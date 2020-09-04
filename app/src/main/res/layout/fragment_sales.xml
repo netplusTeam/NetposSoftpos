@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.woleapp.netpos.viewmodels.SalesViewModel" />
+
+        <variable
+            name="type"
+            type="String" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:focusable="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:id="@+id/sales_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@{type}"
+                android:textAllCaps="true"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <Spinner
+                android:id="@+id/select_transaction_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@android:color/darker_gray"
+                app:layout_constraintTop_toBottomOf="@id/sales_header" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@id/select_transaction_spinner"
+                app:layout_constraintEnd_toEndOf="@id/select_transaction_spinner"
+                app:layout_constraintTop_toTopOf="@id/select_transaction_spinner"
+                app:srcCompat="@drawable/ic_arrow_drop_down"
+                tools:ignore="ContentDescription" />
+
+            <LinearLayout
+                android:id="@+id/price_input_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/select_transaction_spinner">
+
+                <TextView
+                    android:id="@+id/currency_textbox"
+                    style="@style/ServicesInputLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/services_edittext_background"
+                    android:text="@string/naira_symbol" />
+
+                <EditText
+                    android:id="@+id/price_textbox"
+                    style="@style/ServicesInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:autofillHints="@string/hint_amount"
+                    android:hint="@string/hint_amount"
+                    android:inputType="numberDecimal"
+                    android:text="@={viewmodel.amount}" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/enter_name"
+                style="@style/ServicesInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="@string/enter_name"
+                android:hint="@string/enter_name"
+                android:inputType="text"
+                android:text="@={viewmodel.customerName}"
+                app:layout_constraintTop_toBottomOf="@id/price_input_layout" />
+
+            <EditText
+                android:id="@+id/enter_pin"
+                style="@style/ServicesInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="@string/enter_pin"
+                android:hint="@string/enter_pin"
+                android:inputType="numberPassword"
+                android:text="@={viewmodel.pin}"
+                app:layout_constraintTop_toBottomOf="@id/enter_name" />
+
+            <Button
+                android:id="@+id/process"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/action_button_background"
+                android:paddingHorizontal="48dp"
+                android:text="@string/proceess"
+                android:textColor="@android:color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/enter_pin"
+                app:processButtonState="@{viewmodel.transactionState}" />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:elevation="2dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/process"
+                app:layout_constraintEnd_toEndOf="@id/process"
+                app:layout_constraintTop_toTopOf="@id/process"
+                app:paymentProgress="@{viewmodel.transactionState}" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+</layout>

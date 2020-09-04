@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:id="@+id/reprint_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="@string/reprint"
+            android:textAllCaps="true"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Spinner
+            android:id="@+id/select_transaction_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintTop_toBottomOf="@id/reprint_header" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/select_transaction_spinner"
+            app:layout_constraintEnd_toEndOf="@id/select_transaction_spinner"
+            app:layout_constraintTop_toTopOf="@id/select_transaction_spinner"
+            app:srcCompat="@drawable/ic_arrow_drop_down"
+            tools:ignore="ContentDescription" />
+
+        <Button
+            android:id="@+id/reprint"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/colorPrimary"
+            android:text="@string/reprint"
+            android:textColor="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/select_transaction_spinner" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
