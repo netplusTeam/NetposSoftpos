@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class FailedTransactionResponse(
+data class VerveTransactionResponse(
     val amount: String,
     val code: String,
     val message: String,
