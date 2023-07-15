@@ -87,6 +87,7 @@ class ContactlessRegViewModel @Inject constructor(
             .flatMap {
                 if (it.isSuccessful) {
                     savePhoneNumber(it.body()!!.phone)
+                    saveAccountNumber(it.body()!!.account_number)
                     Single.just(Resource.success(it.body()))
                 } else {
                     try {
@@ -136,7 +137,6 @@ class ContactlessRegViewModel @Inject constructor(
 //    }
     fun findAccountForFirstBankUser(accountNumber: String, partnerId: String, deviceSerialId: String) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
-        saveAccountNumber(accountNumber)
         disposable.add(
             contactlessRegRepo.findAccountForFirstBankUser(accountNumber, partnerId, deviceSerialId)
                 .subscribeOn(Schedulers.io())
@@ -144,6 +144,7 @@ class ContactlessRegViewModel @Inject constructor(
                 .subscribe { data, error ->
                     data?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.success(it))
+                        saveAccountNumber(accountNumber)
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)
