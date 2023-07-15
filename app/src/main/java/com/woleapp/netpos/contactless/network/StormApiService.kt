@@ -32,6 +32,13 @@ interface StormApiService {
         @Body payload: JsonObject?
     ): Single<Response<Any?>?>
 
+    @POST("api/merchant-password-reset")
+    fun passwordResetForProvidus(
+        @Body payload: JsonObject?,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceId") deviceId: String
+    ): Single<Response<Any?>?>
+
     @GET("/api/nip-notifications")
     fun getNotificationByReference(
         @Query("referenceNo") reference: String,
