@@ -6,10 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.auth0.android.jwt.JWT
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.AuthError
+import com.woleapp.netpos.contactless.model.ExistingCustomerError
+import com.woleapp.netpos.contactless.model.GeneralResponse
 import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.network.StormApiService
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
@@ -79,7 +82,7 @@ class AuthViewModel : ViewModel() {
                 val userToken = it.token
                 val stormId: String =
                     JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
-                Prefs.putString(PREF_USER_TOKEN, userToken)
+                DPrefs.putString(PREF_USER_TOKEN, userToken)
                 val userTokenDecoded = JWT(userToken)
                 val user = User().apply {
                     this.netplusPayMid = if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
@@ -151,8 +154,8 @@ class AuthViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { res, error ->
                 res?.let {
-                    Prefs.putString(PREF_USER, gson.toJson(it))
-                    Prefs.putBoolean(PREF_AUTHENTICATED, true)
+                    DPrefs.putString(PREF_USER, gson.toJson(it))
+                    DPrefs.putBoolean(PREF_AUTHENTICATED, true)
                     _authDone.value = Event(true)
                 }
                 error?.let {
@@ -189,7 +192,7 @@ class AuthViewModel : ViewModel() {
         val payload = JsonObject().apply {
             addProperty("username", username)
         }
-        Prefs.putString(RESET_USERNAME, username)
+        DPrefs.putString(RESET_USERNAME, username)
         stormApiService!!.passwordReset(payload).subscribeOn(Schedulers.io())
             .doOnSubscribe {
                 passwordResetInProgress.postValue(true)
@@ -211,6 +214,57 @@ class AuthViewModel : ViewModel() {
                 }
                 t2?.let {
                     _message.value = Event("Password reset failed, try again.")
+                }
+            }.disposeWith(disposables)
+    }
+
+    fun resetPasswordForProvidus(partnerID: String, deviceId: String) {
+        val username = usernameLiveData.value
+        val password = passwordLiveData.value
+        if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
+            _message.value = Event("All fields are required")
+            return
+        }
+
+        val payload = JsonObject().apply {
+            addProperty("username", username)
+            addProperty("password", password)
+        }
+        // DPrefs.putString(RESET_USERNAME, username)
+        stormApiService!!.passwordResetForProvidus(payload, partnerID, deviceId).subscribeOn(Schedulers.io())
+            .doOnSubscribe {
+                passwordResetInProgress.postValue(true)
+            }.doFinally { passwordResetInProgress.postValue(false) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { t1, t2 ->
+                t1?.let {
+                    _message.value = if (it.code() != 200) {
+                        Event("Email address not associated with this device. Please contact administrator")
+                    } else {
+                        val res = JSONObject(Gson().toJson(it.body()))
+                        if (!res.getBoolean("success")) {
+                            Event("Password reset failed")
+                        } else {
+                            _passwordResetSent.value = Event(true)
+                            Event("Password reset successfully!")
+                        }
+                    }
+                }
+                t2?.let {
+                    Timber.d("ERROR==${it.localizedMessage}")
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        _message.value = Event(
+                            try {
+                                gson.fromJson(errorMessage, GeneralResponse::class.java).message
+                                    ?: "Error"
+                            } catch (e: Exception) {
+                                "Error"
+                            },
+                        )
+                        // Timber.e("SHOWME--->$errorMessage")
+                    }
                 }
             }.disposeWith(disposables)
     }
