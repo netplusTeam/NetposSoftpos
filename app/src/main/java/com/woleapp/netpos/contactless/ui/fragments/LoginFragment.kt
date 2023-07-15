@@ -34,8 +34,8 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.closeSoftKeyboard
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isLettersOrDigits
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 
@@ -52,6 +52,7 @@ class LoginFragment : BaseFragment() {
     private lateinit var setPasswordDialog: AlertDialog
     private lateinit var deviceId: String
     private lateinit var loader: android.app.AlertDialog
+    private lateinit var partnerID: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -110,7 +111,8 @@ class LoginFragment : BaseFragment() {
             stormApiService = StormApiClient.getInstance()
             appCredentials = credentials
         }
-         deviceId = getDeviceId(requireContext()).toString()
+        deviceId = getDeviceId(requireContext())
+        partnerID = initPartnerId()
         //   Log.d("IMEI", uniqueNumber)
         binding.btnLogin.setOnClickListener {
             viewModel.login(deviceId)
@@ -121,7 +123,7 @@ class LoginFragment : BaseFragment() {
                 BuildConfig.FLAVOR.contains("wemabank") ||
                 BuildConfig.FLAVOR.contains("easypay") || BuildConfig.FLAVOR.contains("fcmbeasypay") ||
                 BuildConfig.FLAVOR.contains("easypayfcmb") ||
-                BuildConfig.FLAVOR.contains("zenith")
+                BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("netpos")
             ) {
                 showFragment(
                     NewOrExistingFragment(),
@@ -175,7 +177,7 @@ class LoginFragment : BaseFragment() {
         } else {
             android.app.AlertDialog.Builder(requireContext())
                 .setTitle("NFC Message")
-                .setMessage("Device dose not have NFC support")
+                .setMessage("Device does not have NFC support")
                 .setPositiveButton("Close") { dialog, _ ->
                     dialog.dismiss()
                     // finish()
@@ -203,6 +205,12 @@ class LoginFragment : BaseFragment() {
                 passwordResetDialog.show()
             }
         }
+        if (BuildConfig.FLAVOR.contains("providuspos")) {
+            resetPasswordBinding.btnResetPassword.setOnClickListener {
+                viewModel.resetPasswordForProvidus(partnerID,deviceId)
+            }
+        }
+
         viewModel.authDone.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { authenticated ->
                 if (authenticated) {
@@ -239,66 +247,71 @@ class LoginFragment : BaseFragment() {
             }
         }
 
-            setPasswordBinding.save.setOnClickListener {
-                val email = setPasswordBinding.email.text?.trim().toString()
-                val password = setPasswordBinding.passwordEdittext.text?.trim().toString()
-                val confirmPassword = setPasswordBinding.confirmPasswordEdittext.text?.trim().toString()
-                if (password != confirmPassword){
-                    showToast("Password mismatch")
-                    return@setOnClickListener
-                }
-                if (email.isNullOrEmpty() || password.isNullOrEmpty()) {
-                    showToast("Enter your new password")
+        setPasswordBinding.save.setOnClickListener {
+            val email = setPasswordBinding.email.text?.trim().toString()
+            val password = setPasswordBinding.passwordEdittext.text?.trim().toString()
+            val confirmPassword = setPasswordBinding.confirmPasswordEdittext.text?.trim().toString()
+            if (password != confirmPassword){
+                showToast("Password mismatch")
+                return@setOnClickListener
+            }
+            if (email.isNullOrEmpty() || password.isNullOrEmpty()) {
+                showToast("Enter your new password")
+                return@setOnClickListener
+            }
+            if (!passwordValidation(password)){
+                showToast("The password's length must be more than 7 digits and must contain small letters, capital letters and special characters")
+                return@setOnClickListener
+            }
+            val payload = JsonObject().apply {
+                addProperty("email", email)
+                addProperty("newPassword", password)
+            }
+            setPasswordBinding.authProgress.visibility = View.VISIBLE
+            contactlessViewModel.setNewPassword(payload, initPartnerId(), deviceId)
+            observeServerResponse(contactlessViewModel.newPasswordResponse, loader, requireActivity().supportFragmentManager){
+                setPasswordDialog.dismiss()
+            }
+        }
+
+        confirmOTPBinding.btnResetPassword.setOnClickListener {
+            activity?.getFragmentManager()?.popBackStack()
+            if (confirmOTPBinding.fragmentOtp.isVisible){
+                val email = confirmOTPBinding.etEmail.text?.trim().toString()
+                val otp = confirmOTPBinding.otp.text?.trim().toString()
+                if (email.isNullOrEmpty() || otp.isNullOrEmpty()) {
+                    showToast("All fields are required required")
                     return@setOnClickListener
                 }
                 val payload = JsonObject().apply {
                     addProperty("email", email)
-                    addProperty("newPassword", password)
+                    addProperty("otp", otp)
                 }
-                setPasswordBinding.authProgress.visibility = View.VISIBLE
-                contactlessViewModel.setNewPassword(payload, initPartnerId(), deviceId)
-                observeServerResponse(contactlessViewModel.newPasswordResponse, loader, requireActivity().supportFragmentManager){
-                    setPasswordDialog.dismiss()
+                contactlessViewModel.confirmOTPToSetPassword(payload, initPartnerId(), deviceId)
+                observeServerResponse(contactlessViewModel.confirmOtpToResetPasswordResponse, loader, requireActivity().supportFragmentManager){
+                    setPasswordBinding.email.setText(email)
+                    confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
+                    confirmOTPDialog.dismiss()
+                    setPasswordDialog.show()
                 }
-            }
-
-            confirmOTPBinding.btnResetPassword.setOnClickListener {
-                activity?.getFragmentManager()?.popBackStack()
-                if (confirmOTPBinding.fragmentOtp.isVisible){
-                    val email = confirmOTPBinding.etEmail.text?.trim().toString()
-                    val otp = confirmOTPBinding.otp.text?.trim().toString()
-                    if (email.isNullOrEmpty() || otp.isNullOrEmpty()) {
-                        showToast("All fields are required required")
-                        return@setOnClickListener
-                    }
-                    val payload = JsonObject().apply {
-                        addProperty("email", email)
-                        addProperty("otp", otp)
-                    }
-                    contactlessViewModel.confirmOTPToSetPassword(payload, initPartnerId(), deviceId)
-                    observeServerResponse(contactlessViewModel.confirmOtpToResetPasswordResponse, loader, requireActivity().supportFragmentManager){
-                        setPasswordBinding.email.setText(email)
-                        confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
-                        confirmOTPDialog.dismiss()
-                        setPasswordDialog.show()
-                    }
-                }else{
-                    val email = confirmOTPBinding.etEmail.text?.trim().toString()
-                    if (email.isNullOrEmpty()) {
-                        showToast("Email is required")
-                        return@setOnClickListener
-                    }
-                    val payload = JsonObject().apply {
-                        addProperty("email", email)
-                    }
-         //           closeSoftKeyboard(requireContext(), this.requireActivity())
-                    contactlessViewModel.resetPassword(payload, initPartnerId(), deviceId)
-                    observeServerResponse(contactlessViewModel.resetPasswordResponse, loader, requireActivity().supportFragmentManager){
-                        confirmOTPBinding.etEmail.setText(email)
-                        confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
-                        confirmOTPBinding.resetPasswordHeader.text = "ENTER OTP"
-                    }
+            }else{
+                val email = confirmOTPBinding.etEmail.text?.trim().toString()
+                if (email.isNullOrEmpty()) {
+                    showToast("Email is required")
+                    return@setOnClickListener
+                }
+                val payload = JsonObject().apply {
+                    addProperty("email", email)
+                }
+                //           closeSoftKeyboard(requireContext(), this.requireActivity())
+                contactlessViewModel.resetPassword(payload, initPartnerId(), deviceId)
+                observeServerResponse(contactlessViewModel.resetPasswordResponse, loader, requireActivity().supportFragmentManager){
+                    confirmOTPBinding.etEmail.setText(email)
+                    confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
+                    confirmOTPBinding.resetPasswordHeader.text = "ENTER OTP"
                 }
             }
+        }
     }
 }
+

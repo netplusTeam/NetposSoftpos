@@ -5,22 +5,25 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentNewOrExistingBinding
-import com.woleapp.netpos.contactless.model.FBNState
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseOnce
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.dialog_account_number_layout.view.*
-import timber.log.Timber
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
+import javax.inject.Inject
+import javax.inject.Named
 
 @AndroidEntryPoint
 class NewOrExistingFragment : BaseFragment() {
@@ -30,6 +33,17 @@ class NewOrExistingFragment : BaseFragment() {
     private lateinit var loader: AlertDialog
     private lateinit var newPartnerId: String
     private lateinit var deviceSerialID: String
+    private lateinit var account : String
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,14 +57,13 @@ class NewOrExistingFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initPartnerID()
+        newPartnerId = initPartnerId()
         deviceSerialID = getDeviceId(requireContext()).toString()
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
-
 
         loader = RandomPurposeUtil.alertDialog(requireContext())
 
@@ -64,17 +77,16 @@ class NewOrExistingFragment : BaseFragment() {
 
         binding.confirmationTvYes.setOnClickListener {
             activity?.getFragmentManager()?.popBackStack()
-            val dialogView: View = LayoutInflater.from(requireContext())
-                .inflate(R.layout.dialog_account_number_layout, null)
+            val inflater = LayoutInflater.from(requireContext())
+            val dialogView = inflater.inflate(R.layout.dialog_account_number_layout, null)
             val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
             dialogBuilder.setView(dialogView)
 
             val alertDialog: AlertDialog = dialogBuilder.create()
             alertDialog.show()
-
-            dialogView.dialog_account_number_proceed.setOnClickListener {
+            dialogView.findViewById<Button>(R.id.dialog_account_number_proceed).setOnClickListener {
                 alertDialog.dismiss()
-                val account = dialogView.dialog_account_number_editText.text.toString()
+                account = dialogView.findViewById<EditText>(R.id.dialog_account_number_editText).text.toString()
                 if (account.isNullOrEmpty()) {
                     Toast.makeText(
                         requireContext(),
@@ -88,43 +100,42 @@ class NewOrExistingFragment : BaseFragment() {
                         Toast.LENGTH_SHORT,
                     ).show()
                 } else {
-                    if (BuildConfig.FLAVOR.contains("firstbank")){
+                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")) {
                         viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
-                        observeServerResponse(viewModel.firstBankAccountNumberResponse, loader, requireActivity().supportFragmentManager){
+                        observeServerResponse(
+                            viewModel.firstBankAccountNumberResponse,
+                            loader,
+                            requireActivity().supportFragmentManager,
+                        ) {
                             showFragment(
                                 ExistingCustomersRegistrationFragment(),
                                 containerViewId = R.id.auth_container,
-                                fragmentName = "RegisterOTP Fragment"
+                                fragmentName = "RegisterOTP Fragment",
                             )
                         }
-                    }else{
-                        viewModel.accountLookUp(account, newPartnerId, deviceSerialID)
-                        observeServerResponse(viewModel.accountNumberResponse, loader, requireActivity().supportFragmentManager){
-                            showFragment(
-                                RegistrationOTPFragment(),
-                                containerViewId = R.id.auth_container,
-                                fragmentName = "RegisterOTP Fragment"
-                            )
-                        }
+                    } else {
+                        otherBanks()
                     }
                 }
             }
         }
     }
 
-    private fun initPartnerID() {
-        val bankList = mutableMapOf("firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA", "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190", "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8", "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
-        )
-
-        for (element in bankList) {
-            if (element.key == BuildConfig.FLAVOR) {
-                Timber.d("ACCOUNTBANK---->${element.value}")
-                newPartnerId = element.value
-                Timber.d("PARTNERID---->$newPartnerId")
-            }
+    private fun otherBanks() {
+        loader.show()
+        observeServerResponse(
+            viewModel.accountLookUp(account, newPartnerId, deviceSerialID),
+            loader,
+            compositeDisposable,
+            ioScheduler,
+            mainThreadScheduler,
+        ) {
+            showFragment(
+                RegistrationOTPFragment(),
+                containerViewId = R.id.auth_container,
+                fragmentName = "RegisterOTP Fragment",
+            )
         }
     }
 }
+
