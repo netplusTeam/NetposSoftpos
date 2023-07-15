@@ -1,8 +1,11 @@
 package com.woleapp.netpos.contactless.viewmodels
 
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.dsofttech.dprefs.utils.DPrefs
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.*
@@ -17,13 +20,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
-import retrofit2.Response
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class ContactlessRegViewModel @Inject constructor(
-    private val contactlessRegRepo: ContactlessRegRepository
+    private val contactlessRegRepo: ContactlessRegRepository,
 ) : ViewModel() {
     private val disposable = CompositeDisposable()
 
@@ -79,39 +81,60 @@ class ContactlessRegViewModel @Inject constructor(
 
     val listOfBranches = arrayListOf<FBNBranch>()
 
-    fun accountLookUp(accountNumber: String, partnerId: String, deviceSerialId: String) {
-        _accountNumberResponse.postValue(Resource.loading(null))
-        saveAccountNumber(accountNumber)
-        disposable.add(
-            contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
-                    data?.let {
-                        _accountNumberResponse.postValue(Resource.success(it))
-                        savePhoneNumber(it.phone)
-                        _message.value = Event(it.message)
+    lateinit var errorMsg: String
+
+    fun accountLookUp(accountNumber: String, partnerId: String, deviceSerialId: String) =
+        contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId)
+            .flatMap {
+                if (it.isSuccessful) {
+                    savePhoneNumber(it.body()!!.phone)
+                    Single.just(Resource.success(it.body()))
+                } else {
+                    try {
+                        val gson = Gson()
+                        errorMsg = gson.fromJson(it.errorBody()?.charStream(), ExistingCustomerError::class.java).message
+                        //      Prefs.putString(WALLET_RESPONSE, errorMsg)
+                        // Log.d("CHECKRESULT=====>", justForTest.toString())
+                    } catch (e: java.lang.Exception) {
+                        //
                     }
-                    error?.let {
-                        _accountNumberResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
-                        (it as? HttpException).let { httpException ->
-                            val errorMessage = httpException?.response()?.errorBody()?.string()
-                                ?: "{\"message\":\"Unexpected error\"}"
-                            _message.value = Event(
-                                try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                }
-                            )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }
-                    }
+                    Single.just(Resource.error(errorMsg))
                 }
-        )
-    }
+            }
+
+    //    fun accountLookUpp(accountNumber: String, partnerId: String, deviceSerialId: String) {
+//        _accountNumberResponse.postValue(Resource.loading(null))
+//        saveAccountNumber(accountNumber)
+//        disposable.add(
+//            contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe { data, error ->
+//                    data?.let {
+//                        _accountNumberResponse.postValue(Resource.success(it))
+//                        savePhoneNumber(it.phone)
+//                        _message.value = Event(it.message)
+//                    }
+//                    error?.let {
+//                        _accountNumberResponse.postValue(Resource.error(null))
+//                        Timber.d("ERROR==${it.localizedMessage}")
+//                        (it as? HttpException).let { httpException ->
+//                            val errorMessage = httpException?.response()?.errorBody()?.string()
+//                                ?: "{\"message\":\"Unexpected error\"}"
+//                            _message.value = Event(
+//                                try {
+//                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+//                                        ?: "Error"
+//                                } catch (e: Exception) {
+//                                    "Error"
+//                                },
+//                            )
+//                            // Timber.e("SHOWME--->$errorMessage")
+//                        }
+//                    }
+//                },
+//        )
+//    }
     fun findAccountForFirstBankUser(accountNumber: String, partnerId: String, deviceSerialId: String) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
         saveAccountNumber(accountNumber)
@@ -141,16 +164,16 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
+                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
-                }
+                },
         )
     }
 
-    fun confirmOTP(phoneNumber: String, accountNumber:String, otp: String, partnerId: String) {
+    fun confirmOTP(phoneNumber: String, accountNumber: String, otp: String, partnerId: String) {
         _confirmOTPResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.confirmOTP(phoneNumber, accountNumber, otp, partnerId)
@@ -159,7 +182,7 @@ class ContactlessRegViewModel @Inject constructor(
                 .subscribe { data, error ->
                     data?.let {
                         _confirmOTPResponse.postValue(Resource.success(it))
-                        //saveExistingCustomerData(data.data)
+                        // saveExistingCustomerData(data.data)
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)
@@ -179,11 +202,12 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
@@ -212,18 +236,19 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
     fun getBranches(stateInt: Int, deviceSerialId: String, partnerId: String) {
         _getBranchResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.getBranches(stateInt,deviceSerialId, partnerId)
+            contactlessRegRepo.getBranches(stateInt, deviceSerialId, partnerId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
@@ -245,11 +270,12 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
@@ -276,11 +302,12 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
@@ -307,11 +334,12 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
@@ -338,15 +366,16 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
-                        }                    }
-                }
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
         )
     }
 
-    fun registerExistingAccount(accountNumber: ExistingAccountRegisterRequest, partnerId:String, deviceSerialId: String) {
+    fun registerExistingAccount(accountNumber: ExistingAccountRegisterRequest, partnerId: String, deviceSerialId: String) {
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.registerExistingAccount(accountNumber, partnerId, deviceSerialId)
@@ -369,16 +398,16 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
+                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
-                }
+                },
         )
     }
 
-    fun registerExistingAccountForFBN(accountNumber: RegistrationForExistingFBNUsersRequest, partnerId:String, deviceSerialId: String) {
+    fun registerExistingAccountForFBN(accountNumber: RegistrationForExistingFBNUsersRequest, partnerId: String, deviceSerialId: String) {
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.registerExistingAccountForFBN(accountNumber, partnerId, deviceSerialId)
@@ -401,38 +430,37 @@ class ContactlessRegViewModel @Inject constructor(
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
-                                }
+                                },
                             )
-                            //Timber.e("SHOWME--->$errorMessage")
+                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
-                }
+                },
         )
     }
     private fun savePhoneNumber(phoneNumber: String) {
-        Prefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
+        DPrefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
     }
 
     private fun saveAccountNumber(ActNumber: String) {
-        Prefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
+        DPrefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
     }
 
     private fun saveBusinessName(businessName: String) {
-        Prefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
+        DPrefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
     }
     private fun saveFullName(fullName: String) {
-        Prefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
+        DPrefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
     }
     private fun saveBusinessAddress(businessAddress: String) {
-        Prefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
+        DPrefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
     }
     private fun saveExistingPhoneNumber(phoneNumber: String) {
-        Prefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
+        DPrefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
     }
     private fun saveEmail(email: String) {
-        Prefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
+        DPrefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
     }
-
 
     override fun onCleared() {
         super.onCleared()
