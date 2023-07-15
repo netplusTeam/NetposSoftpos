@@ -6,7 +6,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.auth0.android.jwt.JWT
-import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
@@ -82,7 +81,7 @@ class AuthViewModel : ViewModel() {
                 val userToken = it.token
                 val stormId: String =
                     JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
-                DPrefs.putString(PREF_USER_TOKEN, userToken)
+                Prefs.putString(PREF_USER_TOKEN, userToken)
                 val userTokenDecoded = JWT(userToken)
                 val user = User().apply {
                     this.netplusPayMid = if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
@@ -154,8 +153,8 @@ class AuthViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { res, error ->
                 res?.let {
-                    DPrefs.putString(PREF_USER, gson.toJson(it))
-                    DPrefs.putBoolean(PREF_AUTHENTICATED, true)
+                    Prefs.putString(PREF_USER, gson.toJson(it))
+                    Prefs.putBoolean(PREF_AUTHENTICATED, true)
                     _authDone.value = Event(true)
                 }
                 error?.let {
@@ -192,7 +191,7 @@ class AuthViewModel : ViewModel() {
         val payload = JsonObject().apply {
             addProperty("username", username)
         }
-        DPrefs.putString(RESET_USERNAME, username)
+        Prefs.putString(RESET_USERNAME, username)
         stormApiService!!.passwordReset(payload).subscribeOn(Schedulers.io())
             .doOnSubscribe {
                 passwordResetInProgress.postValue(true)
