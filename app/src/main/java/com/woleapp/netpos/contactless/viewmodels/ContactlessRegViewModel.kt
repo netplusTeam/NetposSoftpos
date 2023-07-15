@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
@@ -439,27 +438,27 @@ class ContactlessRegViewModel @Inject constructor(
         )
     }
     private fun savePhoneNumber(phoneNumber: String) {
-        DPrefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
+        Prefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
     }
 
     private fun saveAccountNumber(ActNumber: String) {
-        DPrefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
+        Prefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
     }
 
     private fun saveBusinessName(businessName: String) {
-        DPrefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
+        Prefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
     }
     private fun saveFullName(fullName: String) {
-        DPrefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
+        Prefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
     }
     private fun saveBusinessAddress(businessAddress: String) {
-        DPrefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
+        Prefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
     }
     private fun saveExistingPhoneNumber(phoneNumber: String) {
-        DPrefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
+        Prefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
     }
     private fun saveEmail(email: String) {
-        DPrefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
+        Prefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
     }
 
     override fun onCleared() {
