@@ -9,7 +9,6 @@ import android.app.DatePickerDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -38,7 +37,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.netpluspay.netposbarcodesdk.RESULT_CODE_TEXT
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
@@ -50,7 +48,6 @@ import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
-import com.woleapp.netpos.contactless.receivers.BatteryReceiver
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager.READER_FLAGS
 import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
@@ -83,7 +80,9 @@ import java.util.*
 
 @Suppress("DEPRECATION")
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
+class MainActivity :
+    AppCompatActivity(),
+    EasyPermissions.PermissionCallbacks,
     NfcAdapter.ReaderCallback {
 
     private lateinit var receiptPdf: File
@@ -117,13 +116,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     private lateinit var firebaseInstance: FirebaseMessaging
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
 
-
-
     override fun onStart() {
         super.onStart()
         // LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter(CONFIGURATION_ACTION))
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
-            NetPosTerminalConfig.configurationStatus) {
+            NetPosTerminalConfig.configurationStatus
+        ) {
             -1 -> NetPosTerminalConfig.init(
                 applicationContext,
             )
@@ -312,8 +310,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
                 if (result.resultCode == Activity.RESULT_OK) {
                     val data: Intent? = result.data
                     data?.let {
-                        if (it.hasExtra(RESULT_CODE_TEXT)) {
-                            val text = it.getStringExtra(RESULT_CODE_TEXT)
+                        if (it.hasExtra("RESULT_CODE_TEXT")) {
+                            val text = it.getStringExtra("RESULT_CODE_TEXT")
                             Toast.makeText(
                                 this,
                                 getString(R.string.qr_scanned),
