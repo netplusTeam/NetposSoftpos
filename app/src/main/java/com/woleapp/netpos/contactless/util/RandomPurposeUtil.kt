@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
+import android.os.Debug
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.SpannableString
@@ -16,27 +17,29 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.dialog_print_type.*
 import java.text.DecimalFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import kotlin.coroutines.coroutineContext
 
 object RandomPurposeUtil {
     fun stringToBase64(text: String): String {
@@ -187,11 +190,9 @@ object RandomPurposeUtil {
                     )
                 }
                 Status.ERROR -> {
-                    loadingDialog.cancel
                     loadingDialog.dismiss()
                 }
                 Status.TIMEOUT -> {
-                    loadingDialog.cancel
                     loadingDialog.dismiss()
                     showSnackBar(this.requireView(), getString(R.string.timeOut))
                 }
@@ -248,18 +249,23 @@ object RandomPurposeUtil {
                                 loadingDialog.show()
                             }
                             Status.ERROR -> {
-                                loadingDialog.cancel
+                                loadingDialog.cancel()
                                 loadingDialog.dismiss()
+                                if (it.data is String) {
+                                    showToast(it.data)
+                                } else {
+                                    showToast("An error occurred, please try again")
+                                }
                             }
                             Status.TIMEOUT -> {
-                                loadingDialog.cancel
+                                loadingDialog.cancel()
                                 loadingDialog.dismiss()
                                 showSnackBar(this.requireView(), getString(R.string.timeOut))
                             }
                         }
                     }
                     error?.let {
-                        loadingDialog.cancel
+                        loadingDialog.cancel()
                         loadingDialog.dismiss()
                         showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
@@ -309,16 +315,50 @@ object RandomPurposeUtil {
         }
     }
 
+    fun <T> Fragment.observeServerResponseOnce(
+        serverResponse: LiveData<Resource<T>>,
+        loadingDialog: AlertDialog,
+        fragmentManager: FragmentManager,
+        successAction: () -> Unit
+    ) {
+        serverResponse.observe(this.viewLifecycleOwner) {
+            when (it.status) {
+                Status.SUCCESS -> {
+                    loadingDialog.dismiss()
+                    successAction()
+                }
+                Status.LOADING -> {
+                    loadingDialog.show()
+                }
+                Status.ERROR -> {
+                    loadingDialog.cancel()
+                    loadingDialog.dismiss()
+                }
+                Status.TIMEOUT -> {
+                    loadingDialog.cancel()
+                    loadingDialog.dismiss()
+                    showToast(getString(R.string.timeOut))
+                }
+            }
+        }
+        serverResponse.observeOnce(this.viewLifecycleOwner, null)
+    }
+
+    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>?) {
+        observe(lifecycleOwner, object : Observer<T> {
+            override fun onChanged(t: T?) {
+                observer?.onChanged(t)
+                removeObserver(this)
+            }
+        })
+    }
+
     fun closeSoftKeyboard(context: Context, activity: Activity) {
         activity.currentFocus?.let { view ->
             val imm =
                 context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
         }
-    }
-
-    fun isLettersOrDigits(chars: String): Boolean {
-        return chars.matches("^[a-zA-Z0-9]*$".toRegex())
     }
 
     fun formatFailedVerveTransRespToExtractIswResponse(transResponse: VerveTransactionResponse): VerveTransactionResponse {
@@ -374,10 +414,11 @@ object RandomPurposeUtil {
             "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
             "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
             "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "stanbic" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", // the partnerID is for Providus, change to Stanbic later
             "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
             "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
             "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
-            "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
+            "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
         )
 
         for (element in bankList) {
@@ -387,5 +428,21 @@ object RandomPurposeUtil {
         }
         return partnerID
     }
+    fun isDebuggableModeEnabled(context: Context): Boolean {
+        return Settings.Secure.getInt(context.contentResolver, Settings.Secure.ADB_ENABLED, 0) == 1
+    }
 
+    fun passwordValidation(password: String): Boolean {
+        return if (password.length > 7) {
+            val letter: Pattern = Pattern.compile("[a-zA-z]")
+            val digit: Pattern = Pattern.compile("[0-9]")
+            //  val special: Pattern = Pattern.compile("[!@#$%&*()_.+=|<>?{}\\[\\]~-]")
+            val special: Pattern = Pattern.compile("[!@#%^&amp;*()_+=\\[\\]>{}'|,\\~`>/.?\\:;-]")
+            //Pattern eight = Pattern.compile (".{8}");
+            val hasLetter: Matcher = letter.matcher(password)
+            val hasDigit: Matcher = digit.matcher(password)
+            val hasSpecial: Matcher = special.matcher(password)
+            hasLetter.find() && hasDigit.find() && hasSpecial.find()
+        } else  false
+    }
 }
