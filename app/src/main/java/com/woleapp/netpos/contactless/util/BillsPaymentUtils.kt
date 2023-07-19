@@ -15,6 +15,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
 import retrofit2.Response
+import retrofit2.http.Header
 import timber.log.Timber
 
 fun checkBillsPaymentToken(): Boolean {
@@ -37,7 +38,7 @@ fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
                         addProperty("username", "bills@netplusadvisory.com")
                         addProperty("password", "C0r3M3ltD0wn!!")
                     }
-                stormApiService.userToken("Bearer ${it.token}", billsCredentials)
+                stormApiService.getBillsToken("Bearer ${it.token}", billsCredentials)
             } else {
                 throw Exception("Login Failed")
             }
