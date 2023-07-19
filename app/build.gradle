@@ -129,6 +129,10 @@ android {
             dimension "whiteLabel"
             applicationIdSuffix ".polaris"
         }
+        stanbic {
+            dimension "whiteLabel"
+            applicationIdSuffix ".stanbic"
+        }
     }
     variantFilter { variant ->
         def name_types = variant.flavors*.name
