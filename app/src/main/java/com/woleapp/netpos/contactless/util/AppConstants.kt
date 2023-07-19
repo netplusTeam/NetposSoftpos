@@ -4,6 +4,8 @@ import java.util.*
 
 object AppConstants {
     fun getGUID() = UUID.randomUUID().toString().replace("-", "")
+    const val APP_UPDATE_REQUEST_CODE = 911
+    const val APP_UPDATE_TAG = "APP_UPDATE_TAG"
     const val PERMISSION_REQUEST_CODE = 200
     const val LONG_150 = 150L
     const val STRING_QR_READ_RESULT_REQUEST_KEY = "STRING_QR_READ_RESULT_REQUEST_KEY"
