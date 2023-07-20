@@ -29,13 +29,13 @@
 -optimizationpasses 5
 -overloadaggressively
 # Removing logging code
-#-assumenosideeffects class android.util.Log {
-# public static *** d(...);
-# public static *** v(...);
-# public static *** i(...);
-# public static *** w(...);
-# public static *** e(...);
-#}
+-assumenosideeffects class android.util.Log {
+ public static *** d(...);
+ public static *** v(...);
+ public static *** i(...);
+ public static *** w(...);
+ public static *** e(...);
+}
 # Crashlytics code as given below which one can exclude
 -keep class com.crashlytics.* { }
 -keep class com.crashlytics.android.**

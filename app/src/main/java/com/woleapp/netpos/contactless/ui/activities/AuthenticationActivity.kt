@@ -15,6 +15,7 @@ import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
 import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,6 +29,11 @@ class AuthenticationActivity : AppCompatActivity() {
             Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
             finish()
         }
+        if (isDebuggableModeEnabled(applicationContext)) {
+            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT).show()
+            finish()
+        }
+
         if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {
