@@ -35,8 +35,8 @@ android {
         applicationId "com.woleapp.netpos.contactless"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 35
-        versionName "1.0.35"
+        versionCode 26
+        versionName "1.0.26"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         def environmentPath
         if (appModeProd == "true") environmentPath = appProperties["env.path.production"] else environmentPath = appProperties["env.path.staging"]
@@ -128,6 +128,10 @@ android {
         polaris {
             dimension "whiteLabel"
             applicationIdSuffix ".polaris"
+        }
+        stanbic {
+            dimension "whiteLabel"
+            applicationIdSuffix ".stanbic"
         }
     }
     variantFilter { variant ->

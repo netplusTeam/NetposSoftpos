@@ -67,7 +67,6 @@ class DisplayQrFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        initPartnerID()
         val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
         netposID = user.netplus_id
         userTID = user.terminal_id
@@ -126,7 +125,7 @@ class DisplayQrFragment : BaseFragment() {
             amount = amount.text.toString(),
             name = name.toString(),
             email = email.toString(),
-            bank = partnerID,
+            bank = initPartnerID().toString(),
             NPmerchantId = getNetPlusPayMid(),
         )
 

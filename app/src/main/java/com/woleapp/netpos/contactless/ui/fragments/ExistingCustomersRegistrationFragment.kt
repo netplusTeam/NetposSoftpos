@@ -182,7 +182,6 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         }
     }
 
-
     private fun registerForProvidus() {
         when {
             businessNameView.text.toString().isEmpty() -> {
@@ -231,7 +230,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
-                            dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("providus.pdf").load()
+                            dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("providus.pdf")
+                                .load()
                         } else if (BuildConfig.FLAVOR.contains("easypay")) {
                             dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
                         } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
@@ -342,7 +342,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
-                            dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("providus.pdf").load()
+                            dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("providus.pdf")
+                                .load()
                         } else if (BuildConfig.FLAVOR.contains("easypay")) {
                             dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
                         } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
@@ -489,7 +490,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 branch_name = listOfBranches,
                 phoneNumber = phoneNumber.text.toString().trim(),
             )
-            if (!passwordValidation(passwordView.text.toString().trim())){
+            if (!passwordValidation(passwordView.text.toString().trim())) {
                 showToast("The password's length must be more than 7 digits and must contain small letters, capital letters and special characters")
                 return
             }
@@ -527,5 +528,3 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         }
     }
 }
-
-
