@@ -276,10 +276,11 @@
                         android:drawablePadding="8dp"
                         android:inputType="textPassword"
                         android:singleLine="true"
+                        android:maxLength="21"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
                         android:textSize="15sp"
-                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789" />
+                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*()_+=,\-[\]>{}'|\~`>/.?\:;"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -303,39 +304,40 @@
                         android:drawablePadding="8dp"
                         android:inputType="textPassword"
                         android:singleLine="true"
+                        android:maxLength="21"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
                         android:textSize="15sp"
-                        tools:text="" />
+                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*()_+=\-[\]>{}'|,\~`>/.?\:;"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-<!--                <com.google.android.material.textfield.TextInputLayout-->
-<!--                    android:id="@+id/show_bank_field"-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:hint="@string/enter_email_address"-->
-<!--                    android:textColorHint="@android:color/black"-->
-<!--                    app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"-->
-<!--                    app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/confirm_password_field">-->
+                <!--                <com.google.android.material.textfield.TextInputLayout-->
+                <!--                    android:id="@+id/show_bank_field"-->
+                <!--                    android:layout_width="0dp"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:hint="@string/enter_email_address"-->
+                <!--                    android:textColorHint="@android:color/black"-->
+                <!--                    app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"-->
+                <!--                    app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"-->
+                <!--                    app:layout_constraintTop_toBottomOf="@+id/confirm_password_field">-->
 
-<!--                    <TextView-->
-<!--                        android:id="@+id/show_bank"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:drawablePadding="8dp"-->
-<!--                        android:text="FirstBank"-->
-<!--                        android:textColor="@android:color/black"-->
-<!--                        android:textColorHint="@android:color/black"-->
-<!--                        android:textSize="15sp"-->
-<!--                        android:gravity="start"-->
-<!--                        android:paddingStart="@dimen/margin_20"-->
-<!--                        tools:text="FirstBank" />-->
-<!--                </com.google.android.material.textfield.TextInputLayout>-->
+                <!--                    <TextView-->
+                <!--                        android:id="@+id/show_bank"-->
+                <!--                        android:layout_width="match_parent"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:drawablePadding="8dp"-->
+                <!--                        android:text="FirstBank"-->
+                <!--                        android:textColor="@android:color/black"-->
+                <!--                        android:textColorHint="@android:color/black"-->
+                <!--                        android:textSize="15sp"-->
+                <!--                        android:gravity="start"-->
+                <!--                        android:paddingStart="@dimen/margin_20"-->
+                <!--                        tools:text="FirstBank" />-->
+                <!--                </com.google.android.material.textfield.TextInputLayout>-->
 
 
                 <Button
-                    android:id="@+id/btn_login"
+                    android:id="@+id/btn_submit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="48dp"
@@ -355,21 +357,21 @@
                     android:layout_marginVertical="8dp"
                     android:elevation="2dp"
                     android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="@id/btn_login"
-                    app:layout_constraintEnd_toEndOf="@id/btn_login"
-                    app:layout_constraintTop_toTopOf="@id/btn_login" />
+                    app:layout_constraintBottom_toBottomOf="@id/btn_submit"
+                    app:layout_constraintEnd_toEndOf="@id/btn_submit"
+                    app:layout_constraintTop_toTopOf="@id/btn_submit" />
 
 
-<!--                <androidx.appcompat.widget.AppCompatSpinner-->
-<!--                    android:id="@+id/spnBank"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:prompt="@string/hint_choose_bank_caps"-->
-<!--                    android:spinnerMode="dropdown"-->
-<!--                    android:textColorHint="@android:color/black"-->
-<!--                    android:textSize="15sp"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/password_field"-->
-<!--                    tools:layout_editor_absoluteX="16dp" />-->
+                <!--                <androidx.appcompat.widget.AppCompatSpinner-->
+                <!--                    android:id="@+id/spnBank"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:prompt="@string/hint_choose_bank_caps"-->
+                <!--                    android:spinnerMode="dropdown"-->
+                <!--                    android:textColorHint="@android:color/black"-->
+                <!--                    android:textSize="15sp"-->
+                <!--                    app:layout_constraintTop_toBottomOf="@+id/password_field"-->
+                <!--                    tools:layout_editor_absoluteX="16dp" />-->
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
