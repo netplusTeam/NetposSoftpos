@@ -442,6 +442,10 @@ class ContactlessRegViewModel @Inject constructor(
                 },
         )
     }
+    fun clearExistingCustomerLiveData(){
+        _existingRegRequestResponse.postValue(Resource.error(null))
+    }
+
     fun clearLiveData(){
         _firstBankAccountNumberResponse.postValue(Resource.error(null))
     }

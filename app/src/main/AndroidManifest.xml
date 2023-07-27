@@ -36,12 +36,13 @@
 
         <activity
             android:name=".ui.activities.AuthenticationActivity"
+            android:theme="@style/SplashTheme"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustNothing"
+            android:windowSoftInputMode="adjustPan"
             android:launchMode="singleInstance"
-            android:taskAffinity=""
-            android:theme="@style/SplashTheme">
+            android:protectionLevel="signature"
+            android:taskAffinity="com.woleapp.netpos.contactless">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -50,12 +51,12 @@
         </activity>
         <activity
             android:name=".ui.activities.MainActivity"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:exported="true"
-            android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleInstance"
-            android:taskAffinity="">
-
+            android:windowSoftInputMode="adjustPan"
+            android:taskAffinity="com.woleapp.netpos.contactless"
+            android:protectionLevel="signature">
         </activity>
 
         <receiver

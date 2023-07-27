@@ -524,6 +524,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 containerViewId = R.id.auth_container,
                 fragmentName = "Login Fragment",
             )
+            viewModel.clearExistingCustomerLiveData()
         }
     }
 
