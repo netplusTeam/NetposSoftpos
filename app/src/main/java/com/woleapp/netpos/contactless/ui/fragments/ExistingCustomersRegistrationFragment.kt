@@ -526,6 +526,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             )
         }
     }
+
 }
 
 

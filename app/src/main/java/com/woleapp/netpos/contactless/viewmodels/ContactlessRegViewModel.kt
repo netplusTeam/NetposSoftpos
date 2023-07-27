@@ -150,7 +150,11 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
-                        _message.value = Event(it.message)
+                        if (it.message.isNullOrEmpty()){
+                            _message.value = Event("Successful")
+                        }else{
+                            _message.value = Event(it.message.toString())
+                        }
                     }
                     error?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.error(null))
@@ -188,7 +192,7 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
-                        _otpMessage.value = Event(it.message)
+                        _otpMessage.value = Event(it.message.toString())
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))
@@ -438,6 +442,10 @@ class ContactlessRegViewModel @Inject constructor(
                 },
         )
     }
+    fun clearLiveData(){
+        _firstBankAccountNumberResponse.postValue(Resource.error(null))
+    }
+
     private fun savePhoneNumber(phoneNumber: String) {
         Prefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
     }

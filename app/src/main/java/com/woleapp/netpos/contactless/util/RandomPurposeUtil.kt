@@ -14,6 +14,7 @@ import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.util.Base64
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -30,6 +31,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -226,6 +228,7 @@ object RandomPurposeUtil {
                     data?.let {
                         when (it.status) {
                             Status.SUCCESS -> {
+                                Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
                                 if (
                                     it.data is PostQrToServerResponse ||
@@ -235,10 +238,12 @@ object RandomPurposeUtil {
                                     it.data is AccountNumberLookUpResponse ||
                                     it.data is ConfirmOTPResponse ||
                                     it.data is ExistingAccountRegisterResponse ||
+                                    it.data is WemaExistingRegistrationResponse ||
                                     it.data is String
                                 ) {
                                     successAction()
                                 } else {
+                                    Log.d("JUSTCHECKING", it.toString())
                                     showSnackBar(
                                         this.requireView(),
                                         getString(R.string.an_error_occurred),
@@ -325,7 +330,21 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    successAction()
+                    if (
+                        it.data is PostQrToServerResponse ||
+                        it.data is PostQrToServerVerveResponseModel ||
+                        it.data is QrTransactionResponseModel ||
+                        it.data is VerveTransactionResponse ||
+                        it.data is AccountNumberLookUpResponse ||
+                        it.data is ConfirmOTPResponse ||
+                        it.data is ExistingAccountRegisterResponse ||
+                        it.data is String ||
+                        it.data is GeneralResponse
+                    ) {
+                        successAction()
+                    } else {
+                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                    }
                 }
                 Status.LOADING -> {
                     loadingDialog.show()

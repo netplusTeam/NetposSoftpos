@@ -123,6 +123,7 @@ class LoginFragment : BaseFragment() {
                 BuildConfig.FLAVOR.contains("wemabank") ||
                 BuildConfig.FLAVOR.contains("easypay") || BuildConfig.FLAVOR.contains("fcmbeasypay") ||
                 BuildConfig.FLAVOR.contains("easypayfcmb") ||
+                BuildConfig.FLAVOR.contains("stanbic") ||
                 BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("netpos")
             ) {
                 showFragment(
