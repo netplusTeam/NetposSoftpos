@@ -85,6 +85,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                     containerViewId = R.id.auth_container,
                                     fragmentName = "Register Existing Customer Fragment",
                                 )
+                                viewModel.clearOTPResponseLiveData()
                             }
                         } else {
                             viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), "")
@@ -94,6 +95,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                     containerViewId = R.id.auth_container,
                                     fragmentName = "Register Existing Customer Fragment",
                                 )
+                                viewModel.clearOTPResponseLiveData()
                             }
                         }
                     }

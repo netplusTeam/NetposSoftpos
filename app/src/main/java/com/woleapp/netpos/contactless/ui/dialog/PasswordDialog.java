@@ -132,8 +132,12 @@ public class PasswordDialog {
             }
         });
         btnConfirm.setOnClickListener(v -> {
+            if (etPin.getText().toString().isEmpty()) {
+                Toast.makeText(context, context.getString(R.string.please_enter_pin), Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (etPin.getText().toString().length() < 4) {
-                Toast.makeText(context, "Pin too short", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, context.getString(R.string.pin_too_short), Toast.LENGTH_SHORT).show();
                 return;
             }
             pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));

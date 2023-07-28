@@ -74,6 +74,11 @@ class QrPasswordPinBlockDialog : DialogFragment() {
             }
         }
         btnConfirmBtn.setOnClickListener {
+            if (etPinEt.text.toString().isEmpty()) {
+                Toast.makeText(context, getString(R.string.please_enter_pin), Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
             if (etPinEt.text.toString().length < 4) {
                 Toast.makeText(context, getString(R.string.pin_too_short), Toast.LENGTH_SHORT)
                     .show()

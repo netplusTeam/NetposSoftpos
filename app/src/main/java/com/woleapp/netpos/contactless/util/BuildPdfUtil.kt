@@ -147,7 +147,7 @@ private fun initViewsForQrReceipt(
             )
             cardOwner.text = pdfView.root.context.getString(
                 R.string.card_owner_place_holder,
-                respFromWebView.customerName
+                respFromWebView.cardHolder
             )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(

@@ -442,6 +442,10 @@ class ContactlessRegViewModel @Inject constructor(
                 },
         )
     }
+    fun clearOTPResponseLiveData(){
+        _confirmOTPResponse.postValue(Resource.error(null))
+    }
+
     fun clearExistingCustomerLiveData(){
         _existingRegRequestResponse.postValue(Resource.error(null))
     }
