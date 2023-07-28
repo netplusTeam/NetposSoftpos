@@ -14,7 +14,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,16 +25,17 @@ class AuthenticationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
-//        if (RootUtil.isDeviceRooted) {
-//            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
-//            finish()
-//        }
-//        if (isDebuggableModeEnabled(applicationContext)) {
-//            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
-//                .show()
-//            finish()
-//        }
+        val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
+        if (RootUtil.isDeviceRooted) {
+            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
+            finish()
+        }
+        if (debuggableModeEnabled) {
+            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
+                .show()
+            finish()
+        }
         if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {

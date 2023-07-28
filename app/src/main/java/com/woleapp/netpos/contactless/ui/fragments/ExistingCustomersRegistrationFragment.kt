@@ -159,7 +159,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         submitBtn.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
                 registerForFBN()
-            } else if (BuildConfig.FLAVOR.contains("providus")) {
+            } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") ||
+                BuildConfig.FLAVOR.contains("providuspos")
+            ) {
                 registerForProvidus()
             } else {
                 register()
@@ -525,6 +527,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 containerViewId = R.id.auth_container,
                 fragmentName = "Login Fragment",
             )
+            viewModel.clearExistingCustomerLiveData()
         }
     }
 }

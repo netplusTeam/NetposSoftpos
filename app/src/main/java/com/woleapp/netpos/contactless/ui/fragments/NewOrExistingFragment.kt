@@ -17,6 +17,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseOnce
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
@@ -99,7 +100,8 @@ class NewOrExistingFragment : BaseFragment() {
                         Toast.LENGTH_SHORT,
                     ).show()
                 } else {
-                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")) {
+                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")
+                        || BuildConfig.FLAVOR.contains("wemabank")) {
                         viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
                         observeServerResponse(
                             viewModel.firstBankAccountNumberResponse,
@@ -109,8 +111,9 @@ class NewOrExistingFragment : BaseFragment() {
                             showFragment(
                                 ExistingCustomersRegistrationFragment(),
                                 containerViewId = R.id.auth_container,
-                                fragmentName = "RegisterOTP Fragment",
+                                fragmentName = "ExistingCustomersRegistration Fragment",
                             )
+                            viewModel.clearLiveData()
                         }
                     } else {
                         otherBanks()
@@ -136,5 +139,6 @@ class NewOrExistingFragment : BaseFragment() {
             )
         }
     }
+
 }
 
