@@ -25,14 +25,15 @@ class AuthenticationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
-        if (RootUtil.isDeviceRooted) {
-            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
-            finish()
-        }
-        if (isDebuggableModeEnabled(applicationContext)) {
-            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT).show()
-            finish()
-        }
+//        if (RootUtil.isDeviceRooted) {
+//            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
+//            finish()
+//        }
+//        if (isDebuggableModeEnabled(applicationContext)) {
+//            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
+//                .show()
+//            finish()
+//        }
 
         if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(

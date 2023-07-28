@@ -1,7 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,16 +13,10 @@ import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
-import java.net.InetSocketAddress
-import java.net.Socket
 import javax.inject.Inject
 
 @HiltViewModel
@@ -96,7 +89,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     fun makePayment(
         context: Context,
-        transactionType: com.danbamitale.epmslib.entities.TransactionType = com.danbamitale.epmslib.entities.TransactionType.PURCHASE
+        transactionType: TransactionType = TransactionType.PURCHASE,
     ) {
         Timber.e(cardData.toString())
         val configData = NetPosTerminalConfig.getConfigData() ?: kotlin.run {
@@ -110,7 +103,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             NetPosTerminalConfig.getTerminalId(),
             NetPosTerminalConfig.connectionData,
             keyHolder,
-            configData
+            configData,
         )
         // IsoAccountType.
         this.amountLong = amountDbl.toLong()
@@ -119,7 +112,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
                 transactionType,
                 amountLong,
                 cashbackLong,
-                accountType = isoAccountType!!
+                accountType = isoAccountType!!,
             )
         val processor = TransactionProcessor(hostConfig)
         transactionState.value = STATE_PAYMENT_STARTED
@@ -175,7 +168,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     fun showReceiptDialog() {
         _showPrintDialog.value = Event(
             lastTransactionResponse.value!!.buildSMSText(remark.value ?: "")
-                .toString()
+                .toString(),
         )
     }
 
@@ -186,7 +179,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         }
         Timber.e(transactionResponse.toString())
         _showPrintDialog.postValue(
-            Event(transactionResponse.buildSMSText(remark.value ?: "").toString())
+            Event(transactionResponse.buildSMSText(remark.value ?: "").toString()),
         )
     }
 
@@ -196,32 +189,5 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     fun isVend(vend: Boolean) {
         isVend = vend
-    }
-
-    private fun sendVendResponse(context: Context, out: String) {
-        Single.fromCallable {
-            Socket().run {
-                soTimeout = 120_000
-                connect(InetSocketAddress(UtilityParam.VEND_IP, UtilityParam.VEND_PORT.toInt()))
-                val reader = BufferedReader(InputStreamReader(getInputStream()))
-                Timber.e(reader.readLine())
-                val printWriter = PrintWriter(getOutputStream(), true)
-                printWriter.println(out)
-                reader.readLine()
-            }
-        }.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doFinally {
-            }
-            .subscribe { t1, t2 ->
-                t1?.let {
-                    Timber.e(it)
-                    // Toast.makeText(context, "received", Toast.LENGTH_SHORT).show()
-                }
-                t2?.let {
-                    Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT).show()
-                    Timber.e(it)
-                }
-            }.disposeWith(compositeDisposable)
     }
 }
