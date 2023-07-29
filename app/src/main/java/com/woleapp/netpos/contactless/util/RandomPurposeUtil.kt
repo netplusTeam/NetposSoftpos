@@ -6,7 +6,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
-import android.os.Debug
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.text.SpannableString
@@ -24,6 +23,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import com.danbamitale.epmslib.entities.TransactionResponse
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
@@ -31,17 +31,16 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.coroutines.coroutineContext
 
 object RandomPurposeUtil {
     fun stringToBase64(text: String): String {
@@ -324,7 +323,7 @@ object RandomPurposeUtil {
         serverResponse: LiveData<Resource<T>>,
         loadingDialog: AlertDialog,
         fragmentManager: FragmentManager,
-        successAction: () -> Unit
+        successAction: () -> Unit,
     ) {
         serverResponse.observe(this.viewLifecycleOwner) {
             when (it.status) {
@@ -364,12 +363,15 @@ object RandomPurposeUtil {
     }
 
     fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>?) {
-        observe(lifecycleOwner, object : Observer<T> {
-            override fun onChanged(t: T?) {
-                observer?.onChanged(t)
-                removeObserver(this)
-            }
-        })
+        observe(
+            lifecycleOwner,
+            object : Observer<T> {
+                override fun onChanged(t: T?) {
+                    observer?.onChanged(t)
+                    removeObserver(this)
+                }
+            },
+        )
     }
 
     fun closeSoftKeyboard(context: Context, activity: Activity) {
@@ -457,11 +459,77 @@ object RandomPurposeUtil {
             val digit: Pattern = Pattern.compile("[0-9]")
             //  val special: Pattern = Pattern.compile("[!@#$%&*()_.+=|<>?{}\\[\\]~-]")
             val special: Pattern = Pattern.compile("[!@#%^&amp;*()_+=\\[\\]>{}'|,\\~`>/.?\\:;-]")
-            //Pattern eight = Pattern.compile (".{8}");
+            // Pattern eight = Pattern.compile (".{8}");
             val hasLetter: Matcher = letter.matcher(password)
             val hasDigit: Matcher = digit.matcher(password)
             val hasSpecial: Matcher = special.matcher(password)
             hasLetter.find() && hasDigit.find() && hasSpecial.find()
-        } else  false
+        } else {
+            false
+        }
+    }
+
+    fun mapDanbamitaleResponseToResponseX(input: TransactionResponse): TransactionResponseX {
+        with(input) {
+            return TransactionResponseX(
+                AID = AID,
+                rrn = RRN,
+                STAN = STAN,
+                TSI = TSI,
+                TVR = TVR,
+                accountType = accountType.name,
+                acquiringInstCode = acquiringInstCode,
+                additionalAmount_54 = additionalAmount_54,
+                amount = amount.toInt(),
+                appCryptogram = appCryptogram,
+                authCode = authCode,
+                cardExpiry = cardExpiry,
+                cardHolder = cardHolder,
+                cardLabel = cardLabel,
+                id = id.toInt(),
+                localDate_13 = localDate_13,
+                localTime_12 = localTime_12,
+                maskedPan = maskedPan,
+                merchantId = merchantId,
+                originalForwardingInstCode = originalForwardingInstCode,
+                otherAmount = otherAmount.toInt(),
+                otherId = otherId,
+                responseCode = responseCode,
+                responseDE55 = responseDE55 ?: "",
+                terminalId = terminalId,
+                transactionTimeInMillis = transactionTimeInMillis,
+                transactionType = transactionType.name,
+                transmissionDateTime = getCurrentDateTime(),
+            )
+        }
+    }
+
+    val formattedTime =
+        SimpleDateFormat("hh:mm:ss", Locale.getDefault()).format(System.currentTimeMillis())
+            .format(Date())
+
+    fun divideLongBy100(input: Long): Double {
+        val result = input / 100L
+        val decimalPart = input % 100L
+        return result + (decimalPart.toDouble() / 100)
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    fun getDate(): String {
+        val dateFormatter: DateFormat = SimpleDateFormat("ddMM")
+        val today = Date()
+        return dateFormatter.format(today)
+    }
+
+    fun dateStr2Long(dateStr: String): Long {
+        return try {
+            val c = Calendar.getInstance()
+            c.time = SimpleDateFormat("yyyy-MM-dd hh:mm")
+                .parse(dateStr)!!
+            c.timeInMillis
+        } catch (e: ParseException) {
+            e.printStackTrace()
+            0
+        }
     }
 }

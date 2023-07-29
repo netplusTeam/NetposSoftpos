@@ -29,6 +29,8 @@ object UtilityParam {
     private external fun getSmsBaseUrl(): String
     private external fun getZenithBaseUrl(): String
     private external fun getStringNotificationBaseUrlNoApi(): String
+    private external fun getNetposTransactionApiBaseUrl(): String
+    private external fun getRrnServiceBaseUrl(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
     val ZENITH_BASE_URL = getZenithBaseUrl()
@@ -53,4 +55,6 @@ object UtilityParam {
     val VEND_PORT = getConfigurationDataPort()
     val APP_NAME = getAppName()
     val APP_PASSWORD = getAppPassword()
+    val STRING_NETPOS_TRANSACTION_API_BASE_URL = getNetposTransactionApiBaseUrl()
+    val STRING_RRN_SERVICE_BASE_URL = getRrnServiceBaseUrl()
 }

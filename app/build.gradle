@@ -35,9 +35,10 @@ android {
         applicationId "com.woleapp.netpos.contactless"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 27
-        versionName "1.0.27"
+        versionCode 29
+        versionName "1.0.29"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
         def environmentPath
         if (appModeProd == "true") environmentPath = appProperties["env.path.production"] else environmentPath = appProperties["env.path.staging"]
         buildConfigField "Boolean", "APPMODE_PROD", appModeProd
@@ -277,9 +278,6 @@ dependencies {
 
     //lottie
     implementation 'com.airbnb.android:lottie:5.2.0'
-
-    //scanner
-    implementation project(':netposbarcodesdk')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

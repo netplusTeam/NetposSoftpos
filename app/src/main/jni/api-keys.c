@@ -126,3 +126,15 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getStringNotificationBaseU
                                                                                         jobject thiz) {
     return (*env)->NewStringUTF(env, "https://netpos.netpluspay.com/");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getNetposTransactionApiBaseUrl(JNIEnv *env,
+                                                                                     jobject thiz) {
+    return (*env)->NewStringUTF(env, "https://device.netpluspay.com/");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getRrnServiceBaseUrl(JNIEnv *env,
+                                                                           jobject thiz) {
+    return (*env)->NewStringUTF(env, "https://getrrn.netpluspay.com");
+}

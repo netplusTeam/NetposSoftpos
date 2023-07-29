@@ -120,7 +120,6 @@ class MainActivity :
 
     override fun onStart() {
         super.onStart()
-        // LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter(CONFIGURATION_ACTION))
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
             NetPosTerminalConfig.configurationStatus
         ) {
@@ -366,7 +365,6 @@ class MainActivity :
                         showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
                     }
                     R.id.endOfDay -> {
-                        showFragment(TransactionsFragment(), "Transactions")
                         showCalendarDialog()
                     }
                     else -> {
@@ -463,7 +461,6 @@ class MainActivity :
                         receiptDialogBinding.transactionContent.text.toString(),
                         receiptDialogBinding.telephone.text.toString(),
                     )
-                    Log.d("PHONENUMBER", receiptDialogBinding.transactionContent.text.toString())
                     progress.visibility = View.VISIBLE
                     sendButton.isEnabled = false
                 }
@@ -889,6 +886,8 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
+
+                Timber.tag("TRANSACTION_RETURNED").d(it)
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)

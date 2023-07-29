@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.woleapp.netpos.contactless.databinding.LayoutTransactionItemBinding
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.formatDate
 
 typealias TransactionClickListener = (TransactionResponse) -> Unit
@@ -55,7 +57,7 @@ class TransactionsViewHolder private constructor(val binding: LayoutTransactionI
         binding.holderName.text = transactionResponse.cardHolder
         binding.transactionRef.text = transactionResponse.RRN
         binding.transactionAmount.text =
-            transactionResponse.amount.div(100).formatCurrencyAmount("\u20A6")
+            divideLongBy100(transactionResponse.amount).formatCurrencyAmount("\u20A6")
         binding.transactionDate.text = transactionResponse.transactionTimeInMillis.formatDate()
     }
 }
