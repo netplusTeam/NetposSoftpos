@@ -60,7 +60,6 @@ class TokenInterceptor : Interceptor {
         val response = chain.proceed(request)
         val body = response.body
         val bodyString = body?.string()
-        Timber.e("resp: $bodyString")
         return response.newBuilder().body(bodyString!!.toResponseBody(body.contentType()))
             .build()
     }

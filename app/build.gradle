@@ -35,8 +35,8 @@ android {
         applicationId "com.woleapp.netpos.contactless"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 29
-        versionName "1.0.29"
+        versionCode 31
+        versionName "1.0.31"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         def environmentPath

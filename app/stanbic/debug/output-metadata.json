@@ -4,16 +4,16 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.woleapp.netpos.contactless.firstbank",
-  "variantName": "firstbankRelease",
+  "applicationId": "com.woleapp.netpos.contactless.stanbic.debug",
+  "variantName": "stanbicDebug",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 29,
-      "versionName": "1.0.29",
-      "outputFile": "app-firstbank-release.apk"
+      "versionCode": 31,
+      "versionName": "1.0.31",
+      "outputFile": "app-stanbic-debug.apk"
     }
   ],
   "elementType": "File"
