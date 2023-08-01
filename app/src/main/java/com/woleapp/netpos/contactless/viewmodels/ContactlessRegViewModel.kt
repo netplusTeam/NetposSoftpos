@@ -192,7 +192,7 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
-                        _otpMessage.value = Event(it.message.toString())
+                        _otpMessage.value = Event("Success")
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))

@@ -14,7 +14,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
 import dagger.hilt.android.AndroidEntryPoint
 

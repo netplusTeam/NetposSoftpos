@@ -4,6 +4,7 @@ import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.responseMessage
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 
 fun TransactionResponse.buildSMSText(s: String? = null): StringBuilder = StringBuilder().apply {
     append("POS $transactionType ${if (responseCode == "00") "Approved" else "Declined"}\n\n")
@@ -17,9 +18,9 @@ fun TransactionResponse.buildSMSText(s: String? = null): StringBuilder = StringB
             }
         }\n",
     )
-    append("Amount: ${amount.div(100).formatCurrencyAmount("\u20A6")}\n")
+    append("Amount: ${divideLongBy100(amount).formatCurrencyAmount("\u20A6")}\n")
     if (otherAmount > 0) {
-        append("Cashback Amount: ${otherAmount.div(100).formatCurrencyAmount("\u20A6")}\n")
+        append("Cashback Amount: ${divideLongBy100(amount).formatCurrencyAmount("\u20A6")}\n")
     }
     append("Date/Time: ${transactionTimeInMillis.formatDate()}\n")
     s?.let {
@@ -52,7 +53,7 @@ fun QrTransactionResponseFinalModel.buildSMSTextForQrTransaction(): StringBuilde
             }\n",
         )
         append("Narration: $narration\n")
-        append("Amount: ${amount.toDouble().formatCurrencyAmount("\u20A6")}\n")
+        append("Amount: ${divideLongBy100(amount).formatCurrencyAmount("\u20A6")}\n")
         append("Date/Time: $transmissionDateTime\n")
         append("OrderId: $rrnOrderId\n")
         append("Transaction Id: $transIdStan\n")
@@ -69,7 +70,7 @@ fun TransactionResponse.builder() = StringBuilder().apply {
     append("\nTERMINAL ID: ").append(terminalId).append("\n")
     append(transactionType).append("\n")
     append("DATE/TIME: ").append(transactionTimeInMillis.formatDate()).append("\n")
-    append("AMOUNT: ").append(amount.div(100).formatCurrencyAmount("\u20A6")).append("\n")
+    append("AMOUNT: ").append(divideLongBy100(amount).formatCurrencyAmount("\u20A6")).append("\n")
     if (maskedPan.isNotEmpty()) {
         append(cardLabel).append(" Ending with ").append(maskedPan.substring(maskedPan.length - 4))
             .append("\n")

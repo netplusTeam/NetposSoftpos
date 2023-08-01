@@ -1,8 +1,16 @@
 package com.woleapp.netpos.contactless.di.appModule
 
 import com.google.gson.Gson
-import com.woleapp.netpos.contactless.network.*
-import com.woleapp.netpos.contactless.util.UtilityParam
+import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_PAYMENT_WITH_QR_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_GET_QR_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NETPOS_TRANSACTION_API_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NOTIFICATION_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_RRN_SERVICE_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SEND_VERVE_OTP_BASE_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,30 +35,40 @@ object AppModule {
     @Provides
     @Singleton
     @Named("defaultBaseUrl")
-    fun providesBaseUrlForGettingThreshold(): String = UtilityParam.STRING_GET_QR_BASE_URL
+    fun providesBaseUrlForGettingThreshold(): String = STRING_GET_QR_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("netpos-transaction-api-base-url")
+    fun providesNetposTransactionApiBaseUrl(): String = STRING_NETPOS_TRANSACTION_API_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("rrn-service-base-url")
+    fun providesRrnServiceBaseUrl(): String = STRING_RRN_SERVICE_BASE_URL
 
     @Provides
     @Singleton
     @Named("otpBaseUrl")
-    fun providesBaseUrlForGetVerveOtp(): String = UtilityParam.STRING_SEND_VERVE_OTP_BASE_URL
+    fun providesBaseUrlForGetVerveOtp(): String = STRING_SEND_VERVE_OTP_BASE_URL
 
     @Provides
     @Singleton
     @Named("contactlessRegBaseUrl")
     fun providesBaseUrlForContactlessReg(): String =
-        UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
+        STRING_CONTACTLESS_EXISTING_BASE_URL
 
     @Provides
     @Singleton
     @Named("contactlessQrPaymentBaseUrl")
     fun providesBaseUrlForContactlessPaymentWithQr(): String =
-        UtilityParam.STRING_CONTACTLESS_PAYMENT_WITH_QR_BASE_URL
+        STRING_CONTACTLESS_PAYMENT_WITH_QR_BASE_URL
 
     @Provides
     @Singleton
     @Named("notificationBaseUrl")
     fun providesBaseUrlForNotification(): String =
-        UtilityParam.STRING_NOTIFICATION_BASE_URL
+        STRING_NOTIFICATION_BASE_URL
 
     @Provides
     @Singleton
@@ -63,7 +81,7 @@ object AppModule {
     @Singleton
     @Named("headerInterceptor")
     fun providesHeaderInterceptor(): Interceptor =
-        BasicAuthInterceptor(UtilityParam.STRING_AUTH_USER_NAME, UtilityParam.STRING_AUTH_PASSWORD)
+        BasicAuthInterceptor(STRING_AUTH_USER_NAME, STRING_AUTH_PASSWORD)
 
     @Provides
     @Singleton
@@ -164,6 +182,48 @@ object AppModule {
             .baseUrl(notificationBaseUrl)
             .client(okhttp)
             .build()
+
+    @Provides
+    @Singleton
+    @Named("netpos-transaction-api-retrofit")
+    fun providesRetrofitForNetposTransactionApiService(
+        @Named("otpOkHttp") okhttp: OkHttpClient,
+        @Named("netpos-transaction-api-base-url") netposTransactionApiServiceBaseUrl: String,
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(netposTransactionApiServiceBaseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
+    @Named("rrn-retrofit")
+    fun providesRetrofitForRrnService(
+        @Named("otpOkHttp") okhttp: OkHttpClient,
+        @Named("rrn-service-base-url") netposTransactionApiServiceBaseUrl: String,
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(netposTransactionApiServiceBaseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
+    fun providesNetposTransactionApiService(
+        @Named("netpos-transaction-api-retrofit") retrofit: Retrofit,
+    ): NetPosTransactionsService =
+        retrofit.create(NetPosTransactionsService::class.java)
+
+    @Provides
+    @Singleton
+    fun providesRrnService(
+        @Named("rrn-retrofit") retrofit: Retrofit,
+    ): RrnApiService =
+        retrofit.create(RrnApiService::class.java)
 
     @Provides
     @Singleton

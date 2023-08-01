@@ -84,6 +84,8 @@ class MainActivity :
     AppCompatActivity(),
     EasyPermissions.PermissionCallbacks,
     NfcAdapter.ReaderCallback {
+//    private lateinit var appUpdateManager: AppUpdateManager
+//    private val updateType = AppUpdateType.IMMEDIATE
 
     private lateinit var receiptPdf: File
     private var progressDialog: ProgressDialog? = null
@@ -118,7 +120,6 @@ class MainActivity :
 
     override fun onStart() {
         super.onStart()
-        // LocalBroadcastManager.getInstance(this).registerReceiver(receiver, IntentFilter(CONFIGURATION_ACTION))
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
             NetPosTerminalConfig.configurationStatus
         ) {
@@ -232,6 +233,10 @@ class MainActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+//        // First check if there is an update
+//        checkForAppUpdate()
+
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
@@ -360,7 +365,6 @@ class MainActivity :
                         showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
                     }
                     R.id.endOfDay -> {
-                        showFragment(TransactionsFragment(), "Transactions")
                         showCalendarDialog()
                     }
                     else -> {
@@ -457,7 +461,6 @@ class MainActivity :
                         receiptDialogBinding.transactionContent.text.toString(),
                         receiptDialogBinding.telephone.text.toString(),
                     )
-                    Log.d("PHONENUMBER", receiptDialogBinding.transactionContent.text.toString())
                     progress.visibility = View.VISIBLE
                     sendButton.isEnabled = false
                 }
@@ -883,6 +886,8 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
+
+                Timber.tag("TRANSACTION_RETURNED").d(it)
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
@@ -1087,4 +1092,43 @@ class MainActivity :
                 }
         }
     }
+
+//    private fun checkForAppUpdate() {
+//        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+//            val isUpdateAvailable = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+//            val isUpdateAllowed = when (updateType) {
+//                AppUpdateType.FLEXIBLE -> info.isFlexibleUpdateAllowed
+//                AppUpdateType.IMMEDIATE -> info.isImmediateUpdateAllowed
+//                else -> false
+//            }
+//
+//            if (isUpdateAvailable && isUpdateAllowed) {
+//                appUpdateManager.startUpdateFlowForResult(
+//                    info,
+//                    updateType,
+//                    this,
+//                    APP_UPDATE_REQUEST_CODE,
+//                )
+//            }
+//        }
+//    }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == APP_UPDATE_REQUEST_CODE) {
+//            if (resultCode != APP_UPDATE_REQUEST_CODE) {
+//                Timber.tag(APP_UPDATE_TAG).e("SOMETHING WENT WRONG WHILE TRYING TO UPDATE THE APP")
+//            } else {
+//                Toast.makeText(
+//                    this,
+//                    getString(R.string.app_uploaded_successfully),
+//                    Toast.LENGTH_SHORT,
+//                ).show()
+//                lifecycleScope.launch {
+//                    delay(5000)
+//                    appUpdateManager.completeUpdate()
+//                }
+//            }
+//        }
+//    }
 }

@@ -11,9 +11,13 @@ import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.model.MqttEventsLocal
 import com.woleapp.netpos.contactless.util.RoomTypeConverters
 
-@Database(entities = [TransactionResponse::class, MqttEventsLocal::class], version = 7, exportSchema = false)
+@Database(
+    entities = [TransactionResponse::class, MqttEventsLocal::class],
+    version = 8,
+    exportSchema = false,
+)
 @TypeConverters(
-    RoomTypeConverters::class
+    RoomTypeConverters::class,
 )
 abstract class AppDatabase : RoomDatabase() {
 

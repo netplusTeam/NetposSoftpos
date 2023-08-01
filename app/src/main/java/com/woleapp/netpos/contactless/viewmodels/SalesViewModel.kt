@@ -1,37 +1,62 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
+import com.danbamitale.epmslib.entities.TransactionResponse
+import com.danbamitale.epmslib.extensions.maskPan
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.network.NetPosTransactionsService
+import com.woleapp.netpos.contactless.network.RrnApiService
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.formattedTime
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.generateRandomRrn
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDate
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.mapDanbamitaleResponseToResponseX
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
-import java.net.InetSocketAddress
-import java.net.Socket
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class SalesViewModel @Inject constructor() : ViewModel() {
     private var isVend: Boolean = false
     var cardData: CardData? = null
-    private val compositeDisposable: CompositeDisposable by lazy { CompositeDisposable() }
+
+    private val user: User? = Singletons.getCurrentlyLoggedInUser()
+
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
     val transactionState = MutableLiveData(STATE_PAYMENT_STAND_BY)
+
+    @Inject
+    lateinit var rrnApiService: RrnApiService
+
+    @Inject
+    lateinit var netposTransactionApiService: NetPosTransactionsService
     private val lastTransactionResponse = MutableLiveData<TransactionResponse>()
     val lastPosTransaction: LiveData<TransactionResponse> get() = lastTransactionResponse
     val amount: MutableLiveData<String> = MutableLiveData<String>("")
@@ -96,7 +121,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     fun makePayment(
         context: Context,
-        transactionType: com.danbamitale.epmslib.entities.TransactionType = com.danbamitale.epmslib.entities.TransactionType.PURCHASE
+        transactionType: TransactionType = TransactionType.PURCHASE,
     ) {
         Timber.e(cardData.toString())
         val configData = NetPosTerminalConfig.getConfigData() ?: kotlin.run {
@@ -110,22 +135,126 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             NetPosTerminalConfig.getTerminalId(),
             NetPosTerminalConfig.connectionData,
             keyHolder,
-            configData
+            configData,
         )
         // IsoAccountType.
         this.amountLong = amountDbl.toLong()
-        val requestData =
+        val requestData: TransactionRequestData =
             TransactionRequestData(
                 transactionType,
                 amountLong,
                 cashbackLong,
-                accountType = isoAccountType!!
+                accountType = isoAccountType!!,
             )
-        val processor = TransactionProcessor(hostConfig)
+
+        val customStan = generateRandomRrn(6)
+        val customRrn = generateRandomRrn(12)
+
+        val transTime = formattedTime.replace(":", "")
+        val transDateTime = getCurrentDateTime()
+        val processor: TransactionProcessor = TransactionProcessor(hostConfig)
         transactionState.value = STATE_PAYMENT_STARTED
-        processor.processTransaction(context, requestData, cardData!!)
+
+        rrnApiService.getRrn()
+            .subscribeOn(ioScheduler)
+            .flatMap {
+                if (it.isSuccessful) {
+                    it.body()?.let { rrn ->
+                        logTransactionBeforeConnectingToNibss(
+                            cardData,
+                            customStan,
+                            transTime,
+                            requestData,
+                            transDateTime,
+                            rrn,
+                        )
+                    }
+                } else {
+                    logTransactionBeforeConnectingToNibss(
+                        cardData,
+                        customStan,
+                        transTime,
+                        requestData,
+                        transDateTime,
+                        customRrn,
+                    )
+                }
+                Single.just(it)
+            }
+            .flatMap {
+                if (it.isSuccessful) {
+                    it.body()?.let { rrn ->
+                        makePaymentViaNibss(context, requestData, processor, rrn, customStan)
+                    }
+                } else {
+                    makePaymentViaNibss(context, requestData, processor, customRrn, customStan)
+                }
+                Single.just(it)
+            }.observeOn(AndroidSchedulers.mainThread())
+            .subscribe { data, error ->
+                data?.let { d -> d.body()?.let { Timber.d(it) } }
+                error?.let { Timber.d(it.localizedMessage) }
+            }
+    }
+
+    private fun logTransactionBeforeConnectingToNibss(
+        cardData: CardData?,
+        stan: String,
+        transTime: String,
+        requestData: TransactionRequestData,
+        transDateTime: String,
+        rrn: String,
+    ) {
+        logTransactionFirstImpl(
+            cardData,
+            rrn,
+            stan,
+            transTime,
+            requestData,
+            transDateTime,
+        ).observeOn(AndroidSchedulers.mainThread())
+            .subscribe { t1, t2 ->
+                t1?.let {
+                    Timber.d(it.message)
+                }
+                t2?.let {
+                    Timber.d(it.localizedMessage)
+                }
+            }
+    }
+
+    private fun logTransactionFirstImpl(
+        cardData: CardData?,
+        rrn: String,
+        stan: String,
+        transTime: String,
+        requestData: TransactionRequestData,
+        transDateTime: String,
+    ): Single<ResponseBodyAfterLoginToBackend> {
+        val data = createTransToLog(cardData, rrn, stan, transTime, requestData, transDateTime)
+
+        return netposTransactionApiService.logTransactionBeforeConnectingToNibss(data!!)
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun makePaymentViaNibss(
+        context: Context,
+        requestData: TransactionRequestData,
+        processor: TransactionProcessor,
+        rrn: String,
+        stan: String,
+    ) {
+        val modifiedRequestData = requestData.apply {
+            this.RRN = rrn
+            this.STAN = stan
+        }
+        processor.processTransaction(context, modifiedRequestData, cardData!!)
             .onErrorResumeNext {
                 processor.rollback(context, MessageReasonCode.Timeout)
+            }
+            .flatMap {
+                handleUpdateOfTransactionPayloadInBackend(it, rrn)
+                Single.just(it)
             }
             .flatMap {
                 it.amount = amountLong
@@ -138,10 +267,12 @@ class SalesViewModel @Inject constructor() : ViewModel() {
                 it.cardLabel = cardScheme!!
                 lastTransactionResponse.postValue(it)
                 Timber.e(it.toString())
+                Timber.tag("AMOUNT_RETURNED").d(it.amount.toString())
                 Timber.e(it.responseCode)
                 Timber.e(it.responseMessage)
                 _message.postValue(Event(if (it.responseCode == "00") "Transaction Approved" else "Transaction Not approved"))
                 printReceipt(it)
+
                 AppDatabase.getDatabaseInstance(context).transactionResponseDao()
                     .insertNewTransaction(it)
             }
@@ -157,6 +288,54 @@ class SalesViewModel @Inject constructor() : ViewModel() {
                     Timber.e(it)
                 }
             }.disposeWith(compositeDisposable)
+    }
+
+    private fun createTransToLog(
+        cardData: CardData?,
+        customRrn: String,
+        customStan: String,
+        transTime: String,
+        requestData: TransactionRequestData,
+        transDateTime: String,
+    ): TransactionToLogBeforeConnectingToNibbs? = cardData?.expiryDate?.let {
+        customerName.value?.let { it1 ->
+            Singletons.getConfigData()?.cardAcceptorIdCode?.let { it2 ->
+                val newAmount = amountLong.toDouble()/*amount.value!!.toDoubleOrNull() */
+                TransactionToLogBeforeConnectingToNibbs(
+                    status = "PENDING",
+                    TransactionResponseX(
+                        AID = "",
+                        rrn = customRrn,
+                        STAN = customStan,
+                        TSI = "",
+                        TVR = "",
+                        accountType = isoAccountType!!.name,
+                        acquiringInstCode = "",
+                        additionalAmount_54 = "",
+                        amount = newAmount.toInt() ?: amount.value!!.toInt(),
+                        appCryptogram = "",
+                        authCode = "",
+                        cardExpiry = it,
+                        cardHolder = it1,
+                        cardLabel = cardScheme.toString(),
+                        id = 0,
+                        localDate_13 = getDate(),
+                        localTime_12 = transTime,
+                        maskedPan = cardData.pan.maskPan(),
+                        merchantId = it2,
+                        originalForwardingInstCode = "",
+                        otherAmount = requestData.otherAmount.toInt(),
+                        otherId = "",
+                        responseCode = "99",
+                        responseDE55 = "",
+                        terminalId = user!!.terminal_id!!,
+                        transactionTimeInMillis = dateStr2Long(transDateTime),
+                        transactionType = requestData.transactionType.name,
+                        transmissionDateTime = transDateTime,
+                    ),
+                )
+            }
+        }
     }
 
     override fun onCleared() {
@@ -175,7 +354,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     fun showReceiptDialog() {
         _showPrintDialog.value = Event(
             lastTransactionResponse.value!!.buildSMSText(remark.value ?: "")
-                .toString()
+                .toString(),
         )
     }
 
@@ -186,7 +365,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         }
         Timber.e(transactionResponse.toString())
         _showPrintDialog.postValue(
-            Event(transactionResponse.buildSMSText(remark.value ?: "").toString())
+            Event(transactionResponse.buildSMSText(remark.value ?: "").toString()),
         )
     }
 
@@ -198,30 +377,42 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         isVend = vend
     }
 
-    private fun sendVendResponse(context: Context, out: String) {
-        Single.fromCallable {
-            Socket().run {
-                soTimeout = 120_000
-                connect(InetSocketAddress(UtilityParam.VEND_IP, UtilityParam.VEND_PORT.toInt()))
-                val reader = BufferedReader(InputStreamReader(getInputStream()))
-                Timber.e(reader.readLine())
-                val printWriter = PrintWriter(getOutputStream(), true)
-                printWriter.println(out)
-                reader.readLine()
-            }
-        }.subscribeOn(Schedulers.io())
+    private fun handleUpdateOfTransactionPayloadInBackend(
+        transactionResp: TransactionResponse,
+        rrn: String,
+    ) {
+        if (transactionResp.responseCode == "00") {
+            logTransactionAfterConnectingToNibss(
+                rrn,
+                mapDanbamitaleResponseToResponseX(transactionResp),
+                "APPROVED",
+            )
+        } else {
+            logTransactionAfterConnectingToNibss(
+                rrn = rrn,
+                transactionResponse = mapDanbamitaleResponseToResponseX(transactionResp),
+                status = transactionResp.responseMessage,
+            )
+        }
+    }
+
+    private fun logTransactionAfterConnectingToNibss(
+        rrn: String,
+        transactionResponse: TransactionResponseX,
+        status: String,
+    ) {
+        val dataToLog = DataToLogAfterConnectingToNibss(status, transactionResponse, rrn)
+        netposTransactionApiService.updateLogAfterConnectingToNibss(rrn, dataToLog)
+            .doOnError {
+                val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
+            }.flatMap {
+                if (!(it.code() in 200..299 || it.code() in 400..499)) {
+                    val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
+                }
+                Single.just(it.body())
+            }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doFinally {
-            }
-            .subscribe { t1, t2 ->
-                t1?.let {
-                    Timber.e(it)
-                    // Toast.makeText(context, "received", Toast.LENGTH_SHORT).show()
-                }
-                t2?.let {
-                    Toast.makeText(context, it.localizedMessage, Toast.LENGTH_SHORT).show()
-                    Timber.e(it)
-                }
+            .subscribe { _, _ ->
             }.disposeWith(compositeDisposable)
     }
 }
