@@ -521,6 +521,13 @@ object RandomPurposeUtil {
         return dateFormatter.format(today)
     }
 
+    @SuppressLint("SimpleDateFormat")
+    fun getCurrentDate(): String {
+        val dateFormatter: DateFormat = SimpleDateFormat("dd-MM-yyyy")
+        val today = Date()
+        return dateFormatter.format(today)
+    }
+
     fun dateStr2Long(dateStr: String): Long {
         return try {
             val c = Calendar.getInstance()

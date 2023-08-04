@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
+import com.woleapp.netpos.contactless.model.AppCampaignModel
 import io.reactivex.Single
 
 @Dao

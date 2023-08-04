@@ -21,12 +21,14 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -91,11 +93,14 @@ class MainActivity :
     private var progressDialog: ProgressDialog? = null
     private lateinit var alertDialog: AlertDialog
     private lateinit var binding: ActivityMainBinding
+    private lateinit var notificationsLayout: ConstraintLayout
+    private lateinit var unreadNotificationsCountTv: TextView
     private lateinit var pdfView: LayoutPosReceiptPdfBinding
     private lateinit var qrPdfView: LayoutQrReceiptPdfBinding
     private lateinit var dialogContactlessReaderBinding: DialogContatclessReaderBinding
     private val viewModel by viewModels<NfcCardReaderViewModel>()
     private val transactionViewModel by viewModels<TransactionsViewModel>()
+    private val notificationViewModel : NotificationViewModel by viewModels()
     private val contactlessKernel: ContactlessKernel by lazy {
         ContactlessKernel.getInstance(applicationContext)
     }
@@ -173,7 +178,6 @@ class MainActivity :
     }
 
     private fun resolveIntent(intent: Intent) {
-        Timber.e("resolve intent")
         // intent.action
         val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG) as? Tag
         tag?.let {
@@ -241,6 +245,7 @@ class MainActivity :
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        initViews()
         dialogContactlessReaderBinding =
             DialogContatclessReaderBinding.inflate(layoutInflater).apply {
                 executePendingBindings()
@@ -350,6 +355,12 @@ class MainActivity :
             create()
         }
         val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        if (user == null) {
+            val intent = Intent(this, AuthenticationActivity::class.java)
+            this.startActivity(intent)
+            Toast.makeText(this, getString(R.string.kindly_login), Toast.LENGTH_LONG).show()
+            return
+        }
         binding.dashboardHeader.username.text = user.business_name
         binding.dashboardBottomNavigationView.setOnItemSelectedListener(object :
             NavigationBarView.OnItemSelectedListener {
@@ -524,6 +535,10 @@ class MainActivity :
         super.onResume()
         getIntentDataSentInFromFirebaseService()
         handlePdfReceiptPrinting()
+        fetchUnreadNotifications()
+        notificationsLayout.setOnClickListener {
+            showFragment(NotificationFragment(), getString(R.string.notification))
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -886,7 +901,6 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-
                 Timber.tag("TRANSACTION_RETURNED").d(it)
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
@@ -983,6 +997,27 @@ class MainActivity :
                     viewModel.lastPosTransactionResponse.value,
                 )
                 getPermissionAndCreatePdf(pdfView)
+            }
+        }
+    }
+
+    private fun initViews() {
+        with(binding) {
+            notificationsLayout = dashboardHeader.notification
+            unreadNotificationsCountTv = dashboardHeader.unreadNotifications
+        }
+    }
+
+    private fun fetchUnreadNotifications() {
+        notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
+            Timber.tag("TEST_TEST_TEST_TEST").d(Gson().toJson(unreadMessages))
+            unreadMessages?.let {
+                if (it.isEmpty()) {
+                    notificationsLayout.visibility = View.INVISIBLE
+                } else {
+                    unreadNotificationsCountTv.text = it.size.toString()
+                    notificationsLayout.visibility = View.VISIBLE
+                }
             }
         }
     }

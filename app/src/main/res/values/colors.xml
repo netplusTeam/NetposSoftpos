@@ -14,4 +14,6 @@
     <color name="success">#1A9211</color>
     <color name="failed">#F01808</color>
     <color name="black">#000000</color>
+    <color name="color_light_sky_blue">#034971</color>
+    <color name="color_sky_blue">#076296</color>
 </resources>

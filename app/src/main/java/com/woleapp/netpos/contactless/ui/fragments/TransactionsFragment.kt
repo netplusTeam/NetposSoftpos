@@ -102,6 +102,7 @@ class TransactionsFragment : BaseFragment() {
                         .commit()
                 }
                 6 -> showFragment(SalesFragment.newInstance(isVend = true))
+                9 -> showFragment(NotificationFragment())
                 else -> showFragment(SalesFragment.newInstance(TransactionType.CASH_ADVANCE))
             }
         }
@@ -156,7 +157,10 @@ class TransactionsFragment : BaseFragment() {
         val listOfService = ArrayList<Service>()
             .apply {
                 add(Service(0, "Purchase", R.drawable.purchase))
-                if (!BuildConfig.FLAVOR.contains("providussoftpos") || !BuildConfig.FLAVOR.contains("providus")) {
+                if (!BuildConfig.FLAVOR.contains("providussoftpos") || !BuildConfig.FLAVOR.contains(
+                        "providus",
+                    )
+                ) {
                     add(Service(7, "Purchase With Cashback", R.drawable.purchase))
                 }
                 if (BuildConfig.FLAVOR.contains("providuspos")) {
@@ -168,6 +172,7 @@ class TransactionsFragment : BaseFragment() {
                 }
                 add(Service(4, "Balance Enquiry", R.drawable.ic_write))
                 add(Service(5, "Reprint", R.drawable.ic_print))
+                add(Service(9, getString(R.string.notification), R.drawable.ic_notification))
             }
         adapter.submitList(listOfService)
     }
@@ -296,16 +301,16 @@ class TransactionsFragment : BaseFragment() {
         )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
-        progressDialog!!.setMessage("Checking Balance...")
-        progressDialog!!.show()
+        progressDialog.setMessage("Checking Balance...")
+        progressDialog.show()
         val processor = TransactionProcessor(hostConfig)
         // processor.
         val disposable = processor.processTransaction(requireContext(), requestData, cardData)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { response, error ->
-                if (progressDialog!!.isShowing) {
-                    progressDialog!!.dismiss()
+                if (progressDialog.isShowing) {
+                    progressDialog.dismiss()
                 }
                 error?.let {
                     it.printStackTrace()
@@ -345,8 +350,6 @@ class TransactionsFragment : BaseFragment() {
                     )
                 }
             }
-
-        // compositeDisposable.add(disposable)
     }
 
     private fun showMessage(s: String, vararg messageString: String) {
