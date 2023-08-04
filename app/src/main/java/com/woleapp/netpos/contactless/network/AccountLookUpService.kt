@@ -73,6 +73,13 @@ interface AccountLookUpService {
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<GeneralResponse>
 
+    @POST("auth/reset-password-request")
+    fun resetPasswordForProvidus(
+        @Body payload: JsonObject?,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<ResetPasswordResponseForProvidus>
+
     @POST("auth/confirm-reset-otp")
     fun confirmOTPToSetPassword(
         @Body payload: JsonObject?,

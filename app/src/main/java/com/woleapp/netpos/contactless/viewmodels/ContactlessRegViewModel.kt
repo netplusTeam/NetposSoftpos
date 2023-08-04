@@ -52,6 +52,10 @@ class ContactlessRegViewModel @Inject constructor(
         MutableLiveData()
     val resetPasswordResponse: LiveData<Resource<GeneralResponse>> get() = _resetPasswordResponse
 
+    private var _resetPasswordForProvidusResponse: MutableLiveData<Resource<ResetPasswordResponseForProvidus>> =
+        MutableLiveData()
+    val resetPasswordForProvidusResponse: LiveData<Resource<ResetPasswordResponseForProvidus>> get() = _resetPasswordForProvidusResponse
+
     private var _confirmOtpToResetPasswordResponse: MutableLiveData<Resource<GeneralResponse>> =
         MutableLiveData()
     val confirmOtpToResetPasswordResponse: LiveData<Resource<GeneralResponse>> get() = _confirmOtpToResetPasswordResponse
@@ -315,6 +319,40 @@ class ContactlessRegViewModel @Inject constructor(
         )
     }
 
+    fun resetPasswordForProvidus(payload: JsonObject, deviceSerialId: String, partnerId: String) {
+        _resetPasswordForProvidusResponse.postValue(Resource.loading(null))
+        disposable.add(
+            contactlessRegRepo.resetPasswordForProvidus(payload, deviceSerialId, partnerId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { data, error ->
+                    data?.let {
+                        _resetPasswordForProvidusResponse.postValue(Resource.success(it))
+                        saveAccountNumberToResetPasswordForProvidus(it.accountNumber)
+                        _message.value = Event(it.message)
+
+                    }
+                    error?.let {
+                        _resetPasswordForProvidusResponse.postValue(Resource.error(null))
+                        Timber.d("ERROR==${it.localizedMessage}")
+                        (it as? HttpException).let { httpException ->
+                            val errorMessage = httpException?.response()?.errorBody()?.string()
+                                ?: "{\"message\":\"Unexpected error\"}"
+                            _message.value = Event(
+                                try {
+                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                        ?: "Error"
+                                } catch (e: Exception) {
+                                    "Error"
+                                },
+                            )
+                            // Timber.e("SHOWME--->$errorMessage")
+                        }
+                    }
+                },
+        )
+    }
+
     fun confirmOTPToSetPassword(payload: JsonObject, deviceSerialId: String, partnerId: String) {
         _confirmOtpToResetPasswordResponse.postValue(Resource.loading(null))
         disposable.add(
@@ -476,6 +514,10 @@ class ContactlessRegViewModel @Inject constructor(
     }
     private fun saveEmail(email: String) {
         Prefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
+    }
+
+   private fun saveAccountNumberToResetPasswordForProvidus(accountNumber: String) {
+        Prefs.putString(AppConstants.ACCOUNT_NUMBER_FOR_PROVIDUS, gson.toJson(accountNumber))
     }
 
     override fun onCleared() {

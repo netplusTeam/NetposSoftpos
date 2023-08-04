@@ -50,6 +50,9 @@ class ContactlessRegRepository @Inject constructor(
     fun resetPassword(payload: JsonObject, partnerId: String, deviceSerialId: String
     ) = accountLookUpService.resetPassword(payload, partnerId, deviceSerialId)
 
+    fun resetPasswordForProvidus(payload: JsonObject, partnerId: String, deviceSerialId: String
+    ) = accountLookUpService.resetPasswordForProvidus(payload, partnerId, deviceSerialId)
+
     fun confirmOTPToSetPassword(payload: JsonObject, partnerId: String, deviceSerialId: String
     ) = accountLookUpService.confirmOTPToSetPassword(payload, partnerId, deviceSerialId)
 
