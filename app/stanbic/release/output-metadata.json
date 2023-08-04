@@ -4,16 +4,16 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.woleapp.netpos.contactless.providuspos",
-  "variantName": "providusposRelease",
+  "applicationId": "com.woleapp.netpos.contactless.stanbic",
+  "variantName": "stanbicRelease",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 26,
-      "versionName": "1.0.26",
-      "outputFile": "app-providuspos-release.apk"
+      "versionCode": 31,
+      "versionName": "1.0.31",
+      "outputFile": "app-stanbic-release.apk"
     }
   ],
   "elementType": "File"

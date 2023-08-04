@@ -13,6 +13,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.github.barteksc.pdfviewer.PDFView
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.BuildConfig
@@ -241,7 +242,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                         } else if (BuildConfig.FLAVOR.contains("easypayfcmb")) {
                             dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
                         }
-                        dialogView.findViewById<PDFView>(R.id.accept_button).setOnClickListener {
+                        dialogView.findViewById<Button>(R.id.accept_button).setOnClickListener {
                             alertDialog.dismiss()
                             registerExistingCustomer()
                         }

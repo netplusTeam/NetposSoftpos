@@ -254,10 +254,14 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="notification_message_body">%1$s - <b>%2$s</b> \nFrom <b>%3$s</b>   (%4$s)</string>
     <string name="logout_confirmation_dialog_message">Do you want to logout?</string>
     <string name="app_uploaded_successfully">App uploaded successfully! Restarting the app in 5 seconds!</string>
+<<<<<<< HEAD
     <string name="notification">Notification</string>
     <string name="your_account_is_active">YOUR ACCOUNT IS ACTIVE</string>
     <string name="kindly_login">Kindly login to proceed!</string>
     <string name="delete">Delete</string>
     <string name="notifications">Notifications</string>
     <string name="message_deleted">Message deleted successfully!</string>
+=======
+    <string name="enter_your_providus_account_number">"Enter your account number"</string>
+>>>>>>> 85aca63a9a2dfea0e8d388005ba3d51f6403f04f
 </resources>

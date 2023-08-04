@@ -1,0 +1,2 @@
+com/netpluspay/netposbarcodesdk/BuildConfig.java
+ com.netpluspay.netposbarcodesdk.BuildConfig
