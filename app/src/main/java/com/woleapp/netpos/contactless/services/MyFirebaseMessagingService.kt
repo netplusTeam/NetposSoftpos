@@ -34,6 +34,7 @@ import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.worker.RegisterDeviceTokenToBackendOnTokenChangeWorker
 import com.woleapp.netpos.contactless.worker.SaveAppCampaignToDbWorker
 import com.woleapp.netpos.contactless.worker.SaveTransactionFromFirebaseMessagingServiceToDbWorker
+import timber.log.Timber
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -102,16 +103,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
 
             if (temporalTransaction.email.contains(MERCHANT_QR_PREFIX)) {
-                transaction?.let {
-                    scheduleJobToSaveTransactionToDatabase(it)
+                transaction?.let { transactionResponse ->
+                    scheduleJobToSaveTransactionToDatabase(transactionResponse)
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.action = STRING_FIREBASE_INTENT_ACTION
+                    intent.addFlags(FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TOP)
+                    intent.putExtra(TAG_NOTIFICATION_RECEIVED_FROM_BACKEND, true)
+                    this.startActivity(intent)
                 }
             }
-
-            val intent = Intent(this, MainActivity::class.java)
-            intent.action = STRING_FIREBASE_INTENT_ACTION
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TOP)
-            intent.putExtra(TAG_NOTIFICATION_RECEIVED_FROM_BACKEND, true)
-            this.startActivity(intent)
         }
     }
 

@@ -9,10 +9,7 @@ import dagger.assisted.AssistedFactory
 interface JavaScriptInterfaceAssistedFactory {
     fun createJavaScriptInterface(
         @Assisted fragmentManager: FragmentManager,
-        @Assisted("termUrl") termUrl: String,
-        @Assisted("md") md: String,
-        @Assisted("cReq") paReq: String,
-        @Assisted("acsUrl") acsUrl: String,
+        @Assisted("redirectHtml") redirectHtml: String,
         @Assisted("transId") transId: String,
     ): JavaScriptInterface
 }

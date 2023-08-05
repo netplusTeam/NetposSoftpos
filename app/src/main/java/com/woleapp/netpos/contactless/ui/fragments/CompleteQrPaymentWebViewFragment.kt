@@ -74,11 +74,8 @@ class CompleteQrPaymentWebViewFragment : Fragment() {
             response.data?.let {
                 javaScriptInterface = javaScriptInterfaceAssistedFactory.createJavaScriptInterface(
                     parentFragmentManager,
-                    it.TermUrl,
-                    it.MD,
-                    it.PaReq,
-                    it.ACSUrl,
-                    it.transId,
+                    it.redirectHtml.trim(),
+                    it.transId.trim(),
                 )
             }
             setUpWebView(wbView)

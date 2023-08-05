@@ -19,21 +19,18 @@ import dagger.assisted.AssistedInject
 
 class JavaScriptInterface @AssistedInject constructor(
     @Assisted private val fragmentManager: FragmentManager,
-    @Assisted("termUrl") private val termUrl: String,
-    @Assisted("md") private val md: String,
-    @Assisted("cReq") private val cReq: String,
-    @Assisted("acsUrl") private val acsUrl: String,
+    @Assisted("redirectHtml") private val redirectHtml: String,
     @Assisted("transId") private val transId: String,
 ) {
     private val context = fragmentManager.fragments.first().requireContext()
     private val loader = RandomPurposeUtil.alertDialog(context, R.layout.layout_loading_dialog)
     private val responseModal: ResponseModal = ResponseModal()
-    private val webViewBaseUrl =
+    private val webViewReQueryUrl =
         UtilityParam.STRING_WEB_VIEW_BASE_URL + UtilityParam.STRING_MERCHANT_ID + "/"
 
     @JavascriptInterface
-    fun sendValueToWebView() =
-        "$termUrl + $SEPARATOR + $md + $SEPARATOR + $cReq + $SEPARATOR + $acsUrl + $SEPARATOR + $transId + $SEPARATOR + $webViewBaseUrl"
+    fun sendValueToWebView(): String =
+        "$redirectHtml$SEPARATOR$transId$SEPARATOR$webViewReQueryUrl"
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
@@ -47,22 +44,11 @@ class JavaScriptInterface @AssistedInject constructor(
             merchantId = UtilityParam.STRING_MERCHANT_ID,
         )
 
-        if (responseFromWebView.code == "00" || responseFromWebView.code == "90" || responseFromWebView.code == "80") {
-            if (loader.isShowing) {
-                fragmentManager.fragments.first().requireActivity().runOnUiThread {
-                    loader.dismiss()
-                }
-            }
-            fragmentManager.setFragmentResult(
-                QR_TRANSACTION_RESULT_REQUEST_KEY,
-                bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to response),
-            )
-            fragmentManager.popBackStack()
-            responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
-        } else {
-            fragmentManager.fragments.first().requireActivity().runOnUiThread {
-                loader.show()
-            }
-        }
+        fragmentManager.setFragmentResult(
+            QR_TRANSACTION_RESULT_REQUEST_KEY,
+            bundleOf(QR_TRANSACTION_RESULT_BUNDLE_KEY to response),
+        )
+        fragmentManager.popBackStack()
+        responseModal.show(fragmentManager, STRING_QR_RESPONSE_MODAL_DIALOG_TAG)
     }
 }

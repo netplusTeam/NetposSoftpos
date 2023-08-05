@@ -20,8 +20,6 @@ import com.woleapp.netpos.contactless.adapter.ItemsRvAdapterFactory
 import com.woleapp.netpos.contactless.databinding.FragmentNotificationBinding
 import com.woleapp.netpos.contactless.databinding.NotificationItemLayoutBinding
 import com.woleapp.netpos.contactless.model.AppCampaignModel
-import com.woleapp.netpos.contactless.util.AppConstants.CLICKED_NOTIFICATION_BK
-import com.woleapp.netpos.contactless.util.AppConstants.CLICKED_NOTIFICATION_RK
 import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

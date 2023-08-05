@@ -43,6 +43,22 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 object RandomPurposeUtil {
+    private val bankList = mapOf(
+        "firstbank" to "firstbank",
+        "easypay" to "fcmb",
+        "fcmbeasypay" to "fcmb",
+        "easypayfcmb" to "fcmb",
+        "providuspos" to "providus",
+        "stanbic" to "stanbic",
+        "providus" to "providus",
+        "providussoftpos" to "providus",
+        "wemabank" to "wemabank",
+        "zenith" to "zenith",
+        "unitybank" to "unitybank",
+        "polaris" to "polaris",
+        "netpos" to "netpos",
+    )
+
     fun stringToBase64(text: String): String {
         val data: ByteArray = text.toByteArray()
         return Base64.encodeToString(data, Base64.DEFAULT)
@@ -428,6 +444,8 @@ object RandomPurposeUtil {
         return deviceId
     }
 
+    fun getBankName(): String? = bankList[BuildConfig.FLAVOR]
+
     fun initPartnerId(): String {
         var partnerID = ""
         val bankList = mapOf(
@@ -450,6 +468,7 @@ object RandomPurposeUtil {
         }
         return partnerID
     }
+
     fun isDebuggableModeEnabled(context: Context): Boolean {
         return Settings.Secure.getInt(context.contentResolver, Settings.Secure.ADB_ENABLED, 0) == 1
     }

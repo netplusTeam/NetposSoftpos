@@ -100,7 +100,7 @@ class MainActivity :
     private lateinit var dialogContactlessReaderBinding: DialogContatclessReaderBinding
     private val viewModel by viewModels<NfcCardReaderViewModel>()
     private val transactionViewModel by viewModels<TransactionsViewModel>()
-    private val notificationViewModel : NotificationViewModel by viewModels()
+    private val notificationViewModel: NotificationViewModel by viewModels()
     private val contactlessKernel: ContactlessKernel by lazy {
         ContactlessKernel.getInstance(applicationContext)
     }
@@ -517,9 +517,10 @@ class MainActivity :
             setView(verveCardQrAmountDialogBinding.root)
         }.create()
         deviceNotSupportedAlertDialog =
-            AlertDialog.Builder(this).setTitle("NFC Message").setCancelable(false)
-                .setMessage("Device does not have NFC support")
-                .setPositiveButton("Close") { dialog, _ ->
+            AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
+                .setCancelable(false)
+                .setMessage(getString(R.string.device_doesnt_have_nfc))
+                .setPositiveButton(getString(R.string.close)) { dialog, _ ->
                     dialog.dismiss()
                     // finish()
                 }.create()
@@ -694,7 +695,7 @@ class MainActivity :
             PREF_VALUE_PRINT_DOWNLOAD -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = "Download"
+                    receiptDialogBinding.sendButton.text = getString(R.string.download)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -711,7 +712,7 @@ class MainActivity :
             PREF_VALUE_PRINT_SHARE -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = "Share"
+                    receiptDialogBinding.sendButton.text = getString(R.string.share)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -732,7 +733,7 @@ class MainActivity :
                         if (receiptDialogBinding.telephone.text.toString().length != 11) {
                             Toast.makeText(
                                 this@MainActivity,
-                                "Please enter a valid phone number",
+                                getString(R.string.enter_valid_number),
                                 Toast.LENGTH_LONG,
                             ).show()
                             return@setOnClickListener
@@ -749,7 +750,7 @@ class MainActivity :
             else -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = "Download and Share"
+                    receiptDialogBinding.sendButton.text = getString(R.string.download_share)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -792,7 +793,7 @@ class MainActivity :
         timestamp: Long? = null,
         actionToTake: (transactions: List<TransactionResponse>) -> Unit,
     ) {
-        Toast.makeText(this, "Please wait", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, getString(R.string.please_wait), Toast.LENGTH_LONG).show()
         val livedata =
             AppDatabase.getDatabaseInstance(this).transactionResponseDao().getEndOfDayTransaction(
                 getBeginningOfDay(timestamp),
@@ -823,7 +824,7 @@ class MainActivity :
                     if (isEmpty()) {
                         Toast.makeText(
                             this@MainActivity,
-                            "No transactions to print",
+                            getString(R.string.no_transactions),
                             Toast.LENGTH_SHORT,
                         ).show()
                     }
@@ -901,12 +902,11 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                Timber.tag("TRANSACTION_RETURNED").d(it)
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.sendButton.text = "Download"
+                            receiptDialogBinding.sendButton.text = getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                             receiptDialogBinding.transactionContent.text = it
                             show()
@@ -928,7 +928,7 @@ class MainActivity :
                                 if (receiptDialogBinding.telephone.text.toString().length != 11) {
                                     Toast.makeText(
                                         this@MainActivity,
-                                        "Please enter a valid phone number",
+                                        getString(R.string.enter_valid_number),
                                         Toast.LENGTH_LONG,
                                     ).show()
                                     return@setOnClickListener
@@ -945,7 +945,7 @@ class MainActivity :
                     PREF_VALUE_PRINT_SHARE -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.sendButton.text = "Share"
+                            receiptDialogBinding.sendButton.text = getString(R.string.share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                             receiptDialogBinding.transactionContent.text = it
                             show()
@@ -958,7 +958,8 @@ class MainActivity :
                     else -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.sendButton.text = "Download and Share"
+                            receiptDialogBinding.sendButton.text =
+                                getString(R.string.download_share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                             receiptDialogBinding.transactionContent.text = it
                             show()
@@ -1010,7 +1011,6 @@ class MainActivity :
 
     private fun fetchUnreadNotifications() {
         notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
-            Timber.tag("TEST_TEST_TEST_TEST").d(Gson().toJson(unreadMessages))
             unreadMessages?.let {
                 if (it.isEmpty()) {
                     notificationsLayout.visibility = View.INVISIBLE

@@ -97,7 +97,8 @@ class ResponseModal : DialogFragment() {
         sendReceiptAsSms.setOnClickListener {
             dialog?.dismiss()
             responseFromWebView?.let { qrTransResponse ->
-                nfcCardReaderViewModel.setQrTransactionResponse(qrTransResponse)
+                val modifiedAmount = qrTransResponse.amount * 100
+                nfcCardReaderViewModel.setQrTransactionResponse(qrTransResponse.copy(amount = modifiedAmount))
                 nfcCardReaderViewModel.showReceiptDialogForQrPayment()
             }
         }
