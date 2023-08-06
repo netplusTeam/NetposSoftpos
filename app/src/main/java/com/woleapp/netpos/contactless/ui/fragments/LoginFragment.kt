@@ -107,6 +107,9 @@ class LoginFragment : BaseFragment() {
         resetPasswordBinding.closeDialog.setOnClickListener {
             passwordResetDialog.dismiss()
         }
+        resetPasswordBinding.btnResetPassword.setOnClickListener {
+            resetPasswordForFCMB()
+        }
         val credentials = JsonObject()
         credentials.addProperty("appname", UtilityParam.APP_NAME)
         credentials.addProperty("password", UtilityParam.APP_PASSWORD)
@@ -158,6 +161,10 @@ class LoginFragment : BaseFragment() {
             testNfcSupport()
         }
         return binding.root
+    }
+
+    private fun resetPasswordForFCMB() {
+        viewModel.resetPasswordForFCMB(partnerID, deviceId)
     }
 
     private fun testNfcSupport() {

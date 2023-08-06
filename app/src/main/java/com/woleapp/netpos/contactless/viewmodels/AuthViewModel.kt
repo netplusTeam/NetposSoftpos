@@ -217,7 +217,7 @@ class AuthViewModel : ViewModel() {
             }.disposeWith(disposables)
     }
 
-    fun resetPasswordForProvidus(partnerID: String, deviceId: String) {
+    fun resetPasswordForFCMB(partnerID: String, deviceId: String) {
         val username = usernameLiveData.value
         val password = passwordLiveData.value
         if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
