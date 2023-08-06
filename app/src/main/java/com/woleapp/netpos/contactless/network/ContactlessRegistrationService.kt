@@ -1,7 +1,9 @@
 package com.woleapp.netpos.contactless.network
 
+import com.woleapp.netpos.contactless.model.ExistingAccountRegisterResponse
 import com.woleapp.netpos.contactless.model.RegistrationFBNModel
 import com.woleapp.netpos.contactless.model.RegistrationModel
+import com.woleapp.netpos.contactless.model.RegistrationZenithModel
 import com.woleapp.netpos.contactless.util.UtilityParam
 import io.reactivex.Single
 import okhttp3.OkHttpClient
@@ -18,16 +20,23 @@ interface ContactlessRegistrationService {
     fun register(
         @Body registrationModel: RegistrationModel?,
         @Query("bank") bank: String,
-        @Query("deviceSerialId") deviceSerialId: String
-        ): Single<RegistrationModel>
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<RegistrationModel>
+
     @POST("user/register")
     fun registerFBN(
         @Body registrationModel: RegistrationFBNModel?,
         @Query("bank") bank: String,
-        @Query("deviceSerialId") deviceSerialId: String
-        ): Single<RegistrationModel>
-}
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<RegistrationModel>
 
+    @POST("user/register-zenith-account")
+    fun registerExistingAccountForZenith(
+        @Body registerExistingAccountRegisterRequest: RegistrationZenithModel?,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<ExistingAccountRegisterResponse>
+}
 
 object ContactlessClient {
     private val contactlessBaseUrl = UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
@@ -41,12 +50,11 @@ object ContactlessClient {
                 .client(
                     OkHttpClient.Builder()
                         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-                        .build()
+                        .build(),
                 )
                 .build()
                 .create(ContactlessRegistrationService::class.java).also {
                     contactlessClientInstance = it
                 }
         }
-
 }
