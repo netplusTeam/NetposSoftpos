@@ -90,6 +90,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
     private fun handleTransactionMessage(remoteMessage: RemoteMessage) {
         val transactionNotificationFromFirebase = remoteMessage.data["TransactionNotification"]
+        Timber.tag("INCOMING_INCOMING").d(transactionNotificationFromFirebase)
         transactionNotificationFromFirebase?.let {
             val temporalTransaction: FirebaseNotificationModelResponse =
                 gson.fromJson(
@@ -103,6 +104,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
 
             if (temporalTransaction.email.contains(MERCHANT_QR_PREFIX)) {
+                Timber.tag("INCOMING_INCOMING_").d(gson.toJson(temporalTransaction))
                 transaction?.let { transactionResponse ->
                     scheduleJobToSaveTransactionToDatabase(transactionResponse)
                     val intent = Intent(this, MainActivity::class.java)
