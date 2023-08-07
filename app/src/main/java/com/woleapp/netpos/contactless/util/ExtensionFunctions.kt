@@ -6,26 +6,27 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.text.Spannable
-import android.text.SpannableString
+import android.text.*
 import android.text.style.ForegroundColorSpan
 import android.util.Base64
+import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
-
-
 import com.woleapp.netpos.contactless.R
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import timber.log.Timber
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 fun Long.formatDate(): String? =
     SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date(this))
@@ -74,7 +75,7 @@ fun String.isValidIpAddress(): Boolean {
     return this.matches(PATTERN)
 }
 
-//fun NibssAID.toPosEmvAid(): PosEmvAid {
+// fun NibssAID.toPosEmvAid(): PosEmvAid {
 //    val emvAid = PosEmvAid()
 //    emvAid.AID = PosUtils.hexStringToBytes(this.AID)
 //    emvAid.Version = PosUtils.hexStringToBytes(this.applicationVersion)
@@ -92,9 +93,9 @@ fun String.isValidIpAddress(): Boolean {
 //    emvAid.TermDoCvmMoneyLimit = 200000
 //    emvAid.ContactlessOfflineTransMoneyLimit = 0
 //    return emvAid
-//}
+// }
 //
-//fun NibssCA.toPosEmvCa(): PosEmvCapk {
+// fun NibssCA.toPosEmvCa(): PosEmvCapk {
 //    val emvCapk = PosEmvCapk()
 //    emvCapk.RID = PosUtils.hexStringToBytes(this.RID)
 //    emvCapk.KeyID = PosUtils.hexStringToBytes(this.keyIndex)[0]
@@ -104,7 +105,7 @@ fun String.isValidIpAddress(): Boolean {
 //    emvCapk.HashInd = this.hashAlgorithm.toByteOrNull() ?: PosEmvCapk.HASH_IND_SHA1
 //    emvCapk.ArithInd = this.keyAlgorithm.toByteOrNull() ?: PosEmvCapk.AIRTH_IND_RSA
 //    return emvCapk
-//}
+// }
 
 fun Throwable.getResponseBody(): String {
     return if (isHttpException()) {
@@ -121,8 +122,9 @@ fun Throwable.getResponseBody(): String {
         } finally {
             body?.close()
         }
-    } else
+    } else {
         "{\"message\": \"An unexpected error occurred, Please try again\"}"
+    }
 }
 
 fun Throwable.isHttpException(): Boolean = (this is HttpException && this.code() in 400..599)
@@ -166,8 +168,9 @@ fun String.decodeBase64ToBitmap(): Bitmap? {
 }
 
 fun AlertDialog.dismissIfShowing() {
-    if (this.isShowing)
+    if (this.isShowing) {
         this.dismiss()
+    }
 }
 
 fun TextView.highlightTexts(vararg words: String?) {
@@ -179,10 +182,32 @@ fun TextView.highlightTexts(vararg words: String?) {
                     ForegroundColorSpan(ContextCompat.getColor(context, R.color.colorPrimaryDark)),
                     text.toString().indexOf(it),
                     text.toString().indexOf(it).plus(it.length),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
                 )
             }
         }
     }
     this.text = spannable
+}
+
+internal class DecimalDigitsInputFilter(digitsBeforeZero: Int, digitsAfterZero: Int) :
+    InputFilter {
+    private val mPattern: Pattern
+
+    init {
+        mPattern =
+            Pattern.compile("[0-9]{0," + (digitsBeforeZero - 1) + "}+((\\.[0-9]{0," + (digitsAfterZero - 1) + "})?)||(\\.)?")
+    }
+
+    override fun filter(
+        source: CharSequence,
+        start: Int,
+        end: Int,
+        dest: Spanned,
+        dstart: Int,
+        dend: Int,
+    ): CharSequence? {
+        val matcher: Matcher = mPattern.matcher(dest)
+        return if (!matcher.matches()) "" else null
+    }
 }
