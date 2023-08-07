@@ -22,6 +22,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.LayoutPosReceiptPdfBinding
 import com.woleapp.netpos.contactless.databinding.LayoutQrReceiptPdfBinding
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import java.io.File
 import java.io.FileOutputStream
 import java.text.DecimalFormat
@@ -161,7 +162,7 @@ private fun initViewsForQrReceipt(
                 )
             transAmount.text = pdfView.appVersion.context.getString(
                 R.string.amount_place_holder,
-                respFromWebView.amount.div(100).toDouble().formatCurrencyAmountUsingCurrentModule(),
+                divideLongBy100(respFromWebView.amount).formatCurrencyAmountUsingCurrentModule(),
             )
             orderId.text = pdfView.appVersion.context.getString(
                 R.string.order_id_place_holder,
@@ -222,7 +223,7 @@ private fun initViewsForPosReceipt(
                 )
             transAmount.text = pdfView.appVersion.context.getString(
                 R.string.amount_place_holder,
-                it.amount.div(100).toDouble().formatCurrencyAmountUsingCurrentModule(),
+                divideLongBy100(it.amount).formatCurrencyAmountUsingCurrentModule(),
             )
             stan.text =
                 pdfView.appVersion.context.getString(
