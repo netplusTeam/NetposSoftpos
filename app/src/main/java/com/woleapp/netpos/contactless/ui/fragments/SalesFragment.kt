@@ -6,9 +6,11 @@ import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
+import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
@@ -52,6 +54,7 @@ class SalesFragment : BaseFragment() {
 
     private val viewModel by activityViewModels<SalesViewModel>()
     private val nfcCardReaderViewModel by activityViewModels<NfcCardReaderViewModel>()
+    private lateinit var amountEditText: EditText
     private lateinit var transactionType: TransactionType
     private lateinit var alertDialog: AlertDialog
     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
@@ -67,6 +70,10 @@ class SalesFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentSalesBinding.inflate(inflater, container, false)
+        amountEditText = binding.priceTextbox
+        amountEditText.apply {
+            filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(8, 2))
+        }
         transactionType = TransactionType.valueOf(
             arguments?.getString(
                 TRANSACTION_TYPE,

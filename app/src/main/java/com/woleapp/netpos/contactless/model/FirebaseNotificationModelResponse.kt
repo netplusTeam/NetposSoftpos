@@ -8,7 +8,7 @@ data class FirebaseNotificationModelResponse(
     val email: String,
     val maskedPan: String,
     val merchantId: String,
-    val message: String,
+    val message: String?,
     val orderId: String,
     val provider: String,
     val responseMessage: String,

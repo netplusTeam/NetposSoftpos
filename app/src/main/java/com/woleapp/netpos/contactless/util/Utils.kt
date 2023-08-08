@@ -7,14 +7,9 @@ import android.nfc.tech.IsoDep
 import android.nfc.tech.MifareClassic
 import android.nfc.tech.MifareUltralight
 import android.nfc.tech.NfcA
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import timber.log.Timber
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
-import java.net.URL
-import java.net.URLConnection
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.experimental.and
@@ -125,13 +120,13 @@ private fun toReversedDec(bytes: ByteArray): Long {
 
 val NFC_INTENT_FILTER = arrayOf(
     IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-    IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED)
+    IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
 )
 val TECH_LIST = arrayOf(
     arrayOf(
         NfcA::class.java.name,
-        IsoDep::class.java.name
-    )
+        IsoDep::class.java.name,
+    ),
 )
 
 const val NFC_A_TAG = "TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]"
@@ -141,13 +136,13 @@ fun getCurrentDateTimeAsFormattedString(): String {
     val formattedTime =
         SimpleDateFormat(
             "yyyy-MM-dd hh:mm a",
-            Locale.getDefault()
+            Locale.getDefault(),
         ).format(System.currentTimeMillis())
             .format(Date())
 
     return formattedTime.replace(
         formattedTime.takeLast(3),
-        "_${formattedTime.takeLast(3).trim()}"
+        "_${formattedTime.takeLast(3).trim()}",
     ).replace(":", "_")
         .replace("-", "_").replace(" ", "_at_")
 }
@@ -159,4 +154,3 @@ fun validatePasswordMismatch(password: String, confirmPassword: String): Boolean
 fun Fragment.showToast(message: String) {
     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
 }
-

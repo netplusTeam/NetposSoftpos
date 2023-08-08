@@ -6,14 +6,16 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
+import com.woleapp.netpos.contactless.model.AppCampaignModel
 import com.woleapp.netpos.contactless.model.MqttEventsLocal
 import com.woleapp.netpos.contactless.util.RoomTypeConverters
 
 @Database(
-    entities = [TransactionResponse::class, MqttEventsLocal::class],
-    version = 8,
+    entities = [TransactionResponse::class, MqttEventsLocal::class, AppCampaignModel::class],
+    version = 10,
     exportSchema = false,
 )
 @TypeConverters(
@@ -23,6 +25,7 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun transactionResponseDao(): TransactionResponseDao
     abstract fun mqttLocalDao(): MqttLocalDao
+    abstract fun getAppNotificationDao(): AppNotificationDao
 
     companion object {
         @Volatile

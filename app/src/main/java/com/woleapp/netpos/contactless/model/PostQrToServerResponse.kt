@@ -10,8 +10,8 @@ data class PostQrToServerResponse(
     val eciFlag: String,
     val orderId: String,
     val provider: String,
+    val redirectHtml: String,
     val result: String,
     val status: String,
-    val transId: String
+    val transId: String,
 )
-

@@ -45,14 +45,13 @@ object Mappers {
             transactionTimeInMillis = this.transactionTimeInMillis,
             transactionType = this.transactionType,
             terminalId = this.terminalId,
-            merchantId = this.merchantId
+            merchantId = this.merchantId,
         )
-
 
     fun FirebaseNotificationModelResponse.mapToTransactionResponse(): TransactionResponse {
         val currentDateTime = getCurrentDateTime()
         return TransactionResponse().apply {
-              transactionType = TransactionType.PURCHASE
+            transactionType = TransactionType.PURCHASE
             maskedPan = this@mapToTransactionResponse.maskedPan
             amount = this@mapToTransactionResponse.amount.toDouble().toLong()
             transmissionDateTime = currentDateTime
@@ -61,7 +60,7 @@ object Mappers {
             responseCode = this@mapToTransactionResponse.code
             cardLabel = ""
             cardHolder = this@mapToTransactionResponse.customerName
-            transactionTimeInMillis = dateStr2Long(currentDateTime,"yyyy-MM-dd hh:mm a")
+            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@mapToTransactionResponse.terminalId
             merchantId = this@mapToTransactionResponse.merchantId

@@ -22,13 +22,14 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.LayoutPosReceiptPdfBinding
 import com.woleapp.netpos.contactless.databinding.LayoutQrReceiptPdfBinding
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import java.io.File
 import java.io.FileOutputStream
 import java.text.DecimalFormat
 
 fun initViewsForPdfLayout(
     pdfView: ViewDataBinding,
-    receipt: Any?
+    receipt: Any?,
 ) {
     when (receipt) {
         is QrTransactionResponseFinalModel -> {
@@ -44,7 +45,7 @@ fun initViewsForPdfLayout(
 
 fun sharePdf(
     outputFile: File,
-    host: LifecycleOwner
+    host: LifecycleOwner,
 ) {
     // This is the way to do it for targetSdkVersion < 24
 //        val uri: Uri = Uri.fromFile(outputFile)
@@ -53,7 +54,7 @@ fun sharePdf(
     val uri: Uri = FileProvider.getUriForFile(
         context,
         context.applicationContext?.packageName + ".provider",
-        outputFile
+        outputFile,
     )
     val share = Intent().apply {
         action = Intent.ACTION_SEND
@@ -65,7 +66,7 @@ fun sharePdf(
 
 fun createPdf(
     pdfView: ViewDataBinding,
-    host: LifecycleOwner
+    host: LifecycleOwner,
 ): File {
     val displayMetrics = DisplayMetrics()
     if (host is Fragment) {
@@ -88,12 +89,12 @@ fun createPdf(
     pdfView.root.measure(
         View.MeasureSpec.makeMeasureSpec(
             displayMetrics.widthPixels,
-            View.MeasureSpec.EXACTLY
+            View.MeasureSpec.EXACTLY,
         ),
         View.MeasureSpec.makeMeasureSpec(
             displayMetrics.heightPixels,
-            View.MeasureSpec.EXACTLY
-        )
+            View.MeasureSpec.EXACTLY,
+        ),
     )
 
     pdfView.root.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
@@ -103,7 +104,7 @@ fun createPdf(
             Bitmap.createBitmap(
                 it,
                 it1,
-                Bitmap.Config.ARGB_8888
+                Bitmap.Config.ARGB_8888,
             )
         }
     }
@@ -125,7 +126,7 @@ fun createPdf(
     pdfDocument.finishPage(page)
     val filePath = File(
         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-        "NetPOS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf"
+        "NetPOS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf",
     )
 
     pdfDocument.writeTo(FileOutputStream(filePath))
@@ -136,64 +137,64 @@ fun createPdf(
 
 private fun initViewsForQrReceipt(
     pdfView: LayoutQrReceiptPdfBinding,
-    responseFromWebView: QrTransactionResponseFinalModel?
+    responseFromWebView: QrTransactionResponseFinalModel?,
 ) {
     pdfView.apply {
         responseFromWebView?.let { respFromWebView: QrTransactionResponseFinalModel ->
             merchantName.text = pdfView.root.context.getString(
                 R.string.merchant_name_place_holder,
                 Singletons.getCurrentlyLoggedInUser()?.business_name
-                    ?: "${BuildConfig.FLAVOR} POS MERCHANT"
+                    ?: "${BuildConfig.FLAVOR} POS MERCHANT",
             )
             cardOwner.text = pdfView.root.context.getString(
                 R.string.card_owner_place_holder,
-                respFromWebView.customerName
+                respFromWebView.customerName,
             )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
-                    respFromWebView.terminalId
+                    respFromWebView.terminalId,
                 )
             dateTime.text =
                 pdfView.appVersion.context.getString(
                     R.string.date_time_place_holder,
-                    respFromWebView.transmissionDateTime
+                    respFromWebView.transmissionDateTime,
                 )
             transAmount.text = pdfView.appVersion.context.getString(
                 R.string.amount_place_holder,
-                respFromWebView.amount.toDouble().formatCurrencyAmountUsingCurrentModule()
+                divideLongBy100(respFromWebView.amount).formatCurrencyAmountUsingCurrentModule(),
             )
             orderId.text = pdfView.appVersion.context.getString(
                 R.string.order_id_place_holder,
-                respFromWebView.rrnOrderId
+                respFromWebView.rrnOrderId,
             )
             narration.text =
                 pdfView.appVersion.context.getString(
                     R.string.narration_place_holder,
-                    respFromWebView.narration
+                    respFromWebView.narration,
                 )
             transId.text =
                 pdfView.appVersion.context.getString(
                     R.string.trans_ref_place_holder,
-                    respFromWebView.transIdStan
+                    respFromWebView.transIdStan,
                 )
             status.text =
                 pdfView.appVersion.context.getString(
                     R.string.transaction_status_place_holder,
-                    respFromWebView.status.uppercase()
+                    respFromWebView.status.uppercase(),
                 )
             responseCode.text =
                 pdfView.appVersion.context.getString(
                     R.string.response_code_place_holder,
-                    respFromWebView.responseCode
+                    respFromWebView.responseCode,
                 )
             message.text = pdfView.appVersion.context.getString(
                 R.string.message_place_holder,
-                respFromWebView.message
+                respFromWebView.message,
             )
             appVersion.text = pdfView.appVersion.context.getString(
                 R.string.app_version_place_holder,
-                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
+                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
             )
         }
     }
@@ -201,58 +202,58 @@ private fun initViewsForQrReceipt(
 
 private fun initViewsForPosReceipt(
     pdfView: LayoutPosReceiptPdfBinding,
-    transResponse: TransactionResponse
+    transResponse: TransactionResponse,
 ) {
     pdfView.apply {
         transResponse.let {
             merchantName.text = pdfView.root.context.getString(
                 R.string.merchant_name_place_holder,
                 Singletons.getCurrentlyLoggedInUser()?.business_name
-                    ?: "${BuildConfig.FLAVOR} POS MERCHANT"
+                    ?: "${BuildConfig.FLAVOR} POS MERCHANT",
             )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
-                    it.terminalId
+                    it.terminalId,
                 )
             dateTime.text =
                 pdfView.appVersion.context.getString(
                     R.string.date_time_place_holder,
-                    it.transactionTimeInMillis.formatDate()
+                    it.transactionTimeInMillis.formatDate(),
                 )
             transAmount.text = pdfView.appVersion.context.getString(
                 R.string.amount_place_holder,
-                it.amount.div(100).toDouble().formatCurrencyAmountUsingCurrentModule()
+                divideLongBy100(it.amount).formatCurrencyAmountUsingCurrentModule(),
             )
             stan.text =
                 pdfView.appVersion.context.getString(
                     R.string.stan_place_holder,
-                    it.STAN
+                    it.STAN,
                 )
             cardHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.card_holder_place_holder,
-                    it.cardHolder
+                    it.cardHolder,
                 )
             status.text =
                 pdfView.appVersion.context.getString(
                     R.string.transaction_status_place_holder,
-                    if (it.responseCode == "00" || it.responseCode == "16") "APPROVED" else "DECLINED"
+                    if (it.responseCode == "00" || it.responseCode == "16") "APPROVED" else "DECLINED",
                 )
             responseCode.text =
                 pdfView.appVersion.context.getString(
                     R.string.response_code_place_holder,
-                    it.responseCode
+                    it.responseCode,
                 )
             message.text = pdfView.appVersion.context.getString(
                 R.string.message_place_holder,
-                it.responseMessage
+                it.responseMessage,
             )
             cardType.text =
                 pdfView.appVersion.context.getString(R.string.card_type_place_holder, it.cardLabel)
             appVersion.text = pdfView.appVersion.context.getString(
                 R.string.app_version_place_holder,
-                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
+                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
             )
             rrn.text = pdfView.appVersion.context.getString(R.string.rrn_place_holder, it.RRN)
         }

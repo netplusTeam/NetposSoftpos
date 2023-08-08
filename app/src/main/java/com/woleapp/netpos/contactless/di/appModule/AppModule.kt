@@ -1,6 +1,11 @@
 package com.woleapp.netpos.contactless.di.appModule
 
+import android.content.Context
 import com.google.gson.Gson
+import com.woleapp.netpos.contactless.database.AppDatabase
+import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
+import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
+import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
@@ -14,6 +19,7 @@ import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SEND_VERVE_OTP_BA
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -272,4 +278,28 @@ object AppModule {
     @Provides
     @Singleton
     fun providesCompositeDisposable(): CompositeDisposable = CompositeDisposable()
+
+    @Provides
+    @Singleton
+    fun providesAppDb(
+        @ApplicationContext context: Context,
+    ): AppDatabase = AppDatabase.getDatabaseInstance(context)
+
+    @Provides
+    @Singleton
+    fun providesNotificationDao(
+        appDatabase: AppDatabase,
+    ): AppNotificationDao = appDatabase.getAppNotificationDao()
+
+    @Provides
+    @Singleton
+    fun providesTransactionResponseDao(
+        appDatabase: AppDatabase,
+    ): TransactionResponseDao = appDatabase.transactionResponseDao()
+
+    @Provides
+    @Singleton
+    fun providesMqttLocalDao(
+        appDatabase: AppDatabase,
+    ): MqttLocalDao = appDatabase.mqttLocalDao()
 }

@@ -33,17 +33,14 @@ class SaveTransactionFromFirebaseMessagingServiceToDbWorker(
                 .subscribe { t1, t2 ->
                     t1?.let {
                         numberOfAffectedRows = it
-                        Timber.tag("NUMBER_OF_I1").d(it.toString())
                         numberOfAffectedRows
                     } ?: run {
                         numberOfAffectedRows = 0
-                        Timber.tag("NUMBER_OF_I2").d(numberOfAffectedRows.toString())
                         0
                     }
 
                     t2?.let {
                         numberOfAffectedRows = 0
-                        Timber.tag("ERROR_INSERT").d(it)
                     }
                 }.disposeWith(compositeDisposable)
             numberOfAffectedRows

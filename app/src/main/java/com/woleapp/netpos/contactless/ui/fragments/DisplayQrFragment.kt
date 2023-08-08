@@ -18,7 +18,9 @@ import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.CONTACTLESS_TRANSACTION_DEFAULT_EMAIL
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getBankName
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.Singletons.getConfigData
 import com.woleapp.netpos.contactless.util.Singletons.getCurrentlyLoggedInUser
 import com.woleapp.netpos.contactless.util.Singletons.getNetPlusPayMid
 import com.woleapp.netpos.contactless.util.Singletons.gson
@@ -121,15 +123,13 @@ class DisplayQrFragment : BaseFragment() {
         loader.show()
         val paymentWithQr = PayWithQrRequest(
             terminalId = userTID.toString(),
-            netposId = getCurrentlyLoggedInUser()?.netplus_id ?: "",
+            netposId = getConfigData()?.cardAcceptorIdCode ?: "",
             amount = amount.text.toString(),
             name = name.toString(),
             email = email.toString(),
-            bank = initPartnerID().toString(),
+            bank = getBankName() ?: "",
             NPmerchantId = getNetPlusPayMid(),
         )
-
-        Timber.tag("CHECK_MID").d(gson.toJson(paymentWithQr))
 
         observeServerResponse(
             viewModel.paymentWithQr(paymentWithQr),

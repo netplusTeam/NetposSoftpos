@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.woleapp.netpos.contactless.databinding.LayoutTransactionItemBinding
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.formatDate
 
@@ -17,12 +16,12 @@ typealias TransactionClickListener = (TransactionResponse) -> Unit
 object TransactionItemDiffUtil : DiffUtil.ItemCallback<TransactionResponse>() {
     override fun areItemsTheSame(
         oldItem: TransactionResponse,
-        newItem: TransactionResponse
+        newItem: TransactionResponse,
     ) = oldItem.id == newItem.id
 
     override fun areContentsTheSame(
         oldItem: TransactionResponse,
-        newItem: TransactionResponse
+        newItem: TransactionResponse,
     ) = oldItem.transactionType == newItem.transactionType
 }
 
@@ -43,7 +42,7 @@ class TransactionsViewHolder private constructor(val binding: LayoutTransactionI
     RecyclerView.ViewHolder(binding.root) {
     companion object {
         fun from(parent: ViewGroup) = TransactionsViewHolder(
-            LayoutTransactionItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            LayoutTransactionItemBinding.inflate(LayoutInflater.from(parent.context), parent, false),
         )
     }
 
