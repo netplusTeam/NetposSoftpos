@@ -12,10 +12,7 @@ import androidx.lifecycle.ViewModel
 import com.github.barteksc.pdfviewer.PDFView
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.model.RegistrationError
-import com.woleapp.netpos.contactless.model.RegistrationFBNModel
-import com.woleapp.netpos.contactless.model.RegistrationModel
-import com.woleapp.netpos.contactless.model.RegistrationZenithModel
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.network.ContactlessClient
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.Singletons
@@ -40,6 +37,7 @@ class RegistrationViewModel : ViewModel() {
     val registrationZenithModel: MutableLiveData<RegistrationZenithModel> = MutableLiveData(
         RegistrationZenithModel(),
     )
+    val registrationZenithConfirmPassword = MutableLiveData("")
     private val _message = MutableLiveData<Event<String>>()
     private val _authDone = MutableLiveData<Event<Boolean>>()
     val authDone: LiveData<Event<Boolean>>
@@ -96,6 +94,10 @@ class RegistrationViewModel : ViewModel() {
                     regFBN(bank, deviceSerialId)
                 }
             } else if (BuildConfig.FLAVOR.contains("zenith")) {
+                if (registrationZenithModel.value?.Password != registrationZenithConfirmPassword.value){
+                    _message.value = Event("Password mismatch")
+                    return
+                }
                 if (registrationZenithModel.value?.allFieldsFilledZenith() == false) {
                     _message.value = Event("All fields are required")
                     return

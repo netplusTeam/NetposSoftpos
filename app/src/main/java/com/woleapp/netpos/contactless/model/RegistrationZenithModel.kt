@@ -22,3 +22,9 @@ data class RegistrationZenithModel(
                 && Reference.isNotEmpty()
 
 }
+data class ZenithModel(
+    var ConfirmPassword: String
+) {
+    constructor() : this( "")
+
+}
