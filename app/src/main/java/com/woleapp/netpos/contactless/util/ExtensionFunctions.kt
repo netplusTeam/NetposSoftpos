@@ -6,10 +6,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.text.*
+import android.text.InputFilter
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Base64
-import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -22,7 +24,6 @@ import io.reactivex.disposables.Disposable
 import okhttp3.ResponseBody
 import retrofit2.HttpException
 import timber.log.Timber
-import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
@@ -190,7 +191,7 @@ fun TextView.highlightTexts(vararg words: String?) {
     this.text = spannable
 }
 
-internal class DecimalDigitsInputFilter(digitsBeforeZero: Int, digitsAfterZero: Int) :
+internal class DecimalDigitsInputFilter(digitsBeforeZero: Int = 8, digitsAfterZero: Int = 2) :
     InputFilter {
     private val mPattern: Pattern
 

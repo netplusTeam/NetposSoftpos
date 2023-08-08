@@ -72,7 +72,7 @@ class SalesFragment : BaseFragment() {
         binding = FragmentSalesBinding.inflate(inflater, container, false)
         amountEditText = binding.priceTextbox
         amountEditText.apply {
-            filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(6, 2))
+            filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(8, 2))
         }
         transactionType = TransactionType.valueOf(
             arguments?.getString(
