@@ -195,10 +195,10 @@
                 app:endIconDrawable="@drawable/ic_arrow_down_24"
                 app:endIconTint="@color/black"
                 app:hintEnabled="true"
-                app:layout_constraintTop_toBottomOf="@+id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/phoneee"
                 app:layout_constraintEnd_toEndOf="@+id/phoneee"
                 app:layout_constraintStart_toStartOf="@+id/phoneee"
-                app:layout_constraintBottom_toTopOf="@+id/phoneee">
+                app:layout_constraintBottom_toTopOf="@+id/email_field">
 
                 <AutoCompleteTextView
                     android:id="@+id/branch"
@@ -237,6 +237,112 @@
                     app:endIconMode="password_toggle"
                     tools:text="" />
             </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/bvn_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/bvn"
+                app:errorEnabled="true"
+                android:visibility="gone"
+                app:errorTextColor="@color/colorError"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/email_field"
+                app:layout_constraintStart_toStartOf="@id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/email_field">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/bvn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/reference_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/reference"
+                app:errorEnabled="true"
+                android:visibility="gone"
+                app:errorTextColor="@color/colorError"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/email_field"
+                app:layout_constraintStart_toStartOf="@id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/bvn_field">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/reference"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:singleLine="true"
+                    android:inputType="number"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    tools:text=""/>
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/password_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/password"
+                app:errorEnabled="true"
+                android:visibility="gone"
+                app:passwordToggleEnabled="true"
+                app:errorTextColor="@color/colorError"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/email_field"
+                app:layout_constraintStart_toStartOf="@id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/reference_field">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/confirm_password_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/confirm_password"
+                app:errorEnabled="true"
+                android:visibility="gone"
+                app:errorTextColor="@color/colorError"
+                android:textColorHint="@android:color/black"
+                app:passwordToggleEnabled="true"
+                app:layout_constraintEnd_toEndOf="@id/email_field"
+                app:layout_constraintStart_toStartOf="@id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/password_field">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/confirm_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="textPassword"
+                    android:singleLine="true"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
 
 
             <Button
@@ -251,7 +357,7 @@
                 app:buttonInProgress="@{viewmodel.authInProgress}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/email_field" />
+                app:layout_constraintTop_toBottomOf="@id/confirm_password_field" />
 
 
             <ProgressBar
@@ -267,18 +373,18 @@
                 app:layout_constraintTop_toTopOf="@id/btn_login" />
 
 
-<!--            <androidx.appcompat.widget.AppCompatSpinner-->
-<!--                android:id="@+id/spnBank"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="@dimen/dimen_16dp"-->
-<!--                android:layout_marginTop="@dimen/dimen_16dp"-->
-<!--                android:layout_marginEnd="@dimen/dimen_16dp"-->
-<!--                android:prompt="@string/hint_choose_bank_caps"-->
-<!--                android:spinnerMode="dropdown"-->
-<!--                android:textColorHint="@android:color/black"-->
-<!--                android:textSize="15sp"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/email_field" />-->
+            <!--            <androidx.appcompat.widget.AppCompatSpinner-->
+            <!--                android:id="@+id/spnBank"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginStart="@dimen/dimen_16dp"-->
+            <!--                android:layout_marginTop="@dimen/dimen_16dp"-->
+            <!--                android:layout_marginEnd="@dimen/dimen_16dp"-->
+            <!--                android:prompt="@string/hint_choose_bank_caps"-->
+            <!--                android:spinnerMode="dropdown"-->
+            <!--                android:textColorHint="@android:color/black"-->
+            <!--                android:textSize="15sp"-->
+            <!--                app:layout_constraintTop_toBottomOf="@id/email_field" />-->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
