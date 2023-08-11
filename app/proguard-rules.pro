@@ -18,31 +18,31 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
-#-optimizations !code/simplification/arithmetic
-#-keepattributes *Annotation*
-#-keepattributes InnerClasses
-#-keepattributes EnclosingMethod
-#-keep class *.*.R$*
-#-dontskipnonpubliclibraryclasses
-#-forceprocessing
-#-optimizationpasses 5
-#-overloadaggressively
+-renamesourcefileattribute SourceFile
+-optimizations !code/simplification/arithmetic
+-keepattributes *Annotation*
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+-keep class *.*.R$*
+-dontskipnonpubliclibraryclasses
+-forceprocessing
+-optimizationpasses 5
+-overloadaggressively
 # Removing logging code
-#-assumenosideeffects class android.util.Log {
-# public static *** d(...);
-# public static *** v(...);
-# public static *** i(...);
-# public static *** w(...);
-# public static *** e(...);
-#}
-## Crashlytics code as given below which one can exclude
-#-keep class com.crashlytics.* { }
-#-keep class com.crashlytics.android.**
-## Keep specific method from the CAL$CALListener class
-#-keep class com.visa.vac.tc.emvconverter.CAL$CALListener {
-#    void a(java.lang.Exception);
-#}
-## Keep all classes in the package com.visa.vac.tc.emvconverter
-#-keep class com.visa.vac.tc.emvconverter.** {*;}
-#-keepattributes SourceFile,LineNumberTable
+-assumenosideeffects class android.util.Log {
+ public static *** d(...);
+ public static *** v(...);
+ public static *** i(...);
+ public static *** w(...);
+ public static *** e(...);
+}
+# Crashlytics code as given below which one can exclude
+-keep class com.crashlytics.* { }
+-keep class com.crashlytics.android.**
+# Keep visa sdk
+-keep class com.visa.* { }
+-keep class com.visa.vac.**
+-keep class com.visa.vac.** {
+    *;
+}
+-keepattributes SourceFile,LineNumberTable
