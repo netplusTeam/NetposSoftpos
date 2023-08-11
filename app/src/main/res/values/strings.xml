@@ -267,4 +267,6 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="please_wait">Please wait</string>
     <string name="nfc_message_title">NFC Message</string>
     <string name="device_doesnt_have_nfc">Device does not have NFC support</string>
+    <string name="cvv_cannot_be_empty">"CVV can't be empty"</string>
+    <string name="cvv_too_short">"CVV is not complete"</string>
 </resources>

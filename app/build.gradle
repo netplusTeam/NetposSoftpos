@@ -35,8 +35,8 @@ android {
         applicationId "com.woleapp.netpos.contactless"
         minSdkVersion 23
         targetSdkVersion 32
-        versionCode 35
-        versionName "1.0.35"
+        versionCode 37
+        versionName "1.0.37"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         def environmentPath
@@ -63,9 +63,8 @@ android {
             buildConfigField "String", "BUILD_VARIANT", "\"release\""
             resValue "string", "app_name", "NetPOS Contactless"
             debuggable false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            minifyEnabled true
-            shrinkResources true
         }
         nibssserverdebug {
             initWith debug
@@ -114,10 +113,6 @@ android {
             dimension "whiteLabel"
             applicationIdSuffix ".fcmbeasypay"
         }
-        easypayfcmb {
-            dimension "whiteLabel"
-            applicationIdSuffix ".easypayfcmb"
-        }
         zenith {
             dimension "whiteLabel"
             applicationIdSuffix ".zenith"
@@ -133,6 +128,10 @@ android {
         stanbic {
             dimension "whiteLabel"
             applicationIdSuffix ".stanbic"
+        }
+        flutterwave {
+            dimension "whiteLabel"
+            applicationIdSuffix ".flutterwave"
         }
     }
     variantFilter { variant ->

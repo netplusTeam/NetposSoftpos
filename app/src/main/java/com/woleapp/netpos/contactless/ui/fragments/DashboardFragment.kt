@@ -2,6 +2,7 @@
 
 package com.woleapp.netpos.contactless.ui.fragments
 
+import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.os.Build
@@ -10,9 +11,9 @@ import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
@@ -29,6 +30,8 @@ import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -60,6 +63,9 @@ class DashboardFragment : BaseFragment() {
     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
+    private lateinit var loader: AlertDialog
+    private lateinit var cardCvv: String
+    private lateinit var user: User
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,19 +84,20 @@ class DashboardFragment : BaseFragment() {
         dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
             executePendingBindings()
         }
-        printerErrorDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setTitle(getString(R.string.printer_error))
-                setIcon(R.drawable.ic_warning)
-                setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
-                    d.cancel()
-                    viewModel.showReceiptDialog()
-                }
-                setNegativeButton(getString(R.string.dismiss)) { d, _ ->
-                    d.cancel()
-                    viewModel.finish()
-                }
-            }.create()
+        loader = alertDialog(requireContext())
+
+        printerErrorDialog = AlertDialog.Builder(requireContext()).apply {
+            setTitle(getString(R.string.printer_error))
+            setIcon(R.drawable.ic_warning)
+            setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
+                d.cancel()
+                viewModel.showReceiptDialog()
+            }
+            setNegativeButton(getString(R.string.dismiss)) { d, _ ->
+                d.cancel()
+                viewModel.finish()
+            }
+        }.create()
         binding.apply {
             viewmodel = viewModel
             lifecycleOwner = viewLifecycleOwner
@@ -174,6 +181,16 @@ class DashboardFragment : BaseFragment() {
             viewModel.validateField()
         }
 
+        //toast the error messages
+        viewModel.payThroughMPGSMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                showToast(message)
+            }
+        }
+
+        // user object to get netposmid and netplusmid
+        user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
@@ -182,18 +199,26 @@ class DashboardFragment : BaseFragment() {
                         requireContext(),
                         error.message,
                         Toast.LENGTH_LONG,
-                    )
-                        .show()
+                    ).show()
                 }
                 it.cardData?.let { _ ->
                     viewModel.setCardScheme(it.cardScheme!!)
                     viewModel.setCustomerName(it.customerName ?: "Customer")
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
-                    viewModel.makePayment(requireContext(), transactionType)
+                    if (it.cardScheme!!.contains(
+                            "mastercard", true
+                        ) && !user.user_type?.contains("regular", true)!!
+                    ) {
+                        cardCvvDialog()
+                    } else {
+                        viewModel.makePayment(requireContext(), transactionType)
+                    }
                 }
             }
         }
+
+
 
         adapter = ServiceAdapter {
             when (it.id) {
@@ -202,8 +227,7 @@ class DashboardFragment : BaseFragment() {
                 3 -> showFragment(BillsFragment())
                 5 -> {
                     parentFragmentManager.beginTransaction()
-                        .replace(R.id.container_main, SettingsFragment())
-                        .addToBackStack(null)
+                        .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
                         .commit()
                 }
                 else -> {
@@ -247,16 +271,29 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         }
+
+        observeServerResponse(
+            viewModel.payThroughMPGSResponse, loader, requireActivity().supportFragmentManager
+        ) {
+            if (viewModel.payThroughMPGSResponse.value?.data == null) {
+                //
+            } else {
+                showFragment(
+                    CompleteQrPaymentWebViewFragment(),
+                    containerViewId = R.id.container_main,
+                    fragmentName = "CompletePaymentThroughMPGS Fragment",
+                )
+            }
+        }
     }
 
     private fun setServices() {
-        val listOfServices = ArrayList<Service>()
-            .apply {
-                add(Service(0, "Transaction", R.drawable.ic_trans))
-                add(Service(1, "Balance Inquiry", R.drawable.ic_write))
-                add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
-                add(Service(5, "Settings", R.drawable.ic_baseline_settings))
-            }
+        val listOfServices = ArrayList<Service>().apply {
+            add(Service(0, "Transaction", R.drawable.ic_trans))
+            add(Service(1, "Balance Inquiry", R.drawable.ic_write))
+            add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
+            add(Service(5, "Settings", R.drawable.ic_baseline_settings))
+        }
         adapter.submitList(listOfServices)
     }
 
@@ -305,48 +342,45 @@ class DashboardFragment : BaseFragment() {
                 } catch (e: Exception) {
                     Observable.just(Vend(0.0))
                 }
-            }.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    Timber.e("vend: $it")
-                    count++
-                    if (it.amount > 0.0) {
-                        progressBar.dismiss()
-                        Toast.makeText(context, "received", Toast.LENGTH_SHORT).show()
-                        Toast.makeText(context, it.amount.toString(), Toast.LENGTH_LONG).show()
-                        binding.priceTextbox.setText(it.amount.toLong().toString())
-                        compositeDisposable.clear()
-                    } else if (count > 12) {
-                        progressBar.dismiss()
-                        Toast.makeText(
-                            context,
-                            "Did not receive amount after waiting",
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        compositeDisposable.clear()
-                        requireActivity().onBackPressed()
-                    }
-                }, {
+            }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+                Timber.e("vend: $it")
+                count++
+                if (it.amount > 0.0) {
+                    progressBar.dismiss()
+                    Toast.makeText(context, "received", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, it.amount.toString(), Toast.LENGTH_LONG).show()
+                    binding.priceTextbox.setText(it.amount.toLong().toString())
+                    compositeDisposable.clear()
+                } else if (count > 12) {
                     progressBar.dismiss()
                     Toast.makeText(
-                        requireContext(),
-                        "Error ${it.localizedMessage}",
-                        Toast.LENGTH_SHORT,
+                        context,
+                        "Did not receive amount after waiting",
+                        Toast.LENGTH_LONG,
                     ).show()
-                    Timber.e("Error: ${it.localizedMessage}")
+                    compositeDisposable.clear()
                     requireActivity().onBackPressed()
-                }).disposeWith(compositeDisposable)
+                }
+            }, {
+                progressBar.dismiss()
+                Toast.makeText(
+                    requireContext(),
+                    "Error ${it.localizedMessage}",
+                    Toast.LENGTH_SHORT,
+                ).show()
+                Timber.e("Error: ${it.localizedMessage}")
+                requireActivity().onBackPressed()
+            }).disposeWith(compositeDisposable)
         }
     }
 
     private fun showSnackBar(message: String) {
         if (message == "Transaction not approved") {
-            AlertDialog.Builder(requireContext())
-                .apply {
-                    setTitle("Response")
-                    setMessage(message)
-                    show()
-                }
+            AlertDialog.Builder(requireContext()).apply {
+                setTitle("Response")
+                setMessage(message)
+                show()
+            }
         }
 
         Snackbar.make(
@@ -379,8 +413,7 @@ class DashboardFragment : BaseFragment() {
         progressDialog.show()
         val processor = TransactionProcessor(hostConfig)
         processor.processTransaction(requireContext(), requestData, cardData)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { response, error ->
                 if (progressDialog!!.isShowing) {
                     progressDialog!!.dismiss()
@@ -425,16 +458,58 @@ class DashboardFragment : BaseFragment() {
             }
     }
 
-    private fun showMessage(s: String, vararg messageString: String) {
-        AlertDialog.Builder(requireContext())
-            .apply {
-                setTitle(s)
-                setMessage(messageString.first())
-                setPositiveButton("Ok") { dialog, _ ->
-                    dialog.dismiss()
-                    nfcCardReaderViewModel.prepareSMS(messageString.reversed().joinToString("\n"))
+    private fun cardCvvDialog() {
+        val cardCvvDialogView: View =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_enter_cvv, null)
+        val dialogCardCvvBuilder = AlertDialog.Builder(requireContext())
+        dialogCardCvvBuilder.setView(cardCvvDialogView)
+        val alertDialog: AlertDialog = dialogCardCvvBuilder.create()
+        alertDialog.show()
+        cardCvv =
+            cardCvvDialogView.findViewById<EditText>(R.id.enter_card_cvv).text.toString().trim()
+        cardCvvDialogView.findViewById<Button>(R.id.btnConfirm).setOnClickListener {
+            if (cardCvv.isEmpty()) {
+                showToast(getString(R.string.cvv_cannot_be_empty))
+            } else if (cardCvv.toInt() < 3) {
+                showToast(getString(R.string.cvv_too_short))
+            } else {
+                alertDialog.dismiss()
+                nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
+                    event.getContentIfNotHandled()?.let {
+                        it.error?.let { error ->
+                            Timber.e(error)
+                            Toast.makeText(
+                                requireContext(),
+                                error.message,
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                        it.cardData?.let { cardData ->
+                            user.let { user ->
+                                viewModel.payThroughMPGS(
+                                    cardData.track2Data,
+                                    cardCvv,
+                                    cardData.expiryDate,
+                                    user.netplusPayMid.toString(),
+                                    user.mid.toString()
+                                )
+                            }
+                        }
+                    }
                 }
-                create().show()
             }
+        }
+    }
+
+    private fun showMessage(s: String, vararg messageString: String) {
+        AlertDialog.Builder(requireContext()).apply {
+            setTitle(s)
+            setMessage(messageString.first())
+            setPositiveButton("Ok") { dialog, _ ->
+                dialog.dismiss()
+                nfcCardReaderViewModel.prepareSMS(messageString.reversed().joinToString("\n"))
+            }
+            create().show()
+        }
     }
 }

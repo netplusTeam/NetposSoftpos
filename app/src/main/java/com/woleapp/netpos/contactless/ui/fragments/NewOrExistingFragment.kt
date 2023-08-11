@@ -100,8 +100,7 @@ class NewOrExistingFragment : BaseFragment() {
                         Toast.LENGTH_SHORT,
                     ).show()
                 } else {
-                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")
-                        || BuildConfig.FLAVOR.contains("wemabank")) {
+                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")) {
                         viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
                         observeServerResponse(
                             viewModel.firstBankAccountNumberResponse,

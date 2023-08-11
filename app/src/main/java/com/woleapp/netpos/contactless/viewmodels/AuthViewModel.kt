@@ -144,6 +144,14 @@ class AuthViewModel : ViewModel() {
                         } else {
                             " "
                         }
+                    this.user_type =
+                        if (userTokenDecoded.claims.containsKey("user_type")) {
+                            userTokenDecoded.getClaim(
+                                "user_type",
+                            ).asString()
+                        } else {
+                            " "
+                        }
                 }
 
                 Timber.tag("LoggedInUser==>").d(gson.toJson(user))

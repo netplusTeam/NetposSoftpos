@@ -17,6 +17,7 @@ import com.woleapp.netpos.contactless.di.customDependencies.JavaScriptInterface
 import com.woleapp.netpos.contactless.di.customDependencies.WebViewCallBack
 import com.woleapp.netpos.contactless.di.customDependencies.assistedFactories.JavaScriptInterfaceAssistedFactory
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_JAVASCRIPT_INTERFACE_TAG
+import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import com.woleapp.netpos.contactless.viewmodels.ScanQrViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -26,6 +27,7 @@ class CompleteQrPaymentWebViewFragment : Fragment() {
     private lateinit var binding: FragmentCompleteQrPaymentWebViewBinding
     private lateinit var wbView: WebView
     private val viewModel by activityViewModels<ScanQrViewModel>()
+    private val salesViewModel by activityViewModels<SalesViewModel>()
     private lateinit var webSettings: WebSettings
 
     @Inject
@@ -71,6 +73,17 @@ class CompleteQrPaymentWebViewFragment : Fragment() {
         wbView = binding.webView
 
         viewModel.sendQrToServerResponse.observe(viewLifecycleOwner) { response ->
+            response.data?.let {
+                javaScriptInterface = javaScriptInterfaceAssistedFactory.createJavaScriptInterface(
+                    parentFragmentManager,
+                    it.redirectHtml.trim(),
+                    it.transId.trim(),
+                )
+            }
+            setUpWebView(wbView)
+        }
+
+        salesViewModel.payThroughMPGSResponse.observe(viewLifecycleOwner) { response ->
             response.data?.let {
                 javaScriptInterface = javaScriptInterfaceAssistedFactory.createJavaScriptInterface(
                     parentFragmentManager,

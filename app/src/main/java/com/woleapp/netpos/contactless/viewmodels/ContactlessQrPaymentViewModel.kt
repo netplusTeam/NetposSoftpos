@@ -1,7 +1,10 @@
 package com.woleapp.netpos.contactless.viewmodels
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.pixplicity.easyprefs.library.Prefs
+import com.woleapp.netpos.contactless.model.PayThroughMPGSRequest
+import com.woleapp.netpos.contactless.model.PayThroughMPGSResponse
 import com.woleapp.netpos.contactless.model.PayWithQrRequest
 import com.woleapp.netpos.contactless.network.ContactlessQrPaymentRepository
 import com.woleapp.netpos.contactless.util.AppConstants
@@ -17,6 +20,7 @@ class ContactlessQrPaymentViewModel @Inject constructor(
     private val contactlessQrPaymentRepository: ContactlessQrPaymentRepository,
     private val disposable: CompositeDisposable,
 ) : ViewModel() {
+
 
     fun paymentWithQr(payWithQrRequest: PayWithQrRequest) =
         contactlessQrPaymentRepository.payWithQr(payWithQrRequest)

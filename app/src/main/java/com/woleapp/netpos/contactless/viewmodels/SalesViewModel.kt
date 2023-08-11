@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -10,9 +11,11 @@ import com.danbamitale.epmslib.extensions.maskPan
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
+import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.network.ContactlessQrPaymentRepository
 import com.woleapp.netpos.contactless.network.NetPosTransactionsService
 import com.woleapp.netpos.contactless.network.RrnApiService
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
@@ -23,12 +26,14 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.generateRandomRrn
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDate
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.mapDanbamitaleResponseToResponseX
+import com.woleapp.netpos.contactless.util.Singletons.gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -39,6 +44,9 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     var cardData: CardData? = null
 
     private val user: User? = Singletons.getCurrentlyLoggedInUser()
+
+    @Inject
+    lateinit var contactlessQrPaymentRepository: ContactlessQrPaymentRepository
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -103,6 +111,14 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     val showReceiptType: LiveData<Event<Boolean>>
         get() = _showReceiptTypeMutableLiveData
 
+    private val _payThroughMPGSResponse: MutableLiveData<Resource<PayThroughMPGSResponse>> = MutableLiveData()
+    val payThroughMPGSResponse get() = _payThroughMPGSResponse
+
+    private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
+    val payThroughMPGSMessage: LiveData<Event<String>>
+        get() = _payThroughMPGSMessage
+
+
     fun setCustomerName(name: String) {
         customerName.value = name
     }
@@ -118,6 +134,28 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         this.cashbackLong = cashback.value?.toDoubleOrNull()?.times(100)?.toLong() ?: 0L
         _getCardData.value = Event(true)
     }
+
+    fun payThroughMPGS(cardNumber: String, cvv: String, expiry: String, netpluspayMid: String, netposMid: String) =
+        contactlessQrPaymentRepository.payThroughMPGS(amountDbl.toString(), cardNumber, cvv, expiry, netpluspayMid, netposMid, "", NetPosTerminalConfig.getTerminalId())
+            .flatMap {
+                if (it.isSuccessful) {
+                    val masterCardResponse = gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
+                    if (it.body()?.has("TermUrl") == true) {
+                        _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
+                    }
+                    val failedResponse = gson.fromJson(it.body(), PayThroughMPGSErrorResponse::class.java)
+                    if (failedResponse.code == "90"){
+                        _payThroughMPGSMessage.value = Event(
+                            Resource.success(failedResponse).data!!.result
+                        )
+                        _payThroughMPGSResponse.postValue(Resource.success(null))
+                    }
+                    Single.just(Resource.success(it.body()))
+                } else {
+                    Single.just(Resource.error(it.errorBody()))
+                }
+            }
+
 
     fun makePayment(
         context: Context,
