@@ -6,7 +6,7 @@ data class User(
     @SerializedName(value = "agent_id", alternate = ["Merchant_id", "merchant_id"])
     var user_id: Long? = null,
     @SerializedName(value = "user_type")
-    var user_type: String? = null,
+    var userType: String? = null,
     @SerializedName("name")
     var name: String? = null,
     @SerializedName("username")

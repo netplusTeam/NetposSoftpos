@@ -144,7 +144,7 @@ class AuthViewModel : ViewModel() {
                         } else {
                             " "
                         }
-                    this.user_type =
+                    this.userType =
                         if (userTokenDecoded.claims.containsKey("user_type")) {
                             userTokenDecoded.getClaim(
                                 "user_type",

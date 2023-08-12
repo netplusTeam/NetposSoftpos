@@ -20,9 +20,11 @@ import androidx.constraintlayout.widget.Group;
 import com.danbamitale.epmslib.entities.KeyHolder;
 import com.danbamitale.epmslib.entities.KeyHolderKt;
 import com.danbamitale.epmslib.utils.TripleDES;
+import com.dsofttech.dprefs.utils.DPrefs;
 import com.woleapp.netpos.contactless.R;
 import com.woleapp.netpos.contactless.util.ExtensionFunctionsKt;
 import com.woleapp.netpos.contactless.util.Singletons;
+import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,7 +32,6 @@ import java.util.List;
 import java.util.Random;
 
 import timber.log.Timber;
-
 
 public class PasswordDialog {
     public static final int OfflinePin = 11;
@@ -140,6 +141,8 @@ public class PasswordDialog {
                 Toast.makeText(context, context.getString(R.string.pin_too_short), Toast.LENGTH_SHORT).show();
                 return;
             }
+            // Use DPrefs to save Pin key
+            DPrefs.INSTANCE.putString(UtilityParam.INSTANCE.getPIN_KEY(), etPin.getText().toString().trim());
             pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
             dialog.cancel();
         });

@@ -1,7 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +10,6 @@ import com.danbamitale.epmslib.extensions.maskPan
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
-import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
@@ -33,7 +31,6 @@ import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
@@ -111,13 +108,13 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     val showReceiptType: LiveData<Event<Boolean>>
         get() = _showReceiptTypeMutableLiveData
 
-    private val _payThroughMPGSResponse: MutableLiveData<Resource<PayThroughMPGSResponse>> = MutableLiveData()
+    private val _payThroughMPGSResponse: MutableLiveData<Resource<PayThroughMPGSResponse>> =
+        MutableLiveData()
     val payThroughMPGSResponse get() = _payThroughMPGSResponse
 
     private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
     val payThroughMPGSMessage: LiveData<Event<String>>
         get() = _payThroughMPGSMessage
-
 
     fun setCustomerName(name: String) {
         customerName.value = name
@@ -125,7 +122,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     fun validateField() {
         amountDbl = (
-            amount.value!!.toDoubleOrNull() ?: kotlin.run {
+            amount.value!!.toDoubleOrNull() ?: run {
                 _message.value = Event("Enter a valid amount")
                 return
             }
@@ -135,27 +132,53 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         _getCardData.value = Event(true)
     }
 
-    fun payThroughMPGS(cardNumber: String, cvv: String, expiry: String, netpluspayMid: String, netposMid: String) =
-        contactlessQrPaymentRepository.payThroughMPGS(amountDbl.toString(), cardNumber, cvv, expiry, netpluspayMid, netposMid, "", NetPosTerminalConfig.getTerminalId())
-            .flatMap {
-                if (it.isSuccessful) {
-                    val masterCardResponse = gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
-                    if (it.body()?.has("TermUrl") == true) {
-                        _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
+    fun payThroughMPGS(
+        cardNumber: String,
+        cvv: String,
+        expiry: String,
+        netpluspayMid: String,
+        netposMid: String,
+        cardPin: String
+    ) {
+        contactlessQrPaymentRepository.payThroughMPGS(
+            amountDbl.toString(),
+            cardNumber,
+            cvv,
+            expiry,
+            netpluspayMid,
+            netposMid,
+            "",
+            NetPosTerminalConfig.getTerminalId(),
+        ).subscribeOn(ioScheduler)
+            .observeOn(mainThreadScheduler)
+            .subscribe { data, error ->
+                data?.let {
+                    if (it.isSuccessful) {
+                        val masterCardResponse =
+                            gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
+                        if (it.body()?.has("TermUrl") == true) {
+                            _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
+                        } else {
+                            _payThroughMPGSResponse.postValue(Resource.error(null))
+                        }
+                    } else {
+                        _payThroughMPGSResponse.postValue(Resource.error(null))
                     }
-                    val failedResponse = gson.fromJson(it.body(), PayThroughMPGSErrorResponse::class.java)
-                    if (failedResponse.code == "90"){
-                        _payThroughMPGSMessage.value = Event(
-                            Resource.success(failedResponse).data!!.result
-                        )
-                        _payThroughMPGSResponse.postValue(Resource.success(null))
-                    }
-                    Single.just(Resource.success(it.body()))
-                } else {
-                    Single.just(Resource.error(it.errorBody()))
                 }
-            }
 
+                error?.let {
+                    _payThroughMPGSResponse.postValue(Resource.error(null))
+                }
+            }.disposeWith(compositeDisposable)
+    }
+
+    fun setTransactionStateToStarted() {
+        transactionState.value = STATE_PAYMENT_STARTED
+    }
+
+    fun setTransactionStateToStandBy() {
+        transactionState.value = STATE_PAYMENT_STAND_BY
+    }
 
     fun makePayment(
         context: Context,

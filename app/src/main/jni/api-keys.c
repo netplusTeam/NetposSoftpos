@@ -138,3 +138,8 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getRrnServiceBaseUrl(JNIEn
                                                                            jobject thiz) {
     return (*env)->NewStringUTF(env, "https://getrrn.netpluspay.com");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getCardPinKey(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "sieihsoe87360kwjun376shgye03aksjeygkw8376263jjasdbwowrgsdmf03927y3_ajlskd9783_skjieoslaskh_29874");
+}

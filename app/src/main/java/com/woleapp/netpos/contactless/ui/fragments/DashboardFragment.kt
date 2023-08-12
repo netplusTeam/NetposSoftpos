@@ -11,14 +11,14 @@ import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import com.danbamitale.epmslib.entities.*
+import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
@@ -26,12 +26,16 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
+import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
+import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -46,7 +50,6 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.*
 import java.util.concurrent.TimeUnit
-
 
 class DashboardFragment : BaseFragment() {
 
@@ -181,7 +184,7 @@ class DashboardFragment : BaseFragment() {
             viewModel.validateField()
         }
 
-        //toast the error messages
+        // toast the error messages
         viewModel.payThroughMPGSMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 showToast(message)
@@ -201,24 +204,36 @@ class DashboardFragment : BaseFragment() {
                         Toast.LENGTH_LONG,
                     ).show()
                 }
-                it.cardData?.let { _ ->
+                it.cardData?.let { card ->
                     viewModel.setCardScheme(it.cardScheme!!)
                     viewModel.setCustomerName(it.customerName ?: "Customer")
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
-                    if (it.cardScheme!!.contains(
-                            "mastercard", true
-                        ) && !user.user_type?.contains("regular", true)!!
-                    ) {
-                        cardCvvDialog()
+                    if (user.userType!!.contains("regular", true)) {
+                        EnterCvvNumberDialog(object : PinPadDialogListener {
+                            override fun onError(errorMessage: String) {
+                                showToast(errorMessage)
+                                return
+                            }
+
+                            override fun onConfirm(data: String) {
+                                viewModel.setTransactionStateToStarted()
+                                viewModel.payThroughMPGS(
+                                    card.pan,
+                                    data,
+                                    card.expiryDate,
+                                    user.netplusPayMid.toString(),
+                                    user.mid.toString(),
+                                    DPrefs.getString(PIN_KEY, ""),
+                                )
+                            }
+                        }).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
                     } else {
                         viewModel.makePayment(requireContext(), transactionType)
                     }
                 }
             }
         }
-
-
 
         adapter = ServiceAdapter {
             when (it.id) {
@@ -273,10 +288,14 @@ class DashboardFragment : BaseFragment() {
         }
 
         observeServerResponse(
-            viewModel.payThroughMPGSResponse, loader, requireActivity().supportFragmentManager
+            viewModel.payThroughMPGSResponse,
+            loader,
+            requireActivity().supportFragmentManager,
         ) {
+            showToast("YES GOT HERE OOOOOOOOOOOOOOOOOOOOO")
+            viewModel.setTransactionStateToStandBy()
             if (viewModel.payThroughMPGSResponse.value?.data == null) {
-                //
+                showSnackBar(getString(R.string.an_error_occurred))
             } else {
                 showFragment(
                     CompleteQrPaymentWebViewFragment(),
@@ -409,14 +428,14 @@ class DashboardFragment : BaseFragment() {
         )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
-        progressDialog!!.setMessage("Checking Balance...")
+        progressDialog.setMessage("Checking Balance...")
         progressDialog.show()
         val processor = TransactionProcessor(hostConfig)
         processor.processTransaction(requireContext(), requestData, cardData)
             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe { response, error ->
-                if (progressDialog!!.isShowing) {
-                    progressDialog!!.dismiss()
+                if (progressDialog.isShowing) {
+                    progressDialog.dismiss()
                 }
                 error?.let {
                     it.printStackTrace()
@@ -456,49 +475,6 @@ class DashboardFragment : BaseFragment() {
                     )
                 }
             }
-    }
-
-    private fun cardCvvDialog() {
-        val cardCvvDialogView: View =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_enter_cvv, null)
-        val dialogCardCvvBuilder = AlertDialog.Builder(requireContext())
-        dialogCardCvvBuilder.setView(cardCvvDialogView)
-        val alertDialog: AlertDialog = dialogCardCvvBuilder.create()
-        alertDialog.show()
-        cardCvv =
-            cardCvvDialogView.findViewById<EditText>(R.id.enter_card_cvv).text.toString().trim()
-        cardCvvDialogView.findViewById<Button>(R.id.btnConfirm).setOnClickListener {
-            if (cardCvv.isEmpty()) {
-                showToast(getString(R.string.cvv_cannot_be_empty))
-            } else if (cardCvv.toInt() < 3) {
-                showToast(getString(R.string.cvv_too_short))
-            } else {
-                alertDialog.dismiss()
-                nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
-                    event.getContentIfNotHandled()?.let {
-                        it.error?.let { error ->
-                            Timber.e(error)
-                            Toast.makeText(
-                                requireContext(),
-                                error.message,
-                                Toast.LENGTH_LONG,
-                            ).show()
-                        }
-                        it.cardData?.let { cardData ->
-                            user.let { user ->
-                                viewModel.payThroughMPGS(
-                                    cardData.track2Data,
-                                    cardCvv,
-                                    cardData.expiryDate,
-                                    user.netplusPayMid.toString(),
-                                    user.mid.toString()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private fun showMessage(s: String, vararg messageString: String) {

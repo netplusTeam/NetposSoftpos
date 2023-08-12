@@ -269,4 +269,5 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="device_doesnt_have_nfc">Device does not have NFC support</string>
     <string name="cvv_cannot_be_empty">"CVV can't be empty"</string>
     <string name="cvv_too_short">"CVV is not complete"</string>
+    <string name="enter_cvv_number">Enter Card CVV</string>
 </resources>

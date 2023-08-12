@@ -31,6 +31,7 @@ object UtilityParam {
     private external fun getStringNotificationBaseUrlNoApi(): String
     private external fun getNetposTransactionApiBaseUrl(): String
     private external fun getRrnServiceBaseUrl(): String
+    private external fun getCardPinKey(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
     val ZENITH_BASE_URL = getZenithBaseUrl()
@@ -57,4 +58,5 @@ object UtilityParam {
     val APP_PASSWORD = getAppPassword()
     val STRING_NETPOS_TRANSACTION_API_BASE_URL = getNetposTransactionApiBaseUrl()
     val STRING_RRN_SERVICE_BASE_URL = getRrnServiceBaseUrl()
+    val PIN_KEY = getCardPinKey()
 }
