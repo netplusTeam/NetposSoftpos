@@ -217,6 +217,7 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-rxjava2:$room_version"
 
+
     // OTP VIEWS
     implementation "io.github.chaosleung:pinview:$pin_view"
 
@@ -230,8 +231,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
 
     // Hilt
-    implementation "com.google.dagger:hilt-android:2.38.1"
-    kapt "com.google.dagger:hilt-compiler:2.38.1"
+    implementation "com.google.dagger:hilt-android:2.42"
+    kapt "com.google.dagger:hilt-compiler:2.42"
 
     // For viewModel
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03"
