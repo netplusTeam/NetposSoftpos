@@ -7,6 +7,7 @@ import com.woleapp.netpos.contactless.model.PayWithQrRequest
 import io.reactivex.Single
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface QrPaymentService {
@@ -19,6 +20,7 @@ interface QrPaymentService {
 
     @POST("softpos")
     fun payThroughMPGS(
+        @Header("Authorization") token: String,
         @Body payThroughMPGSRequest: PayThroughMPGSRequest,
     ): Single<Response<JsonObject>>
 

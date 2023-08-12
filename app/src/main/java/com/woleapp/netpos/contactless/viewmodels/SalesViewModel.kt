@@ -25,6 +25,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDate
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.mapDanbamitaleResponseToResponseX
 import com.woleapp.netpos.contactless.util.Singletons.gson
+import com.woleapp.netpos.contactless.util.UtilityParam.BEARER_TOKEN_FOR_MPGS_TRANSACTION
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Scheduler
 import io.reactivex.Single
@@ -121,12 +122,10 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun validateField() {
-        amountDbl = (
-            amount.value!!.toDoubleOrNull() ?: run {
-                _message.value = Event("Enter a valid amount")
-                return
-            }
-            ) * 100
+        amountDbl = (amount.value!!.toDoubleOrNull() ?: run {
+            _message.value = Event("Enter a valid amount")
+            return
+        }) * 100
         this.amountLong = amountDbl.toLong()
         this.cashbackLong = cashback.value?.toDoubleOrNull()?.times(100)?.toLong() ?: 0L
         _getCardData.value = Event(true)
@@ -140,6 +139,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         cardPin: String,
     ) {
         contactlessQrPaymentRepository.payThroughMPGS(
+            BEARER_TOKEN_FOR_MPGS_TRANSACTION,
             amountDbl.toString(),
             cardNumber,
             cvv,
@@ -148,27 +148,25 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             Singletons.getConfigData()?.cardAcceptorIdCode ?: "",
             cardPin,
             NetPosTerminalConfig.getTerminalId(),
-        ).subscribeOn(ioScheduler)
-            .observeOn(mainThreadScheduler)
-            .subscribe { data, error ->
-                data?.let {
-                    if (it.isSuccessful) {
-                        val masterCardResponse =
-                            gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
-                        if (it.body()?.has("TermUrl") == true) {
-                            _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
-                        } else {
-                            _payThroughMPGSResponse.postValue(Resource.error(null))
-                        }
+        ).subscribeOn(ioScheduler).observeOn(mainThreadScheduler).subscribe { data, error ->
+            data?.let {
+                if (it.isSuccessful) {
+                    val masterCardResponse =
+                        gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
+                    if (it.body()?.has("TermUrl") == true) {
+                        _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
                     } else {
                         _payThroughMPGSResponse.postValue(Resource.error(null))
                     }
-                }
-
-                error?.let {
+                } else {
                     _payThroughMPGSResponse.postValue(Resource.error(null))
                 }
-            }.disposeWith(compositeDisposable)
+            }
+
+            error?.let {
+                _payThroughMPGSResponse.postValue(Resource.error(null))
+            }
+        }.disposeWith(compositeDisposable)
     }
 
     fun setTransactionStateToStarted() {
@@ -199,13 +197,12 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         )
         // IsoAccountType.
         this.amountLong = amountDbl.toLong()
-        val requestData: TransactionRequestData =
-            TransactionRequestData(
-                transactionType,
-                amountLong,
-                cashbackLong,
-                accountType = isoAccountType!!,
-            )
+        val requestData: TransactionRequestData = TransactionRequestData(
+            transactionType,
+            amountLong,
+            cashbackLong,
+            accountType = isoAccountType!!,
+        )
 
         val customStan = generateRandomRrn(6)
         val customRrn = generateRandomRrn(12)
@@ -215,46 +212,42 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         val processor: TransactionProcessor = TransactionProcessor(hostConfig)
         transactionState.value = STATE_PAYMENT_STARTED
 
-        rrnApiService.getRrn()
-            .subscribeOn(ioScheduler)
-            .flatMap {
-                if (it.isSuccessful) {
-                    it.body()?.let { rrn ->
-                        logTransactionBeforeConnectingToNibss(
-                            cardData,
-                            customStan,
-                            transTime,
-                            requestData,
-                            transDateTime,
-                            rrn,
-                        )
-                    }
-                } else {
+        rrnApiService.getRrn().subscribeOn(ioScheduler).flatMap {
+            if (it.isSuccessful) {
+                it.body()?.let { rrn ->
                     logTransactionBeforeConnectingToNibss(
                         cardData,
                         customStan,
                         transTime,
                         requestData,
                         transDateTime,
-                        customRrn,
+                        rrn,
                     )
                 }
-                Single.just(it)
+            } else {
+                logTransactionBeforeConnectingToNibss(
+                    cardData,
+                    customStan,
+                    transTime,
+                    requestData,
+                    transDateTime,
+                    customRrn,
+                )
             }
-            .flatMap {
-                if (it.isSuccessful) {
-                    it.body()?.let { rrn ->
-                        makePaymentViaNibss(context, requestData, processor, rrn, customStan)
-                    }
-                } else {
-                    makePaymentViaNibss(context, requestData, processor, customRrn, customStan)
+            Single.just(it)
+        }.flatMap {
+            if (it.isSuccessful) {
+                it.body()?.let { rrn ->
+                    makePaymentViaNibss(context, requestData, processor, rrn, customStan)
                 }
-                Single.just(it)
-            }.observeOn(AndroidSchedulers.mainThread())
-            .subscribe { data, error ->
-                data?.let { d -> d.body()?.let { Timber.d(it) } }
-                error?.let { Timber.d(it.localizedMessage) }
+            } else {
+                makePaymentViaNibss(context, requestData, processor, customRrn, customStan)
             }
+            Single.just(it)
+        }.observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
+            data?.let { d -> d.body()?.let { Timber.d(it) } }
+            error?.let { Timber.d(it.localizedMessage) }
+        }
     }
 
     private fun logTransactionBeforeConnectingToNibss(
@@ -272,15 +265,14 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             transTime,
             requestData,
             transDateTime,
-        ).observeOn(AndroidSchedulers.mainThread())
-            .subscribe { t1, t2 ->
-                t1?.let {
-                    Timber.d(it.message)
-                }
-                t2?.let {
-                    Timber.d(it.localizedMessage)
-                }
+        ).observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
+            t1?.let {
+                Timber.d(it.message)
             }
+            t2?.let {
+                Timber.d(it.localizedMessage)
+            }
+        }
     }
 
     private fun logTransactionFirstImpl(
@@ -308,46 +300,39 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             this.RRN = rrn
             this.STAN = stan
         }
-        processor.processTransaction(context, modifiedRequestData, cardData!!)
-            .onErrorResumeNext {
-                processor.rollback(context, MessageReasonCode.Timeout)
+        processor.processTransaction(context, modifiedRequestData, cardData!!).onErrorResumeNext {
+            processor.rollback(context, MessageReasonCode.Timeout)
+        }.flatMap {
+            handleUpdateOfTransactionPayloadInBackend(it, rrn)
+            Single.just(it)
+        }.flatMap {
+            it.amount = amountLong
+            if (it.responseCode == "A3") {
+                Prefs.remove(PREF_CONFIG_DATA)
+                Prefs.remove(PREF_KEYHOLDER)
+                _shouldRefreshNibssKeys.postValue(Event(true))
             }
-            .flatMap {
-                handleUpdateOfTransactionPayloadInBackend(it, rrn)
-                Single.just(it)
-            }
-            .flatMap {
-                it.amount = amountLong
-                if (it.responseCode == "A3") {
-                    Prefs.remove(PREF_CONFIG_DATA)
-                    Prefs.remove(PREF_KEYHOLDER)
-                    _shouldRefreshNibssKeys.postValue(Event(true))
-                }
-                it.cardHolder = customerName.value!!
-                it.cardLabel = cardScheme!!
-                lastTransactionResponse.postValue(it)
-                Timber.e(it.toString())
-                Timber.tag("AMOUNT_RETURNED").d(it.amount.toString())
-                Timber.e(it.responseCode)
-                Timber.e(it.responseMessage)
-                _message.postValue(Event(if (it.responseCode == "00") "Transaction Approved" else "Transaction Not approved"))
-                printReceipt(it)
+            it.cardHolder = customerName.value!!
+            it.cardLabel = cardScheme!!
+            lastTransactionResponse.postValue(it)
+            Timber.e(it.toString())
+            Timber.tag("AMOUNT_RETURNED").d(it.amount.toString())
+            Timber.e(it.responseCode)
+            Timber.e(it.responseMessage)
+            _message.postValue(Event(if (it.responseCode == "00") "Transaction Approved" else "Transaction Not approved"))
+            printReceipt(it)
 
-                AppDatabase.getDatabaseInstance(context).transactionResponseDao()
-                    .insertNewTransaction(it)
+            AppDatabase.getDatabaseInstance(context).transactionResponseDao()
+                .insertNewTransaction(it)
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doFinally {
+            transactionState.value = STATE_PAYMENT_STAND_BY
+        }.subscribe { t1, throwable ->
+            t1?.let {}
+            throwable?.let {
+                _message.value = Event("Error: ${it.localizedMessage}")
+                Timber.e(it)
             }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doFinally {
-                transactionState.value = STATE_PAYMENT_STAND_BY
-            }.subscribe { t1, throwable ->
-                t1?.let {
-                }
-                throwable?.let {
-                    _message.value = Event("Error: ${it.localizedMessage}")
-                    Timber.e(it)
-                }
-            }.disposeWith(compositeDisposable)
+        }.disposeWith(compositeDisposable)
     }
 
     private fun createTransToLog(
@@ -413,8 +398,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     fun showReceiptDialog() {
         _showPrintDialog.value = Event(
-            lastTransactionResponse.value!!.buildSMSText(remark.value ?: "")
-                .toString(),
+            lastTransactionResponse.value!!.buildSMSText(remark.value ?: "").toString(),
         )
     }
 
@@ -462,17 +446,14 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         status: String,
     ) {
         val dataToLog = DataToLogAfterConnectingToNibss(status, transactionResponse, rrn)
-        netposTransactionApiService.updateLogAfterConnectingToNibss(rrn, dataToLog)
-            .doOnError {
+        netposTransactionApiService.updateLogAfterConnectingToNibss(rrn, dataToLog).doOnError {
+            val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
+        }.flatMap {
+            if (!(it.code() in 200..299 || it.code() in 400..499)) {
                 val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
-            }.flatMap {
-                if (!(it.code() in 200..299 || it.code() in 400..499)) {
-                    val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
-                }
-                Single.just(it.body())
-            }.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe { _, _ ->
-            }.disposeWith(compositeDisposable)
+            }
+            Single.just(it.body())
+        }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { _, _ ->
+        }.disposeWith(compositeDisposable)
     }
 }

@@ -143,3 +143,9 @@ JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getCardPinKey(JNIEnv *env, jobject thiz) {
     return (*env)->NewStringUTF(env, "sieihsoe87360kwjun376shgye03aksjeygkw8376263jjasdbwowrgsdmf03927y3_ajlskd9783_skjieoslaskh_29874");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBearerTokenForMPGSTransaction(JNIEnv *env,
+                                                                                       jobject thiz) {
+    return (*env) -> NewStringUTF(env, "Bearer V6XGNyopzrGESg3oSjeksAOMMFR6GzF4SaM9NYaMU1jePVkNQEFc1T096XNFUf3Q")
+}

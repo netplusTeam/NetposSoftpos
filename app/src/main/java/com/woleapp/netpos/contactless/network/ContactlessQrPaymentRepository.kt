@@ -14,9 +14,21 @@ class ContactlessQrPaymentRepository @Inject constructor(
     ) = qrPaymentService.payWithQr(
         payWithQrRequest,
     )
-    fun payThroughMPGS(amount: String, cardno: String, cvv: String, expiry: String, netpluspayMid: String, netposMid: String, pin: String,
-                       terminalId: String
+
+    fun payThroughMPGS(
+        token: String,
+        amount: String,
+        cardno: String,
+        cvv: String,
+        expiry: String,
+        netpluspayMid: String,
+        netposMid: String,
+        pin: String,
+        terminalId: String
     ) = qrPaymentService.payThroughMPGS(
-        PayThroughMPGSRequest(amount, cardno, cvv, expiry, netpluspayMid, netposMid, pin, terminalId),
+        token,
+        PayThroughMPGSRequest(
+            amount, cardno, cvv, expiry, netpluspayMid, netposMid, pin, terminalId
+        ),
     )
 }
