@@ -223,7 +223,6 @@ class DashboardFragment : BaseFragment() {
                                     data,
                                     card.expiryDate,
                                     user.netplusPayMid.toString(),
-                                    user.mid.toString(),
                                     DPrefs.getString(PIN_KEY, ""),
                                 )
                             }

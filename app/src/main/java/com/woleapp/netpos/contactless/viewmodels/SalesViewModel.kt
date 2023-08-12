@@ -137,8 +137,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         cvv: String,
         expiry: String,
         netpluspayMid: String,
-        netposMid: String,
-        cardPin: String
+        cardPin: String,
     ) {
         contactlessQrPaymentRepository.payThroughMPGS(
             amountDbl.toString(),
@@ -146,8 +145,8 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             cvv,
             expiry,
             netpluspayMid,
-            netposMid,
-            "",
+            Singletons.getConfigData()?.cardAcceptorIdCode ?: "",
+            cardPin,
             NetPosTerminalConfig.getTerminalId(),
         ).subscribeOn(ioScheduler)
             .observeOn(mainThreadScheduler)
