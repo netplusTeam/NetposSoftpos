@@ -159,14 +159,17 @@ class SalesViewModel @Inject constructor() : ViewModel() {
                     val response =
                         gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
                     response?.let {
+                        transactionState.postValue(STATE_PAYMENT_APPROVED)
                         _payThroughMPGSResponse.postValue(Resource.success(response))
                     }
                 } else {
+                    setTransactionStateToStandBy()
                     _payThroughMPGSResponse.postValue(Resource.error(null))
                 }
             }
 
             error?.let {
+                setTransactionStateToStandBy()
                 _payThroughMPGSResponse.postValue(Resource.error(null))
             }
         }.disposeWith(compositeDisposable)
@@ -177,7 +180,6 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun setTransactionStateToStandBy() {
-        transactionState.value = STATE_PAYMENT_APPROVED
         transactionState.value = STATE_PAYMENT_STAND_BY
     }
 

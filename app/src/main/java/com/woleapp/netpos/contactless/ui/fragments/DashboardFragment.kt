@@ -292,7 +292,6 @@ class DashboardFragment : BaseFragment() {
             loader,
             requireActivity().supportFragmentManager,
         ) {
-            viewModel.setTransactionStateToStandBy()
             if (viewModel.payThroughMPGSResponse.value?.data == null) {
                 showSnackBar(getString(R.string.an_error_occurred))
             } else {

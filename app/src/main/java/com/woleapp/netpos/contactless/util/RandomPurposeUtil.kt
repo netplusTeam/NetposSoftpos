@@ -325,6 +325,7 @@ object RandomPurposeUtil {
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
+                    showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                 }
@@ -356,7 +357,8 @@ object RandomPurposeUtil {
                         it.data is ConfirmOTPResponse ||
                         it.data is ExistingAccountRegisterResponse ||
                         it.data is String ||
-                        it.data is GeneralResponse
+                        it.data is GeneralResponse ||
+                        it.data is PayThroughMPGSResponse
                     ) {
                         successAction()
                     } else {
@@ -367,6 +369,7 @@ object RandomPurposeUtil {
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
+                    showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                 }
