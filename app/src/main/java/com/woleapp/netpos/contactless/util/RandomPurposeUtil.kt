@@ -313,7 +313,8 @@ object RandomPurposeUtil {
                         it.data is ExistingAccountRegisterResponse ||
                         it.data is String ||
                         it.data is ResetPasswordResponseForProvidus ||
-                        it.data is GeneralResponse
+                        it.data is GeneralResponse ||
+                        it.data is PayThroughMPGSResponse
                     ) {
                         successAction()
                     } else {

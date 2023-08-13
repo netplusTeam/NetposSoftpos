@@ -111,7 +111,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
 
     private val _payThroughMPGSResponse: MutableLiveData<Resource<PayThroughMPGSResponse>> =
         MutableLiveData()
-    val payThroughMPGSResponse get() = _payThroughMPGSResponse
+    val payThroughMPGSResponse: LiveData<Resource<PayThroughMPGSResponse>> get() = _payThroughMPGSResponse
 
     private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
     val payThroughMPGSMessage: LiveData<Event<String>>
@@ -122,10 +122,12 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun validateField() {
-        amountDbl = (amount.value!!.toDoubleOrNull() ?: run {
-            _message.value = Event("Enter a valid amount")
-            return
-        }) * 100
+        amountDbl = (
+            amount.value!!.toDoubleOrNull() ?: run {
+                _message.value = Event("Enter a valid amount")
+                return
+            }
+            ) * 100
         this.amountLong = amountDbl.toLong()
         this.cashbackLong = cashback.value?.toDoubleOrNull()?.times(100)?.toLong() ?: 0L
         _getCardData.value = Event(true)
@@ -138,12 +140,15 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         netpluspayMid: String,
         cardPin: String,
     ) {
+        val expirationMonth = expiry.takeLast(2)
+        val expirationYear = expiry.take(2)
+        val formattedExpirationDate = "$expirationMonth/$expirationYear"
         contactlessQrPaymentRepository.payThroughMPGS(
             BEARER_TOKEN_FOR_MPGS_TRANSACTION,
             amountDbl.toString(),
             cardNumber,
             cvv,
-            expiry,
+            formattedExpirationDate,
             netpluspayMid,
             Singletons.getConfigData()?.cardAcceptorIdCode ?: "",
             cardPin,
@@ -151,12 +156,10 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         ).subscribeOn(ioScheduler).observeOn(mainThreadScheduler).subscribe { data, error ->
             data?.let {
                 if (it.isSuccessful) {
-                    val masterCardResponse =
+                    val response =
                         gson.fromJson(it.body(), PayThroughMPGSResponse::class.java)
-                    if (it.body()?.has("TermUrl") == true) {
-                        _payThroughMPGSResponse.postValue(Resource.success(masterCardResponse))
-                    } else {
-                        _payThroughMPGSResponse.postValue(Resource.error(null))
+                    response?.let {
+                        _payThroughMPGSResponse.postValue(Resource.success(response))
                     }
                 } else {
                     _payThroughMPGSResponse.postValue(Resource.error(null))
@@ -174,6 +177,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun setTransactionStateToStandBy() {
+        transactionState.value = STATE_PAYMENT_APPROVED
         transactionState.value = STATE_PAYMENT_STAND_BY
     }
 

@@ -20,6 +20,7 @@ import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
@@ -291,7 +292,6 @@ class DashboardFragment : BaseFragment() {
             loader,
             requireActivity().supportFragmentManager,
         ) {
-            showToast("YES GOT HERE OOOOOOOOOOOOOOOOOOOOO")
             viewModel.setTransactionStateToStandBy()
             if (viewModel.payThroughMPGSResponse.value?.data == null) {
                 showSnackBar(getString(R.string.an_error_occurred))
