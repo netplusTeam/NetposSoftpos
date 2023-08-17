@@ -37,12 +37,8 @@ class RegisterFragment : BaseFragment() {
     private lateinit var listOfBranches: String
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
-<<<<<<< HEAD
     private lateinit var partnerID : String
     private lateinit var date: Calendar
-=======
-    private lateinit var partnerID: String
->>>>>>> ef44506e9f0cc33b86e94ab469842cefeae8d7e7
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -141,12 +137,9 @@ class RegisterFragment : BaseFragment() {
         }
         deviceSerialId = getDeviceId(requireContext())
         if (BuildConfig.FLAVOR.contains("firstbank")) {
-<<<<<<< HEAD
             initViews()
             binding.fragmentState.visibility = View.VISIBLE
             binding.fragmentBranch.visibility = View.VISIBLE
-            contactlessViewModel.getStates()
-=======
             contactlessViewModel.getStates()
         }
         contactlessViewModel.getStatesResponse.observe(viewLifecycleOwner) {
@@ -157,17 +150,7 @@ class RegisterFragment : BaseFragment() {
             )
             firstBankStates.setAdapter(stateAdapter)
         }
->>>>>>> ef44506e9f0cc33b86e94ab469842cefeae8d7e7
 
-            contactlessViewModel.getStatesResponse.observe(viewLifecycleOwner) {
-                val stateAdapter = StatesAdapter(
-                    contactlessViewModel.listOfStates, requireContext(),
-                    android.R.layout.simple_expandable_list_item_1
-                )
-                firstBankStates.setAdapter(stateAdapter)
-            }
-
-<<<<<<< HEAD
             firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
                     val statesList =
@@ -185,16 +168,6 @@ class RegisterFragment : BaseFragment() {
                 )
                 firstBankBranches.setAdapter(branchAdapter)
             }
-=======
-        contactlessViewModel.getBranchResponse.observe(viewLifecycleOwner) {
-            val branchAdapter = BranchAdapter(
-                contactlessViewModel.listOfBranches,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
-            firstBankBranches.setAdapter(branchAdapter)
-        }
->>>>>>> ef44506e9f0cc33b86e94ab469842cefeae8d7e7
 
             firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
                 override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -204,7 +177,6 @@ class RegisterFragment : BaseFragment() {
                     viewModel.setSelectedBranch(listOfBranches)
                 }
             }
-        }
 
 
 
@@ -215,27 +187,14 @@ class RegisterFragment : BaseFragment() {
         }
     }
 
-<<<<<<< HEAD
-    private fun initViews(){
-        with(binding){
+
+    private fun initViews() {
+        with(binding) {
             firstBankStates = state
             firstBankBranches = branch
-=======
-    private fun initPartnerId() {
-        val bankList = mapOf(
-            "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA", "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190", "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8", "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
-        )
-
-        for (element in bankList) {
-            if (element.key == BuildConfig.FLAVOR) {
-                partnerID = element.value
-            }
->>>>>>> ef44506e9f0cc33b86e94ab469842cefeae8d7e7
         }
     }
+
 
     private fun showDateTimePicker() {
         val currentDate = Calendar.getInstance()
