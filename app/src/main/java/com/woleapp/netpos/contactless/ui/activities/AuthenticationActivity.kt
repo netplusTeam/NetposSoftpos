@@ -27,15 +27,15 @@ class AuthenticationActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
-//        if (RootUtil.isDeviceRooted) {
-//            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
-//            finish()
-//        }
-//        if (debuggableModeEnabled) {
-//            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
-//                .show()
-//            finish()
-//        }
+        if (RootUtil.isDeviceRooted) {
+            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
+            finish()
+        }
+        if (debuggableModeEnabled) {
+            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
+                .show()
+            finish()
+        }
         if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {

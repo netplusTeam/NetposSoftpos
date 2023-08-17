@@ -125,7 +125,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
     fun doVisaTransaction(
         nfcTransceiver: LiveNfcTransReceiver,
-        contactlessKernel: ContactlessKernel
+        contactlessKernel: ContactlessKernel,
     ) {
         iccCardHelper = ICCCardHelper()
         icc.clear()
@@ -167,7 +167,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 0x88.toByte(),
                 0x99.toByte(),
                 0xAA.toByte(),
-                0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte()
+                0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte(),
             )
 
             Timber.e("available keys")
@@ -250,6 +250,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             }
         }
         _enableNfcForegroundDispatcher.postValue(Event(false))
+        // This is where the error is coming from
         if (outcome == TtpOutcome.COMPLETED) {
             iccCardHelper.apply {
                 cardScheme = NfcPaymentType.VISA.name
@@ -278,26 +279,25 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             .parse(HexUtil.parseHex(iccData))
         val panSequence = tlvs.find(
             BerTag(
-                "5F34"
-            )
+                "5F34",
+            ),
         ).hexValue
         val track2 = tlvs.find(
             BerTag(
-                "57"
-            )
+                "57",
+            ),
         ).hexValue
         val pan = track2.split("D").first()
         val cardData = CardData(
             track2,
             iccData,
             StringUtils.leftPad(panSequence, 3, "0"),
-            "051"
+            "051",
         )
-        Timber.e("got here nau, haba")
+
         iccCardHelper.cardData = cardData
         _showWaitingDialog.postValue(Event(null))
         _showPinPadDialog.postValue(Event(pan))
-        Timber.e("got here nau, habatica")
     }
 
     fun setPinBlock(encryptedPinBloc: String?) {
@@ -309,64 +309,64 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
     private fun doMasterCardTransaction() {
         NetPosApp.INSTANCE.outcomeObserver.resetObserver(object :
-                TransactionListener {
-                override fun onTransactionSuccessful() {
-                }
+            TransactionListener {
+            override fun onTransactionSuccessful() {
+            }
 
-                override fun onOnlineReferral(cardData: CardData, pan: String) {
-                    iccCardHelper.apply {
-                        this.cardData = cardData
-                        cardScheme = NfcPaymentType.MASTERCARD.name
-                        customerName = "CUSTOMER"
-                    }
-                    Looper.prepare()
-                    _showWaitingDialog.postValue(Event(null))
-                    _showPinPadDialog.postValue(Event(pan))
-                    Timber.e("on online referral")
+            override fun onOnlineReferral(cardData: CardData, pan: String) {
+                iccCardHelper.apply {
+                    this.cardData = cardData
+                    cardScheme = NfcPaymentType.MASTERCARD.name
+                    customerName = "CUSTOMER"
                 }
+                Looper.prepare()
+                _showWaitingDialog.postValue(Event(null))
+                _showPinPadDialog.postValue(Event(pan))
+                Timber.e("on online referral")
+            }
 
-                override fun onTransactionDeclined() {
-                    Looper.prepare()
-                    _showWaitingDialog.postValue(Event(null))
-                }
+            override fun onTransactionDeclined() {
+                Looper.prepare()
+                _showWaitingDialog.postValue(Event(null))
+            }
 
-                override fun onApplicationEnded() {
-                    Looper.prepare()
-                    _showWaitingDialog.postValue(Event(null))
-                }
+            override fun onApplicationEnded() {
+                Looper.prepare()
+                _showWaitingDialog.postValue(Event(null))
+            }
 
-                override fun onTransactionCancelled() {
-                    Looper.prepare()
-                    _showWaitingDialog.postValue(Event(null))
-                }
+            override fun onTransactionCancelled() {
+                Looper.prepare()
+                _showWaitingDialog.postValue(Event(null))
+            }
 
-                override fun logToScreen(s: String?) {
-                }
+            override fun logToScreen(s: String?) {
+            }
 
-                override fun onTransactionError(message: String?) {
-                    _message.value = Event(message)
-                }
-            })
+            override fun onTransactionError(message: String?) {
+                _message.value = Event(message)
+            }
+        })
 
         NetPosApp.INSTANCE.transactionsApi.initiatePayment(object :
-                PaymentDataProvider {
-                override fun getPaymentDataMap(): HashMap<Int, ByteArrayWrapper> {
-                    val map = HashMap<Int, ByteArrayWrapper>()
-                    map.apply {
-                        put(0x9F02, amountInBytes)
-                        put(
-                            0x9F03,
-                            cashBackAmountInBytes
-                        )
-                        put(0x5F2A, ByteArrayWrapper("0566"))
-                        put(0x9F1A, ByteArrayWrapper("0566"))
-                    }
-                    return map
+            PaymentDataProvider {
+            override fun getPaymentDataMap(): HashMap<Int, ByteArrayWrapper> {
+                val map = HashMap<Int, ByteArrayWrapper>()
+                map.apply {
+                    put(0x9F02, amountInBytes)
+                    put(
+                        0x9F03,
+                        cashBackAmountInBytes,
+                    )
+                    put(0x5F2A, ByteArrayWrapper("0566"))
+                    put(0x9F1A, ByteArrayWrapper("0566"))
                 }
+                return map
+            }
 
-                override fun setPaymentDataEntry(p0: Int?, p1: ByteArrayWrapper?) {
-                }
-            })
+            override fun setPaymentDataEntry(p0: Int?, p1: ByteArrayWrapper?) {
+            }
+        })
     }
 
     fun setIccCardHelperLiveData(iccCardHelper: ICCCardHelper) {
@@ -396,7 +396,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             message,
             toString,
             _smsSent,
-            compositeDisposable = disposable
+            compositeDisposable = disposable,
         )
     }
 
@@ -407,12 +407,11 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
     fun showReceiptDialogForQrPayment() {
         _showQrPrintDialog.value = Event(
-            Gson().toJson(qrTransactionResponseFromWebView.value)
+            Gson().toJson(qrTransactionResponseFromWebView.value),
         )
     }
 
     fun setLastPosTransactionResponse(lastPosTrans: TransactionResponse) {
         _lastPosTransactionResponse.postValue(lastPosTrans)
     }
-
 }

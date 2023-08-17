@@ -18,7 +18,7 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
+-renamesourcefileattribute SourceFile
 -optimizations !code/simplification/arithmetic
 -keepattributes *Annotation*
 -keepattributes InnerClasses
@@ -39,4 +39,10 @@
 # Crashlytics code as given below which one can exclude
 -keep class com.crashlytics.* { }
 -keep class com.crashlytics.android.**
+# Keep visa sdk
+-keep class com.visa.* { }
+-keep class com.visa.vac.**
+-keep class com.visa.vac.** {
+    *;
+}
 -keepattributes SourceFile,LineNumberTable
