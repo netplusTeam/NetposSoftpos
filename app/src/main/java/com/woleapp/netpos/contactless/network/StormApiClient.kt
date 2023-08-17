@@ -123,18 +123,18 @@ class StormApiClient {
                     }
             }
 
-        private var zenithQrServiceInstance: ZenithQrService? = null
-        fun getZenithQRServiceInstance(): ZenithQrService =
-            zenithQrServiceInstance ?: synchronized(this) {
-                zenithQrServiceInstance ?: Retrofit.Builder()
+        private var bankZQrServiceInstance: BankZQrService? = null
+        fun getBankZQRServiceInstance(): BankZQrService =
+            bankZQrServiceInstance ?: synchronized(this) {
+                bankZQrServiceInstance ?: Retrofit.Builder()
                     .baseUrl(UtilityParam.ZENITH_BASE_URL)
                     .client(getOkHttpClient())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
-                    .create(ZenithQrService::class.java)
+                    .create(BankZQrService::class.java)
                     .also {
-                        zenithQrServiceInstance = it
+                        bankZQrServiceInstance = it
                     }
             }
     }

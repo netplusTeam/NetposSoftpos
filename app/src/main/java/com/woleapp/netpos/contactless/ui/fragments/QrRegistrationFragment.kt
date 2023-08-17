@@ -12,11 +12,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.adapter.ZenithQrMCCAdapter
+import com.woleapp.netpos.contactless.adapter.BankZQrMCCAdapter
 import com.woleapp.netpos.contactless.databinding.DialogFragmentZenithMccBinding
 import com.woleapp.netpos.contactless.databinding.FragmentCreateZenithMerchantBinding
 import com.woleapp.netpos.contactless.model.LoadingState
-import com.woleapp.netpos.contactless.model.ZenithMCCDto
+import com.woleapp.netpos.contactless.model.BankZMCCDto
 import com.woleapp.netpos.contactless.viewmodels.QRViewModel
 import timber.log.Timber
 
@@ -25,7 +25,7 @@ class QrRegistrationFragment : BaseFragment() {
     private val viewModel by viewModels<QRViewModel>()
     private lateinit var mccAlertDialog: AlertDialog
     private lateinit var mccDialogBinding: DialogFragmentZenithMccBinding
-    private lateinit var adapter: ZenithQrMCCAdapter
+    private lateinit var adapter: BankZQrMCCAdapter
 
     companion object {
         fun newInstance() = QrRegistrationFragment()
@@ -49,7 +49,7 @@ class QrRegistrationFragment : BaseFragment() {
                 lifecycleOwner = viewLifecycleOwner
                 executePendingBindings()
             }
-        adapter = ZenithQrMCCAdapter {
+        adapter = BankZQrMCCAdapter {
             mccAlertDialog.cancel()
             binding.getMCC.text = it.merchantCategoryDescription
             viewModel.setSelectedMerchantCategory(it)
@@ -95,7 +95,7 @@ class QrRegistrationFragment : BaseFragment() {
             }
         }
 
-        viewModel.zenithCityList.observe(viewLifecycleOwner) { event ->
+        viewModel.bankZCityList.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 val cityAdapter = ArrayAdapter(
                     requireContext(),
@@ -115,7 +115,7 @@ class QrRegistrationFragment : BaseFragment() {
             .create()
         binding.getMCC.setOnClickListener {
             mccAlertDialog.show()
-            viewModel.getZenithMCC(ZenithMCCDto())
+            viewModel.getBankZMCC(BankZMCCDto())
         }
         viewModel.loadingStateLiveData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
@@ -141,7 +141,7 @@ class QrRegistrationFragment : BaseFragment() {
                 Timber.e(it.loadingState.name)
             }
         }
-        viewModel.zenithMccList.observe(viewLifecycleOwner) {
+        viewModel.bankZMccList.observe(viewLifecycleOwner) {
             Timber.e("list in fragment: ${it.size}")
             adapter.submitList(it)
         }
@@ -164,7 +164,7 @@ class QrRegistrationFragment : BaseFragment() {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
         }
-        viewModel.zenithQrRegistrationDone.observe(viewLifecycleOwner) { event ->
+        viewModel.bankZQrRegistrationDone.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 if (it) {
                     requireActivity().onBackPressed()

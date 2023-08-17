@@ -21,7 +21,6 @@ import com.woleapp.netpos.contactless.databinding.QrAmoutDialogBinding
 import com.woleapp.netpos.contactless.databinding.QrBottomSheetDialogBinding
 import com.woleapp.netpos.contactless.model.Service
 import com.woleapp.netpos.contactless.viewmodels.QRViewModel
-import timber.log.Timber
 
 class QRFragment : BaseFragment() {
 
@@ -45,7 +44,7 @@ class QRFragment : BaseFragment() {
         binding.rvTransactionsHeader.text = getString(R.string.qr_payment)
         adapter = ServiceAdapter {
             if (it.id == 2) {
-                showZenithQrDialog()
+                showBankZQrDialog()
             } else {
                 showAmountDialog(it.id)
             }
@@ -128,7 +127,7 @@ class QRFragment : BaseFragment() {
                 }
             }
         }
-        viewModel.createZenithMerchant.observe(viewLifecycleOwner) { event ->
+        viewModel.createBankZMerchant.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 zenithQRProgressDialog.cancel()
                 if (it) {
@@ -136,7 +135,7 @@ class QRFragment : BaseFragment() {
                 }
             }
         }
-        viewModel.zenithQr.observe(viewLifecycleOwner) { event ->
+        viewModel.bankZQr.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 zenithQRProgressDialog.cancel()
                 masterpassQrBottomSheetDialogBinding.providerQr.visibility = View.VISIBLE
@@ -149,7 +148,7 @@ class QRFragment : BaseFragment() {
         return binding.root
     }
 
-    private fun showZenithQrDialog() {
+    private fun showBankZQrDialog() {
         if (::zenithQRProgressDialog.isInitialized.not()) {
             zenithQRProgressDialog = ProgressDialog(requireContext())
                 .apply {
@@ -164,7 +163,7 @@ class QRFragment : BaseFragment() {
                 }
         }
         zenithQRProgressDialog.show()
-        viewModel.getZenithQR()
+        viewModel.getBankZQR()
     }
 
     private fun startNibssReQueryTimer() {

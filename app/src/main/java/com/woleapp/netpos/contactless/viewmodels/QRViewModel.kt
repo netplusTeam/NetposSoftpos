@@ -10,7 +10,7 @@ import androidx.paging.PagedList
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.network.StormApiClient
-import com.woleapp.netpos.contactless.network.ZenithQrMCCDataSourceFactory
+import com.woleapp.netpos.contactless.network.BankZQrMCCDataSourceFactory
 import com.woleapp.netpos.contactless.util.*
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -28,7 +28,7 @@ class QRViewModel : ViewModel() {
     var stillHasRetryAttempts = true
     private val masterPassQRService = StormApiClient.getMasterPassQrServiceInstance()
     private val nibssQRService = StormApiClient.getNibssQRServiceInstance()
-    private val zenithQRService = StormApiClient.getZenithQRServiceInstance()
+    private val bankZQRService = StormApiClient.getBankZQRServiceInstance()
     private val disposable = CompositeDisposable()
     private val _masterPassQrBitmap = MutableLiveData<Event<Bitmap>>()
     val masterPassQrBitmap: LiveData<Event<Bitmap>>
@@ -51,17 +51,17 @@ class QRViewModel : ViewModel() {
     val reQuerying: LiveData<Event<Boolean>>
         get() = _reQuerying
 
-    private val _createZenithMerchant = MutableLiveData<Event<Boolean>>()
+    private val _createBankZMerchant = MutableLiveData<Event<Boolean>>()
 
-    val createZenithMerchant: LiveData<Event<Boolean>>
-        get() = _createZenithMerchant
+    val createBankZMerchant: LiveData<Event<Boolean>>
+        get() = _createBankZMerchant
 
-    private val _zenithCityList = MutableLiveData<Event<List<ZenithCity>>>()
+    private val _bankZCityList = MutableLiveData<Event<List<BankZCity>>>()
 
-    val zenithCityList: LiveData<Event<List<ZenithCity>>>
-        get() = _zenithCityList
+    val bankZCityList: LiveData<Event<List<BankZCity>>>
+        get() = _bankZCityList
 
-    val createZenithMerchantPayload = MutableLiveData(CreateZenithMerchantPayload())
+    val createBankZMerchantPayload = MutableLiveData(CreateBankZMerchantPayload())
 
     val registrationInProgress = MutableLiveData(false)
 
@@ -81,16 +81,16 @@ class QRViewModel : ViewModel() {
         it.eventLiveData!!
     }
 
-    private val _zenithQr = MutableLiveData<Event<Bitmap?>>()
-    val zenithQr: LiveData<Event<Bitmap?>>
-        get() = _zenithQr
+    private val _bankZQr = MutableLiveData<Event<Bitmap?>>()
+    val bankZQr: LiveData<Event<Bitmap?>>
+        get() = _bankZQr
 
-    private val _zenithQrRegistrationDone = MutableLiveData<Event<Boolean>>()
-    val zenithQrRegistrationDone: LiveData<Event<Boolean>>
-        get() = _zenithQrRegistrationDone
+    private val _bankZQrRegistrationDone = MutableLiveData<Event<Boolean>>()
+    val bankZQrRegistrationDone: LiveData<Event<Boolean>>
+        get() = _bankZQrRegistrationDone
 
 
-    val zenithMccList = _paginationHelper.switchMap {
+    val bankZMccList = _paginationHelper.switchMap {
         Timber.e("size: ${it.data?.value?.size.toString()}")
         if (it.data == null) {
             Timber.e("data is null")
@@ -229,8 +229,8 @@ class QRViewModel : ViewModel() {
         }
     }
 
-    fun getZenithQR() {
-        zenithQRService.getZenithQr()
+    fun getBankZQR() {
+        bankZQRService.getBankZQr()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .flatMap {
@@ -242,15 +242,15 @@ class QRViewModel : ViewModel() {
             }
             .subscribe { t1, t2 ->
                 t1?.let {
-                    _zenithQr.value = Event(it)
+                    _bankZQr.value = Event(it)
                 }
                 t2?.let {
                     Timber.e(it)
                     val responseBody = it.getResponseBody()
                     if (it.isHttpStatusCode(404) && responseBody == "Merchant not registered") {
-                        _createZenithMerchant.value = Event(true)
+                        _createBankZMerchant.value = Event(true)
                     } else {
-                        _createZenithMerchant.value = Event(false)
+                        _createBankZMerchant.value = Event(false)
                         message.value = Event(responseBody)
                     }
                 }
@@ -259,7 +259,7 @@ class QRViewModel : ViewModel() {
 
     val cityLoading = MutableLiveData(false)
     fun getCities(state: String) {
-        zenithQRService.getCity(state)
+        bankZQRService.getCity(state)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe {
@@ -270,7 +270,7 @@ class QRViewModel : ViewModel() {
             .retry(2)
             .subscribe { t1, t2 ->
                 t1?.let {
-                    _zenithCityList.value = Event(it.cityList)
+                    _bankZCityList.value = Event(it.cityList)
                 }
                 t2?.let {
                     Timber.e(it.localizedMessage)
@@ -281,19 +281,19 @@ class QRViewModel : ViewModel() {
     }
 
     fun setSelectedCity(position: Int) {
-        createZenithMerchantPayload.value = createZenithMerchantPayload.value?.apply {
-            zenithCityList.value?.peekContent()?.let {
+        createBankZMerchantPayload.value = createBankZMerchantPayload.value?.apply {
+            bankZCityList.value?.peekContent()?.let {
                 this.cityName = it[position].cityName
                 this.regionName = it[position].regionName
             }
         }
-        Timber.e(createZenithMerchantPayload.value.toString())
+        Timber.e(createBankZMerchantPayload.value.toString())
     }
 
-    private lateinit var dataSourceFactory: ZenithQrMCCDataSourceFactory
+    private lateinit var dataSourceFactory: BankZQrMCCDataSourceFactory
 
-    fun getZenithMCC(zenithMCCDto: ZenithMCCDto) {
-        dataSourceFactory = ZenithQrMCCDataSourceFactory(zenithMCCDto, disposable)
+    fun getBankZMCC(bankZMCCDto: BankZMCCDto) {
+        dataSourceFactory = BankZQrMCCDataSourceFactory(bankZMCCDto, disposable)
         val networkResourceLiveData: LiveData<Event<NetworkResource>> = Transformations.switchMap(
             dataSourceFactory.itemLiveDataSource
         ) {
@@ -306,7 +306,7 @@ class QRViewModel : ViewModel() {
             it.emptyResultLiveData
         }
 
-        val data: LiveData<PagedList<ZenithMerchantCategory>> =
+        val data: LiveData<PagedList<BankZMerchantCategory>> =
             LivePagedListBuilder(dataSourceFactory, config).build()
         _paginationHelper.postValue(
             PaginationHelper(
@@ -326,7 +326,7 @@ class QRViewModel : ViewModel() {
             .distinctUntilChanged()
             .subscribe {
                 Timber.e(it)
-                getZenithMCC(ZenithMCCDto(it))
+                getBankZMCC(BankZMCCDto(it))
             }.disposeWith(disposable)
     }
 
@@ -339,16 +339,16 @@ class QRViewModel : ViewModel() {
         subject.onComplete()
     }
 
-    fun setSelectedMerchantCategory(it: ZenithMerchantCategory) {
-        createZenithMerchantPayload.value = createZenithMerchantPayload.value?.apply {
+    fun setSelectedMerchantCategory(it: BankZMerchantCategory) {
+        createBankZMerchantPayload.value = createBankZMerchantPayload.value?.apply {
             this.merchantCategoryCode = it.merchantCategoryCode
             this.merchantCategoryDescription = it.merchantCategoryDescription
         }
     }
 
-    fun registerZenithMerchant() {
-        Timber.e(createZenithMerchantPayload.value.toString())
-        val payload = createZenithMerchantPayload.value!!
+    fun registerBankZMerchant() {
+        Timber.e(createBankZMerchantPayload.value.toString())
+        val payload = createBankZMerchantPayload.value!!
         if (payload.bvn.isNullOrEmpty() || payload.bvn!!.length < 11) {
             message.value = Event("Enter a valid bank verification number")
             return
@@ -361,7 +361,7 @@ class QRViewModel : ViewModel() {
             message.value = Event("Select a LGA")
             return
         }
-        zenithQRService.createZenithQRMerchant(payload)
+        bankZQRService.createBankZQRMerchant(payload)
             .subscribeOn(Schedulers.io()).doOnSubscribe {
                 message.postValue(Event("Registering, please wait"))
                 registrationInProgress.postValue(true)
@@ -369,7 +369,7 @@ class QRViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { t1, t2 ->
                 t1?.let {
-                    _zenithQrRegistrationDone.value = Event(true)
+                    _bankZQrRegistrationDone.value = Event(true)
                     message.value = Event(it.message)
                 }
                 t2?.let {
@@ -381,7 +381,7 @@ class QRViewModel : ViewModel() {
     }
 
     fun clearSelectedCity() {
-        createZenithMerchantPayload.value = createZenithMerchantPayload.value?.apply {
+        createBankZMerchantPayload.value = createBankZMerchantPayload.value?.apply {
             this.cityName = null
             this.regionName = null
         }

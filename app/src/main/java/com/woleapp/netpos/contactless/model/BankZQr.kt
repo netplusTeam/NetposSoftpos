@@ -4,14 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
 import com.woleapp.netpos.contactless.util.Event
 
-data class ZenithQr(val qrCode: String)
-data class ZenithMerchantCategoryList(val merchantCategoryList: List<ZenithMerchantCategory>)
-data class ZenithMerchantCategory(
+data class BankZQr(val qrCode: String)
+data class BankZMerchantCategoryList(val merchantCategoryList: List<BankZMerchantCategory>)
+data class BankZMerchantCategory(
     val merchantCategoryCode: String,
     val merchantCategoryDescription: String
 )
 
-data class CreateZenithMerchantPayload(
+data class CreateBankZMerchantPayload(
     var cityName: String? = null,
     var regionName: String? = null,
     var merchantCategoryCode: String? = null,
@@ -19,17 +19,17 @@ data class CreateZenithMerchantPayload(
     var bvn: String? = null
 )
 
-data class CreateZenithMerchantResponse(val message: String)
+data class CreateBankZMerchantResponse(val message: String)
 
-data class ZenithCityList(val cityList: List<ZenithCity>)
-data class ZenithCity(
+data class BankZCityList(val cityList: List<BankZCity>)
+data class BankZCity(
     val cityName: String,
     val cityCode: String,
     val regionCode: String,
     val regionName: String
 )
 
-data class ZenithMCCDto(val filter: String? = null)
+data class BankZMCCDto(val filter: String? = null)
 
 class NetworkResource {
     var loadingState: LoadingState
@@ -48,11 +48,11 @@ class NetworkResource {
 class PaginationHelper {
     var eventLiveData: LiveData<Event<NetworkResource>>? = null
     var emptyResultLiveData: LiveData<Event<Boolean>>? = null
-    var data: LiveData<PagedList<ZenithMerchantCategory>>? = null
+    var data: LiveData<PagedList<BankZMerchantCategory>>? = null
 
     constructor(
         networkResourceLiveData: LiveData<Event<NetworkResource>>,
-        data:LiveData<PagedList<ZenithMerchantCategory>>?
+        data:LiveData<PagedList<BankZMerchantCategory>>?
     ) {
         eventLiveData = networkResourceLiveData
         this.data = data
@@ -61,7 +61,7 @@ class PaginationHelper {
     constructor(
         networkResourceLiveData: LiveData<Event<NetworkResource>>,
         emptyResultLiveData: LiveData<Event<Boolean>>,
-        data: LiveData<PagedList<ZenithMerchantCategory>>?
+        data: LiveData<PagedList<BankZMerchantCategory>>?
     ) {
         this.eventLiveData = networkResourceLiveData
         this.emptyResultLiveData = emptyResultLiveData

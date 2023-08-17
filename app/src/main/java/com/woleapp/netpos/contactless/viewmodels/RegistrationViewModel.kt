@@ -34,8 +34,8 @@ class RegistrationViewModel : ViewModel() {
     val registrationFBNModel: MutableLiveData<RegistrationFBNModel> = MutableLiveData(
         RegistrationFBNModel(),
     )
-    val registrationZenithModel: MutableLiveData<RegistrationZenithModel> = MutableLiveData(
-        RegistrationZenithModel(),
+    val registrationBankZModel: MutableLiveData<RegistrationBankZModel> = MutableLiveData(
+        RegistrationBankZModel(),
     )
     val registrationZenithConfirmPassword = MutableLiveData("")
     private val _message = MutableLiveData<Event<String>>()
@@ -94,11 +94,11 @@ class RegistrationViewModel : ViewModel() {
                     regFBN(bank, deviceSerialId)
                 }
             } else if (BuildConfig.FLAVOR.contains("zenith")) {
-                if (registrationZenithModel.value?.Password != registrationZenithConfirmPassword.value){
+                if (registrationBankZModel.value?.Password != registrationZenithConfirmPassword.value){
                     _message.value = Event("Password mismatch")
                     return
                 }
-                if (registrationZenithModel.value?.allFieldsFilledZenith() == false) {
+                if (registrationBankZModel.value?.allFieldsFilledBankZ() == false) {
                     _message.value = Event("All fields are required")
                     return
                 } else {
@@ -194,7 +194,7 @@ class RegistrationViewModel : ViewModel() {
     private fun regZenith(bank: String, deviceSerialId: String) {
         authInProgress.value = true
         contactlessService.registerExistingAccountForZenith(
-            registrationZenithModel.value,
+            registrationBankZModel.value,
             bank,
             deviceSerialId,
         )
@@ -205,7 +205,7 @@ class RegistrationViewModel : ViewModel() {
             }
             .subscribe { t1, t2 ->
                 t1?.let {
-                    registrationZenithModel.value = RegistrationZenithModel()
+                    registrationBankZModel.value = RegistrationBankZModel()
                     _authDone.value = Event(true)
                 }
                 t2?.let {

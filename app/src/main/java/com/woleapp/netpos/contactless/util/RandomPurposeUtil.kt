@@ -253,7 +253,7 @@ object RandomPurposeUtil {
                                     it.data is AccountNumberLookUpResponse ||
                                     it.data is ConfirmOTPResponse ||
                                     it.data is ExistingAccountRegisterResponse ||
-                                    it.data is WemaExistingRegistrationResponse ||
+                                    it.data is BankWExistingRegistrationResponse ||
                                     it.data is String
                                 ) {
                                     successAction()

@@ -3,7 +3,7 @@ package com.woleapp.netpos.contactless.network
 import com.woleapp.netpos.contactless.model.ExistingAccountRegisterResponse
 import com.woleapp.netpos.contactless.model.RegistrationFBNModel
 import com.woleapp.netpos.contactless.model.RegistrationModel
-import com.woleapp.netpos.contactless.model.RegistrationZenithModel
+import com.woleapp.netpos.contactless.model.RegistrationBankZModel
 import com.woleapp.netpos.contactless.util.UtilityParam
 import io.reactivex.Single
 import okhttp3.OkHttpClient
@@ -32,7 +32,7 @@ interface ContactlessRegistrationService {
 
     @POST("user/register-zenith-account")
     fun registerExistingAccountForZenith(
-        @Body registerExistingAccountRegisterRequest: RegistrationZenithModel?,
+        @Body registerExistingAccountRegisterRequest: RegistrationBankZModel?,
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<ExistingAccountRegisterResponse>

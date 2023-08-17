@@ -22,22 +22,22 @@ interface NibssQRService {
     fun queryTransactionStatus(@Body body: JsonObject): Single<NibssQRResponse>
 }
 
-interface ZenithQrService {
+interface BankZQrService {
     @GET("getQR")
-    fun getZenithQr(): Single<ZenithQr>
+    fun getBankZQr(): Single<BankZQr>
 
     @GET("getMCC/{pagination}")
-    fun getMerchantCategoryList(@Path("pagination") pagination: String): Single<ZenithMerchantCategoryList>
+    fun getMerchantCategoryList(@Path("pagination") pagination: String): Single<BankZMerchantCategoryList>
 
     @GET("getMCC/{filter}/{pagination}")
     fun getMerchantCategoryListWithFilter(
         @Path("filter") filter: String,
         @Path("pagination") pagination: String
-    ): Single<ZenithMerchantCategoryList>
+    ): Single<BankZMerchantCategoryList>
 
     @POST("createMerchant")
-    fun createZenithQRMerchant(@Body createZenithMerchantPayload: CreateZenithMerchantPayload): Single<CreateZenithMerchantResponse>
+    fun createBankZQRMerchant(@Body createBankZMerchantPayload: CreateBankZMerchantPayload): Single<CreateBankZMerchantResponse>
 
     @GET("getCity/{state}")
-    fun getCity(@Path("state") state: String): Single<ZenithCityList>
+    fun getCity(@Path("state") state: String): Single<BankZCityList>
 }

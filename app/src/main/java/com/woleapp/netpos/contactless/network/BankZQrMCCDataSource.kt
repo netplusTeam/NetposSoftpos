@@ -5,8 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
 import com.woleapp.netpos.contactless.model.LoadingState
 import com.woleapp.netpos.contactless.model.NetworkResource
-import com.woleapp.netpos.contactless.model.ZenithMCCDto
-import com.woleapp.netpos.contactless.model.ZenithMerchantCategory
+import com.woleapp.netpos.contactless.model.BankZMCCDto
+import com.woleapp.netpos.contactless.model.BankZMerchantCategory
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.disposeWith
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -14,12 +14,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
-class ZenithQrMCCDataSource(
-    private val zenithMCCDto: ZenithMCCDto,
+class BankZQrMCCDataSource(
+    private val bankZMCCDto: BankZMCCDto,
     private val disposables: CompositeDisposable
 ) :
-    PageKeyedDataSource<Int, ZenithMerchantCategory>() {
-    private val zenithService = StormApiClient.getZenithQRServiceInstance()
+    PageKeyedDataSource<Int, BankZMerchantCategory>() {
+    private val bankZService = StormApiClient.getBankZQRServiceInstance()
     private val _networkResourceLiveData: MutableLiveData<Event<NetworkResource>> =
         MutableLiveData<Event<NetworkResource>>()
     private val _emptyResultLiveData = MutableLiveData<Event<Boolean>>()
@@ -34,15 +34,15 @@ class ZenithQrMCCDataSource(
 
     override fun loadInitial(
         params: LoadInitialParams<Int>,
-        callback: LoadInitialCallback<Int, ZenithMerchantCategory>
+        callback: LoadInitialCallback<Int, BankZMerchantCategory>
     ) {
         _networkResourceLiveData.postValue(Event(NetworkResource(LoadingState.LOADING_INITIAL)))
         val page = "1.20"
         Timber.e(page)
-        val query = if (zenithMCCDto.filter.isNullOrEmpty())
-            zenithService.getMerchantCategoryList(page)
+        val query = if (bankZMCCDto.filter.isNullOrEmpty())
+            bankZService.getMerchantCategoryList(page)
         else
-            zenithService.getMerchantCategoryListWithFilter(zenithMCCDto.filter, page)
+            bankZService.getMerchantCategoryListWithFilter(bankZMCCDto.filter, page)
         query.retry(2).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { t1, t2 ->
@@ -74,24 +74,24 @@ class ZenithQrMCCDataSource(
 
     override fun loadBefore(
         params: LoadParams<Int>,
-        callback: LoadCallback<Int, ZenithMerchantCategory>
+        callback: LoadCallback<Int, BankZMerchantCategory>
     ) {
 
     }
 
     override fun loadAfter(
         params: LoadParams<Int>,
-        callback: LoadCallback<Int, ZenithMerchantCategory>
+        callback: LoadCallback<Int, BankZMerchantCategory>
     ) {
         if (loadedAll)
             return
         _networkResourceLiveData.postValue(Event(NetworkResource(LoadingState.LOADING_MORE)))
         val page = "${params.key}.20"
         Timber.e(page)
-        val query = if (zenithMCCDto.filter.isNullOrEmpty())
-            zenithService.getMerchantCategoryList(page)
+        val query = if (bankZMCCDto.filter.isNullOrEmpty())
+            bankZService.getMerchantCategoryList(page)
         else
-            zenithService.getMerchantCategoryListWithFilter(zenithMCCDto.filter, page)
+            bankZService.getMerchantCategoryListWithFilter(bankZMCCDto.filter, page)
         query.retry(2).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { t1, t2 ->
