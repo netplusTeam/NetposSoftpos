@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +38,7 @@ class RegisterFragment : BaseFragment() {
     private lateinit var listOfBranches: String
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
-    private lateinit var partnerID: String
+    private lateinit var partnerID : String
     private lateinit var date: Calendar
 
     override fun onCreateView(
@@ -65,7 +66,7 @@ class RegisterFragment : BaseFragment() {
                 }
                 failureDialog.show()
             }
-        } else {
+        }else{
             viewModel.message.observe(viewLifecycleOwner) { event ->
                 event.getContentIfNotHandled()?.let {
                     Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
@@ -93,7 +94,7 @@ class RegisterFragment : BaseFragment() {
                 }
                 .setMessage("Successful")
                 .create()
-        } else {
+        }else{
             dialog = AlertDialog.Builder(requireContext())
                 .setTitle("Registration Status")
                 .setCancelable(false)
@@ -141,52 +142,51 @@ class RegisterFragment : BaseFragment() {
             binding.fragmentState.visibility = View.VISIBLE
             binding.fragmentBranch.visibility = View.VISIBLE
             contactlessViewModel.getStates()
-        }
-        contactlessViewModel.getStatesResponse.observe(viewLifecycleOwner) {
-            val stateAdapter = StatesAdapter(
-                contactlessViewModel.listOfStates,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
-            firstBankStates.setAdapter(stateAdapter)
-        }
 
-        firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val statesList =
-                    adapterView?.getItemAtPosition(p2) as FBNState
-                listOfStates = statesList.state
-                viewModel.setSelectedState(listOfStates)
-                contactlessViewModel.getBranches(statesList.id, partnerID, deviceSerialId)
+            contactlessViewModel.getStatesResponse.observe(viewLifecycleOwner) {
+                val stateAdapter = StatesAdapter(
+                    contactlessViewModel.listOfStates, requireContext(),
+                    android.R.layout.simple_expandable_list_item_1
+                )
+                firstBankStates.setAdapter(stateAdapter)
             }
-        }
 
-        contactlessViewModel.getBranchResponse.observe(viewLifecycleOwner) {
-            val branchAdapter = BranchAdapter(
-                contactlessViewModel.listOfBranches,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
-            firstBankBranches.setAdapter(branchAdapter)
-        }
+            firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
+                override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    val statesList =
+                        adapterView?.getItemAtPosition(p2) as FBNState
+                    listOfStates = statesList.state
+                    viewModel.setSelectedState(listOfStates)
+                    contactlessViewModel.getBranches(statesList.id, partnerID, deviceSerialId)
+                }
+            }
 
-        firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val branchList =
-                    adapterView?.getItemAtPosition(p2) as FBNBranch
-                listOfBranches = branchList.branch_name
-                viewModel.setSelectedBranch(listOfBranches)
+            contactlessViewModel.getBranchResponse.observe(viewLifecycleOwner) {
+                val branchAdapter = BranchAdapter(
+                    contactlessViewModel.listOfBranches, requireContext(),
+                    android.R.layout.simple_expandable_list_item_1
+                )
+                firstBankBranches.setAdapter(branchAdapter)
+            }
+
+            firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
+                override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                    val branchList =
+                        adapterView?.getItemAtPosition(p2) as FBNBranch
+                    listOfBranches = branchList.branch_name
+                    viewModel.setSelectedBranch(listOfBranches)
+                }
             }
         }
 
         register = binding.btnLogin
         register.setOnClickListener {
-            viewModel.register(requireContext(), partnerID, deviceSerialId)
+            viewModel.register(requireContext(),partnerID, deviceSerialId)
         }
     }
 
-    private fun initViews() {
-        with(binding) {
+    private fun initViews(){
+        with(binding){
             firstBankStates = state
             firstBankBranches = branch
         }
@@ -196,15 +196,11 @@ class RegisterFragment : BaseFragment() {
         val currentDate = Calendar.getInstance()
         date = Calendar.getInstance()
         DatePickerDialog(
-            requireContext(),
-            { view, year, monthOfYear, dayOfMonth ->
+            requireContext(), { view, year, monthOfYear, dayOfMonth ->
                 date.set(year, monthOfYear, dayOfMonth)
                 val month = monthOfYear + 1
                 binding.state.setText("$year-$month-$dayOfMonth")
-            },
-            currentDate[Calendar.YEAR],
-            currentDate[Calendar.MONTH],
-            currentDate[Calendar.DATE],
+            }, currentDate[Calendar.YEAR], currentDate[Calendar.MONTH], currentDate[Calendar.DATE]
         ).show()
     }
 }
