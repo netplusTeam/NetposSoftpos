@@ -33,7 +33,7 @@ android {
         resValue "string", "app_name", "NetPOS Contactless"
         vectorDrawables.useSupportLibrary = true
         applicationId "com.woleapp.netpos.contactless"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 32
         versionCode 37
         versionName "1.0.37"
