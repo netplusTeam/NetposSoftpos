@@ -2,8 +2,9 @@ package com.woleapp.netpos.contactless.util
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.JsonObject
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.network.StormApiService
 import io.reactivex.Single
@@ -14,12 +15,11 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
-import retrofit2.Response
-import retrofit2.http.Header
 import timber.log.Timber
 
 fun checkBillsPaymentToken(): Boolean {
-    val billsToken = Prefs.getString(PREF_BILLS_TOKEN, null)
+    val billsToken = DPrefs.getString(PREF_BILLS_TOKEN)
+        .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
     return !(billsToken.isNullOrEmpty() || JWTHelper.isExpired(billsToken))
 }
 
@@ -52,7 +52,7 @@ fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
                     liveData.value = Event(false)
                     return@let
                 } else {
-                    Prefs.putString(PREF_BILLS_TOKEN, it.token)
+                    DPrefs.putString(PREF_BILLS_TOKEN, it.token)
                     liveData.value = Event(true)
                 }
             }
@@ -65,7 +65,8 @@ fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
 }
 
 fun checkAppToken(): Boolean {
-    val appToken = Prefs.getString(PREF_USER_TOKEN, null)
+    val appToken = DPrefs.getString(PREF_USER_TOKEN)
+        .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
     return !(appToken.isNullOrEmpty() || JWTHelper.isExpired(appToken))
 }
 
@@ -81,9 +82,9 @@ fun getAppToken(stormApiService: StormApiService): Single<Boolean> {
                 if (!it.success) {
                     false
                 } else {
-                    Prefs.putString(PREF_APP_TOKEN, it.token)
+                    DPrefs.putString(PREF_APP_TOKEN, it.token)
                     true
-                }
+                },
             )
         }
 }
@@ -95,7 +96,7 @@ private fun sendSmSReq(message: String, number: String): Single<Any> {
         addProperty("message", message)
     }
     Timber.e("payload: $map")
-    val auth = "Bearer ${Prefs.getString(PREF_USER_TOKEN, "")}"
+    val auth = "Bearer ${DPrefs.getString(PREF_USER_TOKEN, "")}"
     val body: RequestBody = map.toString()
         .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
     return StormApiClient.getSmsServiceInstance().sendSms(auth, body)
@@ -105,7 +106,7 @@ fun sendSMS(
     message: String,
     number: String,
     _smsSent: MutableLiveData<Event<Boolean>>,
-    compositeDisposable: CompositeDisposable
+    compositeDisposable: CompositeDisposable,
 ) {
     val req = if (checkAppToken().not()) {
         Timber.e("app token not found, get it first")

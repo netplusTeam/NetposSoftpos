@@ -4,15 +4,15 @@ import com.danbamitale.epmslib.entities.ConfigData
 import com.danbamitale.epmslib.entities.KeyHolder
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.responseMessage
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.ConfigurationData
 import com.woleapp.netpos.contactless.model.NibssResponse
 import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.nibss.Keys
-import java.lang.Exception
 
-fun useStormTerminalId() = Prefs.getBoolean(PREF_USE_STORM_TERMINAL_ID, true)
+fun useStormTerminalId() = DPrefs.getBoolean(PREF_USE_STORM_TERMINAL_ID, true)
 fun TransactionResponse.toNibssResponse(remark: String? = null): NibssResponse =
     Singletons.gson.fromJson(
         Singletons.gson.toJson(this),
@@ -34,13 +34,14 @@ fun TransactionResponse.toNibssResponse(remark: String? = null): NibssResponse =
 
 object Singletons {
     fun setUseStormTid(useStormTid: Boolean) =
-        Prefs.putBoolean(PREF_USE_STORM_TERMINAL_ID, useStormTid)
+        DPrefs.putBoolean(PREF_USE_STORM_TERMINAL_ID, useStormTid)
 
     val gson = Gson()
     fun getCurrentlyLoggedInUser(): User? =
-        gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
 
-    fun getNetPlusPayMid(): String = getCurrentlyLoggedInUser()?.netplusPayMid ?: UtilityParam.STRING_MERCHANT_ID
+    fun getNetPlusPayMid(): String =
+        getCurrentlyLoggedInUser()?.netplusPayMid ?: UtilityParam.STRING_MERCHANT_ID
 
     fun getSavedConfigurationData(): ConfigurationData {
         return ConfigurationData(
@@ -52,10 +53,18 @@ object Singletons {
     }
 
     fun getKeyHolder(): KeyHolder? =
-        gson.fromJson(Prefs.getString(PREF_KEYHOLDER, null), KeyHolder::class.java)
+        gson.fromJson(
+            DPrefs.getString(PREF_KEYHOLDER)
+                .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it },
+            KeyHolder::class.java,
+        )
 
     fun getConfigData(): ConfigData? =
-        gson.fromJson(Prefs.getString(PREF_CONFIG_DATA, null), ConfigData::class.java)
+        gson.fromJson(
+            DPrefs.getString(PREF_CONFIG_DATA)
+                .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it },
+            ConfigData::class.java,
+        )
 }
 
 var TransactionResponse.additionalAmount: Long?

@@ -7,9 +7,9 @@ import androidx.lifecycle.ViewModel
 import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.ErrorNetworkResponse
 import com.woleapp.netpos.contactless.model.NetworkResponse
@@ -59,7 +59,7 @@ class UtilitiesViewModel : ViewModel() {
         NetPosTerminalConfig.getTerminalId(),
         NetPosTerminalConfig.connectionData,
         NetPosTerminalConfig.getKeyHolder()!!,
-        NetPosTerminalConfig.getConfigData()!!
+        NetPosTerminalConfig.getConfigData()!!,
     )
 
     private val processor = TransactionProcessor(hostConfig)
@@ -206,7 +206,7 @@ class UtilitiesViewModel : ViewModel() {
         val validateBillResponse = _billResponse.value
         val utilitiesPayload = payloadMutableLiveData.value!!
         val billResponse = validateBillResponse ?: ValidateBillResponse(
-            billAccountId = utilitiesPayload.destinationAccount
+            billAccountId = utilitiesPayload.destinationAccount,
         )
         billResponse.apply {
             provider = utilitiesPayload.provider
@@ -314,7 +314,7 @@ class UtilitiesViewModel : ViewModel() {
                 transactionType = TransactionType.REVERSAL,
                 amount = originalDataElements.originalAmount,
                 accountType = isoAccountType ?: IsoAccountType.DEFAULT_UNSPECIFIED,
-                originalDataElements = originalDataElements
+                originalDataElements = originalDataElements,
             )
             processor.processTransaction(context, transactionRequestData, cardData!!)
                 .subscribeOn(Schedulers.io())
@@ -323,7 +323,7 @@ class UtilitiesViewModel : ViewModel() {
                     _showProgressMutableLiveData.value = Event(false)
                     _result.value = Event(
                         errorResponse
-                            ?: ErrorNetworkResponse("An unresolvable error occurred, contact administrator")
+                            ?: ErrorNetworkResponse("An unresolvable error occurred, contact administrator"),
                     )
                     printReceipt(context)
                 }
@@ -353,8 +353,8 @@ class UtilitiesViewModel : ViewModel() {
         processor.processTransaction(context, requestData, cardData!!)
             .flatMap {
                 if (it.responseCode == "A3") {
-                    Prefs.remove(PREF_CONFIG_DATA)
-                    Prefs.remove(PREF_KEYHOLDER)
+                    DPrefs.removePref(PREF_CONFIG_DATA)
+                    DPrefs.removePref(PREF_KEYHOLDER)
                     _shouldRefreshNibssKeys.postValue(Event(true))
                 }
                 it.cardHolder = customerName.value!!
@@ -388,7 +388,7 @@ class UtilitiesViewModel : ViewModel() {
     fun showReceiptDialog() {
         _showPrintDialog.value = Event(
             lastTransactionResponse.value!!.buildSMSText(remark)
-                .toString()
+                .toString(),
         )
     }
 
@@ -398,8 +398,8 @@ class UtilitiesViewModel : ViewModel() {
         val transactionResponse = lastTransactionResponse.value!!
         _showPrintDialog.postValue(
             Event(
-                transactionResponse.buildSMSText(remark).toString()
-            )
+                transactionResponse.buildSMSText(remark).toString(),
+            ),
         )
     }
 
@@ -422,7 +422,7 @@ class UtilitiesViewModel : ViewModel() {
             addProperty("message", lastTransactionResponse.value!!.buildSMSText(remark).toString())
         }
         Timber.e("payload: $map")
-        val auth = "Bearer ${Prefs.getString(PREF_APP_TOKEN, "")}"
+        val auth = "Bearer ${DPrefs.getString(PREF_APP_TOKEN, "")}"
         val body: RequestBody = map.toString()
             .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
         StormApiClient.getSmsServiceInstance().sendSms(auth, body)

@@ -1,8 +1,8 @@
 package com.woleapp.netpos.contactless.network
 
 import android.content.Context
-import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.contactless.BuildConfig
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.util.PREF_BILLS_TOKEN
 import com.woleapp.netpos.contactless.util.UtilityParam
 import okhttp3.Interceptor
@@ -38,7 +38,6 @@ object StormUtilitiesApiClient {
     }
 }
 
-
 fun getBillsOkHttpClient(context: Context): OkHttpClient = OkHttpClient.Builder()
     .callTimeout(60, TimeUnit.SECONDS)
     .connectTimeout(60, TimeUnit.SECONDS)
@@ -50,7 +49,8 @@ fun getBillsOkHttpClient(context: Context): OkHttpClient = OkHttpClient.Builder(
 
 class BillsTokenInterceptor(val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token: String? = Prefs.getString(PREF_BILLS_TOKEN, null)
+        val token: String? = DPrefs.getString(PREF_BILLS_TOKEN)
+            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         val request = chain.request()
         Timber.e(request.url.toString())
         Timber.e(request.body.toString())
@@ -60,16 +60,18 @@ class BillsTokenInterceptor(val context: Context) : Interceptor {
             val contentLength = reqBody.contentLength()
             Timber.e("$contentLength")
         }
-        val response = chain.proceed(request.newBuilder().run {
-            token?.let {
-                Timber.e("Token: Bearer $it")
-                addHeader(
-                    "Authorization",
-                    "Bearer $it"
-                )
-            }
-            build()
-        })
+        val response = chain.proceed(
+            request.newBuilder().run {
+                token?.let {
+                    Timber.e("Token: Bearer $it")
+                    addHeader(
+                        "Authorization",
+                        "Bearer $it",
+                    )
+                }
+                build()
+            },
+        )
         val body = response.body
         val bodyString = body?.string()
         Timber.e("response %s", bodyString!!)

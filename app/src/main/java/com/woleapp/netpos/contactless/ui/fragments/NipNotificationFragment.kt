@@ -7,13 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentNipNotificationsBinding
 import com.woleapp.netpos.contactless.databinding.LayoutBankDetailsBinding
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.util.PREF_USER
@@ -139,7 +139,7 @@ class NipNotificationFragment : BaseFragment() {
         val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.SheetDialog)
         bottomSheetDialog.setCancelable(false)
         bottomSheetDialog.setContentView(bankDetailsBinding.root)
-        val user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        val user = Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
         val bank = user.bank ?: ""
         val accountNumber = user.account_number ?: ""
         val accountName = user.business_name ?: ""

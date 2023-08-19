@@ -3,8 +3,8 @@ package com.woleapp.netpos.contactless.viewmodels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.Repository
 import com.woleapp.netpos.contactless.util.AppConstants.QR_TRANSACTION_POST_REQUEST_PAYLOAD
@@ -147,11 +147,11 @@ class ScanQrViewModel @Inject constructor(
     }
 
     fun saveTheQrToSharedPrefs(qrData: PostQrToServerModel) {
-        Prefs.putString(QR_TRANSACTION_POST_REQUEST_PAYLOAD, gson.toJson(qrData))
+        DPrefs.putString(QR_TRANSACTION_POST_REQUEST_PAYLOAD, gson.toJson(qrData))
     }
 
     fun deleteQrPostPayloadFromSharedPrefs() {
-        Prefs.remove(QR_TRANSACTION_POST_REQUEST_PAYLOAD)
+        DPrefs.removePref(QR_TRANSACTION_POST_REQUEST_PAYLOAD)
     }
 
     fun setScannedQrIsVerveCard(boolean: Boolean) {
@@ -159,7 +159,7 @@ class ScanQrViewModel @Inject constructor(
     }
 
     fun retrieveQrPostPayloadFromSharedPrefs(): PostQrToServerModel? {
-        val payload = Prefs.getString(QR_TRANSACTION_POST_REQUEST_PAYLOAD, "")
+        val payload = DPrefs.getString(QR_TRANSACTION_POST_REQUEST_PAYLOAD, "")
         return if (!payload.isNullOrEmpty()) {
             gson.fromJson(payload, PostQrToServerModel::class.java)
         } else {

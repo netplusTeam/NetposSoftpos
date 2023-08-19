@@ -34,12 +34,13 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
@@ -209,11 +210,11 @@ class MainActivity :
     }
 
     private fun logout() {
-        Prefs.remove(PREF_USER_TOKEN)
-        Prefs.remove(PREF_AUTHENTICATED)
-        Prefs.remove(PREF_KEYHOLDER)
-        Prefs.remove(PREF_CONFIG_DATA)
-        Prefs.remove(PREF_USER)
+        DPrefs.removePref(PREF_USER_TOKEN)
+        DPrefs.removePref(PREF_AUTHENTICATED)
+        DPrefs.removePref(PREF_KEYHOLDER)
+        DPrefs.removePref(PREF_CONFIG_DATA)
+        DPrefs.removePref(PREF_USER)
         MqttHelper.disconnect()
         val intent = Intent(this, AuthenticationActivity::class.java)
         intent.flags =
@@ -223,7 +224,8 @@ class MainActivity :
     }
 
     private fun checkTokenExpiry() {
-        val token = Prefs.getString(PREF_USER_TOKEN, null)
+        val token = DPrefs.getString(PREF_USER_TOKEN)
+            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         token?.let {
             if (JWTHelper.isExpired(it)) {
                 logout()
@@ -354,7 +356,7 @@ class MainActivity :
             }
             create()
         }
-        val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
         if (user == null) {
             val intent = Intent(this, AuthenticationActivity::class.java)
             this.startActivity(intent)
@@ -565,7 +567,7 @@ class MainActivity :
             override fun onLocationChanged(location: Location) {
                 // Called when a new location is found by the network location provider.
                 location.let {
-                    Prefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
+                    DPrefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
                 }
             }
 
@@ -691,7 +693,7 @@ class MainActivity :
     }
 
     private fun printQrTransactionUtil(qrTransaction: QrTransactionResponseFinalModel) {
-        when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
+        when (DPrefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
             PREF_VALUE_PRINT_DOWNLOAD -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
@@ -902,7 +904,7 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
+                when (DPrefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {

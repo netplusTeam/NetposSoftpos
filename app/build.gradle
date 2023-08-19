@@ -172,13 +172,14 @@ dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
     implementation("commons-codec:commons-codec:1.15")
     implementation("commons-lang:commons-lang:2.6")
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.7.0"
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.fragment:fragment-ktx:1.3.5'
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
 
     //rx
     implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
@@ -188,7 +189,6 @@ dependencies {
     //epms
     implementation 'net.sf.j8583:j8583:1.12.0'
     implementation project(path: ':epmslib-release')
-//    implementation 'com.github.netplusTeam:netplus-epms:1.0.12'
 
     //Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
@@ -236,6 +236,8 @@ dependencies {
 
     //easyprefs
     implementation 'com.pixplicity.easyprefs:EasyPrefs:1.10.0'
+    // DPrefs
+    implementation "com.github.D-Soft-Tech:DPrefs:1.0.3"
 
     //JWT
     implementation 'com.auth0:java-jwt:3.10.0'
@@ -295,7 +297,4 @@ dependencies {
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"
-
-    // debugImplementation because LeakCanary should only run in debug builds.
-    //   debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.11'
 }
