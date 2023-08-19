@@ -2,17 +2,16 @@ package com.woleapp.netpos.contactless.mqtt
 
 import android.content.Context
 import android.os.Build
+import com.dsofttech.dprefs.utils.DPrefs
 import com.hivemq.client.internal.mqtt.MqttClientSslConfigImpl
 import com.hivemq.client.internal.mqtt.MqttClientSslConfigImplBuilder
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3RxClient
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
-import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.PREF_LAST_LOCATION
 import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.Singletons.gson
@@ -34,8 +33,9 @@ object MqttHelper {
     private var mqttLocalDao: MqttLocalDao? = null
 
     fun <T> init(context: Context, event: MqttEvent<T>? = null, topic: MqttTopics? = null) {
-        if (mqttLocalDao == null)
+        if (mqttLocalDao == null) {
             mqttLocalDao = AppDatabase.getDatabaseInstance(context).mqttLocalDao()
+        }
         if (client != null && client!!.state.isConnected) {
             checkDatabaseForFailedEvents(context)
             return
@@ -95,7 +95,7 @@ object MqttHelper {
     private fun getMqttClientSSLConfigImpl(context: Context): MqttClientSslConfigImpl {
         return MqttClientSslConfigImplBuilder.Default()
             .apply {
-                //handshakeTimeout(60, TimeUnit.SECONDS)
+                // handshakeTimeout(60, TimeUnit.SECONDS)
                 hostnameVerifier { _, _ -> true }
                 trustManagerFactory(SSLUtil.getTrustManagerFactory(context))
                 keyManagerFactory(SSLUtil.getKeyMangerFactory(context))
@@ -105,7 +105,7 @@ object MqttHelper {
     fun <T> sendPayload(
         mqttTopic: MqttTopics,
         event: MqttEvent<T>? = null,
-        failedEvent: MqttEventsLocal? = null
+        failedEvent: MqttEventsLocal? = null,
     ) {
         if (event == null && failedEvent == null) {
             Timber.e("Nothing to publish")
@@ -114,9 +114,9 @@ object MqttHelper {
 
         event?.apply {
             Timber.e(event.toString())
-            geo = Prefs.getString(PREF_LAST_LOCATION, "lat:6.5244 long:3.3792")
+            geo = DPrefs.getString(PREF_LAST_LOCATION, "lat:6.5244 long:3.3792")
             Timber.e("Sending to topic: ${mqttTopic.topic}")
-            //Timber.e(gson.toJson(event).toString())
+            // Timber.e(gson.toJson(event).toString())
         }
         client?.let { client ->
             Timber.e("client state isConnected ${client.state.isConnected}")
@@ -138,7 +138,7 @@ object MqttHelper {
                         .topic(mqttTopic.topic)
                         .qos(MqttQos.AT_LEAST_ONCE)
                         .payload(gson.toJson(event).toByteArray(Charset.forName("UTF-8")))
-                        .build()
+                        .build(),
                 )
             }
             failedEvent?.let { e ->
@@ -147,7 +147,7 @@ object MqttHelper {
                         .topic(e.topic)
                         .qos(MqttQos.AT_LEAST_ONCE)
                         .payload(e.data.toByteArray(Charset.forName("UTF-8")))
-                        .build()
+                        .build(),
                 )
             }
             client.publish(flowable!!).subscribe(
@@ -161,8 +161,8 @@ object MqttHelper {
                             MqttEventsLocal(
                                 it.publish.topic.toString(),
                                 failedPublish,
-                                "error during publishing"
-                            )
+                                "error during publishing",
+                            ),
                         )
                     }
                     Timber.e("Published")
@@ -177,7 +177,8 @@ object MqttHelper {
                     }
                     Timber.e(it)
                 },
-                { Timber.e("Completed") }).disposeWith(disposables)
+                { Timber.e("Completed") },
+            ).disposeWith(disposables)
             return@let
         }
         if (client == null) {
@@ -207,11 +208,13 @@ object MqttHelper {
     }
 
     private fun checkDatabaseForFailedEvents(context: Context) {
-        if (mqttLocalDao == null) mqttLocalDao =
-            AppDatabase.getDatabaseInstance(context).mqttLocalDao()
+        if (mqttLocalDao == null) {
+            mqttLocalDao =
+                AppDatabase.getDatabaseInstance(context).mqttLocalDao()
+        }
         mqttLocalDao?.apply {
             getLocalEvents().flatMap {
-                //NetPosWork.createNotification(context, "Failed Events", "Found ${it.size} failed events", null)
+                // NetPosWork.createNotification(context, "Failed Events", "Found ${it.size} failed events", null)
                 deleteAllEvents().toSingleDefault(it)
             }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -221,7 +224,7 @@ object MqttHelper {
                             Timber.e(getTopic(localEvent.topic).name)
                             sendPayload<Nothing>(
                                 getTopic(localEvent.topic),
-                                failedEvent = localEvent
+                                failedEvent = localEvent,
                             )
                         }
                     }
@@ -234,8 +237,9 @@ object MqttHelper {
 
     private fun getTopic(string: String): MqttTopics {
         MqttTopics.values().forEach {
-            if (it.topic == string)
+            if (it.topic == string) {
                 return it
+            }
         }
         return MqttTopics.TRANSACTIONS
     }

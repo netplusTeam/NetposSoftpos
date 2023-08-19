@@ -4,13 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.text.format.DateUtils
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
+import com.danbamitale.epmslib.entities.ConfigData
+import com.danbamitale.epmslib.entities.ConnectionData
+import com.danbamitale.epmslib.entities.KeyHolder
+import com.danbamitale.epmslib.entities.clearSessionKey
 import com.danbamitale.epmslib.processors.TerminalConfigurator
-import com.pixplicity.easyprefs.library.Prefs
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.model.ConfigurationData
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.Singletons.getSavedConfigurationData
@@ -20,7 +22,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-
 
 const val CONFIGURATION_STATUS = "terminal_configuration_status"
 const val CONFIGURATION_ACTION = "com.woleapp.netpos.TERMINAL_CONFIGURATION"
@@ -38,7 +39,7 @@ class NetPosTerminalConfig {
         var connectionData: ConnectionData = ConnectionData(
             ipAddress = configurationData.ip,
             ipPort = configurationData.port.toInt(),
-            isSSL = true
+            isSSL = true,
         )
         private var terminalId: String? = null
         var isConfigurationInProcess = false
@@ -55,7 +56,7 @@ class NetPosTerminalConfig {
         private fun setTerminalId() {
             terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id
 //            terminalId = "20398A4C"
-            //Log.d("CHECKTT", terminalId.toString())
+            // Log.d("CHECKTT", terminalId.toString())
         }
 
         private var keyHolder: KeyHolder? = null
@@ -68,11 +69,11 @@ class NetPosTerminalConfig {
 
         fun init(
             context: Context,
-            configureSilently: Boolean = false
+            configureSilently: Boolean = false,
         ) {
             KeyHolder.setHostKeyComponents(
                 configurationData.key1,
-                configurationData.key2
+                configurationData.key2,
             ) // default to test  //Set your base keys here
 
             setTerminalId()
@@ -91,7 +92,7 @@ class NetPosTerminalConfig {
                 mutableLiveData.value = Event(-99)
             }
             val req = when {
-                DateUtils.isToday(Prefs.getLong(LAST_POS_CONFIGURATION_TIME, 0)).not() -> {
+                DateUtils.isToday(DPrefs.getLong(LAST_POS_CONFIGURATION_TIME, 0)).not() -> {
                     Timber.e("last configuration time was not today, configure terminal now")
                     configureTerminal(context)
                 }
@@ -126,9 +127,9 @@ class NetPosTerminalConfig {
                     }
                     pair?.let {
                         pair.first?.let {
-                            Prefs.putLong(LAST_POS_CONFIGURATION_TIME, System.currentTimeMillis())
-                            Prefs.putString(PREF_CONFIG_DATA, gson.toJson(pair.second))
-                            Prefs.putString(PREF_KEYHOLDER, gson.toJson(pair.first))
+                            DPrefs.putLong(LAST_POS_CONFIGURATION_TIME, System.currentTimeMillis())
+                            DPrefs.putString(PREF_CONFIG_DATA, gson.toJson(pair.second))
+                            DPrefs.putString(PREF_KEYHOLDER, gson.toJson(pair.first))
                             this.configData = pair.second
                         }
                         configurationStatus = 1
@@ -151,12 +152,14 @@ class NetPosTerminalConfig {
                 context,
                 getTerminalId(),
                 keyHolder?.clearSessionKey ?: "",
-                Build.ID
+                Build.ID,
             ).flatMap {
                 Timber.e("call home result $it")
                 if (it == "00") {
                     return@flatMap Single.just(Pair(null, null))
-                } else Single.error(Exception("call home failed"))
+                } else {
+                    Single.error(Exception("call home failed"))
+                }
             }
         }
 
@@ -168,7 +171,7 @@ class NetPosTerminalConfig {
                         context,
                         getTerminalId(),
                         nibssKeyHolder.clearSessionKey,
-                        Build.ID
+                        Build.ID,
                     ).map { nibssConfigData ->
                         configData = nibssConfigData
                         return@map Pair(nibssKeyHolder, nibssConfigData)

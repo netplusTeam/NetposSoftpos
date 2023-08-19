@@ -10,11 +10,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import com.danbamitale.epmslib.entities.*
+import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
-import com.pixplicity.easyprefs.library.Prefs
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
@@ -28,7 +28,7 @@ import com.woleapp.netpos.contactless.model.Service
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.getGUID
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.stringToBase64
@@ -323,8 +323,8 @@ class TransactionsFragment : BaseFragment() {
 
                 response?.let {
                     if (it.responseCode == "A3") {
-                        Prefs.remove(PREF_CONFIG_DATA)
-                        Prefs.remove(PREF_KEYHOLDER)
+                        DPrefs.removePref(PREF_CONFIG_DATA)
+                        DPrefs.removePref(PREF_KEYHOLDER)
                         NetPosTerminalConfig.init(
                             requireContext().applicationContext,
                             configureSilently = true,

@@ -3,6 +3,7 @@ package com.woleapp.netpos.contactless.app
 import android.app.Activity
 import android.app.Application
 import android.content.ContextWrapper
+import com.dsofttech.dprefs.utils.DPrefs
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
@@ -37,6 +38,7 @@ class NetPosApp : Application() {
         super.onCreate()
         assignInstance(this)
         Timber.plant(Timber.DebugTree())
+        DPrefs.initializeDPrefs(this)
         Prefs.Builder()
             .setContext(this)
             .setMode(ContextWrapper.MODE_PRIVATE)

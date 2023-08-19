@@ -188,7 +188,6 @@ dependencies {
     //epms
     implementation 'net.sf.j8583:j8583:1.12.0'
     implementation project(path: ':epmslib-release')
-//    implementation 'com.github.netplusTeam:netplus-epms:1.0.12'
 
     //Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
@@ -236,6 +235,8 @@ dependencies {
 
     //easyprefs
     implementation 'com.pixplicity.easyprefs:EasyPrefs:1.10.0'
+    // DPrefs
+    implementation "com.github.D-Soft-Tech:DPrefs:1.0.3"
 
     //JWT
     implementation 'com.auth0:java-jwt:3.10.0'
@@ -295,7 +296,4 @@ dependencies {
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"
-
-    // debugImplementation because LeakCanary should only run in debug builds.
-    //   debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.11'
 }

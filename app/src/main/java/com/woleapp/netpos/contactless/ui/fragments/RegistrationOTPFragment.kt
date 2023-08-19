@@ -14,7 +14,7 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.chaos.view.PinView
-import com.pixplicity.easyprefs.library.Prefs
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.FragmentRegistrationOTPBinding
@@ -40,7 +40,12 @@ class RegistrationOTPFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_registration_o_t_p, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_registration_o_t_p,
+            container,
+            false,
+        )
         return binding.root
     }
 
@@ -53,11 +58,11 @@ class RegistrationOTPFragment : BaseFragment() {
             }
         }
         val newPoneNumber =
-            Prefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
+            DPrefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
         val phoneNumber = newPoneNumber.substring(1, newPoneNumber.length - 1)
 
         val newActNumber =
-            Prefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
+            DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
         newAccountNumber = newActNumber.substring(1, newActNumber.length - 1)
 
         loader = alertDialog(requireContext())
@@ -77,9 +82,16 @@ class RegistrationOTPFragment : BaseFragment() {
                 s?.let {
                     if (it.length == 6) {
                         RandomPurposeUtil.closeSoftKeyboard(requireContext(), requireActivity())
-                        if (BuildConfig.FLAVOR.contains("providuspos") ||BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos")) {
+                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                                "providus",
+                            ) || BuildConfig.FLAVOR.contains("providussoftpos")
+                        ) {
                             viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
-                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
+                            observeServerResponse(
+                                viewModel.confirmOTPResponse,
+                                loader,
+                                requireActivity().supportFragmentManager,
+                            ) {
                                 showFragment(
                                     ExistingCustomersRegistrationFragment(),
                                     containerViewId = R.id.auth_container,
@@ -89,7 +101,11 @@ class RegistrationOTPFragment : BaseFragment() {
                             }
                         } else {
                             viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), "")
-                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
+                            observeServerResponse(
+                                viewModel.confirmOTPResponse,
+                                loader,
+                                requireActivity().supportFragmentManager,
+                            ) {
                                 showFragment(
                                     ExistingCustomersRegistrationFragment(),
                                     containerViewId = R.id.auth_container,
@@ -101,6 +117,7 @@ class RegistrationOTPFragment : BaseFragment() {
                     }
                 }
             }
+
             override fun afterTextChanged(s: Editable?) {
             }
         })
@@ -115,10 +132,16 @@ class RegistrationOTPFragment : BaseFragment() {
     }
 
     private fun initPartnerID() {
-        val bankList = mapOf("firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA", "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190","easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA","providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8", "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
+        val bankList = mapOf(
+            "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
+            "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
+            "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
         )
 
         for (element in bankList) {

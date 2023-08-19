@@ -9,7 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import com.pixplicity.easyprefs.library.Prefs
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
@@ -36,7 +37,7 @@ class AuthenticationActivity : AppCompatActivity() {
 //                .show()
 //            finish()
 //        }
-        if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
+        if (DPrefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {
                     flags =
@@ -61,7 +62,8 @@ class AuthenticationActivity : AppCompatActivity() {
     }
 
     private fun tokenValid(): Boolean {
-        val token = Prefs.getString(PREF_USER_TOKEN, null)
+        val token = DPrefs.getString(PREF_USER_TOKEN)
+            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         return !(token.isNullOrEmpty() || JWTHelper.isExpired(token))
     }
 
