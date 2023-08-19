@@ -41,7 +41,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
@@ -225,7 +224,8 @@ class MainActivity :
     }
 
     private fun checkTokenExpiry() {
-        val token = DPrefs.getString(PREF_USER_TOKEN).let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
+        val token = DPrefs.getString(PREF_USER_TOKEN)
+            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         token?.let {
             if (JWTHelper.isExpired(it)) {
                 logout()

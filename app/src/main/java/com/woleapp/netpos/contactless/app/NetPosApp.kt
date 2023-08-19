@@ -2,15 +2,13 @@ package com.woleapp.netpos.contactless.app
 
 import android.app.Activity
 import android.app.Application
-import android.content.ContextWrapper
 import com.dsofttech.dprefs.utils.DPrefs
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
-import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessConfiguration
-import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.*
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
@@ -39,13 +37,6 @@ class NetPosApp : Application() {
         assignInstance(this)
         Timber.plant(Timber.DebugTree())
         DPrefs.initializeDPrefs(this)
-        Prefs.Builder()
-            .setContext(this)
-            .setMode(ContextWrapper.MODE_PRIVATE)
-            .setPrefsName(packageName)
-            .setUseDefaultSharedPreference(true)
-            .build()
-        initVisaLib()
     }
 
     private fun initVisaLib() {
@@ -75,7 +66,8 @@ class NetPosApp : Application() {
         val merchantByte = mercahnt.toByteArray()
         myData["9F4E"] = merchantByte // Merchant Name and location
         myData["9F1B"] = byteArrayOf(0x00, 0x00, 0x00, 0x00) // terminal floor limit
-        myData["DF01"] = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01) // Reader CVM Required Limit
+        myData["DF01"] =
+            byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01) // Reader CVM Required Limit
         contactlessConfiguration.terminalData = myData
     }
 
