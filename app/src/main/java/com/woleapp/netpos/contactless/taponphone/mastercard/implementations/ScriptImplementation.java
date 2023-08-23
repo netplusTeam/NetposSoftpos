@@ -7,6 +7,7 @@ import com.mastercard.terminalsdk.iso8825.BerTlv;
 import com.mastercard.terminalsdk.listeners.ScriptProvider;
 import com.mastercard.terminalsdk.objects.ApplicationInput;
 import com.mastercard.terminalsdk.utility.ByteArrayWrapper;
+import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class ScriptImplementation implements ScriptProvider {
                 BerTlv tlv9F76 = new BerTlv(
                         tag9f76,
                         new ByteArrayWrapper(
-                                "48656c6c6f20576f726c64207772697474656e206f6e20" + getCurrentDateTime()));
+                                UtilityParam.INSTANCE.getSTRING_TLV_BYTE_WRAPPER_CONSTANT() + getCurrentDateTime()));
 
                 ArrayList<BerTlv> tagsToWrite = new ArrayList<>();
                 if (activateWrite) {
@@ -69,7 +70,7 @@ public class ScriptImplementation implements ScriptProvider {
                 BerTlv tlv9F75 = new BerTlv(
                         tag9f75,
                         new ByteArrayWrapper(
-                                "48656c6c6f20576f726c64207772697474656e206f6e20" + getCurrentDateTime()));
+                                UtilityParam.INSTANCE.getSTRING_TLV_BYTE_WRAPPER_CONSTANT() + getCurrentDateTime()));
 
 
                 ArrayList<BerTlv> tagsToWrite = new ArrayList<>();

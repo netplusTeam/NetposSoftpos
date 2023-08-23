@@ -105,7 +105,7 @@
             app:progressBarInProgress="@{viewmodel.inProgress}" />
 
         <ProgressBar
-            android:id="@+id/action_progress_"
+            android:id="@+id/action_progress_2"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginTop="8dp"
