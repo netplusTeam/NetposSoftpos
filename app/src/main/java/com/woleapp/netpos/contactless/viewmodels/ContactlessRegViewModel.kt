@@ -1,12 +1,11 @@
 package com.woleapp.netpos.contactless.viewmodels
 
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.AppConstants
@@ -96,9 +95,11 @@ class ContactlessRegViewModel @Inject constructor(
                 } else {
                     try {
                         val gson = Gson()
-                        errorMsg = gson.fromJson(it.errorBody()?.charStream(), ExistingCustomerError::class.java).message
+                        errorMsg = gson.fromJson(
+                            it.errorBody()?.charStream(),
+                            ExistingCustomerError::class.java,
+                        ).message
                         //      Prefs.putString(WALLET_RESPONSE, errorMsg)
-                        // Log.d("CHECKRESULT=====>", justForTest.toString())
                     } catch (e: java.lang.Exception) {
                         //
                     }
@@ -139,7 +140,11 @@ class ContactlessRegViewModel @Inject constructor(
 //                },
 //        )
 //    }
-    fun findAccountForFirstBankUser(accountNumber: String, partnerId: String, deviceSerialId: String) {
+    fun findAccountForFirstBankUser(
+        accountNumber: String,
+        partnerId: String,
+        deviceSerialId: String,
+    ) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.findAccountForFirstBankUser(accountNumber, partnerId, deviceSerialId)
@@ -154,9 +159,9 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
-                        if (it.message.isNullOrEmpty()){
+                        if (it.message.isNullOrEmpty()) {
                             _message.value = Event("Successful")
-                        }else{
+                        } else {
                             _message.value = Event(it.message.toString())
                         }
                     }
@@ -168,7 +173,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -206,7 +214,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _otpMessage.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -240,7 +251,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -274,7 +288,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -306,7 +323,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -330,7 +350,6 @@ class ContactlessRegViewModel @Inject constructor(
                         _resetPasswordForProvidusResponse.postValue(Resource.success(it))
                         saveAccountNumberToResetPasswordForProvidus(it.accountNumber)
                         _message.value = Event(it.message)
-
                     }
                     error?.let {
                         _resetPasswordForProvidusResponse.postValue(Resource.error(null))
@@ -340,7 +359,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -372,13 +394,15 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -404,7 +428,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -417,7 +444,11 @@ class ContactlessRegViewModel @Inject constructor(
         )
     }
 
-    fun registerExistingAccount(accountNumber: ExistingAccountRegisterRequest, partnerId: String, deviceSerialId: String) {
+    fun registerExistingAccount(
+        accountNumber: ExistingAccountRegisterRequest,
+        partnerId: String,
+        deviceSerialId: String,
+    ) {
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.registerExistingAccount(accountNumber, partnerId, deviceSerialId)
@@ -436,7 +467,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _registerMessage.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -449,10 +483,18 @@ class ContactlessRegViewModel @Inject constructor(
         )
     }
 
-    fun registerExistingAccountForFBN(accountNumber: RegistrationForExistingFBNUsersRequest, partnerId: String, deviceSerialId: String) {
+    fun registerExistingAccountForFBN(
+        accountNumber: RegistrationForExistingFBNUsersRequest,
+        partnerId: String,
+        deviceSerialId: String,
+    ) {
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.registerExistingAccountForFBN(accountNumber, partnerId, deviceSerialId)
+            contactlessRegRepo.registerExistingAccountForFBN(
+                accountNumber,
+                partnerId,
+                deviceSerialId,
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
@@ -468,7 +510,10 @@ class ContactlessRegViewModel @Inject constructor(
                                 ?: "{\"message\":\"Unexpected error\"}"
                             _registerMessage.value = Event(
                                 try {
-                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
+                                    gson.fromJson(
+                                        errorMessage,
+                                        ExistingCustomerError::class.java,
+                                    ).message
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -480,44 +525,49 @@ class ContactlessRegViewModel @Inject constructor(
                 },
         )
     }
-    fun clearOTPResponseLiveData(){
+
+    fun clearOTPResponseLiveData() {
         _confirmOTPResponse.postValue(Resource.error(null))
     }
 
-    fun clearExistingCustomerLiveData(){
+    fun clearExistingCustomerLiveData() {
         _existingRegRequestResponse.postValue(Resource.error(null))
     }
 
-    fun clearLiveData(){
+    fun clearLiveData() {
         _firstBankAccountNumberResponse.postValue(Resource.error(null))
     }
 
     private fun savePhoneNumber(phoneNumber: String) {
-        Prefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
+        DPrefs.putString(AppConstants.SAVE_PHONE_NUMBER, gson.toJson(phoneNumber))
     }
 
     private fun saveAccountNumber(ActNumber: String) {
-        Prefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
+        DPrefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
     }
 
     private fun saveBusinessName(businessName: String) {
-        Prefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
-    }
-    private fun saveFullName(fullName: String) {
-        Prefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
-    }
-    private fun saveBusinessAddress(businessAddress: String) {
-        Prefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
-    }
-    private fun saveExistingPhoneNumber(phoneNumber: String) {
-        Prefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
-    }
-    private fun saveEmail(email: String) {
-        Prefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
+        DPrefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
     }
 
-   private fun saveAccountNumberToResetPasswordForProvidus(accountNumber: String) {
-        Prefs.putString(AppConstants.ACCOUNT_NUMBER_FOR_PROVIDUS, gson.toJson(accountNumber))
+    private fun saveFullName(fullName: String) {
+        DPrefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
+    }
+
+    private fun saveBusinessAddress(businessAddress: String) {
+        DPrefs.putString(AppConstants.BUSINESS_ADDRESS, gson.toJson(businessAddress))
+    }
+
+    private fun saveExistingPhoneNumber(phoneNumber: String) {
+        DPrefs.putString(AppConstants.PHONE_NUMBER, gson.toJson(phoneNumber))
+    }
+
+    private fun saveEmail(email: String) {
+        DPrefs.putString(AppConstants.EMAIL_ADDRESS, gson.toJson(email))
+    }
+
+    private fun saveAccountNumberToResetPasswordForProvidus(accountNumber: String) {
+        DPrefs.putString(AppConstants.ACCOUNT_NUMBER_FOR_PROVIDUS, gson.toJson(accountNumber))
     }
 
     override fun onCleared() {

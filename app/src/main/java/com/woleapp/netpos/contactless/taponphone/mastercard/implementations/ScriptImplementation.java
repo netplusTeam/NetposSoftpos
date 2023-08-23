@@ -7,6 +7,7 @@ import com.mastercard.terminalsdk.iso8825.BerTlv;
 import com.mastercard.terminalsdk.listeners.ScriptProvider;
 import com.mastercard.terminalsdk.objects.ApplicationInput;
 import com.mastercard.terminalsdk.utility.ByteArrayWrapper;
+import com.woleapp.netpos.contactless.BuildConfig;
 import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.text.SimpleDateFormat;
@@ -32,7 +33,9 @@ public class ScriptImplementation implements ScriptProvider {
     public ApplicationInput onDataReceived(ArrayList<BerTlv> dataSent,
                                            final ArrayList<BerTlv> dataNeeded) {
 
-        Log.d(TAG, "onDataReceived: " + dataSent);
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "onDataReceived: " + dataSent);
+        }
 
         final ArrayList<BerTlv> dataRequested = new ArrayList<>();
 

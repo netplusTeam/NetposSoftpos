@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.mastercard.terminalsdk.exception.L1RSPException;
 import com.mastercard.terminalsdk.listeners.CardCommunicationProvider;
 import com.mastercard.terminalsdk.objects.ErrorIndication;
+import com.woleapp.netpos.contactless.BuildConfig;
 
 import java.io.IOException;
 
@@ -17,7 +18,8 @@ public class NfcProvider implements CardCommunicationProvider {
 
     private final String TAG = "NfcProvider";
 
-    @Nullable public NFCManager mNFCManager;
+    @Nullable
+    public NFCManager mNFCManager;
     private IsoDep mIsoDep;
     private TagEventListener mTagEventListener;
     private boolean isCardTapped;
@@ -36,7 +38,6 @@ public class NfcProvider implements CardCommunicationProvider {
         // Check if NFC is enabled
         if (!mNFCManager.isNFCEnabled()) {
             nFCEnabled = false;
-            Log.d(TAG, "NFC is not enabled");
 
         } else {
             nFCEnabled = true;
@@ -56,12 +57,13 @@ public class NfcProvider implements CardCommunicationProvider {
                 // Command execution time in nano seconds
                 mCommandExecutionTime = endTime - startTime;
             } else {
-                Log.e(TAG, "sendReceive: ISO DEP obtained as null");
                 isCardTapped = false;
                 throw new L1RSPException("", ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
             }
         } catch (TagLostException exception) {
-            Log.e(TAG, "TagLostException", exception.getCause());
+            if (BuildConfig.DEBUG) {
+                Log.e(TAG, "TagLostException", exception.getCause());
+            }
             isCardTapped = false;
             throw new L1RSPException("Tag Lost", ErrorIndication.L1_Error_Code.TIMEOUT_ERROR);
 
@@ -80,8 +82,9 @@ public class NfcProvider implements CardCommunicationProvider {
 
     @Override
     public ConnectionObject waitForCard() throws L1RSPException {
-
-        Log.i("is card Tapped ", "" + isCardTapped);
+        if (BuildConfig.DEBUG) {
+            Log.i("is card Tapped ", "" + isCardTapped);
+        }
         if (isCardTapped) {
             return new ConnectionObjectImpl();
         }
@@ -89,10 +92,14 @@ public class NfcProvider implements CardCommunicationProvider {
             try {
                 mIsoDep = mTagEventListener.getIsoDep();
             } catch (Exception e) {
-                Log.e(TAG, "An Exception was encountered: ", e.getCause());
+                if (BuildConfig.DEBUG) {
+                    Log.e(TAG, "An Exception was encountered: ", e.getCause());
+                }
             }
             if (mIsoDep != null) {
-                Log.i(TAG, "connectCard: Card Tapped");
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, "connectCard: Card Tapped");
+                }
                 try {
                     mIsoDep.connect();
                     mIsoDep.setTimeout(10000);
@@ -121,7 +128,6 @@ public class NfcProvider implements CardCommunicationProvider {
                 return false;
             }
         } else {
-            Log.w(TAG, "removeCard: IsoDep is null or disconnected");
             return true;
         }
     }

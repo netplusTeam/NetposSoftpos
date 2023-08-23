@@ -123,9 +123,6 @@ class RegistrationViewModel : ViewModel() {
     fun setSelectedState(data: String) {
         registrationFBNModel.value = registrationFBNModel.value?.apply {
             state = data
-            if (BuildConfig.DEBUG) {
-                Log.d("STATEFBN", data)
-            }
         }
     }
 
