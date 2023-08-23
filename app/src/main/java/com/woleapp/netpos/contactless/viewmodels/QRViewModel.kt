@@ -294,27 +294,27 @@ class QRViewModel : ViewModel() {
 
     fun getBankZMCC(bankZMCCDto: BankZMCCDto) {
         dataSourceFactory = BankZQrMCCDataSourceFactory(bankZMCCDto, disposable)
-        val networkResourceLiveData: LiveData<Event<NetworkResource>> = Transformations.switchMap(
-            dataSourceFactory.itemLiveDataSource
-        ) {
-            it.networkResource
-        }
-
-        val emptyResultLiveData: LiveData<Event<Boolean>> = Transformations.switchMap(
-            dataSourceFactory.itemLiveDataSource
-        ) {
-            it.emptyResultLiveData
-        }
-
-        val data: LiveData<PagedList<BankZMerchantCategory>> =
-            LivePagedListBuilder(dataSourceFactory, config).build()
-        _paginationHelper.postValue(
-            PaginationHelper(
-                networkResourceLiveData,
-                emptyResultLiveData,
-                data
-            )
-        )
+//        val networkResourceLiveData: LiveData<Event<NetworkResource>> = Transformations.switchMap(
+//            dataSourceFactory.itemLiveDataSource
+//        ) {
+//            it.networkResource
+//        }
+//
+//        val emptyResultLiveData: LiveData<Event<Boolean>> = Transformations.switchMap(
+//            dataSourceFactory.itemLiveDataSource
+//        ) {
+//            it.emptyResultLiveData
+//        }
+//
+//        val data: LiveData<PagedList<BankZMerchantCategory>> =
+//            LivePagedListBuilder(dataSourceFactory, config).build()
+//        _paginationHelper.postValue(
+//            PaginationHelper(
+//                networkResourceLiveData,
+//                emptyResultLiveData,
+//                data
+//            )
+//        )
     }
 
     fun textChanged(filter: String) = subject.onNext(filter)

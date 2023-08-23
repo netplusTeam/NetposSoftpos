@@ -8,9 +8,8 @@ import android.view.ViewGroup
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.textfield.TextInputEditText
-import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.FragmentDisplayQrBinding
 import com.woleapp.netpos.contactless.model.PayWithQrRequest
@@ -69,7 +68,7 @@ class DisplayQrFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
-        val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
         netposID = user.netplus_id
         userTID = user.terminal_id
         name = user.business_name
@@ -143,25 +142,6 @@ class DisplayQrFragment : BaseFragment() {
                 containerViewId = R.id.container_main,
                 fragmentName = "Display QR Result",
             )
-        }
-    }
-
-    private fun initPartnerID() {
-        val bankList = mapOf(
-            "firstbank" to "firstbank",
-            "netpos" to "netpos",
-            "easypay" to "fcmb",
-            "fcmbeasypay" to "fcmb",
-            "easypayfcmb" to "fcmb",
-            "providuspos" to "providus",
-            "providus" to "providus",
-            "providussoftpos" to "providus",
-            "wemabank" to "wemabank",
-            "zenith" to "zenith",
-        )
-
-        bankList.forEach { (key, value) ->
-            if (key == BuildConfig.FLAVOR) partnerID = value
         }
     }
 }

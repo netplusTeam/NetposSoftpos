@@ -99,7 +99,7 @@ class ContactlessRegViewModel @Inject constructor(
                             it.errorBody()?.charStream(),
                             ExistingCustomerError::class.java,
                         ).message
-                        //      Prefs.putString(WALLET_RESPONSE, errorMsg)
+                        //      DPrefs.putString(WALLET_RESPONSE, errorMsg)
                     } catch (e: java.lang.Exception) {
                         //
                     }

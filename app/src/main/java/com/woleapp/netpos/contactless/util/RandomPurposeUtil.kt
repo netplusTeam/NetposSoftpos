@@ -13,7 +13,6 @@ import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -391,8 +390,8 @@ object RandomPurposeUtil {
         observe(
             lifecycleOwner,
             object : Observer<T> {
-                override fun onChanged(t: T?) {
-                    observer?.onChanged(t)
+                override fun onChanged(value: T) {
+                    observer?.onChanged(value)
                     removeObserver(this)
                 }
             },
