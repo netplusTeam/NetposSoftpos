@@ -10,7 +10,6 @@ import com.google.gson.Gson
 import com.woleapp.netpos.contactless.model.ConfigurationData
 import com.woleapp.netpos.contactless.model.NibssResponse
 import com.woleapp.netpos.contactless.model.User
-import com.woleapp.netpos.contactless.nibss.Keys
 
 fun useStormTerminalId() = DPrefs.getBoolean(PREF_USE_STORM_TERMINAL_ID, true)
 fun TransactionResponse.toNibssResponse(remark: String? = null): NibssResponse =
@@ -47,8 +46,8 @@ object Singletons {
         return ConfigurationData(
             UtilityParam.CONFIGURATION_DATA_IP,
             UtilityParam.CONFIGURATION_DATA_PORT,
-            Keys.posvasLiveKey1,
-            Keys.posvasLiveKey2,
+            UtilityParam.STRING_POS_VAS_LIVE_KEY_1,
+            UtilityParam.STRING_POS_VAS_LIVE_KEY_2,
         )
     }
 

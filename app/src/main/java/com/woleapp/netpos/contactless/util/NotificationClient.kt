@@ -1,6 +1,6 @@
 package com.woleapp.netpos.contactless.util
 
-import com.pixplicity.easyprefs.library.Prefs
+import com.dsofttech.dprefs.utils.DPrefs
 import com.woleapp.netpos.contactless.network.NotificationService
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -10,8 +10,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
-import timber.log.Timber
-
 
 class NotificationClient {
     companion object {
@@ -50,10 +48,11 @@ class NotificationClient {
 
 class TokenInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
+        val userToken = if (DPrefs.getString(PREF_USER_TOKEN, "").isEmpty()) null else DPrefs.getString(PREF_USER_TOKEN, "")
         var request = chain.request()
         val headersInReq = request.headers
         if (headersInReq["Authorization"].isNullOrEmpty()) {
-            Prefs.getString(PREF_USER_TOKEN, null)?.let {
+            userToken?.let {
                 request = request.newBuilder().addHeader("Authorization", "Bearer $it").build()
             }
         }

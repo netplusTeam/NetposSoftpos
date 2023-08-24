@@ -138,3 +138,118 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getRrnServiceBaseUrl(JNIEn
                                                                            jobject thiz) {
     return (*env)->NewStringUTF(env, "https://getrrn.netpluspay.com");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getTestKey2(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "86CBCDE3B0A22354853E04521686863D");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getTestKey1(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "5D25072F04832A2329D93E4F91BA23A2");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getEpmsLiveKey1(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "E6891F73948F16C4D6E979D68534D0F4");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getEpmsLiveKey2(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "3D10EF707F98E3543E32B570E9E9AE86");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getCertKey1(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "5D25072F04832A2329D93E4F91BA23A2");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getCertKey2(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "86CBCDE3B0A22354853E04521686863D");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPosVasLiveKey1(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "9BF76D3E13ADD67A51549B7C3EB0E3AD");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPosVasLiveKey2(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "A4BAEC5E31BFD913919262C7A7A76D52");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdFirstB(JNIEnv *env,
+                                                                         jobject thiz) {
+    return (*env)->NewStringUTF(env, "7FD43DF1-633F-4250-8C6F-B49DBB9650EA");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdEasyPay(JNIEnv *env,
+                                                                          jobject thiz) {
+    return (*env)->NewStringUTF(env, "1B0E68FD-7676-4F2C-883D-3931C3564190");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdFcmbEasyPay(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "1B0E68FD-7676-4F2C-883D-3931C3564190");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdEasyPayFcmb(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "1B0E68FD-7676-4F2C-883D-3931C3564190");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdProvidusPos(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "8B26F328-040F-4F27-A5BC-4414AB9D1EFA");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdStanbic(JNIEnv *env,
+                                                                          jobject thiz) {
+    return (*env)->NewStringUTF(env, "8B26F328-040F-4F27-A5BC-4414AB9D1EFA");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdProvidus(JNIEnv *env,
+                                                                           jobject thiz) {
+    return (*env)->NewStringUTF(env, "8B26F328-040F-4F27-A5BC-4414AB9D1EFA");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdProvidusSoftPos(JNIEnv *env,
+                                                                                  jobject thiz) {
+    return (*env)->NewStringUTF(env, "8B26F328-040F-4F27-A5BC-4414AB9D1EFA");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdWemaB(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "1E3D050B-6995-495F-982A-0511114959C8");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getPartnerIdZenith(JNIEnv *env,
+                                                                         jobject thiz) {
+    return (*env)->NewStringUTF(env, "C936667C-0B02-4A34-80D0-0FC5B525256E");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getXClientId(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "85522f45-e459-4548-8b20-3a922196c515");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getXAccessCode(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "a14014e18e2cffc4d74e150ed68a472bd94189db82d374306d5b307dc7620f20");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getTlvByteWrapperConstant(JNIEnv *env,
+                                                                                jobject thiz) {
+    return (*env)->NewStringUTF(env, "48656c6c6f20576f726c64207772697474656e206f6e20");
+}

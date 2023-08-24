@@ -4,14 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.*
-import androidx.paging.LivePagedListBuilder
+import androidx.lifecycle.* // ktlint-disable no-wildcard-imports
 import androidx.paging.PagedList
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.model.*
-import com.woleapp.netpos.contactless.network.StormApiClient
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.BankZQrMCCDataSourceFactory
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.network.StormApiClient
+import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -76,7 +75,6 @@ class QRViewModel : ViewModel() {
         }
     }
 
-
     val loadingStateLiveData = _paginationHelper.switchMap {
         it.eventLiveData!!
     }
@@ -89,9 +87,8 @@ class QRViewModel : ViewModel() {
     val bankZQrRegistrationDone: LiveData<Event<Boolean>>
         get() = _bankZQrRegistrationDone
 
-
     val bankZMccList = _paginationHelper.switchMap {
-        Timber.e("size: ${it.data?.value?.size.toString()}")
+        Timber.e("size: ${it.data?.value?.size}")
         if (it.data == null) {
             Timber.e("data is null")
         }
@@ -104,7 +101,6 @@ class QRViewModel : ViewModel() {
         .setPageSize(20)
         .setEnablePlaceholders(false)
         .build()
-
 
     fun getMasterPassQr(amount: Double) {
         Timber.e("Get masterpass")
@@ -124,10 +120,11 @@ class QRViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .flatMap {
                 val bmp = BitmapFactory.decodeStream(it.byteStream())
-                if (bmp != null)
+                if (bmp != null) {
                     Single.just(bmp)
-                else
+                } else {
                     throw NullPointerException("Bitmap is null")
+                }
             }
             .subscribe { t1, t2 ->
                 t1?.let { bmp ->
@@ -143,8 +140,8 @@ class QRViewModel : ViewModel() {
                     }
                     _qrErrorMessage.value = Event("Error: ${error.localizedMessage ?: "Error"}")
                     message.value = Event(
-                        "An error occurred while fetching QR"
-                  )
+                        "An error occurred while fetching QR",
+                    )
                 }
             }.disposeWith(disposable)
     }
@@ -158,7 +155,7 @@ class QRViewModel : ViewModel() {
             "${
                 SimpleDateFormat(
                     "yMM",
-                    Locale.getDefault()
+                    Locale.getDefault(),
                 ).format(Date(System.currentTimeMillis()))
             }$range1$range2"
         val jsonObject = JsonObject()
@@ -168,8 +165,9 @@ class QRViewModel : ViewModel() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .flatMap {
-                if (it.returnCode.isNullOrEmpty() || it.returnCode != "Success" || it.codeUrl.isNullOrEmpty())
+                if (it.returnCode.isNullOrEmpty() || it.returnCode != "Success" || it.codeUrl.isNullOrEmpty()) {
                     throw Exception("Could not fetch QR code")
+                }
                 Single.just(encodeAsBitmap(it.codeUrl, 150, 150))
             }
             .subscribeOn(Schedulers.io())
@@ -235,10 +233,11 @@ class QRViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .flatMap {
                 val bitmap: Bitmap? = it.qrCode.decodeBase64ToBitmap()
-                if (bitmap != null)
+                if (bitmap != null) {
                     Single.just(bitmap)
-                else
+                } else {
                     throw NullPointerException("Bitmap is null")
+                }
             }
             .subscribe { t1, t2 ->
                 t1?.let {
@@ -294,27 +293,27 @@ class QRViewModel : ViewModel() {
 
     fun getBankZMCC(bankZMCCDto: BankZMCCDto) {
         dataSourceFactory = BankZQrMCCDataSourceFactory(bankZMCCDto, disposable)
-        val networkResourceLiveData: LiveData<Event<NetworkResource>> = Transformations.switchMap(
-            dataSourceFactory.itemLiveDataSource
-        ) {
-            it.networkResource
-        }
-
-        val emptyResultLiveData: LiveData<Event<Boolean>> = Transformations.switchMap(
-            dataSourceFactory.itemLiveDataSource
-        ) {
-            it.emptyResultLiveData
-        }
-
-        val data: LiveData<PagedList<BankZMerchantCategory>> =
-            LivePagedListBuilder(dataSourceFactory, config).build()
-        _paginationHelper.postValue(
-            PaginationHelper(
-                networkResourceLiveData,
-                emptyResultLiveData,
-                data
-            )
-        )
+//        val networkResourceLiveData: LiveData<Event<NetworkResource>> = Transformations.switchMap(
+//            dataSourceFactory.itemLiveDataSource
+//        ) {
+//            it.networkResource
+//        }
+//
+//        val emptyResultLiveData: LiveData<Event<Boolean>> = Transformations.switchMap(
+//            dataSourceFactory.itemLiveDataSource
+//        ) {
+//            it.emptyResultLiveData
+//        }
+//
+//        val data: LiveData<PagedList<BankZMerchantCategory>> =
+//            LivePagedListBuilder(dataSourceFactory, config).build()
+//        _paginationHelper.postValue(
+//            PaginationHelper(
+//                networkResourceLiveData,
+//                emptyResultLiveData,
+//                data
+//            )
+//        )
     }
 
     fun textChanged(filter: String) = subject.onNext(filter)

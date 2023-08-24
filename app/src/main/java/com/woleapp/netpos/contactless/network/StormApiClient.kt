@@ -7,6 +7,8 @@ import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.PREF_USER_TOKEN
 import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.UtilityParam
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_X_ACCESS_CODE
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_X_CLIENT_ID
 import okhttp3.* // ktlint-disable no-wildcard-imports
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -220,10 +222,10 @@ class NipInterceptor : Interceptor {
         val builder = request.newBuilder()
         Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).netplus_id
         DPrefs.getString(PREF_USER_TOKEN, "")
-        builder.addHeader("X-CLIENT-ID", "85522f45-e459-4548-8b20-3a922196c515")
+        builder.addHeader("X-CLIENT-ID", STRING_X_CLIENT_ID)
         builder.addHeader(
             "X-ACCESSCODE",
-            "a14014e18e2cffc4d74e150ed68a472bd94189db82d374306d5b307dc7620f20",
+            STRING_X_ACCESS_CODE,
 
         )
         return chain.proceed(builder.build())
