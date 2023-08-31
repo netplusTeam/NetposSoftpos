@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.viewmodels
 
 import android.app.AlertDialog
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -10,19 +9,29 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.github.barteksc.pdfviewer.PDFView
+import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.ContactlessClient
+import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.disposeWith
 import com.woleapp.netpos.contactless.util.getResponseBody
-import io.reactivex.android.schedulers.AndroidSchedulers
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
+import javax.inject.Named
 
-class RegistrationViewModel : ViewModel() {
+@HiltViewModel
+class RegistrationViewModel @Inject constructor(
+    private val contactlessRegRepository: ContactlessRegRepository,
+    private val gson: Gson,
+    @Named("io-scheduler") private val ioSchedule: Scheduler,
+    @Named("main-scheduler") private val mainThreadSchedule: Scheduler,
+) : ViewModel() {
 
     val authInProgress = MutableLiveData(false)
     private val contactlessService = ContactlessClient.getContactlessService()
@@ -94,7 +103,7 @@ class RegistrationViewModel : ViewModel() {
                     regFBN(bank, deviceSerialId)
                 }
             } else if (BuildConfig.FLAVOR.contains("zenith")) {
-                if (registrationBankZModel.value?.Password != registrationZenithConfirmPassword.value){
+                if (registrationBankZModel.value?.Password != registrationZenithConfirmPassword.value) {
                     _message.value = Event("Password mismatch")
                     return
                 }
@@ -135,8 +144,8 @@ class RegistrationViewModel : ViewModel() {
     private fun reg(bank: String, deviceSerialId: String) {
         authInProgress.value = true
         contactlessService.register(registrationModel.value, bank, deviceSerialId)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioSchedule)
+            .observeOn(mainThreadSchedule)
             .doFinally {
                 authInProgress.value = false
             }
@@ -162,9 +171,17 @@ class RegistrationViewModel : ViewModel() {
 
     private fun regFBN(bank: String, deviceSerialId: String) {
         authInProgress.value = true
-        contactlessService.registerFBN(registrationFBNModel.value, bank, deviceSerialId)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        contactlessRegRepository.encryptedRegisterFBN(
+            gson.toJson(
+                EncryptedApiRequestModel(
+                    gson.toJson(registrationFBNModel.value),
+                ),
+            ),
+            bank,
+            deviceSerialId,
+        )
+            .subscribeOn(ioSchedule)
+            .observeOn(mainThreadSchedule)
             .doFinally {
                 authInProgress.value = false
             }
@@ -195,8 +212,8 @@ class RegistrationViewModel : ViewModel() {
             bank,
             deviceSerialId,
         )
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(ioSchedule)
+            .observeOn(mainThreadSchedule)
             .doFinally {
                 authInProgress.value = false
             }

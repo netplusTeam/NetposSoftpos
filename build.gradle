@@ -4,7 +4,7 @@ buildscript {
         lifecycle_version = "2.3.1"
         arch_version = "2.1.0"
         kotlin_version = '1.6.0'
-        room_version = "2.3.0"
+        room_version = "2.5.2"
         pin_view = "1.4.4"
     }
     repositories {

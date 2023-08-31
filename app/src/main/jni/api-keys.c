@@ -253,3 +253,15 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getTlvByteWrapperConstant(
                                                                                 jobject thiz) {
     return (*env)->NewStringUTF(env, "48656c6c6f20576f726c64207772697474656e206f6e20");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getEncryptionSecreteKey(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "hq+fAexgn7hK2edm");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getEncryptionSecreteIv(JNIEnv *env,
+                                                                             jobject thiz) {
+    return (*env)->NewStringUTF(env, "0FJk4uPzoWBjXI+z");
+}

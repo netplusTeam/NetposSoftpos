@@ -3,13 +3,8 @@ package com.woleapp.netpos.contactless.network
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.model.*
 import io.reactivex.Single
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
 import retrofit2.Response
-
+import retrofit2.http.*
 
 interface AccountLookUpService {
 
@@ -20,21 +15,12 @@ interface AccountLookUpService {
 //        @Query("deviceSerialId") deviceSerialId: String,
 //    ): Single<AccountNumberLookUpResponse>
 
-
     @POST("account-lookup")
     fun findAccount(
         @Body accountNumber: AccountNumberLookUpRequest,
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<Response<AccountNumberLookUpResponse>>
-
-
-    @POST("account-lookup")
-    fun findAccountForFirstBankUser(
-        @Body accountNumber: AccountNumberLookUpRequest,
-        @Query("partnerId") partnerId: String,
-        @Query("deviceSerialId") deviceSerialId: String,
-    ): Single<ConfirmOTPResponse>
 
     @POST("confirm-otp")
     fun confirmOTP(
@@ -45,13 +31,6 @@ interface AccountLookUpService {
     @POST("user/register-existing-user")
     fun registerExistingAccount(
         @Body registerExistingAccountRegisterRequest: ExistingAccountRegisterRequest,
-        @Query("partnerId") partnerId: String,
-        @Query("deviceSerialId") deviceSerialId: String,
-    ): Single<ExistingAccountRegisterResponse>
-
-    @POST("user/register-existing-user")
-    fun registerExistingAccountForFBN(
-        @Body registerExistingAccountRegisterRequest: RegistrationForExistingFBNUsersRequest,
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<ExistingAccountRegisterResponse>
@@ -93,4 +72,18 @@ interface AccountLookUpService {
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<GeneralResponse>
+
+    @POST("account-lookup")
+    fun encryptedAccountLookUpRequest(
+        @Body data: EncryptedApiRequestModel,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<EncryptedApiResponseModel>
+
+    @POST("user/register-existing-user")
+    fun encryptedRegisterExistingAccount(
+        @Body data: EncryptedApiRequestModel,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<EncryptedApiResponseModel>
 }

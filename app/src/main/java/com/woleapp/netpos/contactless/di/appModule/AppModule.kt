@@ -6,6 +6,7 @@ import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
+import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
@@ -16,6 +17,7 @@ import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NETPOS_TRANSACTIO
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NOTIFICATION_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_RRN_SERVICE_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SEND_VERVE_OTP_BASE_URL
+import com.woleapp.netpos.contactless.util.encryption.DataEncryptionAndDecryptionImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -263,6 +265,12 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun providesContactlessRegistrationApiService(
+        @Named("contactlessRegRetrofit") retrofit: Retrofit,
+    ): ContactlessRegistrationService = retrofit.create(ContactlessRegistrationService::class.java)
+
+    @Provides
+    @Singleton
     fun providesGson(): Gson = Gson()
 
     @Provides
@@ -302,4 +310,18 @@ object AppModule {
     fun providesMqttLocalDao(
         appDatabase: AppDatabase,
     ): MqttLocalDao = appDatabase.mqttLocalDao()
+
+    @Provides
+    @Singleton
+    fun providesDataEncryptionAndDecryption(
+        dataEncryptionAndDecryptionImpl: DataEncryptionAndDecryptionImpl,
+    ): DataEncryptionAndDecryption =
+        dataEncryptionAndDecryptionImpl
+
+    @Provides
+    @Singleton
+    fun providesDataContactlessRepository(
+        contactlessRegRepositoryImpl: ContactlessRegRepositoryImpl
+    ): ContactlessRegRepository =
+        contactlessRegRepositoryImpl
 }
