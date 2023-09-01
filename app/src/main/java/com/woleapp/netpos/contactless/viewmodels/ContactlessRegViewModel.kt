@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.Event
@@ -107,39 +107,6 @@ class ContactlessRegViewModel @Inject constructor(
                 }
             }
 
-    //    fun accountLookUpp(accountNumber: String, partnerId: String, deviceSerialId: String) {
-//        _accountNumberResponse.postValue(Resource.loading(null))
-//        saveAccountNumber(accountNumber)
-//        disposable.add(
-//            contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe { data, error ->
-//                    data?.let {
-//                        _accountNumberResponse.postValue(Resource.success(it))
-//                        savePhoneNumber(it.phone)
-//                        _message.value = Event(it.message)
-//                    }
-//                    error?.let {
-//                        _accountNumberResponse.postValue(Resource.error(null))
-//                        Timber.d("ERROR==${it.localizedMessage}")
-//                        (it as? HttpException).let { httpException ->
-//                            val errorMessage = httpException?.response()?.errorBody()?.string()
-//                                ?: "{\"message\":\"Unexpected error\"}"
-//                            _message.value = Event(
-//                                try {
-//                                    gson.fromJson(errorMessage, ExistingCustomerError::class.java).message
-//                                        ?: "Error"
-//                                } catch (e: Exception) {
-//                                    "Error"
-//                                },
-//                            )
-//                            // Timber.e("SHOWME--->$errorMessage")
-//                        }
-//                    }
-//                },
-//        )
-//    }
     fun findAccountForFirstBankUser(
         accountNumber: String,
         partnerId: String,
@@ -147,7 +114,13 @@ class ContactlessRegViewModel @Inject constructor(
     ) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.findAccountForFirstBankUser(accountNumber, partnerId, deviceSerialId)
+            contactlessRegRepo.encryptedAccountLookUpRequest(
+                gson.toJson(
+                    AccountNumberLookUpRequest(accountNumber),
+                ),
+                partnerId,
+                deviceSerialId,
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
@@ -490,8 +463,8 @@ class ContactlessRegViewModel @Inject constructor(
     ) {
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.registerExistingAccountForFBN(
-                accountNumber,
+            contactlessRegRepo.encryptedRegisterExistingAccount(
+                gson.toJson(accountNumber),
                 partnerId,
                 deviceSerialId,
             )

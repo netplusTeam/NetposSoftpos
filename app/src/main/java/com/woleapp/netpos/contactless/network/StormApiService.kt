@@ -15,13 +15,13 @@ interface StormApiService {
 
     @POST("api/auth")
     fun userToken(
-        @Body credentials: JsonObject?
+        @Body credentials: JsonObject?,
     ): Single<TokenResp>
 
     @POST("api/auth")
     fun getBillsToken(
         @Header("Authorization") appToken: String?,
-        @Body credentials: JsonObject?
+        @Body credentials: JsonObject?,
     ): Single<TokenResp>
 
     @GET("api/agents/{stormId}")
@@ -29,21 +29,21 @@ interface StormApiService {
 
     @POST("api/passwordReset")
     fun passwordReset(
-        @Body payload: JsonObject?
+        @Body payload: JsonObject?,
     ): Single<Response<Any?>?>
 
     @POST("api/merchant-password-reset")
     fun passwordResetForProvidus(
         @Body payload: JsonObject?,
         @Query("partnerId") partnerId: String,
-        @Query("deviceId") deviceId: String
+        @Query("deviceId") deviceId: String,
     ): Single<Response<Any?>?>
 
     @GET("/api/nip-notifications")
     fun getNotificationByReference(
         @Query("referenceNo") reference: String,
         @Header("X-CLIENT-ID") clientId: String,
-        @Header("X-ACCESSCODE") accessCode: String
+        @Header("X-ACCESSCODE") accessCode: String,
     ): Single<NipNotification>
 
     @GET("/api/nip-notifications")
@@ -52,7 +52,7 @@ interface StormApiService {
         @Query("from") from: String? = null,
         @Query("to") to: String? = null,
         @Header("X-CLIENT-ID") clientId: String,
-        @Header("X-ACCESSCODE") accessCode: String
+        @Header("X-ACCESSCODE") accessCode: String,
     ): Single<List<NipNotification>>
 
     @GET("api/sessionCode")

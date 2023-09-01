@@ -10,5 +10,5 @@ data class Data(
     val fullName: String,
     val accountNumber: String,
     val email: String,
-    val phone: String
-): Parcelable
+    val phone: String,
+) : Parcelable

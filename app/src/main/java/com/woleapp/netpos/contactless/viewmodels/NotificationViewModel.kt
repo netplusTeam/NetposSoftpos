@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
+import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.model.AppCampaignModel
 import com.woleapp.netpos.contactless.network.NotificationRepository
 import com.woleapp.netpos.contactless.util.AppConstants.DATA_BASE_ERROR_TAG
@@ -20,11 +21,11 @@ import javax.inject.Named
 class NotificationViewModel @Inject constructor(
     private val notificationRepository: NotificationRepository,
     private val disposable: CompositeDisposable,
+    private val notificationDao: AppNotificationDao,
     @Named("io-scheduler")
     private val ioScheduler: Scheduler,
     @Named("main-scheduler")
-    private val mainThreadScheduler: Scheduler,
-    private val notificationDao: AppNotificationDao,
+    private val mainThreadScheduler: Scheduler
 ) : ViewModel() {
     val allMessages: LiveData<List<AppCampaignModel>> get() = notificationDao.getAllMessages()
     val unreadNotifications: LiveData<List<AppCampaignModel>> get() = notificationDao.getAllMessagesByHasBeenReadStatus(false)

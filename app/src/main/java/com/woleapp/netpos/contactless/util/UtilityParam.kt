@@ -52,6 +52,8 @@ object UtilityParam {
     private external fun getXClientId(): String
     private external fun getXAccessCode(): String
     private external fun getTlvByteWrapperConstant(): String
+    private external fun getEncryptionSecreteKey(): String
+    private external fun getEncryptionSecreteIv(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
     val ZENITH_BASE_URL = getZenithBaseUrl()
@@ -99,4 +101,6 @@ object UtilityParam {
     val STRING_X_CLIENT_ID = getXClientId()
     val STRING_X_ACCESS_CODE = getXAccessCode()
     val STRING_TLV_BYTE_WRAPPER_CONSTANT = getTlvByteWrapperConstant()
+    val STRING_SECRET_KEY = getEncryptionSecreteKey()
+    val STRING_SECRET_IV = getEncryptionSecreteIv()
 }

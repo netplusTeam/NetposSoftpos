@@ -13,14 +13,8 @@ import com.woleapp.netpos.contactless.model.AppCampaignModel
 import com.woleapp.netpos.contactless.model.MqttEventsLocal
 import com.woleapp.netpos.contactless.util.RoomTypeConverters
 
-@Database(
-    entities = [TransactionResponse::class, MqttEventsLocal::class, AppCampaignModel::class],
-    version = 10,
-    exportSchema = false,
-)
-@TypeConverters(
-    RoomTypeConverters::class,
-)
+@Database(entities = [TransactionResponse::class, MqttEventsLocal::class, AppCampaignModel::class], version = 10, exportSchema = false,)
+@TypeConverters(RoomTypeConverters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun transactionResponseDao(): TransactionResponseDao
@@ -37,6 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun buildDatabase(context: Context) =
             Room.databaseBuilder(context, AppDatabase::class.java, "netpos-db")
+                .allowMainThreadQueries()
                 .fallbackToDestructiveMigration()
                 .build()
     }

@@ -30,7 +30,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_EASY_PAY
+import com.woleapp.netpos.contactless.util. UtilityParam.STRING_PARTNER_ID_EASY_PAY
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_EASY_PAY_FCMB
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_FCMB_EASY_PAY
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_FIRST_B
