@@ -294,7 +294,8 @@ object AppModule {
     @Provides
     @Singleton
     fun providesAppDatabase(
-        @ApplicationContext context: Context) : AppDatabase =
+        @ApplicationContext context: Context,
+    ): AppDatabase =
         AppDatabase.getDatabaseInstance(context)
 
 //    @Provides
@@ -306,7 +307,8 @@ object AppModule {
     @Provides
     @Singleton
     fun providesNotificationDao(
-        appDatabase: AppDatabase): AppNotificationDao {
+        appDatabase: AppDatabase,
+    ): AppNotificationDao {
         return appDatabase.getAppNotificationDao()
     }
 
@@ -325,7 +327,7 @@ object AppModule {
     @Provides
     @Singleton
     @Named("network")
-    private fun providesNetworkDataEncryptionAndDecryptionImpl(): DataEncryptionAndDecryptionImpl =
+    fun providesNetworkDataEncryptionAndDecryptionImpl(): DataEncryptionAndDecryptionImpl =
         DataEncryptionAndDecryptionImpl(STRING_SECRET_KEY, STRING_SECRET_IV)
 
     @Provides

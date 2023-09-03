@@ -9,8 +9,8 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class DataEncryptionAndDecryptionImpl @AssistedInject constructor(
-    @Assisted private val secretKey: String,
-    @Assisted private val iv: String,
+    @Assisted("secretKey") private val secretKey: String,
+    @Assisted("iv") private val iv: String,
 ) : DataEncryptionAndDecryption {
 
     private fun getEncryptionKey(secreteKey: String): ByteArray {

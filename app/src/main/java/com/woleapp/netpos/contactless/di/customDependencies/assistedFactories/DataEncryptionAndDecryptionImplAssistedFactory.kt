@@ -7,7 +7,7 @@ import dagger.assisted.AssistedFactory
 @AssistedFactory
 interface DataEncryptionAndDecryptionImplAssistedFactory {
     fun createDataEncryptionAndDecryptionImpl(
-        @Assisted secreteKey: String,
-        @Assisted iv: String,
+        @Assisted("secretKey") secretKey: String,
+        @Assisted("iv") iv: String,
     ): DataEncryptionAndDecryptionImpl
 }

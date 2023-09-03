@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.util
 
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.util.encryption.DataEncryptionAndDecryptionImpl
+import timber.log.Timber
 
 object UtilityParam {
 
@@ -67,6 +68,15 @@ object UtilityParam {
     private external fun getXClientId(): String
     private external fun getXAccessCode(): String
     private external fun getTlvByteWrapperConstant(): String
+
+    private fun testingTesting() {
+        val aaa = getStringNotificationBaseUrlNoApi()
+        Timber.tag("CHECK_CHECK_1").d(aaa)
+        val bbb = encryptionHelper.decryptData(aaa)
+        Timber.tag("CHECK_CHECK_2").d(bbb)
+    }
+
+    val aaa = testingTesting()
 
     val STRING_NOTIFICATION_BASE_URL_NO_API =
         encryptionHelper.decryptData(getStringNotificationBaseUrlNoApi())
