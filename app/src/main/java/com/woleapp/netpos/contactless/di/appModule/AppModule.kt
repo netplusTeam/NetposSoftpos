@@ -7,6 +7,8 @@ import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
+import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.domain.implementations.SharedPrefsManager
 import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
@@ -16,6 +18,8 @@ import com.woleapp.netpos.contactless.util.UtilityParam.STRING_GET_QR_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NETPOS_TRANSACTION_API_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NOTIFICATION_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_RRN_SERVICE_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SECRET_IV
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SECRET_KEY
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SEND_VERVE_OTP_BASE_URL
 import com.woleapp.netpos.contactless.util.encryption.DataEncryptionAndDecryptionImpl
 import dagger.Module
@@ -313,15 +317,28 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("network")
+    private fun providesNetworkDataEncryptionAndDecryptionImpl(): DataEncryptionAndDecryptionImpl =
+        DataEncryptionAndDecryptionImpl(STRING_SECRET_KEY, STRING_SECRET_IV)
+
+    @Provides
+    @Singleton
+    @Named("network")
     fun providesDataEncryptionAndDecryption(
-        dataEncryptionAndDecryptionImpl: DataEncryptionAndDecryptionImpl,
+        @Named("network") dataEncryptionAndDecryptionImpl: DataEncryptionAndDecryptionImpl,
     ): DataEncryptionAndDecryption =
         dataEncryptionAndDecryptionImpl
 
     @Provides
     @Singleton
     fun providesDataContactlessRepository(
-        contactlessRegRepositoryImpl: ContactlessRegRepositoryImpl
+        contactlessRegRepositoryImpl: ContactlessRegRepositoryImpl,
     ): ContactlessRegRepository =
         contactlessRegRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun providesSharedPrefsManagerContract(
+        sharedPrefsManager: SharedPrefsManager,
+    ): SharedPrefsManagerContract = sharedPrefsManager
 }

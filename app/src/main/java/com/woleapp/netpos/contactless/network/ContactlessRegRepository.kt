@@ -74,4 +74,8 @@ interface ContactlessRegRepository {
         partnerId: String,
         deviceSerialId: String,
     ): Single<RegistrationModel?>
+
+    fun getCred(
+        data: String,
+    ): Single<Boolean>
 }

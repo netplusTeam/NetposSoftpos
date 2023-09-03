@@ -265,3 +265,9 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getEncryptionSecreteIv(JNI
                                                                              jobject thiz) {
     return (*env)->NewStringUTF(env, "0FJk4uPzoWBjXI+z");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getNetPosMqttPortNumber(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "8883");
+}

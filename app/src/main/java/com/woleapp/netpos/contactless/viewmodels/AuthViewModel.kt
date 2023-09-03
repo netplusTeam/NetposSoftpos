@@ -8,13 +8,17 @@ import com.auth0.android.jwt.JWT
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.model.AuthError
-import com.woleapp.netpos.contactless.model.GeneralResponse
-import com.woleapp.netpos.contactless.model.User
+import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
+import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.network.StormApiService
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.RESET_USERNAME
+import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import com.woleapp.netpos.contactless.util.Singletons.gson
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -22,8 +26,31 @@ import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
 import retrofit2.HttpException
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Named
 
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor() : ViewModel() {
+    @Inject
+    @Named("network")
+    lateinit var encryptionHelper: DataEncryptionAndDecryption
+
+    @Inject
+    lateinit var contactlessRegRepository: ContactlessRegRepository
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
+
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    lateinit var sharedPrefs: SharedPrefsManagerContract
     private val disposables = CompositeDisposable()
     var stormApiService: StormApiService? = null
     var appCredentials: JsonObject? = null
@@ -49,6 +76,23 @@ class AuthViewModel : ViewModel() {
         get() = _message
 
     fun login(deviceSerialId: String) {
+        val requestCred = encryptionHelper.encryptData(
+            gson.toJson(
+                RequestEncryptionCredentialsModel("request_for_credentials"),
+            ),
+        )
+        contactlessRegRepository.getCred(requestCred)
+            .subscribeOn(ioScheduler)
+            .observeOn(mainThreadScheduler)
+            .subscribe { data, error ->
+                data?.let {
+                    if (it) {
+                        val cred = sharedPrefs.retrieveString(STRING_TAG_APP_ENCRYPTION_CREDENTIALS, null)
+                        Timber.tag("${STRING_TAG_APP_ENCRYPTION_CREDENTIALS}_TAG").d(cred)
+                    }
+                }
+            }.disposeWith(compositeDisposable)
+
         val username = usernameLiveData.value
         val password = passwordLiveData.value
         if (username.isNullOrEmpty() || password.isNullOrEmpty()) {

@@ -3,18 +3,22 @@ package com.woleapp.netpos.contactless.network
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import io.reactivex.Single
 import retrofit2.Response
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 class ContactlessRegRepositoryImpl @Inject constructor(
     private val accountLookUpService: AccountLookUpService,
     private val contactlessRegService: ContactlessRegistrationService,
-    private val encryptionHelper: DataEncryptionAndDecryption,
+    @Named("network") private val networkEncryptionHelper: DataEncryptionAndDecryption,
     private val gson: Gson,
+    private val sharedPrefs: SharedPrefsManagerContract,
 ) : ContactlessRegRepository {
     override fun findAccount(
         accountNumber: String,
@@ -92,7 +96,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ): Single<ConfirmOTPResponse?> =
         accountLookUpService.encryptedAccountLookUpRequest(
             gson.fromJson(
-                encryptionHelper.encryptData(data),
+                networkEncryptionHelper.encryptData(data),
                 EncryptedApiRequestModel::class.java,
             ),
             partnerId,
@@ -101,7 +105,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             if (!it.sendResponse.isNullOrEmpty()) {
                 Single.just(
                     gson.fromJson(
-                        encryptionHelper.decryptData(
+                        networkEncryptionHelper.decryptData(
                             it.sendResponse,
                         ),
                         ConfirmOTPResponse::class.java,
@@ -121,7 +125,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ): Single<ExistingAccountRegisterResponse?> =
         accountLookUpService.encryptedRegisterExistingAccount(
             gson.fromJson(
-                encryptionHelper.encryptData(data),
+                networkEncryptionHelper.encryptData(data),
                 EncryptedApiRequestModel::class.java,
             ),
             partnerId,
@@ -134,7 +138,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             } else {
                 Single.just(
                     gson.fromJson(
-                        encryptionHelper.decryptData(it.sendResponse),
+                        networkEncryptionHelper.decryptData(it.sendResponse),
                         ExistingAccountRegisterResponse::class.java,
                     ),
                 )
@@ -148,7 +152,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ): Single<RegistrationModel?> =
         contactlessRegService.encryptedRegisterFBN(
             gson.fromJson(
-                encryptionHelper.encryptData(data),
+                networkEncryptionHelper.encryptData(data),
                 EncryptedApiRequestModel::class.java,
             ),
             partnerId,
@@ -161,10 +165,42 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             } else {
                 Single.just(
                     gson.fromJson(
-                        encryptionHelper.decryptData(it.sendResponse),
+                        networkEncryptionHelper.decryptData(it.sendResponse),
                         RegistrationModel::class.java,
                     ),
                 )
             }
         }
+
+    override fun getCred(data: String): Single<Boolean> =
+        contactlessRegService.getCredentials(EncryptedApiRequestModel(data))
+            .flatMap {
+                return@flatMap if (it.isSuccessful) {
+                    return@flatMap try {
+                        val response = gson.fromJson(
+                            it.body()?.sendResponse?.let { it1 ->
+                                networkEncryptionHelper.decryptData(
+                                    it1,
+                                )
+                            },
+                            EncryptionCredentials::class.java,
+                        )
+                        Single.just(
+                            if (response is EncryptionCredentials) {
+                                sharedPrefs.saveString(
+                                    STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
+                                    gson.toJson(response),
+                                )
+                                true
+                            } else {
+                                false
+                            },
+                        )
+                    } catch (e: Exception) {
+                        Single.just(false)
+                    }
+                } else {
+                    Single.just(false)
+                }
+            }
 }

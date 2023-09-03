@@ -16,6 +16,7 @@ import com.woleapp.netpos.contactless.util.PREF_LAST_LOCATION
 import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.util.UtilityParam
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NETPOS_MQTT_PORT
 import com.woleapp.netpos.contactless.util.disposeWith
 import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -27,7 +28,7 @@ import java.nio.charset.StandardCharsets
 
 object MqttHelper {
     private val SERVER_HOST = UtilityParam.BASE_URL_NETPOS_MQTT
-    private const val PORT = 8883
+    private val PORT = STRING_NETPOS_MQTT_PORT.toInt()
     private var client: Mqtt3RxClient? = null
     private var disposables = CompositeDisposable()
     private var mqttLocalDao: MqttLocalDao? = null
