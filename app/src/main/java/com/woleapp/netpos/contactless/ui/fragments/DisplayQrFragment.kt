@@ -116,7 +116,7 @@ class DisplayQrFragment : BaseFragment() {
             }
         }
         return isValidated
-    }
+     }
 
     private fun generateMerchantQr() {
         loader.show()

@@ -293,15 +293,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesAppDb(
-        @ApplicationContext context: Context,
-    ): AppDatabase = AppDatabase.getDatabaseInstance(context)
+    fun providesAppDatabase(
+        @ApplicationContext context: Context) : AppDatabase =
+        AppDatabase.getDatabaseInstance(context)
+
+//    @Provides
+//    @Singleton
+//    fun providesNotificationDao(
+//        appDatabase: AppDatabase,
+//    ): AppNotificationDao = appDatabase.getAppNotificationDao()
 
     @Provides
     @Singleton
     fun providesNotificationDao(
-        appDatabase: AppDatabase,
-    ): AppNotificationDao = appDatabase.getAppNotificationDao()
+        appDatabase: AppDatabase): AppNotificationDao {
+        return appDatabase.getAppNotificationDao()
+    }
 
     @Provides
     @Singleton

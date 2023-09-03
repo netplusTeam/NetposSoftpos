@@ -62,7 +62,7 @@ class NotificationDetailsFragment : BaseFragment() {
             }
         }
         deleteNotificationIcon.setOnClickListener {
-            viewModel.deleteMessage(clickedNotification)
+           // viewModel.deleteMessage(clickedNotification)
         }
     }
 }

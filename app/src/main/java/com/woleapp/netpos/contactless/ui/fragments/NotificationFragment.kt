@@ -64,14 +64,14 @@ class NotificationFragment : BaseFragment() {
             R.layout.notification_item_layout,
             genericRvBindingInterface,
         ) { _, clickedMessage ->
-            notificationViewModel.markMessageAsRead(clickedMessage)
+          //  notificationViewModel.markMessageAsRead(clickedMessage)
             showFragment(NotificationDetailsFragment())
         }
-        notificationViewModel.allMessages.observe(viewLifecycleOwner) { allCampaign ->
-            allCampaign?.let {
-                rvAdapter.updateData((it as ArrayList<AppCampaignModel>))
-            }
-        }
+//        notificationViewModel.allMessages.observe(viewLifecycleOwner) { allCampaign ->
+//            allCampaign?.let {
+//                rvAdapter.updateData((it as ArrayList<AppCampaignModel>))
+//            }
+//        }
         rv.adapter = rvAdapter
     }
 

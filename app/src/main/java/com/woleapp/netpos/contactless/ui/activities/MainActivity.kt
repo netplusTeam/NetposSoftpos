@@ -81,7 +81,6 @@ import timber.log.Timber
 import java.io.File
 import java.util.*
 
-@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
@@ -101,7 +100,6 @@ class MainActivity :
     private lateinit var dialogContactlessReaderBinding: DialogContatclessReaderBinding
     private val viewModel by viewModels<NfcCardReaderViewModel>()
     private val transactionViewModel by viewModels<TransactionsViewModel>()
-    private val notificationViewModel: NotificationViewModel by viewModels()
     private val contactlessKernel: ContactlessKernel by lazy {
         ContactlessKernel.getInstance(applicationContext)
     }
@@ -120,9 +118,13 @@ class MainActivity :
     private val qrPinBlock: QrPasswordPinBlockDialog = QrPasswordPinBlockDialog()
     private var amountToPayInDouble: Double? = 0.0
     private var qrData: QrScannedDataModel? = null
-    private val notificationModel: NotificationViewModel by viewModels()
+    private val notificationModel by viewModels<NotificationViewModel>()
+
     private lateinit var firebaseInstance: FirebaseMessaging
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
+    private lateinit var terminalId: String
+    private lateinit var userName: String
+    private lateinit var token: String
 
     override fun onStart() {
         super.onStart()
@@ -496,8 +498,9 @@ class MainActivity :
                 if (!task.isSuccessful) {
                     return@OnCompleteListener
                 }
-                val token = task.result // this is the token retrieved
+                 token = task.result // this is the token retrieved
                 Log.d("FCM", token)
+                sendTokenToBackend(token, terminalId, userName)
             },
         )
         qrAmoutDialogBinding = QrAmoutDialogBinding.inflate(layoutInflater, null, false).apply {
@@ -526,12 +529,13 @@ class MainActivity :
                     dialog.dismiss()
                     // finish()
                 }.create()
-        val terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
-        val userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
+         terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
+         userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         firebaseInstance = FirebaseMessaging.getInstance()
-        getFireBaseToken(firebaseInstance) {
-            sendTokenToBackend(it, terminalId, userName)
+        getFireBaseToken(firebaseInstance){
+            sendTokenToBackend(token, terminalId, userName)
         }
+
     }
 
     override fun onResume() {
@@ -1012,7 +1016,7 @@ class MainActivity :
     }
 
     private fun fetchUnreadNotifications() {
-        notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
+        notificationModel.unreadNotifications.observe(this) { unreadMessages ->
             unreadMessages?.let {
                 if (it.isEmpty()) {
                     notificationsLayout.visibility = View.INVISIBLE
@@ -1046,9 +1050,8 @@ class MainActivity :
         token: String,
         terminalId: String,
         username: String,
-    ) {
-        notificationModel.registerDeviceToken(token, terminalId, username)
-    }
+    ) { notificationModel.registerDeviceToken(token, terminalId, username)}
+
 
     private fun getFireBaseToken(
         firebaseMessagingInstance: FirebaseMessaging,

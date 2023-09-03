@@ -1,19 +1,24 @@
 package com.woleapp.netpos.contactless.network
 
+import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
+import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.model.AccountNumberLookUpRequest
+import com.woleapp.netpos.contactless.model.AppCampaignModel
 import com.woleapp.netpos.contactless.model.NotificationRegisterDeviceTokenModel
 import com.woleapp.netpos.contactless.model.PayWithQrRequest
+import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class NotificationRepository @Inject constructor(
-    private val notificationService: NotificationService
-) {
+    private val notificationService: NotificationService,
+    ) {
 
     fun registerDeviceToken(deviceRegistrationToken: String,
                              terminalId: String,
                              username: String) = notificationService.registerDeviceToken(
         NotificationRegisterDeviceTokenModel(deviceRegistrationToken, terminalId, username))
+
 
 }
