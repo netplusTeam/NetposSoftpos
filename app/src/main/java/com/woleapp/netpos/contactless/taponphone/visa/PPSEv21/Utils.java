@@ -28,6 +28,8 @@ package com.woleapp.netpos.contactless.taponphone.visa.PPSEv21;
 
 import java.util.Locale;
 
+import timber.log.Timber;
+
 
 public class Utils 
 {
@@ -187,7 +189,7 @@ public class Utils
     	}
     	catch(Exception e)
     	{
-			//Log.d("TLVParser", e.toString());
+			// Timber.tag("TLVParser").d(e.toString());
     	}
     	
         return (short)(off - offset); 

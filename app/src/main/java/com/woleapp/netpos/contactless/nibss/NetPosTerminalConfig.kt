@@ -53,8 +53,6 @@ class NetPosTerminalConfig {
 
         private fun setTerminalId() {
             terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id
-//            terminalId = "20398A4C"
-            // Log.d("CHECKTT", terminalId.toString())
         }
 
         private var keyHolder: KeyHolder? = null

@@ -118,7 +118,6 @@ class LoginFragment : BaseFragment() {
         }
         deviceId = getDeviceId(requireContext())
         partnerID = initPartnerId()
-        //   Log.d("IMEI", uniqueNumber)
         binding.btnLogin.setOnClickListener {
             viewModel.login(deviceId)
         }

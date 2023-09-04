@@ -25,20 +25,6 @@ class LiveNfcTransReceiver(
         // iccData.append(BytesUtils.bytesToString(response))
         log.append("<font color='blue'><b>resp:</b> " + com.woleapp.netpos.contactless.util.BytesUtils.bytesToString(response))
             .append("</font><br/>")
-//        Log.d(TAG, "resp: " + BytesUtils.bytesToString(response))
-//        try {
-//            Log.d(TAG, "resp: " + TlvUtil.prettyPrintAPDUResponse(response))
-//            val `val` = SwEnum.getSW(response)
-//            if (`val` != null) {
-//                Log.d(TAG, "resp: " + `val`.detail)
-//            }
-//            log.append("<pre>").append(
-//                TlvUtil.prettyPrintAPDUResponse(response).replace("\n", "<br/>")
-//                    .replace(" ", "&nbsp;")
-//            )
-//                .append("</pre><br/>")
-//        } catch (e: Exception) {
-//        }
         return response!!
     }
 

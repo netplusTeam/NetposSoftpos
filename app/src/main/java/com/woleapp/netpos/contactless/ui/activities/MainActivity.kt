@@ -499,7 +499,7 @@ class MainActivity :
                     return@OnCompleteListener
                 }
                  token = task.result // this is the token retrieved
-                Log.d("FCM", token)
+                Timber.tag("FCM").d(token)
                 sendTokenToBackend(token, terminalId, userName)
             },
         )
