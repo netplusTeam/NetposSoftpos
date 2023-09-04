@@ -40,7 +40,7 @@
             android:theme="@style/SplashTheme"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleInstance"
             android:protectionLevel="signature"
             android:taskAffinity="com.woleapp.netpos.contactless">

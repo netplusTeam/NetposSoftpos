@@ -36,7 +36,9 @@ import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginFragment : BaseFragment() {
 
     private val viewModel by viewModels<AuthViewModel>()

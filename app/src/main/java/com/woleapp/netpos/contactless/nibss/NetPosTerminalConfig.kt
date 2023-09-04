@@ -13,6 +13,8 @@ import com.danbamitale.epmslib.entities.KeyHolder
 import com.danbamitale.epmslib.entities.clearSessionKey
 import com.danbamitale.epmslib.processors.TerminalConfigurator
 import com.dsofttech.dprefs.utils.DPrefs
+import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.domain.implementations.SharedPrefsManager
 import com.woleapp.netpos.contactless.model.ConfigurationData
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.Singletons.getSavedConfigurationData
@@ -30,12 +32,8 @@ class NetPosTerminalConfig {
     companion object {
         private var configurationData: ConfigurationData = getSavedConfigurationData()
         private val disposables = CompositeDisposable()
+        private val sharedPrefs: SharedPrefsManagerContract = SharedPrefsManager()
 
-        //        var connectionData: ConnectionData = ConnectionData(
-//            ipAddress = "196.6.103.10",
-//            ipPort = 55533,
-//            isSSL = true
-//        )
         var connectionData: ConnectionData = ConnectionData(
             ipAddress = configurationData.ip,
             ipPort = configurationData.port.toInt(),

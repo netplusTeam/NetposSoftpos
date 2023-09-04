@@ -10,13 +10,14 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
-import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.network.StormApiService
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.RESET_USERNAME
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import com.woleapp.netpos.contactless.util.Singletons.gson
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_REQ_CRED_CREDENTIALS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Scheduler
 import io.reactivex.Single
@@ -32,7 +33,7 @@ import javax.inject.Named
 @HiltViewModel
 class AuthViewModel @Inject constructor() : ViewModel() {
     @Inject
-    @Named("network")
+    @Named("network-enc")
     lateinit var encryptionHelper: DataEncryptionAndDecryption
 
     @Inject
@@ -76,18 +77,14 @@ class AuthViewModel @Inject constructor() : ViewModel() {
         get() = _message
 
     fun login(deviceSerialId: String) {
-        val requestCred = encryptionHelper.encryptData(
-            gson.toJson(
-                RequestEncryptionCredentialsModel("request_for_credentials"),
-            ),
-        )
-        contactlessRegRepository.getCred(requestCred)
+        contactlessRegRepository.getCred(STRING_REQ_CRED_CREDENTIALS)
             .subscribeOn(ioScheduler)
             .observeOn(mainThreadScheduler)
             .subscribe { data, error ->
                 data?.let {
                     if (it) {
-                        val cred = sharedPrefs.retrieveString(STRING_TAG_APP_ENCRYPTION_CREDENTIALS, null)
+                        val cred =
+                            sharedPrefs.retrieveString(STRING_TAG_APP_ENCRYPTION_CREDENTIALS, null)
                         Timber.tag("${STRING_TAG_APP_ENCRYPTION_CREDENTIALS}_TAG").d(cred)
                     }
                 }

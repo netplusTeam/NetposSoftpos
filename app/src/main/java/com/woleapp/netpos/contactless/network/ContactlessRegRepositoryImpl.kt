@@ -6,8 +6,11 @@ import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_REQ_CRED_IV
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_REQ_CRED_SEC_K
 import io.reactivex.Single
 import retrofit2.Response
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -16,7 +19,7 @@ import javax.inject.Singleton
 class ContactlessRegRepositoryImpl @Inject constructor(
     private val accountLookUpService: AccountLookUpService,
     private val contactlessRegService: ContactlessRegistrationService,
-    @Named("network") private val networkEncryptionHelper: DataEncryptionAndDecryption,
+    @Named("network-enc") private val networkEncryptionHelper: DataEncryptionAndDecryption,
     private val gson: Gson,
     private val sharedPrefs: SharedPrefsManagerContract,
 ) : ContactlessRegRepository {
@@ -185,16 +188,26 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                             },
                             EncryptionCredentials::class.java,
                         )
+
+                        Timber.tag("CHECKING_A").d(gson.toJson(response))
+                        // Remove later
+                        sharedPrefs.saveString(
+                            STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
+                            gson.toJson(
+                                EncryptionCredentials(STRING_REQ_CRED_IV, STRING_REQ_CRED_SEC_K),
+                            ),
+                        )
                         Single.just(
-                            if (response is EncryptionCredentials) {
-                                sharedPrefs.saveString(
-                                    STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
-                                    gson.toJson(response),
-                                )
-                                true
-                            } else {
-                                false
-                            },
+                            true,
+//                            if (response is EncryptionCredentials) {
+//                                sharedPrefs.saveString(
+//                                    STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
+//                                    gson.toJson(response),
+//                                )
+//                                true
+//                            } else {
+//                                false
+//                            },
                         )
                     } catch (e: Exception) {
                         Single.just(false)

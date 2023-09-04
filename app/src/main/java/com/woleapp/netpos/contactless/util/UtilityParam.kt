@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.util
 
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.util.encryption.DataEncryptionAndDecryptionImpl
-import timber.log.Timber
 
 object UtilityParam {
 
@@ -12,13 +11,20 @@ object UtilityParam {
 
     private external fun getEncryptionSecreteKey(): String
     private external fun getEncryptionSecreteIv(): String
+    private external fun getCredCredentials(): String
+    private external fun getCredSecK(): String
+    private external fun getCredIv(): String
 
     val STRING_SECRET_KEY = getEncryptionSecreteKey()
     val STRING_SECRET_IV = getEncryptionSecreteIv()
 
+    val STRING_REQ_CRED_CREDENTIALS = getCredCredentials()
+    val STRING_REQ_CRED_SEC_K = getCredSecK()
+    val STRING_REQ_CRED_IV = getCredIv()
+
     private val encryptionHelper: DataEncryptionAndDecryption = DataEncryptionAndDecryptionImpl(
-        STRING_SECRET_KEY,
-        STRING_SECRET_IV,
+        STRING_REQ_CRED_SEC_K,
+        STRING_REQ_CRED_IV,
     )
 
     private external fun getAuthUserName(): String
@@ -68,15 +74,6 @@ object UtilityParam {
     private external fun getXClientId(): String
     private external fun getXAccessCode(): String
     private external fun getTlvByteWrapperConstant(): String
-
-    private fun testingTesting() {
-        val aaa = getStringNotificationBaseUrlNoApi()
-        Timber.tag("CHECK_CHECK_1").d(aaa)
-        val bbb = encryptionHelper.decryptData(aaa)
-        Timber.tag("CHECK_CHECK_2").d(bbb)
-    }
-
-    val aaa = testingTesting()
 
     val STRING_NOTIFICATION_BASE_URL_NO_API =
         encryptionHelper.decryptData(getStringNotificationBaseUrlNoApi())

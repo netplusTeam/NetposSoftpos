@@ -1,8 +1,10 @@
 package com.woleapp.netpos.contactless.util.encryption
 
+import com.google.android.gms.common.util.Hex
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -12,6 +14,18 @@ class DataEncryptionAndDecryptionImpl @AssistedInject constructor(
     @Assisted("secretKey") private val secretKey: String,
     @Assisted("iv") private val iv: String,
 ) : DataEncryptionAndDecryption {
+
+    private fun getCipher(cipherMode: Int): Cipher =
+        Cipher.getInstance("AES/CBC/PKCS5PADDING").apply {
+            init(
+                cipherMode,
+                SecretKeySpec(
+                    secretKey.toByteArray(),
+                    "AES",
+                ),
+                IvParameterSpec(this@DataEncryptionAndDecryptionImpl.iv.toByteArray()),
+            )
+        }
 
     private fun getEncryptionKey(secreteKey: String): ByteArray {
         val digest = MessageDigest.getInstance("SHA-512")
@@ -25,33 +39,16 @@ class DataEncryptionAndDecryptionImpl @AssistedInject constructor(
         return ivBytes.copyOfRange(0, 16)
     }
 
-    override fun encryptData(data: String): String {
-        try {
-            val key = SecretKeySpec(getEncryptionKey(secretKey), "AES")
-            val encryptionIV = IvParameterSpec(getEncryptionIV(iv))
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, key, encryptionIV)
-            val encryptedBytes = cipher.doFinal(data.toByteArray())
-            return encryptedBytes.joinToString("") { "%02x".format(it) }
-        } catch (err: Exception) {
-            println(err)
-        }
-        return ""
-    }
+    override fun encryptData(data: String): String =
+        Hex.bytesToStringLowercase(
+            getCipher(Cipher.ENCRYPT_MODE).doFinal(data.toByteArray(StandardCharsets.UTF_8)),
+        )
 
-    override fun decryptData(encryptedData: String): String {
-        try {
-            val key = SecretKeySpec(getEncryptionKey(secretKey), "AES")
-            val encryptionIV = IvParameterSpec(getEncryptionIV(iv))
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-            cipher.init(Cipher.DECRYPT_MODE, key, encryptionIV)
-            val encryptedBytes =
-                encryptedData.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-            val decryptedBytes = cipher.doFinal(encryptedBytes)
-            return String(decryptedBytes)
-        } catch (err: Exception) {
-            println(err)
-        }
-        return ""
-    }
+    override fun decryptData(encryptedData: String): String =
+        String(
+            getCipher(Cipher.DECRYPT_MODE).doFinal(
+                Hex.stringToBytes(encryptedData),
+            ),
+            StandardCharsets.UTF_8,
+        )
 }
