@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:filterTouchesWhenObscured="true">
 
     <data>
 
@@ -45,7 +46,7 @@
         <Button
             android:id="@+id/print"
             android:layout_width="100dp"
-            android:layout_height="30dp"
+            android:layout_height="33dp"
             android:layout_marginTop="16dp"
             android:background="@color/colorPrimary"
             android:text="@string/print"
@@ -58,7 +59,7 @@
         <Button
             android:id="@+id/retry"
             android:layout_width="100dp"
-            android:layout_height="30dp"
+            android:layout_height="33dp"
             android:layout_marginTop="16dp"
             android:background="@android:color/darker_gray"
             android:text="@string/retry"
