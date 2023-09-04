@@ -16,7 +16,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -498,7 +497,7 @@ class MainActivity :
                 if (!task.isSuccessful) {
                     return@OnCompleteListener
                 }
-                 token = task.result // this is the token retrieved
+                token = task.result // this is the token retrieved
                 Timber.tag("FCM").d(token)
                 sendTokenToBackend(token, terminalId, userName)
             },
@@ -529,13 +528,12 @@ class MainActivity :
                     dialog.dismiss()
                     // finish()
                 }.create()
-         terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
-         userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
+        terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
+        userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         firebaseInstance = FirebaseMessaging.getInstance()
-        getFireBaseToken(firebaseInstance){
+        getFireBaseToken(firebaseInstance) {
             sendTokenToBackend(token, terminalId, userName)
         }
-
     }
 
     override fun onResume() {
@@ -917,6 +915,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 showSnackBar(
                                     binding.root,
@@ -956,6 +956,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
@@ -970,6 +972,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 showSnackBar(
                                     binding.root,
@@ -1050,8 +1054,7 @@ class MainActivity :
         token: String,
         terminalId: String,
         username: String,
-    ) { notificationModel.registerDeviceToken(token, terminalId, username)}
-
+    ) { notificationModel.registerDeviceToken(token, terminalId, username) }
 
     private fun getFireBaseToken(
         firebaseMessagingInstance: FirebaseMessaging,
