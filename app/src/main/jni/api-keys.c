@@ -149,3 +149,9 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getBearerTokenForMPGSTrans
                                                                                        jobject thiz) {
     return (*env) -> NewStringUTF(env, "Bearer V6XGNyopzrGESg3oSjeksAOMMFR6GzF4SaM9NYaMU1jePVkNQEFc1T096XNFUf3Q");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getFwBaseUrl(JNIEnv *env, jobject thiz) {
+
+    return (*env) -> NewStringUTF(env, "https://agency-banking-middleware-staging.dev-flutterwave.com/api/");
+}

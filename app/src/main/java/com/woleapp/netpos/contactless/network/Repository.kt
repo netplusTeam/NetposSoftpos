@@ -19,7 +19,7 @@ class Repository @Inject constructor(
 
     fun consummateTransactionBySendingOtp(otpPayLoad: SendOtpForVerveCardModel): Single<Response<JsonObject>> =
         otpService.sendOtpForVerveCard(otpPayLoad)
-//
+
 //    fun findAccount(accountNumber: String): Single<Response<JsonObject>> =
 //        accountLookUp.findAccount(accountNumber)
 }

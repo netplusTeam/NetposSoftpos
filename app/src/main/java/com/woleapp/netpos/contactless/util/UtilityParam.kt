@@ -34,6 +34,8 @@ object UtilityParam {
     private external fun getCardPinKey(): String
     private external fun getBearerTokenForMPGSTransaction(): String
 
+    private external fun getFwBaseUrl(): String
+
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
     val ZENITH_BASE_URL = getZenithBaseUrl()
     val SMS_BASE_URL = getSmsBaseUrl()
@@ -61,4 +63,5 @@ object UtilityParam {
     val STRING_RRN_SERVICE_BASE_URL = getRrnServiceBaseUrl()
     val PIN_KEY = getCardPinKey()
     val BEARER_TOKEN_FOR_MPGS_TRANSACTION = getBearerTokenForMPGSTransaction()
+    val FW_BASE_URL = getFwBaseUrl()
 }

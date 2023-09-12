@@ -7,6 +7,7 @@ import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.UtilityParam.FW_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
@@ -75,6 +76,12 @@ object AppModule {
     @Named("notificationBaseUrl")
     fun providesBaseUrlForNotification(): String =
         STRING_NOTIFICATION_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("flutterWaveBaseUrl")
+    fun providesBaseUrlForFlutterwave(): String =
+        FW_BASE_URL
 
     @Provides
     @Singleton
@@ -216,6 +223,27 @@ object AppModule {
             .baseUrl(netposTransactionApiServiceBaseUrl)
             .client(okhttp)
             .build()
+
+    @Provides
+    @Singleton
+    @Named("fw-retrofit")
+    fun providesRetrofitForFWApiService(
+        @Named("otpOkHttp") okhttp: OkHttpClient,
+        @Named("flutterWaveBaseUrl") fwApiServiceBaseUrl: String,
+    ): Retrofit =
+        Retrofit.Builder()
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .baseUrl(fwApiServiceBaseUrl)
+            .client(okhttp)
+            .build()
+
+    @Provides
+    @Singleton
+    fun providesFWApiService(
+        @Named("fw-retrofit") retrofit: Retrofit,
+    ): FWApiService =
+        retrofit.create(FWApiService::class.java)
 
     @Provides
     @Singleton
