@@ -119,6 +119,7 @@
                 android:autofillHints="@string/enter_name"
                 android:background="@drawable/services_edittext_background_disabled"
                 android:enabled="false"
+                android:visibility="gone"
                 android:focusable="false"
                 android:hint="@string/enter_name"
                 android:inputType="text"

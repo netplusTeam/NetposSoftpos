@@ -133,6 +133,10 @@ android {
             dimension "whiteLabel"
             applicationIdSuffix ".flutterwave"
         }
+        tingo {
+            dimension "whiteLabel"
+            applicationIdSuffix ".tingo"
+        }
     }
     variantFilter { variant ->
         def name_types = variant.flavors*.name

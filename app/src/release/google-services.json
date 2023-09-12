@@ -509,80 +509,6 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:983048306918:android:db405d56456d5966bfbb27",
-        "android_client_info": {
-          "package_name": "com.woleapp.netpos.contactless.providus"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "983048306918-q2oulo93239kcvlusd845ahgpmthtpp2.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.woleapp.netpos.contactless.providus",
-            "certificate_hash": "d63b0a7a6a6a542ab3bf2133c65462e24660398d"
-          }
-        },
-        {
-          "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:983048306918:android:2255422a1eaf2bf0bfbb27",
-        "android_client_info": {
-          "package_name": "com.woleapp.netpos.contactless.providus.debug"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "983048306918-nbtlsm4kis0300tafebmrkiah9gqc0i2.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.woleapp.netpos.contactless.providus.debug",
-            "certificate_hash": "d63b0a7a6a6a542ab3bf2133c65462e24660398d"
-          }
-        },
-        {
-          "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:983048306918:android:204575068bc435d4bfbb27",
         "android_client_info": {
           "package_name": "com.woleapp.netpos.contactless.providuspos"
@@ -782,6 +708,64 @@
             "certificate_hash": "d63b0a7a6a6a542ab3bf2133c65462e24660398d"
           }
         },
+        {
+          "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983048306918:android:395cbcd08ce67589bfbb27",
+        "android_client_info": {
+          "package_name": "com.woleapp.netpos.contactless.tingo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983048306918:android:f9bd0a84d9fe19d2bfbb27",
+        "android_client_info": {
+          "package_name": "com.woleapp.netpos.contactless.tingo.debug"
+        }
+      },
+      "oauth_client": [
         {
           "client_id": "983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com",
           "client_type": 3

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#BF0926</color>
-    <color name="colorPrimaryDark">#BF0926</color>
-    <color name="colorPrimaryLight">#BF0926</color>
-    <color name="colorAccent">#eebb48</color>
+    <color name="colorPrimary">#F68A29</color>
+    <color name="colorPrimaryDark">#314C81</color>
+    <color name="colorPrimaryLight">#FECE24</color>
+    <color name="colorAccent">#F1C86D</color>
     <color name="pinTextColor">#000</color>
     <color name="gray">#a4a4a4</color>
     <color name="pinButtonText">#ffffff</color>
