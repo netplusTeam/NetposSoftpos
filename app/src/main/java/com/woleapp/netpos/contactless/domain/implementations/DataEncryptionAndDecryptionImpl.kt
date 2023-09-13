@@ -6,7 +6,7 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class DataEncryptionAndDecryption(
+class DataEncryptionAndDecryptionImpl(
     private val secretKey: String,
     private val iv: String,
 ) : DataEncryptionAndDecryption {

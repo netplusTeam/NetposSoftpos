@@ -1,7 +1,10 @@
 package com.woleapp.netpos.contactless.domain.implementations
 
 import com.dsofttech.dprefs.utils.DPrefs
+import com.google.gson.Gson
 import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.model.EncryptionCredentials
+import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import javax.inject.Inject
 
 class SharedPrefsManager @Inject constructor() : SharedPrefsManagerContract {

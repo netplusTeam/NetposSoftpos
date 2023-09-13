@@ -83,10 +83,17 @@ class AuthViewModel @Inject constructor() : ViewModel() {
             .subscribe { data, error ->
                 data?.let {
                     if (it) {
-                        val cred =
+                        val resp =
                             sharedPrefs.retrieveString(STRING_TAG_APP_ENCRYPTION_CREDENTIALS, null)
-                        Timber.tag("${STRING_TAG_APP_ENCRYPTION_CREDENTIALS}_TAG").d(cred)
+                        val cred = gson.fromJson(resp, EncryptionCredentials::class.java)
+                        if (cred == null) _message.value = Event("Login Failed, please try again!")
+                    } else {
+                        _message.value = Event("Login Failed, please try again!")
                     }
+                }
+                error?.let {
+                    Timber.d(it.localizedMessage)
+                    _message.value = Event("Login Failed, please try again!")
                 }
             }.disposeWith(compositeDisposable)
 

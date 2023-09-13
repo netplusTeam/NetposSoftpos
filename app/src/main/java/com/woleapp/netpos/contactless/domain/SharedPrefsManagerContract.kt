@@ -1,5 +1,7 @@
 package com.woleapp.netpos.contactless.domain
 
+import com.woleapp.netpos.contactless.model.EncryptionCredentials
+
 interface SharedPrefsManagerContract {
     fun saveString(key: String, data: String)
     fun saveInt(key: String, data: Int)
