@@ -463,6 +463,7 @@ object RandomPurposeUtil {
             "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
             "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
             "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
+            "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
         )
 
         for (element in bankList) {
