@@ -70,6 +70,7 @@ android {
             buildConfigField "boolean", "DEBUG", "false"
             debuggable false
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

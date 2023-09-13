@@ -8,6 +8,7 @@ import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-impo
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import io.reactivex.Single
 import retrofit2.Response
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -95,10 +96,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         deviceSerialId: String,
     ): Single<ConfirmOTPResponse?> =
         accountLookUpService.encryptedAccountLookUpRequest(
-            gson.fromJson(
-                networkEncryptionHelper.encryptData(data),
-                EncryptedApiRequestModel::class.java,
-            ),
+            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
             partnerId,
             deviceSerialId,
         ).flatMap {
@@ -124,10 +122,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         deviceSerialId: String,
     ): Single<ExistingAccountRegisterResponse?> =
         accountLookUpService.encryptedRegisterExistingAccount(
-            gson.fromJson(
-                networkEncryptionHelper.encryptData(data),
-                EncryptedApiRequestModel::class.java,
-            ),
+            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
             partnerId,
             deviceSerialId,
         ).flatMap {
@@ -151,10 +146,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         deviceSerialId: String,
     ): Single<RegistrationModel?> =
         contactlessRegService.encryptedRegisterFBN(
-            gson.fromJson(
-                networkEncryptionHelper.encryptData(data),
-                EncryptedApiRequestModel::class.java,
-            ),
+            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
             partnerId,
             deviceSerialId,
         ).flatMap {
