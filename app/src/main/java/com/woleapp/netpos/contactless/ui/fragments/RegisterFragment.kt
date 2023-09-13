@@ -28,7 +28,7 @@ import java.util.*
 
 class RegisterFragment : BaseFragment() {
     private lateinit var binding: FragmentRegisterBinding
-    private val viewModel by viewModels<RegistrationViewModel>()
+    private val viewModel by activityViewModels<RegistrationViewModel>()
     private val contactlessViewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var dialog: AlertDialog
     private lateinit var failureDialog: AlertDialog

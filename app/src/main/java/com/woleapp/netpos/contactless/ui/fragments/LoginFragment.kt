@@ -42,7 +42,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class LoginFragment : BaseFragment() {
 
-    private val viewModel by viewModels<AuthViewModel>()
+    private val viewModel by activityViewModels<AuthViewModel>()
     private val contactlessViewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var binding: FragmentLoginBinding
     private lateinit var resetPasswordBinding: DialogPasswordResetBinding
