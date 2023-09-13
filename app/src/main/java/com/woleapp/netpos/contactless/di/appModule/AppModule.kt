@@ -1,12 +1,18 @@
 package com.woleapp.netpos.contactless.di.appModule
 
 import android.content.Context
+import com.danbamitale.epmslib.comms.DataEcDc
+import com.danbamitale.epmslib.domain.DataEc
 import com.google.gson.Gson
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
+import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
+import com.woleapp.netpos.contactless.domain.implementations.DataEncryptionAndDecryptionImplDetails
+import com.woleapp.netpos.contactless.domain.implementations.DataEncryptionJwt
+import com.woleapp.netpos.contactless.domain.implementations.SharedPrefsManager
 import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
@@ -15,9 +21,12 @@ import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_PAYME
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_GET_QR_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NETPOS_TRANSACTION_API_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_NOTIFICATION_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_REQ_CRED_IV
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_REQ_CRED_SEC_K
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_RRN_SERVICE_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SECRET_IV
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SECRET_KEY
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_SEND_VERVE_OTP_BASE_URL
-import com.woleapp.netpos.contactless.util.encryption.DataEncryptionAndDecryptionImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -290,7 +299,8 @@ object AppModule {
     @Provides
     @Singleton
     fun providesAppDatabase(
-        @ApplicationContext context: Context) : AppDatabase =
+        @ApplicationContext context: Context,
+    ): AppDatabase =
         AppDatabase.getDatabaseInstance(context)
 
 //    @Provides
@@ -302,7 +312,8 @@ object AppModule {
     @Provides
     @Singleton
     fun providesNotificationDao(
-        appDatabase: AppDatabase): AppNotificationDao {
+        appDatabase: AppDatabase,
+    ): AppNotificationDao {
         return appDatabase.getAppNotificationDao()
     }
 
@@ -320,15 +331,36 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun providesDataEncryptionAndDecryption(
-        dataEncryptionAndDecryptionImpl: DataEncryptionAndDecryptionImpl,
+    @Named("app_local")
+    fun providesAppDataEncryptionAndDecryptionImpl(): DataEncryptionAndDecryptionImplDetails =
+        DataEncryptionAndDecryptionImplDetails(STRING_REQ_CRED_SEC_K, STRING_REQ_CRED_IV)
+
+    @Provides
+    @Singleton
+    @Named("network-enc")
+    fun providesNetworkDataEncryptionAndDecryption(
+        dataEncryptionAndDecryptionImpl: DataEncryptionJwt,
+    ): DataEncryptionAndDecryption =
+        dataEncryptionAndDecryptionImpl
+
+    @Provides
+    @Singleton
+    @Named("app-enc")
+    fun providesAppDataEncryptionAndDecryption(
+        @Named("app_local") dataEncryptionAndDecryptionImpl: DataEncryptionAndDecryptionImplDetails,
     ): DataEncryptionAndDecryption =
         dataEncryptionAndDecryptionImpl
 
     @Provides
     @Singleton
     fun providesDataContactlessRepository(
-        contactlessRegRepositoryImpl: ContactlessRegRepositoryImpl
+        contactlessRegRepositoryImpl: ContactlessRegRepositoryImpl,
     ): ContactlessRegRepository =
         contactlessRegRepositoryImpl
+
+    @Provides
+    @Singleton
+    fun providesSharedPrefsManagerContract(
+        sharedPrefsManager: SharedPrefsManager,
+    ): SharedPrefsManagerContract = sharedPrefsManager
 }

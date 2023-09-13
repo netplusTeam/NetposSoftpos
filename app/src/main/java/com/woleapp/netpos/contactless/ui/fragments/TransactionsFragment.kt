@@ -3,14 +3,13 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
-import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
+import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -28,7 +27,7 @@ import com.woleapp.netpos.contactless.model.Service
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.getGUID
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.stringToBase64
@@ -225,7 +224,7 @@ class TransactionsFragment : BaseFragment() {
                         merchantId = UtilityParam.STRING_MERCHANT_ID,
                         naration = requestNarration,
                     )
-                Log.d("QRDATA", qrDataToSendToBackend.naration)
+                Timber.tag("QRDATA").d(qrDataToSendToBackend.naration)
                 scanQrViewModel.setScannedQrIsVerveCard(false)
                 scanQrViewModel.postScannedQrRequestToServer(qrDataToSendToBackend)
                 observeServerResponse(

@@ -36,7 +36,10 @@ import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class LoginFragment : BaseFragment() {
 
     private val viewModel by activityViewModels<AuthViewModel>()
@@ -116,7 +119,6 @@ class LoginFragment : BaseFragment() {
         }
         deviceId = getDeviceId(requireContext())
         partnerID = initPartnerId()
-        //   Log.d("IMEI", uniqueNumber)
         binding.btnLogin.setOnClickListener {
             viewModel.login(deviceId)
         }

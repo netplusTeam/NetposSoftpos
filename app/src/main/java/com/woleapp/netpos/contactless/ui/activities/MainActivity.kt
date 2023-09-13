@@ -16,7 +16,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -46,8 +45,8 @@ import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.database.AppDatabase
-import com.woleapp.netpos.contactless.databinding.* // ktlint-disable no-wildcard-imports
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.databinding.*
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
@@ -57,8 +56,8 @@ import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.contactless.ui.fragments.* // ktlint-disable no-wildcard-imports
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.ui.fragments.*
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_FIREBASE_INTENT_ACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_BUNDLE_KEY
@@ -103,7 +102,6 @@ class MainActivity :
     private val contactlessKernel: ContactlessKernel by lazy {
         ContactlessKernel.getInstance(applicationContext)
     }
-
     private lateinit var waitingDialog: AlertDialog
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var receiptDialogBinding: DialogTransactionResultBinding
@@ -498,8 +496,8 @@ class MainActivity :
                 if (!task.isSuccessful) {
                     return@OnCompleteListener
                 }
-                 token = task.result // this is the token retrieved
-                Log.d("FCM", token)
+                token = task.result // this is the token retrieved
+                Timber.tag("FCM").d(token)
                 sendTokenToBackend(token, terminalId, userName)
             },
         )
@@ -529,13 +527,12 @@ class MainActivity :
                     dialog.dismiss()
                     // finish()
                 }.create()
-         terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
-         userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
+        terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
+        userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         firebaseInstance = FirebaseMessaging.getInstance()
-        getFireBaseToken(firebaseInstance){
+        getFireBaseToken(firebaseInstance) {
             sendTokenToBackend(token, terminalId, userName)
         }
-
     }
 
     override fun onResume() {
@@ -917,6 +914,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 showSnackBar(
                                     binding.root,
@@ -956,6 +955,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
@@ -970,6 +971,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 showSnackBar(
                                     binding.root,
@@ -1050,8 +1053,9 @@ class MainActivity :
         token: String,
         terminalId: String,
         username: String,
-    ) { notificationModel.registerDeviceToken(token, terminalId, username)}
-
+    ) {
+        notificationModel.registerDeviceToken(token, terminalId, username)
+    }
 
     private fun getFireBaseToken(
         firebaseMessagingInstance: FirebaseMessaging,

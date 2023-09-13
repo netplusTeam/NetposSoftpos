@@ -7,15 +7,23 @@ object JWTHelper {
     @JvmStatic
     fun getStormId(token: String?): String? {
         val jwt = JWT(token!!)
-        return if (!jwt.claims.containsKey("stormId")) null else JWT(token).getClaim("stormId")
-            .asString()
+        return if (!jwt.claims.containsKey("stormId")) {
+            null
+        } else {
+            JWT(token).getClaim("stormId")
+                .asString()
+        }
     }
 
     @JvmStatic
     fun isAgent(token: String?): Boolean? {
         val jwt = JWT(token!!)
-        return if (!jwt.claims.containsKey("isAgent")) false else JWT(token).getClaim("isAgent")
-            .asBoolean()
+        return if (!jwt.claims.containsKey("isAgent")) {
+            false
+        } else {
+            JWT(token).getClaim("isAgent")
+                .asBoolean()
+        }
     }
 
     @JvmStatic

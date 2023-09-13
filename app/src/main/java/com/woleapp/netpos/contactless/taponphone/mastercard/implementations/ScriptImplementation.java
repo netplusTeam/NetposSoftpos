@@ -14,6 +14,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import timber.log.Timber;
+
 
 /**
  * This script provider is optimized for initatePayment API of TerminalSDK
@@ -34,7 +36,7 @@ public class ScriptImplementation implements ScriptProvider {
                                            final ArrayList<BerTlv> dataNeeded) {
 
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "onDataReceived: " + dataSent);
+            Timber.tag(TAG).d("onDataReceived: %s", dataSent);
         }
 
         final ArrayList<BerTlv> dataRequested = new ArrayList<>();

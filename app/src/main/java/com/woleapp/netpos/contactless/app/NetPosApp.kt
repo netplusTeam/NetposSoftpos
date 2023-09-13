@@ -8,6 +8,7 @@ import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
 import com.visa.app.ttpkernel.ContactlessConfiguration
+import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.*
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import dagger.hilt.android.HiltAndroidApp
@@ -35,7 +36,9 @@ class NetPosApp : Application() {
     override fun onCreate() {
         super.onCreate()
         assignInstance(this)
-        Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         DPrefs.initializeDPrefs(this)
     }
 
