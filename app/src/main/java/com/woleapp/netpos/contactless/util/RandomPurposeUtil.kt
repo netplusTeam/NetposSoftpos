@@ -456,16 +456,17 @@ object RandomPurposeUtil {
     fun initPartnerId(): String {
         var partnerID = ""
         val bankList = mapOf(
-            "firstbank" to STRING_PARTNER_ID_FIRST_B,
-            "easypay" to STRING_PARTNER_ID_EASY_PAY,
-            "fcmbeasypay" to STRING_PARTNER_ID_FCMB_EASY_PAY,
-            "easypayfcmb" to STRING_PARTNER_ID_EASY_PAY_FCMB,
-            "providuspos" to STRING_PARTNER_ID_PROVIDUS_POS,
-            "stanbic" to STRING_PARTNER_ID_STANBIC, // the partnerID is for Providus, change to Stanbic later
-            "providus" to STRING_PARTNER_ID_PROVIDUS,
-            "providussoftpos" to STRING_PARTNER_ID_PROVIDUS_SOFT_POS,
-            "wemabank" to STRING_PARTNER_ID_WEMA_B,
-            "zenith" to STRING_PARTNER_ID_ZENITH,
+            "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
+            "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "stanbic" to "377F47E9-55F9-45E0-B77A-1BAA4BC88026",
+            "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
+            "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
+            "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
         )
 
         for (element in bankList) {
