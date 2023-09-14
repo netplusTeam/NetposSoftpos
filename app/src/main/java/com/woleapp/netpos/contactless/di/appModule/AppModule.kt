@@ -1,8 +1,6 @@
 package com.woleapp.netpos.contactless.di.appModule
 
 import android.content.Context
-import com.danbamitale.epmslib.comms.DataEcDc
-import com.danbamitale.epmslib.domain.DataEc
 import com.google.gson.Gson
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
