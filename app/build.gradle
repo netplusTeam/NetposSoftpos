@@ -128,6 +128,10 @@ android {
             dimension "whiteLabel"
             applicationIdSuffix ".stanbic"
         }
+        tingo {
+            dimension "whiteLabel"
+            applicationIdSuffix ".tingo"
+        }
     }
     variantFilter { variant ->
         def name_types = variant.flavors*.name

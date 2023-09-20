@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.viewmodels
 
 import android.app.AlertDialog
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
@@ -39,6 +40,9 @@ class RegistrationViewModel @Inject constructor(
 
     val registrationModel: MutableLiveData<RegistrationModel> = MutableLiveData(
         RegistrationModel(),
+    )
+    val bankTRegistrationModel: MutableLiveData<BankTRegistrationModel> = MutableLiveData(
+        BankTRegistrationModel(),
     )
     val registrationFBNModel: MutableLiveData<RegistrationFBNModel> = MutableLiveData(
         RegistrationFBNModel(),
@@ -113,6 +117,18 @@ class RegistrationViewModel @Inject constructor(
                 } else {
                     regZenith(bank, deviceSerialId)
                 }
+            }  else if (BuildConfig.FLAVOR.contains("tingo")) {
+                if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
+                    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
+                    _message.value = Event("Password mismatch")
+                    return
+                }
+                if (bankTRegistrationModel.value?.allFieldsFilled() == false) {
+                    _message.value = Event("All fields are required")
+                    return
+                } else {
+                    regTingo(bank, deviceSerialId)
+                }
             } else {
                 if (registrationModel.value?.allFieldsFilled() == false) {
                     _message.value = Event("All fields are required")
@@ -123,6 +139,7 @@ class RegistrationViewModel @Inject constructor(
             }
         }
     }
+
 
     override fun onCleared() {
         super.onCleared()
@@ -235,5 +252,49 @@ class RegistrationViewModel @Inject constructor(
                         Event(errorMessage)
                 }
             }.disposeWith(disposable)
+    }
+    private fun regTingo(bank: String, deviceSerialId: String) {
+        authInProgress.value = true
+//        val newCustomer = bankTRegistrationModel.value?.let {
+//            ExistingAccountRegisterRequest(
+//                "NULL",
+//                it.businessAddress,
+//                it.businessName,
+//                it.contactInformation,
+//                it.email,
+//                it.password,
+//                it.confirmPassword
+//            )
+//        }
+        bankTRegistrationModel.value?.let {
+            contactlessRegRepository.registerExistingAccountForBankT(
+                it,
+                bank,
+                deviceSerialId,
+            )
+                .subscribeOn(ioSchedule)
+                .observeOn(mainThreadSchedule)
+                .doFinally {
+                    authInProgress.value = false
+                }
+                .subscribe { t1, t2 ->
+                    t1?.let {
+                        bankTRegistrationModel.value = BankTRegistrationModel()
+                        _authDone.value = Event(true)
+                    }
+                    t2?.let {
+                        val errorMessage = try {
+                            Singletons.gson.fromJson(
+                                it.getResponseBody(),
+                                RegistrationError::class.java,
+                            ).message
+                        } catch (e: Exception) {
+                            "an error occurred during registration, try again or contact support"
+                        }
+                        _message.value =
+                            Event(errorMessage)
+                    }
+                }.disposeWith(disposable)
+        }
     }
 }

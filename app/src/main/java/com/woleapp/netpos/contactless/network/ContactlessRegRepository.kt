@@ -25,6 +25,12 @@ interface ContactlessRegRepository {
         deviceSerialId: String,
     ): Single<ExistingAccountRegisterResponse>
 
+    fun registerExistingAccountForBankT(
+        existingAccountRegisterRequest: BankTRegistrationModel,
+        partnerId: String,
+        deviceSerialId: String,
+    ): Single<ExistingAccountRegisterResponse>
+
     fun getBranches(
         stateId: Int,
         partnerId: String,

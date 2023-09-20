@@ -53,6 +53,16 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         deviceSerialId,
     )
 
+    override fun registerExistingAccountForBankT(
+        existingAccountRegisterRequest: BankTRegistrationModel,
+        partnerId: String,
+        deviceSerialId: String
+    ): Single<ExistingAccountRegisterResponse> = accountLookUpService.registerExistingAccountForBankT(
+        existingAccountRegisterRequest,
+        partnerId,
+        deviceSerialId,
+    )
+
     override fun getBranches(
         stateId: Int,
         partnerId: String,
