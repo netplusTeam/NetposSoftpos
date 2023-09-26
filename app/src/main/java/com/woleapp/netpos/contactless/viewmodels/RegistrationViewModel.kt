@@ -10,10 +10,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.github.barteksc.pdfviewer.PDFView
-import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.network.AccountLookUpService
 import com.woleapp.netpos.contactless.network.ContactlessClient
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.Event
@@ -21,34 +21,33 @@ import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.disposeWith
 import com.woleapp.netpos.contactless.util.getResponseBody
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel
 class RegistrationViewModel @Inject constructor(
-    private val contactlessRegRepository: ContactlessRegRepository,
-    private val gson: Gson,
-    @Named("io-scheduler") private val ioSchedule: Scheduler,
-    @Named("main-scheduler") private val mainThreadSchedule: Scheduler,
+    private val contactlessRegRepository: ContactlessRegRepository
 ) : ViewModel() {
 
     val authInProgress = MutableLiveData(false)
     private val contactlessService = ContactlessClient.getContactlessService()
     private val disposable = CompositeDisposable()
 
+
+
     val registrationModel: MutableLiveData<RegistrationModel> = MutableLiveData(
         RegistrationModel(),
     )
     val bankTRegistrationModel: MutableLiveData<BankTRegistrationModel> = MutableLiveData(
-        BankTRegistrationModel(),
+        BankTRegistrationModel()
     )
     val registrationFBNModel: MutableLiveData<RegistrationFBNModel> = MutableLiveData(
         RegistrationFBNModel(),
     )
-    val registrationBankZModel: MutableLiveData<RegistrationBankZModel> = MutableLiveData(
-        RegistrationBankZModel(),
+    val registrationZenithModel: MutableLiveData<RegistrationZenithModel> = MutableLiveData(
+        RegistrationZenithModel(),
     )
     val registrationZenithConfirmPassword = MutableLiveData("")
     private val _message = MutableLiveData<Event<String>>()
@@ -107,27 +106,15 @@ class RegistrationViewModel @Inject constructor(
                     regFBN(bank, deviceSerialId)
                 }
             } else if (BuildConfig.FLAVOR.contains("zenith")) {
-                if (registrationBankZModel.value?.Password != registrationZenithConfirmPassword.value) {
+                if (registrationZenithModel.value?.Password != registrationZenithConfirmPassword.value){
                     _message.value = Event("Password mismatch")
                     return
                 }
-                if (registrationBankZModel.value?.allFieldsFilledBankZ() == false) {
+                if (registrationZenithModel.value?.allFieldsFilledZenith() == false) {
                     _message.value = Event("All fields are required")
                     return
                 } else {
                     regZenith(bank, deviceSerialId)
-                }
-            }  else if (BuildConfig.FLAVOR.contains("tingo")) {
-                if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
-                    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
-                    _message.value = Event("Password mismatch")
-                    return
-                }
-                if (bankTRegistrationModel.value?.allFieldsFilled() == false) {
-                    _message.value = Event("All fields are required")
-                    return
-                } else {
-                    regTingo(bank, deviceSerialId)
                 }
             } else {
                 if (registrationModel.value?.allFieldsFilled() == false) {
@@ -140,7 +127,6 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-
     override fun onCleared() {
         super.onCleared()
         disposable.clear()
@@ -149,6 +135,9 @@ class RegistrationViewModel @Inject constructor(
     fun setSelectedState(data: String) {
         registrationFBNModel.value = registrationFBNModel.value?.apply {
             state = data
+            if (BuildConfig.DEBUG) {
+                Log.d("STATEFBN", data)
+            }
         }
     }
 
@@ -161,8 +150,8 @@ class RegistrationViewModel @Inject constructor(
     private fun reg(bank: String, deviceSerialId: String) {
         authInProgress.value = true
         contactlessService.register(registrationModel.value, bank, deviceSerialId)
-            .subscribeOn(ioSchedule)
-            .observeOn(mainThreadSchedule)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .doFinally {
                 authInProgress.value = false
             }
@@ -188,17 +177,9 @@ class RegistrationViewModel @Inject constructor(
 
     private fun regFBN(bank: String, deviceSerialId: String) {
         authInProgress.value = true
-        contactlessRegRepository.encryptedRegisterFBN(
-            gson.toJson(
-                EncryptedApiRequestModel(
-                    gson.toJson(registrationFBNModel.value),
-                ),
-            ),
-            bank,
-            deviceSerialId,
-        )
-            .subscribeOn(ioSchedule)
-            .observeOn(mainThreadSchedule)
+        contactlessService.registerFBN(registrationFBNModel.value, bank, deviceSerialId)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .doFinally {
                 authInProgress.value = false
             }
@@ -225,18 +206,18 @@ class RegistrationViewModel @Inject constructor(
     private fun regZenith(bank: String, deviceSerialId: String) {
         authInProgress.value = true
         contactlessService.registerExistingAccountForZenith(
-            registrationBankZModel.value,
+            registrationZenithModel.value,
             bank,
             deviceSerialId,
         )
-            .subscribeOn(ioSchedule)
-            .observeOn(mainThreadSchedule)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
             .doFinally {
                 authInProgress.value = false
             }
             .subscribe { t1, t2 ->
                 t1?.let {
-                    registrationBankZModel.value = RegistrationBankZModel()
+                    registrationZenithModel.value = RegistrationZenithModel()
                     _authDone.value = Event(true)
                 }
                 t2?.let {
@@ -253,27 +234,18 @@ class RegistrationViewModel @Inject constructor(
                 }
             }.disposeWith(disposable)
     }
+
     private fun regTingo(bank: String, deviceSerialId: String) {
         authInProgress.value = true
-//        val newCustomer = bankTRegistrationModel.value?.let {
-//            ExistingAccountRegisterRequest(
-//                "NULL",
-//                it.businessAddress,
-//                it.businessName,
-//                it.contactInformation,
-//                it.email,
-//                it.password,
-//                it.confirmPassword
-//            )
-//        }
+
         bankTRegistrationModel.value?.let {
             contactlessRegRepository.registerExistingAccountForBankT(
                 it,
                 bank,
                 deviceSerialId,
             )
-                .subscribeOn(ioSchedule)
-                .observeOn(mainThreadSchedule)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .doFinally {
                     authInProgress.value = false
                 }
@@ -298,4 +270,3 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 }
-
