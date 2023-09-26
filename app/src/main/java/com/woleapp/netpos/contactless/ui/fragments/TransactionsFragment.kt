@@ -171,6 +171,9 @@ class TransactionsFragment : BaseFragment() {
                     remove(Service(3, "Settings", R.drawable.ic_baseline_settings))
                 }
                 add(Service(4, "Balance Enquiry", R.drawable.ic_write))
+                if (BuildConfig.FLAVOR.contains("zenith")) {
+                    remove(Service(4, "Balance Enquiry", R.drawable.ic_write))
+                }
                 add(Service(5, "Reprint", R.drawable.ic_print))
                 add(Service(9, getString(R.string.notification), R.drawable.ic_notification))
             }

@@ -65,6 +65,48 @@ class NewOrExistingFragment : BaseFragment() {
             }
         }
 
+        if(BuildConfig.FLAVOR.contains("zenith")){
+            binding.newOrExistingCardview.visibility = View.GONE
+            binding.accountNumberCardview.visibility = View.VISIBLE
+
+            binding.dialogAccountNumberProceed.setOnClickListener {
+                binding.accountNumberCardview.visibility = View.VISIBLE
+                account = binding.dialogAccountNumberEditText.text.toString()
+                if (account.isNullOrEmpty()) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please, enter your account number",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                } else if (account.length < 10) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Please, enter valid account number",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                } else {
+                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")
+                        || BuildConfig.FLAVOR.contains("wemabank")) {
+                        viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
+                        observeServerResponse(
+                            viewModel.firstBankAccountNumberResponse,
+                            loader,
+                            requireActivity().supportFragmentManager,
+                        ) {
+                            showFragment(
+                                ExistingCustomersRegistrationFragment(),
+                                containerViewId = R.id.auth_container,
+                                fragmentName = "ExistingCustomersRegistration Fragment",
+                            )
+                            viewModel.clearLiveData()
+                        }
+                    } else {
+                        otherBanks()
+                    }
+                }
+            }
+
+        }
         loader = RandomPurposeUtil.alertDialog(requireContext())
 
         binding.confirmationTvNo.setOnClickListener {
@@ -100,7 +142,8 @@ class NewOrExistingFragment : BaseFragment() {
                         Toast.LENGTH_SHORT,
                     ).show()
                 } else {
-                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")) {
+                    if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith")
+                        || BuildConfig.FLAVOR.contains("wemabank")) {
                         viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
                         observeServerResponse(
                             viewModel.firstBankAccountNumberResponse,
@@ -140,4 +183,5 @@ class NewOrExistingFragment : BaseFragment() {
     }
 
 }
+
 

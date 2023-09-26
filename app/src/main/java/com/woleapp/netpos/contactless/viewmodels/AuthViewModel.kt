@@ -63,6 +63,19 @@ class AuthViewModel : ViewModel() {
         }
         auth(username, password, deviceSerialId)
     }
+    fun login(deviceSerialId: String, partnerID: String) {
+        val username = usernameLiveData.value
+        val password = passwordLiveData.value
+        if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
+            _message.value = Event("All fields are required")
+            return
+        }
+        if (!Patterns.EMAIL_ADDRESS.matcher(username).matches()) {
+            _message.value = Event("Please enter a valid email")
+            return
+        }
+        authProvidus(username, password, deviceSerialId, partnerID)
+    }
 
     private fun auth(username: String, password: String, deviceId: String) {
         authInProgress.value = true
@@ -73,6 +86,131 @@ class AuthViewModel : ViewModel() {
                 addProperty("deviceId", deviceId)
             }
         stormApiService!!.userToken(credentials)
+            .flatMap {
+                Timber.e(it.toString())
+                if (!it.success) {
+                    throw Exception("Login Failed, Check Credentials")
+                }
+                val userToken = it.token
+                val stormId: String =
+                    JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
+                Prefs.putString(PREF_USER_TOKEN, userToken)
+                val userTokenDecoded = JWT(userToken)
+                val user = User().apply {
+                    this.netplusPayMid = if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
+                        userTokenDecoded.getClaim("netplusPayMid").asString()
+                    } else {
+                        null
+                    }
+                    this.business_address =
+                        if (userTokenDecoded.claims.containsKey("business_address")) {
+                            userTokenDecoded.getClaim(
+                                "business_address",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.terminal_id =
+                        if (userTokenDecoded.claims.containsKey("terminalId")) {
+                            userTokenDecoded.getClaim(
+                                "terminalId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.business_name =
+                        if (userTokenDecoded.claims.containsKey("businessName")) {
+                            userTokenDecoded.getClaim(
+                                "businessName",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.netplus_id =
+                        if (userTokenDecoded.claims.containsKey("stormId")) {
+                            userTokenDecoded.getClaim(
+                                "stormId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.mid =
+                        if (userTokenDecoded.claims.containsKey("mid")) {
+                            userTokenDecoded.getClaim("mid")
+                                .asString()
+                        } else {
+                            " "
+                        }
+                    this.partnerId =
+                        if (userTokenDecoded.claims.containsKey("partnerId")) {
+                            userTokenDecoded.getClaim(
+                                "partnerId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.email =
+                        if (userTokenDecoded.claims.containsKey("email")) {
+                            userTokenDecoded.getClaim(
+                                "email",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.userType =
+                        if (userTokenDecoded.claims.containsKey("user_type")) {
+                            userTokenDecoded.getClaim(
+                                "user_type",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                }
+
+                Timber.tag("LoggedInUser==>").d(gson.toJson(user))
+                Single.just(user)
+            }.subscribeOn(Schedulers.io())
+            .doFinally { authInProgress.postValue(false) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe { res, error ->
+                res?.let {
+                    Prefs.putString(PREF_USER, gson.toJson(it))
+                    Prefs.putBoolean(PREF_AUTHENTICATED, true)
+                    _authDone.value = Event(true)
+                }
+                error?.let {
+                    Timber.e(it)
+                    if (it.message.equals("admin", true)) {
+                        _gotoAdminPage.value = Event(true)
+                        return@let
+                    }
+                    Timber.e(it.localizedMessage)
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
+                        _message.value = Event(
+                            try {
+                                gson.fromJson(errorMessage, AuthError::class.java).message
+                                    ?: "Login Failed"
+                            } catch (e: Exception) {
+                                "login failed"
+                            },
+                        )
+                        Timber.e(errorMessage)
+                    }
+                }
+            }.disposeWith(disposables)
+    }
+
+    private fun authProvidus(username: String, password: String, deviceId: String, partnerID: String) {
+        authInProgress.value = true
+        val credentials = JsonObject()
+            .apply {
+                addProperty("username", username)
+                addProperty("password", password)
+                addProperty("deviceId", deviceId)
+            }
+        stormApiService!!.userTokenProvidus(partnerID, credentials)
             .flatMap {
                 Timber.e(it.toString())
                 if (!it.success) {

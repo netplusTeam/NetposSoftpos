@@ -19,6 +19,12 @@ interface StormApiService {
     ): Single<TokenResp>
 
     @POST("api/auth")
+    fun userTokenProvidus(
+        @Header("app-key") appToken: String?,
+        @Body credentials: JsonObject?
+    ): Single<TokenResp>
+
+    @POST("api/auth")
     fun getBillsToken(
         @Header("Authorization") appToken: String?,
         @Body credentials: JsonObject?
