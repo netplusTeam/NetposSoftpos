@@ -64,6 +64,7 @@ android {
             resValue "string", "app_name", "NetPOS Contactless"
             debuggable false
             minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         nibssserverdebug {

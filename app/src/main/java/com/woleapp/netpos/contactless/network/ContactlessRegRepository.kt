@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.network
 
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.model.*
+import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,6 +39,13 @@ class ContactlessRegRepository @Inject constructor(
         partnerId: String,
         deviceSerialId: String
     ) = accountLookUpService.registerExistingAccountForFBN(
+        existingAccountRegisterRequest, partnerId, deviceSerialId
+    )
+    fun registerExistingAccountForBankT(
+        existingAccountRegisterRequest: BankTRegistrationModel,
+        partnerId: String,
+        deviceSerialId: String,
+    )  = accountLookUpService.registerExistingAccountForBankT(
         existingAccountRegisterRequest, partnerId, deviceSerialId
     )
 

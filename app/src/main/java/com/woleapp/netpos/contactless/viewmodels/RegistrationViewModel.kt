@@ -116,7 +116,20 @@ class RegistrationViewModel @Inject constructor(
                 } else {
                     regZenith(bank, deviceSerialId)
                 }
-            } else {
+            }else if (BuildConfig.FLAVOR.contains("tingo")) {
+                if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
+                    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
+                    _message.value = Event("Password mismatch")
+                    return
+                }
+                if (bankTRegistrationModel.value?.allFieldsFilled() == false) {
+                    _message.value = Event("All fields are required")
+                    return
+                } else {
+                    regTingo(bank, deviceSerialId)
+                }
+            }
+            else {
                 if (registrationModel.value?.allFieldsFilled() == false) {
                     _message.value = Event("All fields are required")
                     return

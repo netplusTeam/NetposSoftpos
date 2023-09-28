@@ -56,6 +56,13 @@ interface AccountLookUpService {
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<ExistingAccountRegisterResponse>
 
+    @POST("user/register-existing-user")
+    fun registerExistingAccountForBankT(
+        @Body registerExistingAccountRegisterRequest: BankTRegistrationModel,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<ExistingAccountRegisterResponse>
+
     @GET("get-states")
     fun getStates(): Single<GetStatesResponse>
 
