@@ -210,7 +210,7 @@ class DashboardFragment : BaseFragment() {
                     viewModel.setCustomerName(it.customerName ?: "Customer")
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
-                    if (user.userType!!.contains("regular", true)) {
+                    if (!user.userType!!.contains("regular", true)) {
                         EnterCvvNumberDialog(object : PinPadDialogListener {
                             override fun onError(errorMessage: String) {
                                 showToast(errorMessage)
