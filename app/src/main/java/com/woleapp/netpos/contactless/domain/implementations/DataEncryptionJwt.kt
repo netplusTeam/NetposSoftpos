@@ -27,4 +27,5 @@ class DataEncryptionJwt @Inject constructor() : DataEncryptionAndDecryption {
             .parse(encryptedData)
             .body.toString()
     }
+
 }

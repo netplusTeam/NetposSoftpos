@@ -1,14 +1,17 @@
 package com.woleapp.netpos.contactless.network
 
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_TAG_APP_ENCRYPTION_CREDENTIALS
 import io.reactivex.Single
+import org.json.JSONObject
+import retrofit2.HttpException
 import retrofit2.Response
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -25,23 +28,21 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         accountNumber: String,
         partnerId: String,
         deviceSerialId: String,
-    ): Single<Response<AccountNumberLookUpResponse>> =
-        accountLookUpService.findAccount(
-            AccountNumberLookUpRequest(accountNumber),
-            partnerId,
-            deviceSerialId,
-        )
+    ): Single<Response<AccountNumberLookUpResponse>> = accountLookUpService.findAccount(
+        AccountNumberLookUpRequest(accountNumber),
+        partnerId,
+        deviceSerialId,
+    )
 
     override fun confirmOTP(
         phoneNumber: String,
         accountNumber: String,
         otp: String,
         partnerId: String,
-    ): Single<ConfirmOTPResponse> =
-        accountLookUpService.confirmOTP(
-            ConfirmOTPRequest(phoneNumber, accountNumber, otp),
-            partnerId,
-        )
+    ): Single<ConfirmOTPResponse> = accountLookUpService.confirmOTP(
+        ConfirmOTPRequest(phoneNumber, accountNumber, otp),
+        partnerId,
+    )
 
     override fun registerExistingAccount(
         existingAccountRegisterRequest: ExistingAccountRegisterRequest,
@@ -57,11 +58,12 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         existingAccountRegisterRequest: BankTRegistrationModel,
         partnerId: String,
         deviceSerialId: String
-    ): Single<ExistingAccountRegisterResponse> = accountLookUpService.registerExistingAccountForBankT(
-        existingAccountRegisterRequest,
-        partnerId,
-        deviceSerialId,
-    )
+    ): Single<ExistingAccountRegisterResponse> =
+        accountLookUpService.registerExistingAccountForBankT(
+            existingAccountRegisterRequest,
+            partnerId,
+            deviceSerialId,
+        )
 
     override fun getBranches(
         stateId: Int,
@@ -104,27 +106,54 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         data: String,
         partnerId: String,
         deviceSerialId: String,
-    ): Single<ConfirmOTPResponse?> =
-        accountLookUpService.encryptedAccountLookUpRequest(
-            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
-            partnerId,
-            deviceSerialId,
-        ).flatMap {
-            if (!it.sendResponse.isNullOrEmpty()) {
-                Single.just(
-                    gson.fromJson(
-                        networkEncryptionHelper.decryptData(
-                            it.sendResponse,
-                        ),
-                        ConfirmOTPResponse::class.java,
-                    ),
-                )
-            } else {
-                Single.just(
-                    null,
-                )
-            }
+    ): Single<ConfirmOTPResponse?> = accountLookUpService.encryptedAccountLookUpRequest(
+        EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
+        partnerId,
+        deviceSerialId,
+    ).flatMap {
+        val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
+        if (!it.sendResponse.isNullOrEmpty()) {
+            val resp = otpResponse.substringAfter("{").substringBefore("}")
+            val fields = resp.split(",")
+            val businessName = fields.find { it.contains("businessName") }?.substringAfter("{")
+                ?.substringAfter(":")?.trim('"', ' ')
+            val address =
+                fields.find { it.contains("address") }?.substringAfter(":")?.trim('"', ' ')
+            val accountNumber =
+                fields.find { it.contains("accountNumber") }?.substringAfter(":")?.trim('"', ' ')
+            val email = fields.find { it.contains("email") }?.substringAfter(":")?.trim('"', ' ')
+            val phone = fields.find { it.contains("phone") }?.substringAfter(":")?.trim('"', ' ')
+            val fullName =
+                fields.find { it.contains("fullName") }?.substringAfter(":")?.trim('"', ' ')
+
+            val decryptedResponse = Data(
+                businessName ?: "",
+                address ?: "",
+                fullName ?: "",
+                accountNumber ?: "",
+                email ?: "",
+                phone ?: ""
+            )
+            Single.just(
+                ConfirmOTPResponse(true, "Account verified successfully", decryptedResponse)
+            )
+        } else {
+            Single.just(
+                null,
+            )
         }
+
+    }.onErrorResumeNext {
+        val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
+        val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
+        val ans = listOf(resp)
+        val newSize = ans[0].toString().substring(16, 245)
+        val finalErrorResp = networkEncryptionHelper.decryptData(newSize)
+        val jsonObject = JSONObject(finalErrorResp)
+        val message = jsonObject.getJSONObject("data").getString("message")
+        DPrefs.putString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, message)
+        Single.just(null)
+    }
 
     override fun encryptedRegisterExistingAccount(
         data: String,
@@ -136,73 +165,81 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             partnerId,
             deviceSerialId,
         ).flatMap {
-            if (it.sendResponse.isNullOrEmpty()) {
-                Single.just(
-                    null,
-                )
-            } else {
+            if (!it.sendResponse.isNullOrEmpty()) {
                 Single.just(
                     gson.fromJson(
                         networkEncryptionHelper.decryptData(it.sendResponse),
                         ExistingAccountRegisterResponse::class.java,
                     ),
                 )
+            } else {
+                Single.just(
+                    null,
+                )
             }
+        }.onErrorResumeNext {
+            val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
+            val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
+            val ans = listOf(resp)
+            val newSize = ans[0].toString().substring(16, 244)
+            val finalErrorResp = networkEncryptionHelper.decryptData(newSize)
+            val jsonObject = JSONObject(finalErrorResp)
+            val message = jsonObject.getJSONObject("data").getString("message")
+            DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
+            Single.just(null)
         }
 
     override fun encryptedRegisterFBN(
         data: String,
         partnerId: String,
         deviceSerialId: String,
-    ): Single<RegistrationModel?> =
-        contactlessRegService.encryptedRegisterFBN(
-            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
-            partnerId,
-            deviceSerialId,
-        ).flatMap {
-            if (it.sendResponse.isNullOrEmpty()) {
-                Single.just(
-                    null,
-                )
-            } else {
-                Single.just(
-                    gson.fromJson(
-                        networkEncryptionHelper.decryptData(it.sendResponse),
-                        RegistrationModel::class.java,
-                    ),
-                )
-            }
+    ): Single<RegistrationModel?> = contactlessRegService.encryptedRegisterFBN(
+        EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
+        partnerId,
+        deviceSerialId,
+    ).flatMap {
+        if (it.sendResponse.isNullOrEmpty()) {
+            Single.just(
+                null,
+            )
+        } else {
+            Single.just(
+                gson.fromJson(
+                    networkEncryptionHelper.decryptData(it.sendResponse),
+                    RegistrationModel::class.java,
+                ),
+            )
         }
+    }
 
     override fun getCred(data: String): Single<Boolean> =
-        contactlessRegService.getCredentials(EncryptedApiRequestModel(data))
-            .flatMap {
-                return@flatMap if (it.isSuccessful) {
-                    return@flatMap try {
-                        val response = gson.fromJson(
-                            it.body()?.sendResponse?.let { it1 ->
-                                networkEncryptionHelper.decryptData(
-                                    it1,
-                                )
-                            },
-                            EncryptionCredentials::class.java,
-                        )
-                        response?.let { encCred ->
-                            sharedPrefs.saveString(
-                                STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
-                                gson.toJson(
-                                    encCred,
-                                ),
+        contactlessRegService.getCredentials(EncryptedApiRequestModel(data)).flatMap {
+            return@flatMap if (it.isSuccessful) {
+                return@flatMap try {
+                    val response = gson.fromJson(
+                        it.body()?.sendResponse?.let { it1 ->
+                            networkEncryptionHelper.decryptData(
+                                it1,
                             )
-                        }
-                        Single.just(
-                            response?.let { true } ?: false,
+                        },
+                        EncryptionCredentials::class.java,
+                    )
+                    response?.let { encCred ->
+                        sharedPrefs.saveString(
+                            STRING_TAG_APP_ENCRYPTION_CREDENTIALS,
+                            gson.toJson(
+                                encCred,
+                            ),
                         )
-                    } catch (e: Exception) {
-                        Single.just(false)
                     }
-                } else {
+                    Single.just(
+                        response?.let { true } ?: false,
+                    )
+                } catch (e: Exception) {
                     Single.just(false)
                 }
+            } else {
+                Single.just(false)
             }
+        }
 }

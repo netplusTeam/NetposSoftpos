@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.domain.implementations
 
+import android.util.Log
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import java.security.MessageDigest
 import javax.crypto.Cipher
@@ -49,4 +50,5 @@ class DataEncryptionAndDecryptionImpl(
         }
         return ""
     }
+
 }

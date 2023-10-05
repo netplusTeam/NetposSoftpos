@@ -90,7 +90,7 @@ class RegistrationViewModel @Inject constructor(
                     dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
                 } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
                     dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
-                } else if (BuildConfig.FLAVOR.contains("easypayfcmb")) {
+                }  else if (BuildConfig.FLAVOR.contains("easypayfcmb")) {
                     dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("qlick.pdf").load()
                 }
                 dialogView.findViewById<Button>(R.id.accept_button).setOnClickListener {
@@ -104,7 +104,19 @@ class RegistrationViewModel @Inject constructor(
                     _message.value = Event("All fields are required")
                     return
                 } else {
-                    regFBN(bank, deviceSerialId)
+                    val dialogView: View = LayoutInflater.from(context)
+                        .inflate(R.layout.dialog_terms_and_conditions, null)
+                    val dialogBuilder: AlertDialog.Builder =
+                        AlertDialog.Builder(context)
+                    dialogBuilder.setView(dialogView)
+
+                    val alertDialog: AlertDialog = dialogBuilder.create()
+                    alertDialog.show()
+                    dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("fbn.pdf").load()
+                    dialogView.findViewById<Button>(R.id.accept_button).setOnClickListener {
+                        alertDialog.dismiss()
+                        regFBN(bank, deviceSerialId)
+                    }
                 }
             } else if (BuildConfig.FLAVOR.contains("zenith")) {
                 if (registrationBankZModel.value?.Password != registrationZenithConfirmPassword.value) {

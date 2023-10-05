@@ -159,8 +159,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         submitBtn.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
                 registerForFBN()
-            } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") ||
-                BuildConfig.FLAVOR.contains("providuspos")
+            } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") || BuildConfig.FLAVOR.contains(
+                    "providuspos"
+                )
             ) {
                 registerForProvidus()
             } else {
@@ -290,7 +291,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    registerExistingCustomer()
+                    activity?.getFragmentManager()?.popBackStack()
+                    val dialogView: View = LayoutInflater.from(requireContext())
+                        .inflate(R.layout.dialog_terms_and_conditions, null)
+                    val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
+                    dialogBuilder.setView(dialogView)
+
+                    val alertDialog: AlertDialog = dialogBuilder.create()
+                    alertDialog.show()
+
+                    dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("fbn.pdf").load()
+                    dialogView.findViewById<Button>(R.id.accept_button).setOnClickListener {
+                        alertDialog.dismiss()
+                        registerExistingCustomer()
+                    }
                 }
             }
         }

@@ -1,17 +1,20 @@
 package com.woleapp.netpos.contactless.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.Resource
 import com.woleapp.netpos.contactless.util.Singletons.gson
+import com.woleapp.netpos.contactless.util.UtilityParam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -20,11 +23,16 @@ import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
+
 
 @HiltViewModel
 class ContactlessRegViewModel @Inject constructor(
     private val contactlessRegRepo: ContactlessRegRepository,
-) : ViewModel() {
+    ) : ViewModel() {
+
+
     private val disposable = CompositeDisposable()
 
     private var _accountNumberResponse: MutableLiveData<Resource<AccountNumberLookUpResponse>> =
@@ -144,12 +152,10 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "")
                             _message.value = Event(
                                 try {
-                                    gson.fromJson(
-                                        errorMessage,
-                                        ExistingCustomerError::class.java,
-                                    ).message
+                                    errorMsg
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -477,16 +483,15 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _existingRegRequestResponse.postValue(Resource.error(null))
+                        Log.d("VIEWWCHECKAA", it.toString())
                         Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, "")
                             _registerMessage.value = Event(
                                 try {
-                                    gson.fromJson(
-                                        errorMessage,
-                                        ExistingCustomerError::class.java,
-                                    ).message
+                                    errorMsg
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"

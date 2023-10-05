@@ -50,4 +50,6 @@ object AppConstants {
     const val RESET_USERNAME = "RESET_USERNAME"
     const val ACCOUNT_NUMBER_FOR_PROVIDUS = "ACCOUNT_NUMBER_FOR_PROVIDUS"
     const val STRING_TAG_APP_ENCRYPTION_CREDENTIALS = "STRING_TAG_APP_ENCRYPTION_CREDENTIALS"
+    const val FBN_ACCOUNT_NUMBER_LOOKUP = "fbn_account_number_lookup"
+    const val FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER = "fbn_existing_customer_account_register"
 }
