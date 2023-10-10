@@ -76,7 +76,7 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getConfigurationDataIp(JNI
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getConfigurationDataPort(JNIEnv *env,
                                                                                jobject thiz) {
-    return (*env)->NewStringUTF(env, "5016");
+    return (*env)->NewStringUTF(env, "4016");
 }
 
 JNIEXPORT jstring JNICALL
