@@ -963,7 +963,6 @@ class MainActivity :
                         }
                     }
                     else -> {
-                        receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download_share)
@@ -974,6 +973,7 @@ class MainActivity :
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
+                                receiptPdf = createPdf(pdfView, this@MainActivity)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
@@ -1031,7 +1031,7 @@ class MainActivity :
         }
     }
 
-    fun addFragmentWithoutRemove(
+    private fun addFragmentWithoutRemove(
         fragment: Fragment,
         containerViewId: Int = R.id.container_main,
         fragmentName: String? = null,
