@@ -12,37 +12,40 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.NFC" />
-    <uses-feature android:name="android.hardware.nfc" android:required="false" tools:replace="required"/>
 
     <uses-feature
-        android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
+        android:name="android.hardware.nfc"
+        android:required="false"
+        tools:replace="required" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
 
 
     <application
         android:name=".app.NetPosApp"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:debuggable="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:debuggable="false"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
-        android:requestLegacyExternalStorage="true"
-        tools:replace="android:label,android:theme"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        tools:ignore="HardcodedDebugMode">
+        tools:ignore="HardcodedDebugMode"
+        tools:replace="android:label,android:theme">
 
         <activity
             android:name=".ui.activities.AuthenticationActivity"
-            android:theme="@style/SplashTheme"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"
             android:launchMode="singleInstance"
             android:protectionLevel="signature"
-            android:taskAffinity="com.woleapp.netpos.contactless">
+            android:screenOrientation="portrait"
+            android:taskAffinity="com.woleapp.netpos.contactless"
+            android:theme="@style/SplashTheme"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -52,12 +55,11 @@
         <activity
             android:name=".ui.activities.MainActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
             android:launchMode="singleInstance"
-            android:windowSoftInputMode="adjustPan"
+            android:protectionLevel="signature"
+            android:screenOrientation="portrait"
             android:taskAffinity="com.woleapp.netpos.contactless"
-            android:protectionLevel="signature">
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
 
         <receiver
             android:name=".receivers.BatteryReceiver"
@@ -79,6 +81,7 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWEROFF" />
             </intent-filter>
         </receiver>
+
         <service
             android:name=".services.MyFirebaseMessagingService"
             android:exported="false">
@@ -97,6 +100,7 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -107,5 +111,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
     </application>
-
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 </manifest>
