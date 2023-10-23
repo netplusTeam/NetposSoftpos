@@ -20,8 +20,10 @@ import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRegisterBinding
 import com.woleapp.netpos.contactless.model.FBNBranch
 import com.woleapp.netpos.contactless.model.FBNState
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import com.woleapp.netpos.contactless.viewmodels.RegistrationViewModel
 import java.util.*
@@ -69,7 +71,8 @@ class RegisterFragment : BaseFragment() {
         }else{
             viewModel.message.observe(viewLifecycleOwner) { event ->
                 event.getContentIfNotHandled()?.let {
-                    Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    showAlertDialog(requireContext(), it, "OK") {}
+                 //   Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                 }
             }
         }

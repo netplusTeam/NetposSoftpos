@@ -61,7 +61,8 @@ class NewOrExistingFragment : BaseFragment() {
         deviceSerialID = getDeviceId(requireContext()).toString()
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                RandomPurposeUtil.showAlertDialog(requireContext(), message, "OK") {}
+                // Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
 

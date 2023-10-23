@@ -30,6 +30,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.util.validatePasswordMismatch
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -81,7 +82,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         deviceSerialID = getDeviceId(requireContext())
         viewModel.registerMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                showAlertDialog(requireContext(), message, "OK"){}
+              //  Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
         if (BuildConfig.FLAVOR.contains("firstbank")) {
