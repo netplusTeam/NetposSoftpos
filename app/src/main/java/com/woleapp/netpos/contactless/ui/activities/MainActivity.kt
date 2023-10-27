@@ -16,7 +16,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -34,19 +33,20 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.enums.DPrefsDefaultValue
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.database.AppDatabase
-import com.woleapp.netpos.contactless.databinding.* // ktlint-disable no-wildcard-imports
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.databinding.*
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
@@ -56,8 +56,8 @@ import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.contactless.ui.fragments.* // ktlint-disable no-wildcard-imports
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.ui.fragments.*
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_FIREBASE_INTENT_ACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_BUNDLE_KEY
@@ -80,7 +80,6 @@ import timber.log.Timber
 import java.io.File
 import java.util.*
 
-@Suppress("DEPRECATION")
 @AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
@@ -100,11 +99,9 @@ class MainActivity :
     private lateinit var dialogContactlessReaderBinding: DialogContatclessReaderBinding
     private val viewModel by viewModels<NfcCardReaderViewModel>()
     private val transactionViewModel by viewModels<TransactionsViewModel>()
-    private val notificationViewModel: NotificationViewModel by viewModels()
     private val contactlessKernel: ContactlessKernel by lazy {
         ContactlessKernel.getInstance(applicationContext)
     }
-
     private lateinit var waitingDialog: AlertDialog
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var receiptDialogBinding: DialogTransactionResultBinding
@@ -119,9 +116,13 @@ class MainActivity :
     private val qrPinBlock: QrPasswordPinBlockDialog = QrPasswordPinBlockDialog()
     private var amountToPayInDouble: Double? = 0.0
     private var qrData: QrScannedDataModel? = null
-    private val notificationModel: NotificationViewModel by viewModels()
+    private val notificationModel by viewModels<NotificationViewModel>()
+
     private lateinit var firebaseInstance: FirebaseMessaging
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
+    private lateinit var terminalId: String
+    private lateinit var userName: String
+    private lateinit var token: String
 
     override fun onStart() {
         super.onStart()
@@ -209,11 +210,11 @@ class MainActivity :
     }
 
     private fun logout() {
-        Prefs.remove(PREF_USER_TOKEN)
-        Prefs.remove(PREF_AUTHENTICATED)
-        Prefs.remove(PREF_KEYHOLDER)
-        Prefs.remove(PREF_CONFIG_DATA)
-        Prefs.remove(PREF_USER)
+        DPrefs.removePref(PREF_USER_TOKEN)
+        DPrefs.removePref(PREF_AUTHENTICATED)
+        DPrefs.removePref(PREF_KEYHOLDER)
+        DPrefs.removePref(PREF_CONFIG_DATA)
+        DPrefs.removePref(PREF_USER)
         MqttHelper.disconnect()
         val intent = Intent(this, AuthenticationActivity::class.java)
         intent.flags =
@@ -223,7 +224,8 @@ class MainActivity :
     }
 
     private fun checkTokenExpiry() {
-        val token = Prefs.getString(PREF_USER_TOKEN, null)
+        val token = DPrefs.getString(PREF_USER_TOKEN)
+            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         token?.let {
             if (JWTHelper.isExpired(it)) {
                 logout()
@@ -354,7 +356,7 @@ class MainActivity :
             }
             create()
         }
-        val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
         if (user == null) {
             val intent = Intent(this, AuthenticationActivity::class.java)
             this.startActivity(intent)
@@ -494,8 +496,9 @@ class MainActivity :
                 if (!task.isSuccessful) {
                     return@OnCompleteListener
                 }
-                val token = task.result // this is the token retrieved
-                Log.d("FCM", token)
+                token = task.result // this is the token retrieved
+                Timber.tag("FCM").d(token)
+                sendTokenToBackend(token, terminalId, userName)
             },
         )
         qrAmoutDialogBinding = QrAmoutDialogBinding.inflate(layoutInflater, null, false).apply {
@@ -524,11 +527,11 @@ class MainActivity :
                     dialog.dismiss()
                     // finish()
                 }.create()
-        val terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
-        val userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
+        terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
+        userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         firebaseInstance = FirebaseMessaging.getInstance()
         getFireBaseToken(firebaseInstance) {
-            sendTokenToBackend(it, terminalId, userName)
+            sendTokenToBackend(token, terminalId, userName)
         }
     }
 
@@ -565,7 +568,7 @@ class MainActivity :
             override fun onLocationChanged(location: Location) {
                 // Called when a new location is found by the network location provider.
                 location.let {
-                    Prefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
+                    DPrefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
                 }
             }
 
@@ -691,7 +694,7 @@ class MainActivity :
     }
 
     private fun printQrTransactionUtil(qrTransaction: QrTransactionResponseFinalModel) {
-        when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
+        when (DPrefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
             PREF_VALUE_PRINT_DOWNLOAD -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
@@ -902,7 +905,7 @@ class MainActivity :
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
+                when (DPrefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
@@ -911,6 +914,8 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 showSnackBar(
                                     binding.root,
@@ -950,13 +955,14 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
                     }
                     else -> {
-                        receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download_share)
@@ -964,7 +970,10 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
+                                receiptPdf = createPdf(pdfView, this@MainActivity)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
@@ -1010,7 +1019,7 @@ class MainActivity :
     }
 
     private fun fetchUnreadNotifications() {
-        notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
+        notificationModel.unreadNotifications.observe(this) { unreadMessages ->
             unreadMessages?.let {
                 if (it.isEmpty()) {
                     notificationsLayout.visibility = View.INVISIBLE
@@ -1022,7 +1031,7 @@ class MainActivity :
         }
     }
 
-    fun addFragmentWithoutRemove(
+    private fun addFragmentWithoutRemove(
         fragment: Fragment,
         containerViewId: Int = R.id.container_main,
         fragmentName: String? = null,
