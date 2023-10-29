@@ -81,9 +81,7 @@ import java.io.File
 import java.util.*
 
 @AndroidEntryPoint
-class MainActivity :
-    AppCompatActivity(),
-    EasyPermissions.PermissionCallbacks,
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks,
     NfcAdapter.ReaderCallback {
 //    private lateinit var appUpdateManager: AppUpdateManager
 //    private val updateType = AppUpdateType.IMMEDIATE
@@ -127,8 +125,7 @@ class MainActivity :
     override fun onStart() {
         super.onStart()
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
-            NetPosTerminalConfig.configurationStatus
-        ) {
+            NetPosTerminalConfig.configurationStatus) {
             -1 -> NetPosTerminalConfig.init(
                 applicationContext,
             )
@@ -152,7 +149,12 @@ class MainActivity :
                     }.show()
             }
         } else {
-            deviceNotSupportedAlertDialog.show()
+            AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
+                .setCancelable(false).setMessage(getString(R.string.device_doesnt_have_nfc))
+                .setPositiveButton(getString(R.string.close)) { dialog, _ ->
+                    dialog.dismiss()
+                    // finish()
+                }.create().show()
         }
     }
 
@@ -357,12 +359,12 @@ class MainActivity :
             create()
         }
         val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
-        if (user == null) {
-            val intent = Intent(this, AuthenticationActivity::class.java)
-            this.startActivity(intent)
-            Toast.makeText(this, getString(R.string.kindly_login), Toast.LENGTH_LONG).show()
-            return
-        }
+//        if (user == null) {
+//            val intent = Intent(this, AuthenticationActivity::class.java)
+//            this.startActivity(intent)
+//            Toast.makeText(this, getString(R.string.kindly_login), Toast.LENGTH_LONG).show()
+//            return
+//        }
         binding.dashboardHeader.username.text = user.business_name
         binding.dashboardBottomNavigationView.setOnItemSelectedListener(object :
             NavigationBarView.OnItemSelectedListener {
@@ -521,8 +523,7 @@ class MainActivity :
         }.create()
         deviceNotSupportedAlertDialog =
             AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
-                .setCancelable(false)
-                .setMessage(getString(R.string.device_doesnt_have_nfc))
+                .setCancelable(false).setMessage(getString(R.string.device_doesnt_have_nfc))
                 .setPositiveButton(getString(R.string.close)) { dialog, _ ->
                     dialog.dismiss()
                     // finish()
