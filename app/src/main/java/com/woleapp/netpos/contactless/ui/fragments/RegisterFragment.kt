@@ -107,7 +107,7 @@ class RegisterFragment : BaseFragment() {
                         fragmentName = "Login Fragment",
                     )
                 }
-                .setMessage("Business Info Received, our team will contact you in 2 Business Days")
+                .setMessage("You can start transactions immediately but contact the bank to regularize your EasyPay Account")
                 .create()
         }
 

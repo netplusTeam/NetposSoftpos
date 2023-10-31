@@ -43,7 +43,6 @@ class DisplayQrFragment : BaseFragment() {
     private lateinit var amount: TextInputEditText
     private val viewModel by activityViewModels<ContactlessQrPaymentViewModel>()
     private lateinit var loader: AlertDialog
-    private lateinit var partnerID: String
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -78,7 +77,7 @@ class DisplayQrFragment : BaseFragment() {
         loader = alertDialog(requireContext())
 
         binding.process.setOnClickListener {
-            register()
+            processPayment()
         }
     }
 
@@ -88,7 +87,7 @@ class DisplayQrFragment : BaseFragment() {
         }
     }
 
-    private fun register() {
+    private fun processPayment() {
         when {
             amount.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_amount))
@@ -146,22 +145,4 @@ class DisplayQrFragment : BaseFragment() {
         }
     }
 
-    private fun initPartnerID() {
-        val bankList = mapOf(
-            "firstbank" to "firstbank",
-            "netpos" to "netpos",
-            "easypay" to "fcmb",
-            "fcmbeasypay" to "fcmb",
-            "easypayfcmb" to "fcmb",
-            "providuspos" to "providus",
-            "providus" to "providus",
-            "providussoftpos" to "providus",
-            "wemabank" to "wemabank",
-            "zenith" to "zenith",
-        )
-
-        bankList.forEach { (key, value) ->
-            if (key == BuildConfig.FLAVOR) partnerID = value
-        }
-    }
 }
