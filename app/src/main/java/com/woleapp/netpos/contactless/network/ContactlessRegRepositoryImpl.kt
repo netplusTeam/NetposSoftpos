@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.network
 
+import android.util.Log
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -117,12 +118,17 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             val fields = resp.split(",")
             val businessName = fields.find { it.contains("businessName") }?.substringAfter("{")
                 ?.substringAfter(":")?.trim('"', ' ')
+
             val address =
                 fields.find { it.contains("address") }?.substringAfter(":")?.trim('"', ' ')
+
             val accountNumber =
                 fields.find { it.contains("accountNumber") }?.substringAfter(":")?.trim('"', ' ')
+
             val email = fields.find { it.contains("email") }?.substringAfter(":")?.trim('"', ' ')
+
             val phone = fields.find { it.contains("phone") }?.substringAfter(":")?.trim('"', ' ')
+
             val fullName =
                 fields.find { it.contains("fullName") }?.substringAfter(":")?.trim('"', ' ')
 
@@ -135,7 +141,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                 phone ?: ""
             )
             Single.just(
-                ConfirmOTPResponse(true, "Account verified successfully", decryptedResponse)
+                ConfirmOTPResponse(true, "OTP sent", decryptedResponse)
             )
         } else {
             Single.just(

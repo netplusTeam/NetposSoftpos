@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
-import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.chaos.view.PinView
@@ -22,6 +21,7 @@ import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
 import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 
@@ -55,16 +55,26 @@ class RegistrationOTPFragment : BaseFragment() {
         initPartnerID()
         viewModel.otpMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                if (message == "Account verified successfully"){
+                    showAlertDialog(requireContext(), message, "OK") {
+                        showFragment(
+                            ExistingCustomersRegistrationFragment(),
+                            containerViewId = R.id.auth_container,
+                            fragmentName = "Register Existing Customer Fragment",
+                        )
+                    }
+                }else{
+                    showAlertDialog(requireContext(), message, "OK") {}
+                }
             }
         }
         val newPoneNumber =
             DPrefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
-        val phoneNumber = newPoneNumber.substring(1, newPoneNumber.length - 1)
+        val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
 
         val newActNumber =
             DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-        newAccountNumber = newActNumber.substring(1, newActNumber.length - 1)
+        newAccountNumber = newActNumber.substring(0, newActNumber.length)
 
         loader = alertDialog(requireContext())
         initViews()
@@ -98,6 +108,15 @@ class RegistrationOTPFragment : BaseFragment() {
                                     containerViewId = R.id.auth_container,
                                     fragmentName = "Register Existing Customer Fragment",
                                 )
+                                viewModel.clearOTPResponseLiveData()
+                            }
+                        } else if(BuildConfig.FLAVOR.contains("firstbank"))  {
+                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
+                            observeServerResponse(
+                                viewModel.confirmOTPResponse,
+                                loader,
+                                requireActivity().supportFragmentManager,
+                            ) {
                                 viewModel.clearOTPResponseLiveData()
                             }
                         } else {

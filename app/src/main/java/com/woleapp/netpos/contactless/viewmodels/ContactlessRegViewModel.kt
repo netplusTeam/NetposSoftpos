@@ -183,6 +183,7 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
+                        Log.d("CHECKING", it.toString())
                         _otpMessage.value = Event("Success")
                     }
                     error?.let {
