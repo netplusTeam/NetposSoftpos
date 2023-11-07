@@ -564,4 +564,24 @@ object RandomPurposeUtil {
             0
         }
     }
+
+
+    fun showAlertDialog(
+        context: Context,
+        message: String,
+        positiveButtonTitle: String,
+        onPositiveButtonClick: () -> Unit,
+    ) {
+        val alertDialog = AlertDialog.Builder(context)
+            .setMessage(message)
+            .setPositiveButton(positiveButtonTitle) { _, _ ->
+                onPositiveButtonClick()
+                // Dismiss the dialog when "Yes" is clicked
+                alertDialog(context).dismiss()
+            }
+            .setCancelable(false)
+            .create()
+
+        alertDialog.show()
+    }
 }

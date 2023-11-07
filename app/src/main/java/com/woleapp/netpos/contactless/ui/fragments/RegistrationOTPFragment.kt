@@ -54,11 +54,11 @@ class RegistrationOTPFragment : BaseFragment() {
         }
         val newPoneNumber =
             Prefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
-        val phoneNumber = newPoneNumber.substring(1, newPoneNumber.length - 1)
+        val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
 
         val newActNumber =
             Prefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-        newAccountNumber = newActNumber.substring(1, newActNumber.length - 1)
+        newAccountNumber = newActNumber.substring(0, newActNumber.length)
 
         loader = alertDialog(requireContext())
         initViews()
@@ -77,7 +77,7 @@ class RegistrationOTPFragment : BaseFragment() {
                 s?.let {
                     if (it.length == 6) {
                         RandomPurposeUtil.closeSoftKeyboard(requireContext(), requireActivity())
-                        if (BuildConfig.FLAVOR.contains("providuspos") ||BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos")) {
+                        if (BuildConfig.FLAVOR.contains("providuspos") ||BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("providussoftpos")) {
                             viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
                             observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
                                 showFragment(

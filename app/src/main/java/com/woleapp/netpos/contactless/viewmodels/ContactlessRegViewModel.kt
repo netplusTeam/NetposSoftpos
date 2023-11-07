@@ -149,11 +149,11 @@ class ContactlessRegViewModel @Inject constructor(
                     data?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.success(it))
                         saveAccountNumber(accountNumber)
-                        saveExistingPhoneNumber(it.data.phone)
-                        saveEmail(it.data.email)
-                        saveBusinessName(it.data.businessName)
-                        saveBusinessAddress(it.data.address)
-                        saveFullName(it.data.fullName)
+                        it.data.phone?.let { it1 -> saveExistingPhoneNumber(it1) }
+                        it.data.email?.let { it1 -> saveEmail(it1) }
+                        it.data.businessName?.let { it1 -> saveBusinessName(it1) }
+                        it.data.address?.let { it1 -> saveBusinessAddress(it1) }
+                        it.data.fullName?.let { it1 -> saveFullName(it1) }
                         if (it.message.isNullOrEmpty()){
                             _message.value = Event("Successful")
                         }else{
@@ -191,11 +191,11 @@ class ContactlessRegViewModel @Inject constructor(
                     data?.let {
                         _confirmOTPResponse.postValue(Resource.success(it))
                         // saveExistingCustomerData(data.data)
-                        saveExistingPhoneNumber(it.data.phone)
-                        saveEmail(it.data.email)
-                        saveBusinessName(it.data.businessName)
-                        saveBusinessAddress(it.data.address)
-                        saveFullName(it.data.fullName)
+                        it.data.phone?.let { it1 -> saveExistingPhoneNumber(it1) }
+                        it.data.email?.let { it1 -> saveEmail(it1) }
+                        it.data.businessName?.let { it1 -> saveBusinessName(it1) }
+                        it.data.address?.let { it1 -> saveBusinessAddress(it1) }
+                        it.data.fullName?.let { it1 -> saveFullName(it1) }
                         _otpMessage.value = Event("Success")
                     }
                     error?.let {
