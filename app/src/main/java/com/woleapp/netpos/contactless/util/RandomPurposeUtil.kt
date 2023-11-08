@@ -197,7 +197,7 @@ object RandomPurposeUtil {
                     ) {
                         successAction()
                     } else {
-                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                        //showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
                 }
                 Status.LOADING -> {
