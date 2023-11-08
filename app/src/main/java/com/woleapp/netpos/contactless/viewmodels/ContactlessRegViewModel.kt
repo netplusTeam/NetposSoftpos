@@ -168,23 +168,36 @@ class ContactlessRegViewModel @Inject constructor(
         )
     }
 
-    fun confirmOTP(phoneNumber: String, accountNumber: String, otp: String, partnerId: String) {
+    fun confirmOTPForFBN(
+        phoneNumber: String,
+        accountNumber: String,
+        otp: String,
+        partnerId: String
+    ) {
         _confirmOTPResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.confirmOTP(phoneNumber, accountNumber, otp, partnerId)
+            contactlessRegRepo.confirmOTP(
+                gson.toJson(
+                    ConfirmOTPRequest(phoneNumber, accountNumber, otp),
+                ),
+                partnerId
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _confirmOTPResponse.postValue(Resource.success(it))
-                        // saveExistingCustomerData(data.data)
+                        saveAccountNumber(accountNumber)
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
-                        Log.d("CHECKING", it.toString())
-                        _otpMessage.value = Event("Success")
+                        if (it.message.isNullOrEmpty()) {
+                            _otpMessage.value = Event("Successful")
+                        } else {
+                            _otpMessage.value = Event(it.message.toString())
+                        }
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))
@@ -192,12 +205,10 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "")
                             _otpMessage.value = Event(
                                 try {
-                                    gson.fromJson(
-                                        errorMessage,
-                                        ExistingCustomerError::class.java,
-                                    ).message
+                                    errorMsg
                                         ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
@@ -209,6 +220,49 @@ class ContactlessRegViewModel @Inject constructor(
                 },
         )
     }
+
+
+//    fun confirmOTP(phoneNumber: String, accountNumber: String, otp: String, partnerId: String) {
+//        _confirmOTPResponse.postValue(Resource.loading(null))
+//        disposable.add(
+//            contactlessRegRepo.confirmOTP(phoneNumber, accountNumber, otp, partnerId)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe { data, error ->
+//                    data?.let {
+//                        _confirmOTPResponse.postValue(Resource.success(it))
+//                        // saveExistingCustomerData(data.data)
+//                        saveExistingPhoneNumber(it.data.phone)
+//                        saveEmail(it.data.email)
+//                        saveBusinessName(it.data.businessName)
+//                        saveBusinessAddress(it.data.address)
+//                        saveFullName(it.data.fullName)
+//                        Log.d("CHECKING", it.toString())
+//                        _otpMessage.value = Event("Success")
+//                    }
+//                    error?.let {
+//                        _confirmOTPResponse.postValue(Resource.error(null))
+//                        Timber.d("ERROR==${it.localizedMessage}")
+//                        (it as? HttpException).let { httpException ->
+//                            val errorMessage = httpException?.response()?.errorBody()?.string()
+//                                ?: "{\"message\":\"Unexpected error\"}"
+//                            _otpMessage.value = Event(
+//                                try {
+//                                    gson.fromJson(
+//                                        errorMessage,
+//                                        ExistingCustomerError::class.java,
+//                                    ).message
+//                                        ?: "Error"
+//                                } catch (e: Exception) {
+//                                    "Error"
+//                                },
+//                            )
+//                            // Timber.e("SHOWME--->$errorMessage")
+//                        }
+//                    }
+//                },
+//        )
+//    }
 
     fun getStates() {
         _getStatesResponse.postValue(Resource.loading(null))

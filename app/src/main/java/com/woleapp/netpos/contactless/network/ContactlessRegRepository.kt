@@ -12,12 +12,17 @@ interface ContactlessRegRepository {
         deviceSerialId: String,
     ): Single<Response<AccountNumberLookUpResponse>>
 
+//    fun confirmOTP(
+//        phoneNumber: String,
+//        accountNumber: String,
+//        otp: String,
+//        partnerId: String,
+//    ): Single<ConfirmOTPResponse>
+
     fun confirmOTP(
-        phoneNumber: String,
-        accountNumber: String,
-        otp: String,
-        partnerId: String,
-    ): Single<ConfirmOTPResponse>
+        data: String,
+        partnerId: String
+    ): Single<ConfirmOTPResponse?>
 
     fun registerExistingAccount(
         existingAccountRegisterRequest: ExistingAccountRegisterRequest,
@@ -62,6 +67,11 @@ interface ContactlessRegRepository {
         partnerId: String,
         deviceSerialId: String,
     ): Single<GeneralResponse>
+
+//    fun confirmOtp(
+//        data: String,
+//        partnerId: String
+//    ): Single<ConfirmOTPResponse?>
 
     fun encryptedAccountLookUpRequest(
         data: String,

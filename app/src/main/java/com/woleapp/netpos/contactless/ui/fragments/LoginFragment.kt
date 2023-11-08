@@ -208,6 +208,18 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+       // Log.d("FIRSTPAYLOAD",UtilityParam.STRING_NOTIFICATION_BASE_URL_NO_API)
+//        Log.d("FIRSTRESPONSE",UtilityParam.FIRSTRESPONSE)
+//        Log.d("SECONDPAYLOAD",UtilityParam.SECONDPAYLOAD)
+//        Log.d("FIRSTRESPONSE",UtilityParam.SECONDRESPONSE)
+//        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCIzMDUwMjc3MzE2XCJ9In0.IkcvojQx-AiO4Y-M3LwL-sARs1T-3DeBFabYPQn-9_Q"
+//
+//        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6dHJ1ZSxcIm1lc3NhZ2VcIjpcIk9UUCBzZW50XCIsXCJkYXRhXCI6e1wiYnVzaW5lc3NOYW1lXCI6XCJNVVNUQVBIQSBIQUxJTUEgU1VMRU1BTlwiLFwiYWRkcmVzc1wiOlwiXCIsXCJmdWxsTmFtZVwiOlwiTVVTVEFQSEEgSEFMSU1BIFNVTEVNQU5cIixcImFjY291bnROdW1iZXJcIjpcIjMwNTAyNzczMTZcIixcImVtYWlsXCI6bnVsbCxcInBob25lXCI6XCIrMjM0KDcwOCk2MTQ2NzcxXCJ9fSIsImlhdCI6MTY5OTM3NDg1MSwiZXhwIjoxNjk5Mzc4NDUxfQ.i-5Kiw_N03eF_wKezgAwEikZ_6FZNN3QUoRoiLeXl1M"
+//
+//
+//        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCJcXFwiMzA1MDI3NzMxNlxcXCJcIn0ifQ.pW2tu1bbjtRbc6rfNiye6afJx9hoo-WUvr_awHV34rM"
+//
+//        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJJbnZhbGlkIGFjY291bnQgbnVtYmVyIHByb3ZpZGVkXCJ9IiwiaWF0IjoxNjk5Mzc0OTQwLCJleHAiOjE2OTkzNzg1NDB9.fRrCcoFDVRHA3l6VHUHWOPeha5vzi2K9LokPGrLheH4"
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
@@ -294,11 +306,11 @@ class LoginFragment : BaseFragment() {
                 showToast("All fields are required required")
                 return
             }
-            contactlessViewModel.confirmOTP("", savedAcctNumber, otp, partnerID)
+            contactlessViewModel.confirmOTPForFBN("", savedAcctNumber, otp, partnerID)
             observeServerResponse(
                 contactlessViewModel.confirmOTPResponse,
                 loader,
-                requireActivity().supportFragmentManager,
+                requireActivity().supportFragmentManager
             ) {
                 setPasswordBinding.email.setText(email)
                 confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE

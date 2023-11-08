@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,10 +21,12 @@ import com.woleapp.netpos.contactless.databinding.FragmentRegistrationOTPBinding
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
-import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
+import java.util.*
 
 class RegistrationOTPFragment : BaseFragment() {
     private lateinit var binding: FragmentRegistrationOTPBinding
@@ -34,6 +37,9 @@ class RegistrationOTPFragment : BaseFragment() {
     private lateinit var loader: AlertDialog
     private lateinit var newAccountNumber: String
     private lateinit var partnerID: String
+    private lateinit var deviceSerialID: String
+    private var timeSeconds = 60L
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,10 +58,13 @@ class RegistrationOTPFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initPartnerID()
+        partnerID = initPartnerId()
+        deviceSerialID = getDeviceId(requireContext())
+        initViews()
+        startResendTimer()
         viewModel.otpMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                if (message == "Account verified successfully"){
+                if (message == "Account verified successfully") {
                     showAlertDialog(requireContext(), message, "OK") {
                         showFragment(
                             ExistingCustomersRegistrationFragment(),
@@ -63,21 +72,21 @@ class RegistrationOTPFragment : BaseFragment() {
                             fragmentName = "Register Existing Customer Fragment",
                         )
                     }
-                }else{
+                } else {
                     showAlertDialog(requireContext(), message, "OK") {}
                 }
             }
         }
-        val newPoneNumber =
-            DPrefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
+        val newPoneNumber = DPrefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
         val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
-
-        val newActNumber =
-            DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-        newAccountNumber = newActNumber.substring(0, newActNumber.length)
-
+        Log.d("NUMBERCHECK", phoneNumber)
+        val newActNumber = DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
+        newAccountNumber = newActNumber.substring(1, newActNumber.length-1)
+        Log.d("ACCOUNTNUMBER", newAccountNumber)
         loader = alertDialog(requireContext())
-        initViews()
+        resendCode.setOnClickListener {
+            resendOtp()
+        }
         otpView.requestFocus()
         val inputMethodManager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -97,7 +106,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
-                            viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
+                            viewModel.confirmOTPForFBN("", newAccountNumber, s.toString(), partnerID)
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
                                 loader,
@@ -110,8 +119,10 @@ class RegistrationOTPFragment : BaseFragment() {
                                 )
                                 viewModel.clearOTPResponseLiveData()
                             }
-                        } else if(BuildConfig.FLAVOR.contains("firstbank"))  {
-                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
+                        } else if (BuildConfig.FLAVOR.contains("firstbank")) {
+                            viewModel.confirmOTPForFBN(
+                                phoneNumber, newAccountNumber, s.toString(), partnerID
+                            )
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
                                 loader,
@@ -120,7 +131,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                 viewModel.clearOTPResponseLiveData()
                             }
                         } else {
-                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), "")
+                            viewModel.confirmOTPForFBN(phoneNumber, newAccountNumber, s.toString(), "")
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
                                 loader,
@@ -143,6 +154,19 @@ class RegistrationOTPFragment : BaseFragment() {
         })
     }
 
+    private fun resendOtp() {
+        viewModel.findAccountForFirstBankUser(newAccountNumber, partnerID, deviceSerialID)
+        startResendTimer()
+        observeServerResponse(
+            viewModel.firstBankAccountNumberResponse,
+            loader,
+            requireActivity().supportFragmentManager,
+        ) {
+            binding.otpResent.visibility
+            viewModel.clearLiveData()
+        }
+    }
+
     private fun initViews() {
         with(binding) {
             resendCode = resendOtp
@@ -151,24 +175,37 @@ class RegistrationOTPFragment : BaseFragment() {
         }
     }
 
-    private fun initPartnerID() {
-        val bankList = mapOf(
-            "firstbank" to UtilityParam.STRING_PARTNER_ID_FIRST_B,
-            "easypay" to UtilityParam.STRING_PARTNER_ID_EASY_PAY,
-            "fcmbeasypay" to UtilityParam.STRING_PARTNER_ID_FCMB_EASY_PAY,
-            "easypayfcmb" to UtilityParam.STRING_PARTNER_ID_EASY_PAY_FCMB,
-            "providuspos" to UtilityParam.STRING_PARTNER_ID_PROVIDUS_POS,
-            "stanbic" to UtilityParam.STRING_PARTNER_ID_STANBIC, // the partnerID is for Providus, change to Stanbic later
-            "providus" to UtilityParam.STRING_PARTNER_ID_PROVIDUS,
-            "providussoftpos" to UtilityParam.STRING_PARTNER_ID_PROVIDUS_SOFT_POS,
-            "wemabank" to UtilityParam.STRING_PARTNER_ID_WEMA_B,
-            "zenith" to UtilityParam.STRING_PARTNER_ID_ZENITH,
-        )
 
-        for (element in bankList) {
-            if (element.key == BuildConfig.FLAVOR) {
-                partnerID = element.value
+    private fun startResendTimer() {
+        resendCode.isEnabled = false
+        val timer = Timer()
+
+        // Schedule a task to run repeatedly at a fixed rate
+        timer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                // Code to run repeatedly at a fixed rate
+                timeSeconds--
+                activity?.runOnUiThread {
+                    resendCode.text = "Resend OTP in $timeSeconds seconds"
+                }
+                if (timeSeconds <= 0) {
+                    timeSeconds = 60L
+                    timer.cancel()
+                    activity?.runOnUiThread {
+                        resendCode.isEnabled = true
+                    }
+                }
             }
-        }
+        }, 0, 1000) // run 1000 milliseconds (1 second)
+
+        // To stop the timer, cancel it after a specified number of milliseconds
+//        timer.schedule(object : TimerTask() {
+//            override fun run() {
+//                // Cancel the timer
+//                timer.cancel()
+//                println("Timer canceled")
+//            }
+//        }, 5000) // 5000 milliseconds (5 seconds)
     }
+
 }

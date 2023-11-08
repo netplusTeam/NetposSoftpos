@@ -22,11 +22,17 @@ interface AccountLookUpService {
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<Response<AccountNumberLookUpResponse>>
 
+//    @POST("confirm-otp")
+//    fun confirmOTP(
+//        @Body confirmOTP: ConfirmOTPRequest,
+//        @Query("partnerId") partnerId: String,
+//    ): Single<ConfirmOTPResponse>
+
     @POST("confirm-otp")
     fun confirmOTP(
-        @Body confirmOTP: ConfirmOTPRequest,
-        @Query("partnerId") partnerId: String,
-    ): Single<ConfirmOTPResponse>
+        @Body data: EncryptedApiRequestModel,
+        @Query("partnerId") partnerId: String
+    ): Single<EncryptedApiResponseModel>
 
     @POST("user/register-existing-user")
     fun registerExistingAccount(

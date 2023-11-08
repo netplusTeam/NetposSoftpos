@@ -326,3 +326,25 @@ JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getCredIv(JNIEnv *env, jobject thiz) {
     return (*env)->NewStringUTF(env, "873hdfwyb4+pi_7h");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getFirstPayload(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCIzMDUwMjc3MzE2XCJ9In0.IkcvojQx-AiO4Y-M3LwL-sARs1T-3DeBFabYPQn-9_Q");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getFirstResponse(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6dHJ1ZSxcIm1lc3NhZ2VcIjpcIk9UUCBzZW50XCIsXCJkYXRhXCI6e1wiYnVzaW5lc3NOYW1lXCI6XCJNVVNUQVBIQSBIQUxJTUEgU1VMRU1BTlwiLFwiYWRkcmVzc1wiOlwiXCIsXCJmdWxsTmFtZVwiOlwiTVVTVEFQSEEgSEFMSU1BIFNVTEVNQU5cIixcImFjY291bnROdW1iZXJcIjpcIjMwNTAyNzczMTZcIixcImVtYWlsXCI6bnVsbCxcInBob25lXCI6XCIrMjM0KDcwOCk2MTQ2NzcxXCJ9fSIsImlhdCI6MTY5OTM3NDg1MSwiZXhwIjoxNjk5Mzc4NDUxfQ.i-5Kiw_N03eF_wKezgAwEikZ_6FZNN3QUoRoiLeXl1M");
+
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getSecondPayload(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCJcXFwiMzA1MDI3NzMxNlxcXCJcIn0ifQ.pW2tu1bbjtRbc6rfNiye6afJx9hoo-WUvr_awHV34rM");
+
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getSecondResponse(JNIEnv *env, jobject thiz) {
+    return (*env)->NewStringUTF(env, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJJbnZhbGlkIGFjY291bnQgbnVtYmVyIHByb3ZpZGVkXCJ9IiwiaWF0IjoxNjk5Mzc0OTQwLCJleHAiOjE2OTkzNzg1NDB9.fRrCcoFDVRHA3l6VHUHWOPeha5vzi2K9LokPGrLheH4");
+}
