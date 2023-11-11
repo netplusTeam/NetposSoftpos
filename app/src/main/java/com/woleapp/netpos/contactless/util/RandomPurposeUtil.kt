@@ -259,10 +259,10 @@ object RandomPurposeUtil {
                                     successAction()
                                 } else {
                                     Log.d("JUSTCHECKING", it.toString())
-                                    showSnackBar(
-                                        this.requireView(),
-                                        getString(R.string.an_error_occurred),
-                                    )
+//                                    showSnackBar(
+//                                        this.requireView(),
+//                                        getString(R.string.an_error_occurred),
+//                                    )
                                 }
                             }
                             Status.LOADING -> {
@@ -318,14 +318,14 @@ object RandomPurposeUtil {
                     ) {
                         successAction()
                     } else {
-                        showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                     //   showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
                 }
                 Status.LOADING -> {
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
-                    showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                  //  showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                 }

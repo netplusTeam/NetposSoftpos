@@ -21,6 +21,8 @@ import com.woleapp.netpos.contactless.databinding.FragmentRegistrationOTPBinding
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.closeSoftKeyboard
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 
@@ -46,7 +48,7 @@ class RegistrationOTPFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initPartnerID()
+        partnerID = initPartnerId()
         viewModel.otpMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
@@ -58,7 +60,7 @@ class RegistrationOTPFragment : BaseFragment() {
 
         val newActNumber =
             Prefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-        newAccountNumber = newActNumber.substring(0, newActNumber.length)
+        newAccountNumber = newActNumber.substring(1, newActNumber.length-1)
 
         loader = alertDialog(requireContext())
         initViews()
@@ -75,9 +77,22 @@ class RegistrationOTPFragment : BaseFragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 s?.let {
-                    if (it.length == 6) {
-                        RandomPurposeUtil.closeSoftKeyboard(requireContext(), requireActivity())
-                        if (BuildConfig.FLAVOR.contains("providuspos") ||BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("providussoftpos")) {
+                    if (BuildConfig.FLAVOR.contains("zenith") ){
+                        if (it.length == 5){
+                            closeSoftKeyboard(requireContext(), requireActivity())
+                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
+                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
+                                showFragment(
+                                    ExistingCustomersRegistrationFragment(),
+                                    containerViewId = R.id.auth_container,
+                                    fragmentName = "Register Existing Customer Fragment",
+                                )
+                                viewModel.clearOTPResponseLiveData()
+                            }
+                        }
+                    }else if (it.length == 6) {
+                        closeSoftKeyboard(requireContext(), requireActivity())
+                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providussoftpos")) {
                             viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
                             observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
                                 showFragment(
@@ -88,7 +103,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                 viewModel.clearOTPResponseLiveData()
                             }
                         } else {
-                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), "")
+                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
                             observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
                                 showFragment(
                                     ExistingCustomersRegistrationFragment(),
@@ -114,17 +129,4 @@ class RegistrationOTPFragment : BaseFragment() {
         }
     }
 
-    private fun initPartnerID() {
-        val bankList = mapOf("firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA", "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190","easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA","providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA", "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8", "zenith" to "3D9B3E2D-5171-4D6A-99CC-E2799D16DD56",
-        )
-
-        for (element in bankList) {
-            if (element.key == BuildConfig.FLAVOR) {
-                partnerID = element.value
-            }
-        }
-    }
 }

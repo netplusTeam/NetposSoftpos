@@ -104,13 +104,13 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val businessName = newBusinessName.substring(1, newBusinessName.length - 1)
 
         val newBusinessAddress = Prefs.getString(AppConstants.BUSINESS_ADDRESS, "")
-        val businessAddress = newBusinessAddress.substring(1, newBusinessAddress.length - 1)
+        val businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
 
         val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
-        val email = newEmail.substring(1, newEmail.length - 1)
+        val email = newEmail.substring(0, newEmail.length)
 
         val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
-        val phone = newPhone.substring(1, newPhone.length - 1)
+        val phone = newPhone.substring(0, newPhone.length)
 
         val newContactInfo = Prefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =

@@ -956,7 +956,6 @@ class MainActivity :
                         }
                     }
                     else -> {
-                        receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download_share)
@@ -964,7 +963,10 @@ class MainActivity :
                             receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
+                                cancel()
+                                dismiss()
                                 downloadPdfImpl()
+                                receiptPdf = createPdf(pdfView, this@MainActivity)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
