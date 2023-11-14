@@ -1,0 +1,20 @@
+{
+  "version": 3,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.woleapp.netpos.contactless.zenith",
+  "variantName": "zenithRelease",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "attributes": [],
+      "versionCode": 45,
+      "versionName": "1.0.45",
+      "outputFile": "app-zenith-release.apk"
+    }
+  ],
+  "elementType": "File"
+}

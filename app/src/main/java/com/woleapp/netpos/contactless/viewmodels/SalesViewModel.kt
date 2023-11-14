@@ -383,6 +383,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
                         transactionTimeInMillis = dateStr2Long(transDateTime),
                         transactionType = requestData.transactionType.name,
                         transmissionDateTime = transDateTime,
+                        agentName = user.email!!
                     ),
                 )
             }

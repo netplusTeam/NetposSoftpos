@@ -525,6 +525,7 @@ object RandomPurposeUtil {
                 transactionTimeInMillis = transactionTimeInMillis,
                 transactionType = transactionType.name,
                 transmissionDateTime = getCurrentDateTime(),
+                agentName = Singletons.getCurrentlyLoggedInUser()?.email!!
             )
         }
     }
