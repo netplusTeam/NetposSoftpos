@@ -61,7 +61,7 @@ object RandomPurposeUtil {
 
     fun stringToBase64(text: String): String {
         val data: ByteArray = text.toByteArray()
-        return Base64.encodeToString(data, Base64.DEFAULT)
+        return Base64.encodeToString(data, BaseDEFAULT)
     }
 
     fun base64ToPlainText(base64String: String): String {

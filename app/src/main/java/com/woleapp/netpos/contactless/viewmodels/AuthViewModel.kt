@@ -150,13 +150,21 @@ class AuthViewModel : ViewModel() {
                             " "
                         }
                     this.email =
-                        if (userTokenDecoded.claims.containsKey("email")) {
+                        if (userTokenDecoded.claims.containsKey("username")) {
                             userTokenDecoded.getClaim(
-                                "email",
+                                "username",
                             ).asString()
                         } else {
                             " "
                         }
+//                    this.username =
+//                        if (userTokenDecoded.claims.containsKey("username")) {
+//                            userTokenDecoded.getClaim(
+//                                "username",
+//                            ).asString()
+//                        } else {
+//                            " "
+//                        }
                     this.userType =
                         if (userTokenDecoded.claims.containsKey("user_type")) {
                             userTokenDecoded.getClaim(
@@ -275,9 +283,9 @@ class AuthViewModel : ViewModel() {
                             " "
                         }
                     this.email =
-                        if (userTokenDecoded.claims.containsKey("email")) {
+                        if (userTokenDecoded.claims.containsKey("username")) {
                             userTokenDecoded.getClaim(
-                                "email",
+                                "username",
                             ).asString()
                         } else {
                             " "
