@@ -59,10 +59,10 @@ public class SampleTripleDes {
         return result;
     }
     public static byte[] encrypt(byte[] data, byte[] key) {
-        SecretKeySpec sk = new SecretKeySpec(GetKey(key), "DESede");
+        SecretKeySpec sk = new SecretKeySpec(GetKey(key), "AES");
 
         try {
-            Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding");
             cipher.init(1, sk);
             byte[] enc = cipher.doFinal(data);
             return enc;
@@ -73,10 +73,10 @@ public class SampleTripleDes {
     }
 
     public static byte[] decrypt(byte[] data, byte[] key) {
-        SecretKeySpec sk = new SecretKeySpec(GetKey(key), "DESede");
+        SecretKeySpec sk = new SecretKeySpec(GetKey(key), "AES");
 
         try {
-            Cipher cipher = Cipher.getInstance("DESede/ECB/NoPadding");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding");
             cipher.init(2, sk);
             byte[] enc = cipher.doFinal(data);
             return enc;

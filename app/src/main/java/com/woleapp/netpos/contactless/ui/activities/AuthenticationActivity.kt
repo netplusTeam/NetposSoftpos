@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
@@ -15,8 +14,9 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -27,16 +27,17 @@ class AuthenticationActivity : AppCompatActivity() {
         setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
-
-//        if (RootUtil.isDeviceRooted) {
-//            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
-//            finish()
-//        }
-//        if (debuggableModeEnabled) {
-//            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
-//                .show()
-//            finish()
-//        }
+            val rootCheck = RootCheck(this).rootBeerCheck()
+        if (rootCheck == "DEVICE IS ROOTED!") {
+            showAlertDialog(this, getString(R.string.device_is_rooted), "OK") {
+                finish()
+            }
+        }
+        if (debuggableModeEnabled) {
+            showAlertDialog(this, getString(R.string.device_is_a_debug_device), "OK") {
+                finish()
+            }
+        }
         if (DPrefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {
@@ -69,16 +70,15 @@ class AuthenticationActivity : AppCompatActivity() {
 
     private fun showFragment(targetFragment: Fragment) {
         try {
-            supportFragmentManager.beginTransaction()
-                .apply {
-                    replace(
-                        R.id.auth_container,
-                        targetFragment,
-                        targetFragment.javaClass.simpleName,
-                    )
-                    setCustomAnimations(R.anim.right_to_left, android.R.anim.fade_out)
-                    commit()
-                }
+            supportFragmentManager.beginTransaction().apply {
+                replace(
+                    R.id.auth_container,
+                    targetFragment,
+                    targetFragment.javaClass.simpleName,
+                )
+                setCustomAnimations(R.anim.right_to_left, android.R.anim.fade_out)
+                commit()
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }

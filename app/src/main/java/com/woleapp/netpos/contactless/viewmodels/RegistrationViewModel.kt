@@ -131,7 +131,7 @@ class RegistrationViewModel @Inject constructor(
                 }
             }  else if (BuildConfig.FLAVOR.contains("tingo")) {
                 if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
-                    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
+                //    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
                     _message.value = Event("Password mismatch")
                     return
                 }

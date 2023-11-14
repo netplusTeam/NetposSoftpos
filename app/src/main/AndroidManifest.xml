@@ -73,6 +73,7 @@
         </receiver>
         <service
             android:name=".services.MyFirebaseMessagingService"
+            android:launchMode="singleInstance"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

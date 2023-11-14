@@ -86,6 +86,7 @@ class RegistrationOTPFragment : BaseFragment() {
         loader = alertDialog(requireContext())
         resendCode.setOnClickListener {
             resendOtp()
+            binding.otpResent.visibility = View.GONE
         }
         otpView.requestFocus()
         val inputMethodManager =
@@ -156,13 +157,13 @@ class RegistrationOTPFragment : BaseFragment() {
 
     private fun resendOtp() {
         viewModel.findAccountForFirstBankUser(newAccountNumber, partnerID, deviceSerialID)
-        startResendTimer()
         observeServerResponse(
             viewModel.firstBankAccountNumberResponse,
             loader,
             requireActivity().supportFragmentManager,
         ) {
-            binding.otpResent.visibility
+            startResendTimer()
+            binding.otpResent.visibility = View.VISIBLE
             viewModel.clearLiveData()
         }
     }
@@ -193,6 +194,7 @@ class RegistrationOTPFragment : BaseFragment() {
                     timer.cancel()
                     activity?.runOnUiThread {
                         resendCode.isEnabled = true
+                        resendCode.text = getString(R.string.resend_code)
                     }
                 }
             }

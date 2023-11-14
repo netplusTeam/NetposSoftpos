@@ -538,8 +538,8 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _existingRegRequestResponse.postValue(Resource.error(null))
-                        Log.d("VIEWWCHECKAA", it.toString())
-                        Timber.d("ERROR==${it.localizedMessage}")
+                    //    Log.d("VIEWWCHECKAA", it.toString())
+                    //    Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"

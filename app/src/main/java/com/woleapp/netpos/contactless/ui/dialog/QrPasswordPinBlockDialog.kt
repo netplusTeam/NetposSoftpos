@@ -101,7 +101,7 @@ class QrPasswordPinBlockDialog : DialogFragment() {
         super.onResume()
         etPinEt.text.clear()
         Collections.shuffle(integerList)
-        Timber.d("SHUFFLED_LIST_OF_INT====>$integerList")
+     //   Timber.d("SHUFFLED_LIST_OF_INT====>$integerList")
         setNumberOnTextViews(integerList)
     }
 
