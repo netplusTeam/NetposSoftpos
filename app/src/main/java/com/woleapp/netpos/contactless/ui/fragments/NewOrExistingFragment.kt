@@ -72,7 +72,7 @@ class NewOrExistingFragment : BaseFragment() {
         deviceSerialID = getDeviceId(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                if (message == "OTP sent") {
+                if (message.contains("OTP")) {
                     showAlertDialog(requireContext(), message, "OK") {
                         showFragment(
                             RegistrationOTPFragment(),

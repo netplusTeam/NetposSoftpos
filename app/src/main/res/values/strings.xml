@@ -163,7 +163,7 @@
     <string name="invalid_qr">Invalid Qr detected</string>
     <string name="verify">Verify</string>
     <string name="otp_here">Enter the OTP sent to you Here…</string>
-    <string name="resend_code">Didn\'t Receive Code? Resend it</string>
+    <string name="resend_code">Click resend, if OTP is not received</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="password">Password</string>
     <string name="are_you_an_existing_customer">Are you an existing customer?</string>

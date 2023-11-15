@@ -125,6 +125,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
         loader = alertDialog(requireContext())
 
+        if (email.isNullOrEmpty()){
+            binding.email.isFocusableInTouchMode = true
+        }
         viewModel.getStatesResponse.observe(viewLifecycleOwner) {
             val stateAdapter = StatesAdapter(
                 viewModel.listOfStates,

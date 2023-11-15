@@ -201,7 +201,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                 phone ?: ""
             )
             Single.just(
-                ConfirmOTPResponse(true, "OTP sent", decryptedResponse)
+                ConfirmOTPResponse(true, "An OTP has been sent to your registered $email or $phone. The OTP expires in ten minutes.", decryptedResponse)
             )
         } else {
             Single.just(
