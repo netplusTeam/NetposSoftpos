@@ -33,11 +33,11 @@ class AuthenticationActivity : AppCompatActivity() {
                 finish()
             }
         }
-        if (debuggableModeEnabled) {
-            showAlertDialog(this, getString(R.string.device_is_a_debug_device), "OK") {
-                finish()
-            }
-        }
+//        if (debuggableModeEnabled) {
+//            showAlertDialog(this, getString(R.string.device_is_a_debug_device), "OK") {
+//                finish()
+//            }
+//        }
         if (DPrefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {

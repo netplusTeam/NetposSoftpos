@@ -152,7 +152,7 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "")
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "Unexpected error")
                             _message.value = Event(
                                 try {
                                     errorMsg
