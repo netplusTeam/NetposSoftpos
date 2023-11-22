@@ -4,6 +4,7 @@ import android.util.Log
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.domain.SharedPrefsManagerContract
 import com.woleapp.netpos.contactless.model.*
@@ -28,7 +29,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     override fun findAccount(
         accountNumber: String,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<Response<AccountNumberLookUpResponse>> = accountLookUpService.findAccount(
         AccountNumberLookUpRequest(accountNumber),
         partnerId,
@@ -46,7 +47,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     override fun registerExistingAccount(
         existingAccountRegisterRequest: ExistingAccountRegisterRequest,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<ExistingAccountRegisterResponse> = accountLookUpService.registerExistingAccount(
         existingAccountRegisterRequest,
         partnerId,
@@ -67,7 +68,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     override fun getBranches(
         stateId: Int,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<GetFBNBranchResponse> =
         accountLookUpService.getBranches(stateId, partnerId, deviceSerialId)
 
@@ -76,63 +77,93 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     override fun resetPassword(
         payload: JsonObject,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<GeneralResponse> =
         accountLookUpService.resetPassword(payload, partnerId, deviceSerialId)
 
     override fun resetPasswordForProvidus(
         payload: JsonObject,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<ResetPasswordResponseForProvidus> =
         accountLookUpService.resetPasswordForProvidus(payload, partnerId, deviceSerialId)
 
     override fun confirmOTPToSetPassword(
         payload: JsonObject,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<GeneralResponse> =
         accountLookUpService.confirmOTPToSetPassword(payload, partnerId, deviceSerialId)
 
     override fun setNewPassword(
         payload: JsonObject,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ): Single<GeneralResponse> =
         accountLookUpService.setNewPassword(payload, partnerId, deviceSerialId)
 
 
     override fun confirmOTP(
-        data: String,
-        partnerId: String
+        data: String, partnerId: String
     ): Single<ConfirmOTPResponse?> = accountLookUpService.confirmOTP(
-        EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
-        partnerId
+        EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)), partnerId
     ).flatMap {
-   //     val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
+        //     val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         Log.d("CONFIRMOTP", otpResponse)
         if (!it.sendResponse.isNullOrEmpty()) {
-            val resp = otpResponse.substringAfter("{").substringBefore("}")
-            val fields = resp.split(",")
-            Log.d("RESPCONFIRMOTP", resp)
-            Log.d("FIELDSOTP", fields.toString())
+//            val resp = otpResponse.substringAfter("{").substringBefore("}")
+//            val fields = resp.split(",")
+//            Log.d("RESPCONFIRMOTP", resp)
+//            Log.d("FIELDSOTP", fields.toString())
+//
+//            val businessName = fields.find { it.contains("businessName") }?.substringAfter("{")
+//                ?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("BUSINESSNAME", businessName.toString())
+//
+//            val address =
+//                fields.find { it.contains("address") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("ADRESSSS", businessName.toString())
+//
+//            val accountNumber =
+//                fields.find { it.contains("accountNumber") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("CCOUNTNUMBERRR", accountNumber.toString())
+//
+//            val email = fields.find { it.contains("email") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("EMAILLL", email.toString())
+//
+//            val phone = fields.find { it.contains("phone") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("PHONEEE", phone.toString())
+//
+//            val fullName =
+//                fields.find { it.contains("fullName") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("FULLNAMEEE", fullName.toString())
+//
+//            val title = fields.find { it.contains("title") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("TITLE", title.toString())
+//
+//            val otpId = fields.find { it.contains("otpId") }?.substringAfter(":")?.trim('"', ' ')
+//            Log.d("otpId", otpId.toString())
 
-            val businessName = fields.find { it.contains("businessName") }?.substringAfter("{")
-                ?.substringAfter(":")?.trim('"', ' ')
 
-            val address =
-                fields.find { it.contains("address") }?.substringAfter(":")?.trim('"', ' ')
+            val jsonObject = JsonParser.parseString(otpResponse).asJsonObject
+            val dataObject = jsonObject.getAsJsonObject("data")
 
-            val accountNumber =
-                fields.find { it.contains("accountNumber") }?.substringAfter(":")?.trim('"', ' ')
+            Log.d("JSONRESP", jsonObject.toString())
+            Log.d("DATAOBJ", dataObject.toString())
+            // Accessing individual fields
+            val status = dataObject.getAsJsonPrimitive("status").asBoolean
+            val message = dataObject.getAsJsonPrimitive("message").asString
+            val innerData = dataObject.getAsJsonObject("data")
+            Log.d("INNERDATA", innerData.toString())
+            val businessName = innerData.getAsJsonPrimitive("businessName").asString
+            val address = innerData.getAsJsonPrimitive("address").asString
+            val fullName = innerData.getAsJsonPrimitive("fullName").asString
+            val accountNumber = innerData.getAsJsonPrimitive("accountNumber").asString
+            val email = innerData.getAsJsonPrimitive("email").asString
+            val phone = innerData.getAsJsonPrimitive("phone").asString
+            val title = innerData.getAsJsonPrimitive("title").asString
 
-            val email = fields.find { it.contains("email") }?.substringAfter(":")?.trim('"', ' ')
-
-            val phone = fields.find { it.contains("phone") }?.substringAfter(":")?.trim('"', ' ')
-
-            val fullName =
-                fields.find { it.contains("fullName") }?.substringAfter(":")?.trim('"', ' ')
 
             val decryptedResponse = Data(
                 businessName ?: "",
@@ -140,26 +171,40 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                 fullName ?: "",
                 accountNumber ?: "",
                 email ?: "",
-                phone ?: ""
+                phone ?: "",
+                title ?: "",
+                "",
             )
             Single.just(
                 ConfirmOTPResponse(true, "Account verified successfully", decryptedResponse)
             )
-        }else{
+        } else {
             Single.just(
                 null,
             )
         }
 
-    }.onErrorResumeNext{
-        val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
-        val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
-        val ans = listOf(resp)
-        val newSize = ans[0].toString().substring(16, 244)
-        val finalErrorResp = networkEncryptionHelper.decryptData(newSize)
-        val jsonObject = JSONObject(finalErrorResp)
-        val message = jsonObject.getJSONObject("data").getString("message")
-        DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
+    }.onErrorResumeNext {throwable ->
+        val response = (throwable as? HttpException)?.response()?.errorBody()?.string()
+        val sendResponse =
+            response?.substringAfter("sendResponse")?.substringAfter("\",\"")?.removeSuffix("\"]")
+        Log.d("SENDRESP", sendResponse.toString())
+        // Assuming the response is always in the format provided
+        val encryptedMessage = sendResponse?.substringAfter("\",\"")!!
+        val firstLetterIndex = encryptedMessage.indexOfFirst { it.isLetter() }
+        val lastLetterIndex = encryptedMessage.indexOfLast { it.isLetter() }
+        Log.d("ENCRYPTEDMSG", encryptedMessage)
+        if (firstLetterIndex != -1 && lastLetterIndex != -1) {
+            val extractedString = encryptedMessage.substring(firstLetterIndex, lastLetterIndex + 1)
+            // Implement the decryption logic here (replace with your decryption logic)
+            val finalErrorResp = networkEncryptionHelper.decryptData(extractedString)
+            Log.d("FINALLY", finalErrorResp)
+
+            val jsonObject = JSONObject(finalErrorResp)
+            val message = jsonObject.getJSONObject("data").getString("message")
+            DPrefs.putString(AppConstants.FBN_OTP, message)
+            Log.d("MESSSAGE", message)
+        }
         Single.just(null)
     }
 
@@ -174,23 +219,21 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ).flatMap {
         val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         if (!it.sendResponse.isNullOrEmpty()) {
-            val resp = otpResponse.substringAfter("{").substringBefore("}")
-            val fields = resp.split(",")
-            val businessName = fields.find { it.contains("businessName") }?.substringAfter("{")
-                ?.substringAfter(":")?.trim('"', ' ')
+            // Parse the JSON string
+            val jsonObject = JsonParser.parseString(otpResponse).asJsonObject
+            val dataObject = jsonObject.getAsJsonObject("data")
 
-            val address =
-                fields.find { it.contains("address") }?.substringAfter(":")?.trim('"', ' ')
-
-            val accountNumber =
-                fields.find { it.contains("accountNumber") }?.substringAfter(":")?.trim('"', ' ')
-
-            val email = fields.find { it.contains("email") }?.substringAfter(":")?.trim('"', ' ')
-
-            val phone = fields.find { it.contains("phone") }?.substringAfter(":")?.trim('"', ' ')
-
-            val fullName =
-                fields.find { it.contains("fullName") }?.substringAfter(":")?.trim('"', ' ')
+            // Accessing individual fields
+            val status = dataObject.getAsJsonPrimitive("status").asBoolean
+            val message = dataObject.getAsJsonPrimitive("message").asString
+            val innerData = dataObject.getAsJsonObject("data")
+            val businessName = innerData.getAsJsonPrimitive("businessName").asString
+            val address = innerData.getAsJsonPrimitive("address").asString
+            val fullName = innerData.getAsJsonPrimitive("fullName").asString
+            val accountNumber = innerData.getAsJsonPrimitive("accountNumber").asString
+            val email = innerData.getAsJsonPrimitive("email").asString
+            val otpId = innerData.getAsJsonPrimitive("otpId").asString
+            val phone = innerData.getAsJsonPrimitive("phone").asString
 
             val decryptedResponse = Data(
                 businessName ?: "",
@@ -198,17 +241,23 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                 fullName ?: "",
                 accountNumber ?: "",
                 email ?: "",
-                phone ?: ""
+                phone ?: "",
+                "",
+                otpId ?: "",
             )
+
             Single.just(
-                ConfirmOTPResponse(true, "An OTP has been sent to your registered $email or $phone. The OTP expires in ten minutes.", decryptedResponse)
+                ConfirmOTPResponse(
+                    true,
+                    "An OTP has been sent to your registered email address or phone number. The OTP expires in ten minutes.",
+                    decryptedResponse
+                )
             )
         } else {
             Single.just(
                 null,
             )
         }
-
     }.onErrorResumeNext {
         val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
         val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
@@ -276,6 +325,26 @@ class ContactlessRegRepositoryImpl @Inject constructor(
                 ),
             )
         }
+    }.onErrorResumeNext { throwable ->
+        val response = (throwable as? HttpException)?.response()?.errorBody()?.string()
+        val sendResponse =
+            response?.substringAfter("sendResponse")?.substringAfter("\",\"")?.removeSuffix("\"]")
+        // Assuming the response is always in the format provided
+        val encryptedMessage = sendResponse?.substringAfter("\",\"")!!
+        val firstLetterIndex = encryptedMessage.indexOfFirst { it.isLetter() }
+        val lastLetterIndex = encryptedMessage.indexOfLast { it.isLetter() }
+
+        if (firstLetterIndex != -1 && lastLetterIndex != -1) {
+            val extractedString = encryptedMessage.substring(firstLetterIndex, lastLetterIndex + 1)
+            // Implement the decryption logic here (replace with your decryption logic)
+            val finalErrorResp = networkEncryptionHelper.decryptData(extractedString)
+
+        val jsonObject = JSONObject(finalErrorResp)
+        val message = jsonObject.getJSONObject("data").getString("message")
+        DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
+            Log.d("FINALLY", finalErrorResp)
+        }
+        Single.just(null)
     }
 
     override fun getCred(data: String): Single<Boolean> =

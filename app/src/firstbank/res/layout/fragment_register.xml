@@ -33,12 +33,43 @@
                 android:textColor="@android:color/black"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@id/textInputBusinessName"
+                app:layout_constraintBottom_toTopOf="@id/existing_customers_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.23000002"
                 app:layout_constraintVertical_chainStyle="packed" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/existing_customers_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                app:errorTextColor="@color/colorError"
+                android:hint="@string/title"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/login_label">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="@string/username"
+                    android:inputType="none"
+                    android:background="@drawable/edittext_bg"
+                    android:singleLine="true"
+                    android:text="@={viewmodel.registrationFBNModel.title}"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/darker_gray"
+                    android:textSize="15sp"
+                    app:startIconContentDescription="@string/username"
+                    tools:text="netpos" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputBusinessName"
@@ -49,10 +80,9 @@
                 android:layout_marginEnd="16dp"
                 android:hint="@string/business_name"
                 android:textColorHint="@android:color/black"
-                app:layout_constraintBottom_toTopOf="@id/text_contact_info"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/login_label">
+                app:layout_constraintTop_toBottomOf="@id/existing_customers_title">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/businessName"

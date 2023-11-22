@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -46,6 +47,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var contactName: TextInputEditText
     private lateinit var addressView: TextInputEditText
     private lateinit var emailView: TextInputEditText
+    private lateinit var titleFBN: TextInputEditText
     private lateinit var passwordView: TextInputEditText
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
@@ -89,6 +91,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
             binding.fragmentState.visibility = View.VISIBLE
             binding.fragmentBranch.visibility = View.VISIBLE
+            binding.existingCustomersTitle.visibility = View.VISIBLE
             viewModel.getStates()
         }
         if (BuildConfig.FLAVOR.contains("zenith")) {
@@ -113,6 +116,12 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val newPhone = DPrefs.getString(AppConstants.PHONE_NUMBER, "")
         val phone = newPhone.substring(1, newPhone.length - 1)
 
+        val newTitle = DPrefs.getString(AppConstants.TITLE, "")
+        val title = newTitle.substring(1, newTitle.length - 1)
+
+        Log.d("NEWTITLE", newTitle)
+        Log.d("TITLE", title)
+
         val newContactInfo = DPrefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
             newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
@@ -122,6 +131,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         binding.address.setText(businessAddress.replace("\\u0026", "&"))
         binding.phone.setText(phone)
         binding.email.setText(email.replace("\\u0026", "&"))
+        binding.title.setText(title)
 
         loader = alertDialog(requireContext())
 
@@ -181,6 +191,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             contactName = contactInfo
             addressView = address
             emailView = email
+            titleFBN = title
             passwordView = password
             firstBankStates = state
             firstBankBranches = branch
@@ -261,6 +272,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
     private fun registerForFBN() {
         when {
+            titleFBN.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_your_title))
+            }
             businessNameView.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_business_name))
             }
@@ -501,6 +515,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private fun registerExistingCustomer() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
             val existingAccountRegReq = RegistrationForExistingFBNUsersRequest(
+                title= titleFBN.text.toString().trim(),
                 accountNumber = actNumber,
                 businessAddress = addressView.text.toString().trim(),
                 businessName = businessNameView.text.toString().trim(),

@@ -8,13 +8,15 @@ data class RegistrationFBNModel(
     var email: String,
     var state: String?,
     var branch_name: String?,
+    var title: String?,
     var isRegistered: Boolean = true
 ) {
-    constructor() : this("", "", "", "", "", "", "")
+    constructor() : this("", "", "", "", "", "", "", "")
 
 
     fun allFieldsFilledFBN() =
-        businessName.isNotEmpty() && contactInformation.isNotEmpty() && businessAddress.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty() && state?.isNotEmpty() == true && branch_name?.isNotEmpty() == true
+        businessName.isNotEmpty() && contactInformation.isNotEmpty() && businessAddress.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty() &&
+                state?.isNotEmpty() == true && branch_name?.isNotEmpty() == true && title?.isNotEmpty() == true
 
 }
 

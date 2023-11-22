@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.model
 
 data class RegistrationForExistingFBNUsersRequest(
+    val title: String,
     val accountNumber: String,
     val businessAddress: String,
     val businessName: String,

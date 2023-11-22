@@ -9,6 +9,7 @@ import android.widget.Button
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.dsofttech.dprefs.utils.DPrefs
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
@@ -16,13 +17,11 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.ContactlessClient
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
-import com.woleapp.netpos.contactless.util.Event
-import com.woleapp.netpos.contactless.util.Singletons
-import com.woleapp.netpos.contactless.util.disposeWith
-import com.woleapp.netpos.contactless.util.getResponseBody
+import com.woleapp.netpos.contactless.util.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -220,16 +219,31 @@ class RegistrationViewModel @Inject constructor(
                     _authDone.value = Event(true)
                 }
                 t2?.let {
-                    val errorMessage = try {
-                        Singletons.gson.fromJson(
-                            it.getResponseBody(),
-                            RegistrationError::class.java,
-                        ).message
-                    } catch (e: Exception) {
-                        "an error occurred during registration, try again or contact support"
+//                    val errorMessage = try {
+//                        Singletons.gson.fromJson(
+//                            it.getResponseBody(),
+//                            RegistrationError::class.java,
+//                        ).message
+//                    } catch (e: Exception) {
+//                        "an error occurred during registration, try again or contact support"
+//                    }
+//                    _message.value =
+//                        Event(errorMessage)
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage = httpException?.response()?.errorBody()?.string()
+                            ?: "{\"message\":\"Unexpected error\"}"
+                        val errorMsg = DPrefs.getString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, "Unexpected error \nPlease try again")
+                        Log.d("HERE", "HEREEEEE")
+                        _message.value = Event(
+                            try {
+                                errorMsg
+                                    ?: "Error"
+                            } catch (e: Exception) {
+                                "Error"
+                            },
+                        )
+                        // Timber.e("SHOWME--->$errorMessage")
                     }
-                    _message.value =
-                        Event(errorMessage)
                 }
             }.disposeWith(disposable)
     }

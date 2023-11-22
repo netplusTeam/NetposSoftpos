@@ -11,4 +11,6 @@ data class Data(
     val accountNumber: String,
     val email: String,
     val phone: String,
+    val title: String?,
+    val otpId: String?,
 ) : Parcelable

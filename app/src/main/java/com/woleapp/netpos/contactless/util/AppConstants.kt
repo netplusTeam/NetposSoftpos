@@ -25,10 +25,12 @@ object AppConstants {
     const val PIN_BLOCK_BK = "PIN_BLOCK_BK"
     const val STRING_ACCOUNT_NUMBER_LOOKUP_TAG = "STRING_ACCOUNT_NUMBER_LOOKUP_TAG"
     const val SAVED_ACCOUNT_NUM_SIGNED_UP = "SAVED_ACCOUNT_NUM_SIGNED_UP"
+    const val SAVED_OTP_ID = "saved_otp_id"
     const val SAVE_PHONE_NUMBER = "SAVE_PHONE_NUMBER"
     const val PAYMENT_WITH_QR_STRING = "PAYMENT_WITH_QR_STRING"
     const val BUSINESS_NAME = "BUSINESS_NAME"
     const val FULL_NAME = "FULL_NAME"
+    const val TITLE = "title"
     const val BUSINESS_ADDRESS = "BUSINESS_ADDRESS"
     const val PHONE_NUMBER = "PHONE_NUMBER"
     const val EMAIL_ADDRESS = "EMAIL_ADDRESS"
@@ -52,4 +54,5 @@ object AppConstants {
     const val STRING_TAG_APP_ENCRYPTION_CREDENTIALS = "STRING_TAG_APP_ENCRYPTION_CREDENTIALS"
     const val FBN_ACCOUNT_NUMBER_LOOKUP = "fbn_account_number_lookup"
     const val FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER = "fbn_existing_customer_account_register"
+    const val FBN_OTP = "fbn_otp"
 }

@@ -118,7 +118,7 @@ class ContactlessRegViewModel @Inject constructor(
     fun findAccountForFirstBankUser(
         accountNumber: String,
         partnerId: String,
-        deviceSerialId: String,
+        deviceSerialId: String
     ) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
         disposable.add(
@@ -133,8 +133,10 @@ class ContactlessRegViewModel @Inject constructor(
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
+                        Log.d("NEW_RESPONSE", it.toString())
                         _firstBankAccountNumberResponse.postValue(Resource.success(it))
                         saveAccountNumber(accountNumber)
+                        it.data.otpId?.let { it1 -> saveOtpId(it1) }
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)
@@ -145,6 +147,7 @@ class ContactlessRegViewModel @Inject constructor(
                         } else {
                             _message.value = Event(it.message.toString())
                         }
+                        Log.d("SEEMESSAGE", _message.value.toString())
                     }
                     error?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.error(null))
@@ -171,6 +174,7 @@ class ContactlessRegViewModel @Inject constructor(
     fun confirmOTPForFBN(
         phoneNumber: String,
         accountNumber: String,
+        otpId: String,
         otp: String,
         partnerId: String
     ) {
@@ -178,7 +182,7 @@ class ContactlessRegViewModel @Inject constructor(
         disposable.add(
             contactlessRegRepo.confirmOTP(
                 gson.toJson(
-                    ConfirmOTPRequest(phoneNumber, accountNumber, otp),
+                    ConfirmOTPRequest(phoneNumber, accountNumber, otpId, otp),
                 ),
                 partnerId
             )
@@ -193,11 +197,13 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessName(it.data.businessName)
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
+                        it.data.title?.let { it1 -> saveTitle(it1) }
                         if (it.message.isNullOrEmpty()) {
                             _otpMessage.value = Event("Successful")
                         } else {
                             _otpMessage.value = Event(it.message.toString())
                         }
+                        Log.d("HEREEEE++++>", it.data.toString())
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))
@@ -205,7 +211,7 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "")
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_OTP, "Unexpected error\nPlease try again")
                             _otpMessage.value = Event(
                                 try {
                                     errorMsg
@@ -214,7 +220,7 @@ class ContactlessRegViewModel @Inject constructor(
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
+                            Timber.e("SHOWME--->$errorMsg")
                         }
                     }
                 },
@@ -543,7 +549,7 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, "")
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, "Unexpected error \nPlease try again")
                             _registerMessage.value = Event(
                                 try {
                                     errorMsg
@@ -579,12 +585,19 @@ class ContactlessRegViewModel @Inject constructor(
         DPrefs.putString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, gson.toJson(ActNumber))
     }
 
+    private fun saveOtpId(otpid: String) {
+        DPrefs.putString(AppConstants.SAVED_OTP_ID, gson.toJson(otpid))
+    }
+
     private fun saveBusinessName(businessName: String) {
         DPrefs.putString(AppConstants.BUSINESS_NAME, gson.toJson(businessName))
     }
 
     private fun saveFullName(fullName: String) {
         DPrefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
+    }
+    private fun saveTitle(title: String) {
+        DPrefs.putString(AppConstants.TITLE, gson.toJson(title))
     }
 
     private fun saveBusinessAddress(businessAddress: String) {
@@ -605,6 +618,7 @@ class ContactlessRegViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        _otpMessage.value = null
         disposable.clear()
     }
 }

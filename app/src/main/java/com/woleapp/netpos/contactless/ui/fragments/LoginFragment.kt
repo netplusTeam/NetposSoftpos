@@ -306,7 +306,7 @@ class LoginFragment : BaseFragment() {
                 showToast("All fields are required required")
                 return
             }
-            contactlessViewModel.confirmOTPForFBN("", savedAcctNumber, otp, partnerID)
+            contactlessViewModel.confirmOTPForFBN("", savedAcctNumber, otp, partnerID, "")
             observeServerResponse(
                 contactlessViewModel.confirmOTPResponse,
                 loader,

@@ -36,6 +36,7 @@ class RegistrationOTPFragment : BaseFragment() {
     private val viewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var loader: AlertDialog
     private lateinit var newAccountNumber: String
+    private lateinit var newOtpId: String
     private lateinit var partnerID: String
     private lateinit var deviceSerialID: String
     private var timeSeconds = 60L
@@ -83,6 +84,9 @@ class RegistrationOTPFragment : BaseFragment() {
         val newActNumber = DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
         newAccountNumber = newActNumber.substring(1, newActNumber.length-1)
         Log.d("ACCOUNTNUMBER", newAccountNumber)
+        val otpId = DPrefs.getString(AppConstants.SAVED_OTP_ID, "")
+        newOtpId = otpId.substring(1, otpId.length-1)
+        Log.d("otpId", otpId)
         loader = alertDialog(requireContext())
         resendCode.setOnClickListener {
             resendOtp()
@@ -107,7 +111,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
-                            viewModel.confirmOTPForFBN("", newAccountNumber, s.toString(), partnerID)
+                            viewModel.confirmOTPForFBN("", newAccountNumber, newOtpId, s.toString(), partnerID)
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
                                 loader,
@@ -122,7 +126,7 @@ class RegistrationOTPFragment : BaseFragment() {
                             }
                         } else if (BuildConfig.FLAVOR.contains("firstbank")) {
                             viewModel.confirmOTPForFBN(
-                                phoneNumber, newAccountNumber, s.toString(), partnerID
+                                phoneNumber, newAccountNumber, newOtpId, s.toString(), partnerID
                             )
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
@@ -132,7 +136,7 @@ class RegistrationOTPFragment : BaseFragment() {
                                 viewModel.clearOTPResponseLiveData()
                             }
                         } else {
-                            viewModel.confirmOTPForFBN(phoneNumber, newAccountNumber, s.toString(), "")
+                            viewModel.confirmOTPForFBN(phoneNumber, newAccountNumber, s.toString(), "", "")
                             observeServerResponse(
                                 viewModel.confirmOTPResponse,
                                 loader,
