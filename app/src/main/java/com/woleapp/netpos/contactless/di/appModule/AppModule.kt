@@ -330,4 +330,5 @@ object AppModule {
     fun providesMqttLocalDao(
         appDatabase: AppDatabase,
     ): MqttLocalDao = appDatabase.mqttLocalDao()
+
 }

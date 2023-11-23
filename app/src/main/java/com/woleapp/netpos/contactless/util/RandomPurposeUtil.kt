@@ -34,10 +34,7 @@ import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TA
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import java.text.DateFormat
-import java.text.DecimalFormat
-import java.text.ParseException
-import java.text.SimpleDateFormat
+import java.text.*
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -584,5 +581,21 @@ object RandomPurposeUtil {
             .create()
 
         alertDialog.show()
+    }
+
+    fun getDateFromZenithPbtTransDate(dateTime: String): String {
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return dateTime.replace("T", " ").removeSuffix(".000Z")
+    }
+
+    fun increaseHourInDate(paidAt: String): String = paidAt.split("T").let {
+        val originalHour = it.last().split(":").first().toInt()
+        val lastPart = it.last().split("$originalHour:")
+        it.first().plus("T${originalHour.plus(1)}:${lastPart.last()}")
+    }
+
+    fun formatAmountToNaira(amount: Double): String {
+        val format = NumberFormat.getCurrencyInstance(Locale("en", "NG"))
+        return format.format(amount)
     }
 }

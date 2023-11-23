@@ -18,6 +18,7 @@ import timber.log.Timber
 
 class TransactionsViewModel : ViewModel() {
     private lateinit var endOfDayList: List<TransactionResponse>
+
     var cardData: CardData? = null
     private val compositeDisposable = CompositeDisposable()
     private var appDatabase: AppDatabase? = null
@@ -302,4 +303,6 @@ class TransactionsViewModel : ViewModel() {
     }
 
     fun getEodList() = endOfDayList
+
+
 }

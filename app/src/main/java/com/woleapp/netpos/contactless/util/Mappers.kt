@@ -4,7 +4,9 @@ import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.woleapp.netpos.contactless.model.FirebaseNotificationModelResponse
+import com.woleapp.netpos.contactless.model.GetZenithPayByTransferUserTransactionsModel
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
+import com.woleapp.netpos.contactless.util.Mappers.mapToTransactionResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 
@@ -61,6 +63,25 @@ object Mappers {
             cardLabel = ""
             cardHolder = this@mapToTransactionResponse.customerName
             transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+            accountType = IsoAccountType.DEFAULT_UNSPECIFIED
+            terminalId = this@mapToTransactionResponse.terminalId
+            merchantId = this@mapToTransactionResponse.merchantId
+        }
+    }
+
+    fun GetZenithPayByTransferUserTransactionsModel.mapToTransactionResponse(): TransactionResponse {
+        val currentDateTime = getCurrentDateTime()
+        return TransactionResponse().apply {
+            transactionType = TransactionType.PURCHASE
+            maskedPan = ""
+            amount = this@mapToTransactionResponse.amount.toDouble().toLong()
+            transmissionDateTime = paid_at
+            STAN = ""
+            RRN = this@mapToTransactionResponse.transaction_reference
+            responseCode = "00"
+            cardLabel = this@mapToTransactionResponse.payer_account_number
+            cardHolder = this@mapToTransactionResponse.payer_account_name
+            transactionTimeInMillis = dateStr2Long(paid_at, "yyyy-MM-dd hh:mm:ss")
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@mapToTransactionResponse.terminalId
             merchantId = this@mapToTransactionResponse.merchantId

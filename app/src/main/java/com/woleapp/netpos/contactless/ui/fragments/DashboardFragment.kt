@@ -8,6 +8,7 @@ import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,7 @@ import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListe
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.formatCurrencyAmountUsingCurrentModule
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
@@ -49,6 +51,8 @@ import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -486,4 +490,5 @@ class DashboardFragment : BaseFragment() {
             create().show()
         }
     }
+
 }
