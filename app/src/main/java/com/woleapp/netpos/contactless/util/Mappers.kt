@@ -1,5 +1,7 @@
 package com.woleapp.netpos.contactless.util
 
+import android.text.Html
+import android.text.Spanned
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -71,13 +73,16 @@ object Mappers {
 
     fun GetZenithPayByTransferUserTransactionsModel.mapToTransactionResponse(): TransactionResponse {
         val currentDateTime = getCurrentDateTime()
+        val boldText = "<b>PayByTransfer</b>"
+        val spanned: Spanned = Html.fromHtml(boldText, Html.FROM_HTML_MODE_LEGACY)
+
         return TransactionResponse().apply {
             transactionType = TransactionType.PURCHASE
             maskedPan = ""
             amount = this@mapToTransactionResponse.amount.toDouble().toLong()
             transmissionDateTime = paid_at
             STAN = ""
-            RRN = this@mapToTransactionResponse.transaction_reference
+            RRN = "$spanned ${this@mapToTransactionResponse.transaction_reference}"
             responseCode = "00"
             cardLabel = this@mapToTransactionResponse.payer_account_number
             cardHolder = this@mapToTransactionResponse.payer_account_name

@@ -90,9 +90,9 @@ android {
             dimension "whiteLabel"
             applicationIdSuffix ".firstbank"
         }
-        providus {
+        heritage {
             dimension "whiteLabel"
-            applicationIdSuffix ".providus"
+            applicationIdSuffix ".heritage"
         }
         providuspos {
             dimension "whiteLabel"
@@ -155,9 +155,6 @@ android {
             java.srcDirs('src/default/java')
         }
         firstbank {
-            java.srcDirs('src/default/java')
-        }
-        providus {
             java.srcDirs('src/default/java')
         }
     }

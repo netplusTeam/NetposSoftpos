@@ -1,5 +1,7 @@
 package com.woleapp.netpos.contactless.services
 
+import android.app.Notification
+import android.app.Notification.VISIBILITY_PUBLIC
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -332,10 +334,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             .setStyle(NotificationCompat.BigTextStyle().bigText(messageBody))
             .setSmallIcon(R.drawable.ic_netpos_logo).setContentText(messageBody).setAutoCancel(true)
             .setSound(defaultSoundUri).setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH) // or NotificationCompat.PRIORITY_MAX
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
