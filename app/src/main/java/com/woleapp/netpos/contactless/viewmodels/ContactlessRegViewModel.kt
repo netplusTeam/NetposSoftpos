@@ -137,6 +137,7 @@ class ContactlessRegViewModel @Inject constructor(
                         _firstBankAccountNumberResponse.postValue(Resource.success(it))
                         saveAccountNumber(accountNumber)
                         it.data.otpId?.let { it1 -> saveOtpId(it1) }
+                        Log.d("NOTPCHECKING", it.data.otpId!!)
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)

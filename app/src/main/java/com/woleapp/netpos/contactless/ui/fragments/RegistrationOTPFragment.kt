@@ -169,6 +169,8 @@ class RegistrationOTPFragment : BaseFragment() {
             startResendTimer()
             binding.otpResent.visibility = View.VISIBLE
             viewModel.clearLiveData()
+            newOtpId = viewModel.firstBankAccountNumberResponse.value?.data?.data?.otpId!!
+            Log.d("JUSTCHECKING", newOtpId)
         }
     }
 
@@ -194,7 +196,7 @@ class RegistrationOTPFragment : BaseFragment() {
                     resendCode.text = "Resend OTP in $timeSeconds seconds"
                 }
                 if (timeSeconds <= 0) {
-                    timeSeconds = 60L
+                    timeSeconds = 150L
                     timer.cancel()
                     activity?.runOnUiThread {
                         resendCode.isEnabled = true

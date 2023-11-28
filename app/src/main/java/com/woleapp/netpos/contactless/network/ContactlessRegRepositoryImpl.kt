@@ -108,7 +108,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ): Single<ConfirmOTPResponse?> = accountLookUpService.confirmOTP(
         EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)), partnerId
     ).flatMap {
-        //     val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
+        //val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         Log.d("CONFIRMOTP", otpResponse)
         if (!it.sendResponse.isNullOrEmpty()) {
