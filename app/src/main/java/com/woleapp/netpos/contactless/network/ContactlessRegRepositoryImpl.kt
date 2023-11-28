@@ -249,7 +249,7 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             Single.just(
                 ConfirmOTPResponse(
                     true,
-                    "An OTP has been sent to your registered email address or phone number. The OTP expires in ten minutes.",
+                    message,
                     decryptedResponse
                 )
             )
