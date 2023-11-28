@@ -39,7 +39,7 @@ class RegistrationOTPFragment : BaseFragment() {
     private lateinit var newOtpId: String
     private lateinit var partnerID: String
     private lateinit var deviceSerialID: String
-    private var timeSeconds = 60L
+    private var timeSeconds = 150L
 
 
     override fun onCreateView(
