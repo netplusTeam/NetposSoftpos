@@ -860,10 +860,16 @@ class MainActivity :
             amountDouble?.let {
                 qrAmoutDialogBinding.amount.text?.clear()
                 qrAmountDialog.cancel()
+//                val qrDataToSendToBackend = PostQrToServerModel(
+//                    it,
+//                    qrData.data,
+//                    merchantId = UtilityParam.STRING_MERCHANT_ID,
+//                    naration = requestNarration,
+//                )
                 val qrDataToSendToBackend = PostQrToServerModel(
                     it,
                     qrData.data,
-                    merchantId = UtilityParam.STRING_MERCHANT_ID,
+                    merchantId = Singletons.getCurrentlyLoggedInUser()?.netplusPayMid!!,
                     naration = requestNarration,
                 )
                 scanQrViewModel.setScannedQrIsVerveCard(false)
