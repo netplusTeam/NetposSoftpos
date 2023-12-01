@@ -39,7 +39,7 @@ interface AccountLookUpService {
         @Body registerExistingAccountRegisterRequest: ExistingAccountRegisterRequest,
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
-    ): Single<ExistingAccountRegisterResponse>
+    ): Single<GeneralResponse>
 
     @POST("user/register-existing-user")
     fun registerExistingAccountForBankT(

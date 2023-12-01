@@ -278,11 +278,11 @@ object RandomPurposeUtil {
                             Status.ERROR -> {
                                 loadingDialog.cancel()
                                 loadingDialog.dismiss()
-                                if (it.data is String) {
-                                    showToast(it.data)
-                                } else {
-                                    showToast("An error occurred, please try again")
-                                }
+//                                if (it.data is String) {
+//                                    showToast(it.data)
+//                                } else {
+//                                    showToast("An error occurred, please try again")
+//                                }
                             }
                             Status.TIMEOUT -> {
                                 loadingDialog.cancel()

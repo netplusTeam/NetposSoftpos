@@ -28,7 +28,7 @@ interface ContactlessRegRepository {
         existingAccountRegisterRequest: ExistingAccountRegisterRequest,
         partnerId: String,
         deviceSerialId: String,
-    ): Single<ExistingAccountRegisterResponse>
+    ): Single<GeneralResponse>
 
     fun registerExistingAccountForBankT(
         existingAccountRegisterRequest: BankTRegistrationModel,
@@ -83,7 +83,7 @@ interface ContactlessRegRepository {
         data: String,
         partnerId: String,
         deviceSerialId: String,
-    ): Single<ExistingAccountRegisterResponse?>
+    ): Single<GeneralResponse?>
 
     fun encryptedRegisterFBN(
         data: String,

@@ -71,13 +71,17 @@ class ContactlessRegViewModel @Inject constructor(
         MutableLiveData()
     val newPasswordResponse: LiveData<Resource<GeneralResponse>> get() = _newPasswordResponse
 
-    private var _existingRegRequestResponse: MutableLiveData<Resource<ExistingAccountRegisterResponse>> =
+    private var _existingRegRequestResponse: MutableLiveData<Resource<GeneralResponse>> =
         MutableLiveData()
-    val existingRegRequestResponse: LiveData<Resource<ExistingAccountRegisterResponse>> get() = _existingRegRequestResponse
+    val existingRegRequestResponse: LiveData<Resource<GeneralResponse>> get() = _existingRegRequestResponse
 
     private val _message = MutableLiveData<Event<String>>()
     val message: LiveData<Event<String>>
         get() = _message
+
+    private val _findAccountFBNMessage = MutableLiveData<Event<String>>()
+    val findAccountFBNMessage: LiveData<Event<String>>
+        get() = _findAccountFBNMessage
 
     private val _otpMessage = MutableLiveData<Event<String>>()
     val otpMessage: LiveData<Event<String>>
@@ -144,9 +148,9 @@ class ContactlessRegViewModel @Inject constructor(
                         saveBusinessAddress(it.data.address)
                         saveFullName(it.data.fullName)
                         if (it.message.isNullOrEmpty()) {
-                            _message.value = Event("Successful")
+                            _findAccountFBNMessage.value = Event("Successful")
                         } else {
-                            _message.value = Event(it.message.toString())
+                            _findAccountFBNMessage.value = Event(it.message.toString())
                         }
                         Log.d("SEEMESSAGE", _message.value.toString())
                     }
@@ -157,7 +161,7 @@ class ContactlessRegViewModel @Inject constructor(
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
                             val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "Unexpected error")
-                            _message.value = Event(
+                            _findAccountFBNMessage.value = Event(
                                 try {
                                     errorMsg
                                         ?: "Error"
@@ -290,17 +294,17 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            _message.value = Event(
-                                try {
-                                    gson.fromJson(
-                                        errorMessage,
-                                        ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                },
-                            )
+//                            _message.value = Event(
+//                                try {
+//                                    gson.fromJson(
+//                                        errorMessage,
+//                                        ExistingCustomerError::class.java,
+//                                    ).message
+//                                        ?: "Error"
+//                                } catch (e: Exception) {
+//                                    "Error"
+//                                },
+//                            )
                             // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
@@ -327,17 +331,17 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            _message.value = Event(
-                                try {
-                                    gson.fromJson(
-                                        errorMessage,
-                                        ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
-                                } catch (e: Exception) {
-                                    "Error"
-                                },
-                            )
+//                            _message.value = Event(
+//                                try {
+//                                    gson.fromJson(
+//                                        errorMessage,
+//                                        ExistingCustomerError::class.java,
+//                                    ).message
+//                                        ?: "Error"
+//                                } catch (e: Exception) {
+//                                    "Error"
+//                                },
+//                            )
                             // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
@@ -499,6 +503,7 @@ class ContactlessRegViewModel @Inject constructor(
                     data?.let {
                         _existingRegRequestResponse.postValue(Resource.success(it))
                         _registerMessage.value = Event(it.message)
+                        Log.d("EXISTINGMSG", it.message)
                     }
                     error?.let {
                         _existingRegRequestResponse.postValue(Resource.error(null))
@@ -559,7 +564,8 @@ class ContactlessRegViewModel @Inject constructor(
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
+                             Timber.e("SHOWME--->$errorMessage")
+                             Log.d("ERRSHOWME--->", errorMessage)
                         }
                     }
                 },

@@ -70,7 +70,7 @@ class NewOrExistingFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         newPartnerId = initPartnerId()
         deviceSerialID = getDeviceId(requireContext())
-        viewModel.message.observe(viewLifecycleOwner) {
+        viewModel.findAccountFBNMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 if (message.contains("OTP")) {
                     showAlertDialog(requireContext(), message, "OK") {

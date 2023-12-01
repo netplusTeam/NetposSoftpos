@@ -208,8 +208,14 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-       // Log.d("FIRSTPAYLOAD",UtilityParam.STRING_NOTIFICATION_BASE_URL_NO_API)
-//        Log.d("FIRSTRESPONSE",UtilityParam.FIRSTRESPONSE)
+//        val first = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJJbnZhbGlkIGFjY291bnQgbnVtYmVyIHByb3ZpZGVkXCJ9IiwiaWF0IjoxNzAxMjYzOTg5LCJleHAiOjE3MDEyNjc1ODl9.emA-6g5pRNck09PZG-Wl5jWUaAGAiUoIh8azAYWJLhA"
+//        val second = "sendResponsep,peyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJFbWFpbCBhbHJlYWR5IGV4aXN0cyFcIn0iLCJpYXQiOjE3MDEyNjc1MjcsImV4cCI6MTcwMTI3MTEyN30.mHvxSp-jvKK_SchOk_ONt0YoNnXKDLpV0iWOEC2FvaY"
+//        val third = second[15]
+//        val fourth = second[230]
+//        Log.d("FIRSTPAYLOAD", first.length.toString())
+//         Log.d("FIRSTRESPONSE", second.length.toString())
+//         Log.d("THIRDTRESPONSE", third.toString())
+//         Log.d("FOURTHRESPONSE", fourth.toString())
 //        Log.d("SECONDPAYLOAD",UtilityParam.SECONDPAYLOAD)
 //        Log.d("FIRSTRESPONSE",UtilityParam.SECONDRESPONSE)
 //        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCIzMDUwMjc3MzE2XCJ9In0.IkcvojQx-AiO4Y-M3LwL-sARs1T-3DeBFabYPQn-9_Q"

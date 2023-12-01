@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
@@ -84,8 +83,18 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         deviceSerialID = getDeviceId(requireContext())
         viewModel.registerMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                showAlertDialog(requireContext(), message, "OK"){}
-              //  Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                if (message.contains("successfully")) {
+                    showAlertDialog(requireContext(), message, "OK") {
+                        showFragment(
+                            LoginFragment(),
+                            containerViewId = R.id.auth_container,
+                            fragmentName = "Login Fragment",
+                        )
+                        Log.d("FBNWAHALA", message)
+                    }
+                } else {
+                    showAlertDialog(requireContext(), message, "OK") {}
+                }
             }
         }
         if (BuildConfig.FLAVOR.contains("firstbank")) {
@@ -135,7 +144,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
         loader = alertDialog(requireContext())
 
-        if (email.isNullOrEmpty()){
+        if (email.isNullOrEmpty()) {
             binding.email.isFocusableInTouchMode = true
         }
         viewModel.getStatesResponse.observe(viewLifecycleOwner) {
@@ -515,7 +524,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private fun registerExistingCustomer() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
             val existingAccountRegReq = RegistrationForExistingFBNUsersRequest(
-                title= titleFBN.text.toString().trim(),
+                title = titleFBN.text.toString().trim(),
                 accountNumber = actNumber,
                 businessAddress = addressView.text.toString().trim(),
                 businessName = businessNameView.text.toString().trim(),
@@ -556,11 +565,6 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             loader,
             requireActivity().supportFragmentManager,
         ) {
-            showFragment(
-                LoginFragment(),
-                containerViewId = R.id.auth_container,
-                fragmentName = "Login Fragment",
-            )
             viewModel.clearExistingCustomerLiveData()
         }
     }
