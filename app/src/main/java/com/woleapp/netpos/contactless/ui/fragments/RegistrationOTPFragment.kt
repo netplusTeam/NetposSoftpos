@@ -39,7 +39,7 @@ class RegistrationOTPFragment : BaseFragment() {
     private lateinit var newOtpId: String
     private lateinit var partnerID: String
     private lateinit var deviceSerialID: String
-    private var timeSeconds = 150L
+    private var timeSeconds = 120L
 
 
     override fun onCreateView(
@@ -196,7 +196,7 @@ class RegistrationOTPFragment : BaseFragment() {
                     resendCode.text = "Resend OTP in $timeSeconds seconds"
                 }
                 if (timeSeconds <= 0) {
-                    timeSeconds = 150L
+                    timeSeconds = 120L
                     timer.cancel()
                     activity?.runOnUiThread {
                         resendCode.isEnabled = true
