@@ -75,7 +75,7 @@
             app:layout_constraintEnd_toEndOf="@id/textInputUname"
             app:layout_constraintStart_toStartOf="@id/textInputUname"
             app:layout_constraintTop_toBottomOf="@id/textInputUname"
-            app:passwordToggleEnabled="false"
+            app:passwordToggleEnabled="true"
             app:passwordToggleTint="@android:color/black">
 
             <com.google.android.material.textfield.TextInputEditText

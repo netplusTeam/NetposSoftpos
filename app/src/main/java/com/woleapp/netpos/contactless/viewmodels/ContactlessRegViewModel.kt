@@ -160,7 +160,7 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "Unexpected error")
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "Invalid account number provided")
                             _findAccountFBNMessage.value = Event(
                                 try {
                                     errorMsg
@@ -216,7 +216,7 @@ class ContactlessRegViewModel @Inject constructor(
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_OTP, "Unexpected error\nPlease try again")
+                            val errorMsg = DPrefs.getString(AppConstants.FBN_OTP, "Invalid OTP provided")
                             _otpMessage.value = Event(
                                 try {
                                     errorMsg
