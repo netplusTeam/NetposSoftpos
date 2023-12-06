@@ -22,7 +22,7 @@ object UtilityParam {
     val STRING_REQ_CRED_SEC_K = getCredSecK()
     val STRING_REQ_CRED_IV = getCredIv()
 
-    private val encryptionHelper: DataEncryptionAndDecryption =
+     val encryptionHelper: DataEncryptionAndDecryption =
         DataEncryptionAndDecryptionImpl(
             STRING_REQ_CRED_SEC_K,
             STRING_REQ_CRED_IV,

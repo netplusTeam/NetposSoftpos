@@ -34,6 +34,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
 import com.woleapp.netpos.contactless.util.UtilityParam
+import com.woleapp.netpos.contactless.util.UtilityParam.encryptionHelper
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -208,24 +209,9 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        val first = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJJbnZhbGlkIGFjY291bnQgbnVtYmVyIHByb3ZpZGVkXCJ9IiwiaWF0IjoxNzAxMjYzOTg5LCJleHAiOjE3MDEyNjc1ODl9.emA-6g5pRNck09PZG-Wl5jWUaAGAiUoIh8azAYWJLhA"
-//        val second = "sendResponsep,peyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJFbWFpbCBhbHJlYWR5IGV4aXN0cyFcIn0iLCJpYXQiOjE3MDEyNjc1MjcsImV4cCI6MTcwMTI3MTEyN30.mHvxSp-jvKK_SchOk_ONt0YoNnXKDLpV0iWOEC2FvaY"
-//        val third = second[15]
-//        val fourth = second[230]
-//        Log.d("FIRSTPAYLOAD", first.length.toString())
-//         Log.d("FIRSTRESPONSE", second.length.toString())
-//         Log.d("THIRDTRESPONSE", third.toString())
-//         Log.d("FOURTHRESPONSE", fourth.toString())
-//        Log.d("SECONDPAYLOAD",UtilityParam.SECONDPAYLOAD)
-//        Log.d("FIRSTRESPONSE",UtilityParam.SECONDRESPONSE)
-//        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCIzMDUwMjc3MzE2XCJ9In0.IkcvojQx-AiO4Y-M3LwL-sARs1T-3DeBFabYPQn-9_Q"
-//
-//        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6dHJ1ZSxcIm1lc3NhZ2VcIjpcIk9UUCBzZW50XCIsXCJkYXRhXCI6e1wiYnVzaW5lc3NOYW1lXCI6XCJNVVNUQVBIQSBIQUxJTUEgU1VMRU1BTlwiLFwiYWRkcmVzc1wiOlwiXCIsXCJmdWxsTmFtZVwiOlwiTVVTVEFQSEEgSEFMSU1BIFNVTEVNQU5cIixcImFjY291bnROdW1iZXJcIjpcIjMwNTAyNzczMTZcIixcImVtYWlsXCI6bnVsbCxcInBob25lXCI6XCIrMjM0KDcwOCk2MTQ2NzcxXCJ9fSIsImlhdCI6MTY5OTM3NDg1MSwiZXhwIjoxNjk5Mzc4NDUxfQ.i-5Kiw_N03eF_wKezgAwEikZ_6FZNN3QUoRoiLeXl1M"
-//
-//
-//        "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ7XCJhY2NvdW50TnVtYmVyXCI6XCJcXFwiMzA1MDI3NzMxNlxcXCJcIn0ifQ.pW2tu1bbjtRbc6rfNiye6afJx9hoo-WUvr_awHV34rM"
-//
-//        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6ZmFsc2UsXCJtZXNzYWdlXCI6XCJJbnZhbGlkIGFjY291bnQgbnVtYmVyIHByb3ZpZGVkXCJ9IiwiaWF0IjoxNjk5Mzc0OTQwLCJleHAiOjE2OTkzNzg1NDB9.fRrCcoFDVRHA3l6VHUHWOPeha5vzi2K9LokPGrLheH4"
+        val decrypt = encryptionHelper.decryptData("0dd757c6dd99cb5f506d7bade65e9ba1")
+        Log.d("YEAAAH", decrypt)
+
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
