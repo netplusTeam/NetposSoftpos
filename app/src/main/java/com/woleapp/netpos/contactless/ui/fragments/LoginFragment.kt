@@ -209,8 +209,8 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val decrypt = encryptionHelper.decryptData("0dd757c6dd99cb5f506d7bade65e9ba1")
-        Log.d("YEAAAH", decrypt)
+//        val decrypt = encryptionHelper.decryptData("0dd757c6dd99cb5f506d7bade65e9ba1")
+//        Log.d("YEAAAH", decrypt)
 
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {

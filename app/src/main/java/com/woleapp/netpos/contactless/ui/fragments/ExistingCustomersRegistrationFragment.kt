@@ -28,6 +28,7 @@ import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isEmailValid
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
@@ -298,6 +299,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             emailView.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_email_address))
+            }
+            !isEmailValid(emailView.text.toString()) -> {
+                showToast(getString(R.string.all_please_email_not_valid))
             }
             passwordView.text.toString().isEmpty() -> {
                 showToast(getString(R.string.hint_enter_password))

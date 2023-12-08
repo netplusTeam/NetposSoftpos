@@ -226,6 +226,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="all_please_enter_location">Please Enter Your Location</string>
     <string name="all_please_enter_phone_number">Please Enter your Phone Number</string>
     <string name="all_please_enter_email_address">Please Enter your Email address</string>
+    <string name="all_please_email_not_valid">Your Email is invalid</string>
     <string name="all_please_enter_reference">Please Enter your Reference</string>
     <string name="all_please_enter_bvn">Please Enter your BVN</string>
     <string name="all_please_enter_password">Please Enter Password</string>
