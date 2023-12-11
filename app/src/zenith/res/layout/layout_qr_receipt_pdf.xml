@@ -22,8 +22,8 @@
 
             <ImageView
                 android:id="@+id/imageView"
-                android:layout_width="@dimen/dimen_50dp"
-                android:layout_height="@dimen/dimen_50dp"
+                android:layout_width="@dimen/dimen_100dp"
+                android:layout_height="@dimen/dimen_60dp"
                 android:contentDescription="@string/app_logo"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -37,7 +37,6 @@
                 android:layout_marginTop="@dimen/dimen_15dp"
                 android:fontFamily="@font/poppins_bold"
                 android:text="@string/transaction_receipt"
-                android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/dimen_20sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +82,6 @@
                 android:text="@string/qr_purchase"
                 android:textSize="@dimen/dimen_20sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
                 app:layout_constraintEnd_toEndOf="@+id/title"
                 app:layout_constraintStart_toStartOf="@+id/title"
                 app:layout_constraintTop_toBottomOf="@+id/terminal_id_place_holder" />
@@ -154,6 +152,7 @@
                 app:layout_constraintStart_toStartOf="@+id/narration"
                 app:layout_constraintTop_toBottomOf="@+id/narration" />
 
+
             <TextView
                 android:id="@+id/masked_pan"
                 android:layout_width="wrap_content"
@@ -190,7 +189,6 @@
                 android:textAllCaps="true"
                 android:textSize="@dimen/dimen_20sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorPrimary"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
@@ -245,7 +243,6 @@
                 android:text="@string/powered_by_netplus"
                 android:textSize="@dimen/dimen_16sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorAccent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/app_version"
                 app:layout_constraintTop_toBottomOf="@+id/app_version" />
@@ -268,6 +265,7 @@
                 android:fontFamily="@font/poppins_medium"
                 android:text="@string/contact_us"
                 android:textColor="@color/colorPrimary"
+                android:visibility="gone"
                 android:textSize="@dimen/dimen_18sp"
                 app:layout_constraintStart_toStartOf="@+id/view3"
                 app:layout_constraintTop_toBottomOf="@+id/view3" />
@@ -276,6 +274,7 @@
                 android:id="@+id/textView4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:layout_marginVertical="@dimen/dimen_5dp"
                 android:text="@string/receipt_footer_message"
                 app:layout_constraintStart_toStartOf="@+id/textView3"
@@ -283,8 +282,8 @@
 
             <ImageView
                 android:id="@+id/imageView2"
-                android:layout_width="@dimen/dimen_110dp"
-                android:layout_height="@dimen/dimen_45dp"
+                android:layout_width="@dimen/dimen_60dp"
+                android:layout_height="@dimen/dimen_30dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:contentDescription="@string/netplus_logo"
                 app:layout_constraintBottom_toBottomOf="parent"

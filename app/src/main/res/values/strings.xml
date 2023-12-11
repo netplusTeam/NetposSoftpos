@@ -195,6 +195,7 @@
     <string name="order_id_place_holder">Order Id: %1$s</string>
     <string name="narration_place_holder">Narration: %1$s</string>
     <string name="card_owner_place_holder">Card Owner: %1$s</string>
+    <string name="card_masked_pan">Masked Pan: %1$s</string>
     <string name="customerCopy">CUSTOMER COPY</string>
     <string name="merchantCopy">MERCHANT COPY</string>
     <string name="storage_permission_rationale_for_download">You need to grant this permission to save this file</string>

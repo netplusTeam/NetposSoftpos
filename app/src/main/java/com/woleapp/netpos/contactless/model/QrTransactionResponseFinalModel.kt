@@ -37,6 +37,7 @@ data class QrTransactionResponseFinalModel(
     var TVR: String = "",
     var TSI: String = "",
     var AID: String = "",
+    var maskedPan: String = "",
     var appCryptogram: String = "",
     var accountType: IsoAccountType = IsoAccountType.DEFAULT_UNSPECIFIED,
     var otherId: String = "",

@@ -17,10 +17,10 @@
 
         <ImageView
             android:id="@+id/imageView"
-            android:layout_width="90dp"
+            android:layout_width="@dimen/dimen_120dp"
             android:layout_height="@dimen/dimen_50dp"
             android:contentDescription="@string/app_logo"
-            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_netpos_logo" />
@@ -34,7 +34,6 @@
             android:text="@string/transaction_receipt"
             android:textSize="@dimen/dimen_20sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/imageView"
             app:layout_constraintTop_toBottomOf="@+id/imageView" />
@@ -78,7 +77,6 @@
             android:text="@string/pos_purchase"
             android:textSize="@dimen/dimen_20sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="@+id/title"
             app:layout_constraintStart_toStartOf="@+id/title"
             app:layout_constraintTop_toBottomOf="@+id/terminal_id_place_holder" />
@@ -123,7 +121,6 @@
             app:layout_constraintStart_toStartOf="@+id/trans_amount"
             app:layout_constraintTop_toBottomOf="@+id/trans_amount" />
 
-
         <TextView
             android:id="@+id/stan"
             android:layout_width="wrap_content"
@@ -163,7 +160,6 @@
             app:layout_constraintStart_toStartOf="@+id/card_holder"
             app:layout_constraintTop_toBottomOf="@+id/card_holder" />
 
-
         <TextView
             android:id="@+id/card_type"
             android:layout_width="wrap_content"
@@ -187,7 +183,6 @@
             android:textAllCaps="true"
             android:textSize="@dimen/dimen_20sp"
             android:textStyle="bold"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
@@ -242,7 +237,6 @@
             android:text="@string/powered_by_netplus"
             android:textSize="@dimen/dimen_16sp"
             android:textStyle="bold"
-            android:textColor="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/app_version"
             app:layout_constraintTop_toBottomOf="@+id/app_version" />
@@ -263,9 +257,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_10dp"
             android:fontFamily="@font/poppins_medium"
-            android:textColor="@color/colorPrimary"
             android:textSize="@dimen/dimen_18sp"
             android:text="@string/contact_us"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="@+id/view3"
             app:layout_constraintTop_toBottomOf="@+id/view3" />
 
@@ -273,6 +267,7 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:layout_marginVertical="@dimen/dimen_5dp"
             android:text="@string/receipt_footer_message"
             app:layout_constraintStart_toStartOf="@+id/textView3"
@@ -280,8 +275,8 @@
 
         <ImageView
             android:id="@+id/imageView2"
-            android:layout_width="@dimen/dimen_120dp"
-            android:layout_height="@dimen/dimen_50dp"
+            android:layout_width="@dimen/dimen_60dp"
+            android:layout_height="@dimen/dimen_30dp"
             android:layout_marginTop="@dimen/dimen_10dp"
             android:contentDescription="@string/netplus_logo"
             app:layout_constraintBottom_toBottomOf="parent"
