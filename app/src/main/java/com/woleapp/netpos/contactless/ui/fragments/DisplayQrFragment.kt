@@ -20,14 +20,12 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getBankName
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.Singletons.getConfigData
-import com.woleapp.netpos.contactless.util.Singletons.getCurrentlyLoggedInUser
 import com.woleapp.netpos.contactless.util.Singletons.getNetPlusPayMid
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.viewmodels.ContactlessQrPaymentViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
-import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -116,7 +114,7 @@ class DisplayQrFragment : BaseFragment() {
             }
         }
         return isValidated
-     }
+    }
 
     private fun generateMerchantQr() {
         loader.show()

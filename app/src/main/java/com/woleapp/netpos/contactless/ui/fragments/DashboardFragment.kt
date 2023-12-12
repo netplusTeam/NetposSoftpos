@@ -35,7 +35,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -109,7 +108,7 @@ class DashboardFragment : BaseFragment() {
                         viewLifecycleOwner,
                     ).observe(viewLifecycleOwner) { event ->
                         event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
+//                            Timber.e(it.toString())
                             nfcCardReaderViewModel.initiateNfcPayment(
                                 viewModel.amountLong,
                                 viewModel.cashbackLong,
@@ -176,7 +175,7 @@ class DashboardFragment : BaseFragment() {
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
-                    Timber.e(error)
+//                    Timber.e(error)
                     Toast.makeText(
                         requireContext(),
                         error.message,
@@ -237,7 +236,7 @@ class DashboardFragment : BaseFragment() {
         observer = { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
-                    Timber.e(error)
+//                    Timber.e(error)
                     Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)
                         .show()
                 }
@@ -286,7 +285,7 @@ class DashboardFragment : BaseFragment() {
                 printWriter = PrintWriter(socket.getOutputStream(), true)
                 reader = BufferedReader(InputStreamReader(socket.getInputStream()))
                 val firstData = reader?.readLine()
-                Timber.e(firstData)
+//                Timber.e(firstData)
             }.flatMap {
                 Observable.interval(0, 5, TimeUnit.SECONDS)
             }.flatMap {
@@ -297,7 +296,7 @@ class DashboardFragment : BaseFragment() {
                 printWriter?.println(out)
                 try {
                     val s = reader?.readLine()
-                    Timber.e(s)
+//                    Timber.e(s)
                     val vend = Singletons.gson.fromJson(s, Vend::class.java)
                     // socket.close()
                     Observable.just(vend)
@@ -307,7 +306,7 @@ class DashboardFragment : BaseFragment() {
             }.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    Timber.e("vend: $it")
+//                    Timber.e("vend: $it")
                     count++
                     if (it.amount > 0.0) {
                         progressBar.dismiss()
@@ -332,7 +331,7 @@ class DashboardFragment : BaseFragment() {
                         "Error ${it.localizedMessage}",
                         Toast.LENGTH_SHORT,
                     ).show()
-                    Timber.e("Error: ${it.localizedMessage}")
+//                    Timber.e("Error: ${it.localizedMessage}")
                     requireActivity().onBackPressed()
                 }).disposeWith(compositeDisposable)
         }

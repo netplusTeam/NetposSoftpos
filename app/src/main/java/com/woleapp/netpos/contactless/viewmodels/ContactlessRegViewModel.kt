@@ -1,36 +1,30 @@
 package com.woleapp.netpos.contactless.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.domain.DataEncryptionAndDecryption
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.network.ContactlessRegRepository
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.Resource
 import com.woleapp.netpos.contactless.util.Singletons.gson
-import com.woleapp.netpos.contactless.util.UtilityParam
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
-import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Named
-import javax.inject.Singleton
 
 
 @HiltViewModel
 class ContactlessRegViewModel @Inject constructor(
     private val contactlessRegRepo: ContactlessRegRepository,
-    ) : ViewModel() {
+) : ViewModel() {
 
 
     private val disposable = CompositeDisposable()
@@ -47,8 +41,7 @@ class ContactlessRegViewModel @Inject constructor(
         MutableLiveData()
     val confirmOTPResponse: LiveData<Resource<ConfirmOTPResponse>> get() = _confirmOTPResponse
 
-    private var _getStatesResponse: MutableLiveData<Resource<GetStatesResponse>> =
-        MutableLiveData()
+    private var _getStatesResponse: MutableLiveData<Resource<GetStatesResponse>> = MutableLiveData()
     val getStatesResponse: LiveData<Resource<GetStatesResponse>> get() = _getStatesResponse
 
     private var _getBranchResponse: MutableLiveData<Resource<GetFBNBranchResponse>> =
@@ -67,8 +60,7 @@ class ContactlessRegViewModel @Inject constructor(
         MutableLiveData()
     val confirmOtpToResetPasswordResponse: LiveData<Resource<GeneralResponse>> get() = _confirmOtpToResetPasswordResponse
 
-    private var _newPasswordResponse: MutableLiveData<Resource<GeneralResponse>> =
-        MutableLiveData()
+    private var _newPasswordResponse: MutableLiveData<Resource<GeneralResponse>> = MutableLiveData()
     val newPasswordResponse: LiveData<Resource<GeneralResponse>> get() = _newPasswordResponse
 
     private var _existingRegRequestResponse: MutableLiveData<Resource<GeneralResponse>> =
@@ -98,31 +90,28 @@ class ContactlessRegViewModel @Inject constructor(
     lateinit var errorMsg: String
 
     fun accountLookUp(accountNumber: String, partnerId: String, deviceSerialId: String) =
-        contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId)
-            .flatMap {
-                if (it.isSuccessful) {
-                    savePhoneNumber(it.body()!!.phone)
-                    saveAccountNumber(it.body()!!.account_number)
-                    Single.just(Resource.success(it.body()))
-                } else {
-                    try {
-                        val gson = Gson()
-                        errorMsg = gson.fromJson(
-                            it.errorBody()?.charStream(),
-                            ExistingCustomerError::class.java,
-                        ).message
-                        //      DPrefs.putString(WALLET_RESPONSE, errorMsg)
-                    } catch (e: java.lang.Exception) {
-                        //
-                    }
-                    Single.just(Resource.error(errorMsg))
+        contactlessRegRepo.findAccount(accountNumber, partnerId, deviceSerialId).flatMap {
+            if (it.isSuccessful) {
+                savePhoneNumber(it.body()!!.phone)
+                saveAccountNumber(it.body()!!.account_number)
+                Single.just(Resource.success(it.body()))
+            } else {
+                try {
+                    val gson = Gson()
+                    errorMsg = gson.fromJson(
+                        it.errorBody()?.charStream(),
+                        ExistingCustomerError::class.java,
+                    ).message
+                    //      DPrefs.putString(WALLET_RESPONSE, errorMsg)
+                } catch (e: java.lang.Exception) {
+                    //
                 }
+                Single.just(Resource.error(errorMsg))
             }
+        }
 
     fun findAccountForFirstBankUser(
-        accountNumber: String,
-        partnerId: String,
-        deviceSerialId: String
+        accountNumber: String, partnerId: String, deviceSerialId: String
     ) {
         _firstBankAccountNumberResponse.postValue(Resource.loading(null))
         disposable.add(
@@ -132,16 +121,12 @@ class ContactlessRegViewModel @Inject constructor(
                 ),
                 partnerId,
                 deviceSerialId,
-            )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
-                        Log.d("NEW_RESPONSE", it.toString())
                         _firstBankAccountNumberResponse.postValue(Resource.success(it))
                         saveAccountNumber(accountNumber)
                         it.data.otpId?.let { it1 -> saveOtpId(it1) }
-                        Log.d("NOTPCHECKING", it.data.otpId!!)
                         saveExistingPhoneNumber(it.data.phone)
                         saveEmail(it.data.email)
                         saveBusinessName(it.data.businessName)
@@ -152,24 +137,24 @@ class ContactlessRegViewModel @Inject constructor(
                         } else {
                             _findAccountFBNMessage.value = Event(it.message.toString())
                         }
-                        Log.d("SEEMESSAGE", _message.value.toString())
                     }
                     error?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+//                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, "Invalid account number provided")
+                            val errorMsg = DPrefs.getString(
+                                AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP,
+                                "Invalid account number provided"
+                            )
                             _findAccountFBNMessage.value = Event(
                                 try {
-                                    errorMsg
-                                        ?: "Error"
+                                    errorMsg ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -177,22 +162,15 @@ class ContactlessRegViewModel @Inject constructor(
     }
 
     fun confirmOTPForFBN(
-        phoneNumber: String,
-        accountNumber: String,
-        otpId: String,
-        otp: String,
-        partnerId: String
+        phoneNumber: String, accountNumber: String, otpId: String, otp: String, partnerId: String
     ) {
         _confirmOTPResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.confirmOTP(
                 gson.toJson(
                     ConfirmOTPRequest(phoneNumber, accountNumber, otpId, otp),
-                ),
-                partnerId
-            )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                ), partnerId
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _confirmOTPResponse.postValue(Resource.success(it))
@@ -208,24 +186,21 @@ class ContactlessRegViewModel @Inject constructor(
                         } else {
                             _otpMessage.value = Event(it.message.toString())
                         }
-                        Log.d("HEREEEE++++>", it.data.toString())
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_OTP, "Invalid OTP provided")
+                            val errorMsg =
+                                DPrefs.getString(AppConstants.FBN_OTP, "Invalid OTP provided")
                             _otpMessage.value = Event(
                                 try {
-                                    errorMsg
-                                        ?: "Error"
+                                    errorMsg ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            Timber.e("SHOWME--->$errorMsg")
                         }
                     }
                 },
@@ -248,12 +223,10 @@ class ContactlessRegViewModel @Inject constructor(
 //                        saveBusinessName(it.data.businessName)
 //                        saveBusinessAddress(it.data.address)
 //                        saveFullName(it.data.fullName)
-//                        Log.d("CHECKING", it.toString())
 //                        _otpMessage.value = Event("Success")
 //                    }
 //                    error?.let {
 //                        _confirmOTPResponse.postValue(Resource.error(null))
-//                        Timber.d("ERROR==${it.localizedMessage}")
 //                        (it as? HttpException).let { httpException ->
 //                            val errorMessage = httpException?.response()?.errorBody()?.string()
 //                                ?: "{\"message\":\"Unexpected error\"}"
@@ -268,7 +241,6 @@ class ContactlessRegViewModel @Inject constructor(
 //                                    "Error"
 //                                },
 //                            )
-//                            // Timber.e("SHOWME--->$errorMessage")
 //                        }
 //                    }
 //                },
@@ -278,10 +250,8 @@ class ContactlessRegViewModel @Inject constructor(
     fun getStates() {
         _getStatesResponse.postValue(Resource.loading(null))
         disposable.add(
-            contactlessRegRepo.getStates()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { data, error ->
+            contactlessRegRepo.getStates().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
                     data?.let {
                         _getStatesResponse.postValue(Resource.success(it))
                         for (i in 0 until it.data.rows.size) {
@@ -290,7 +260,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _getStatesResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -305,7 +274,6 @@ class ContactlessRegViewModel @Inject constructor(
 //                                    "Error"
 //                                },
 //                            )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -316,8 +284,7 @@ class ContactlessRegViewModel @Inject constructor(
         _getBranchResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.getBranches(stateInt, deviceSerialId, partnerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _getBranchResponse.postValue(Resource.success(it))
@@ -327,7 +294,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _getBranchResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -342,7 +308,6 @@ class ContactlessRegViewModel @Inject constructor(
 //                                    "Error"
 //                                },
 //                            )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -353,8 +318,7 @@ class ContactlessRegViewModel @Inject constructor(
         _resetPasswordResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.resetPassword(payload, deviceSerialId, partnerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _resetPasswordResponse.postValue(Resource.success(it))
@@ -362,7 +326,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _resetPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -371,13 +334,11 @@ class ContactlessRegViewModel @Inject constructor(
                                     gson.fromJson(
                                         errorMessage,
                                         ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
+                                    ).message ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -388,8 +349,7 @@ class ContactlessRegViewModel @Inject constructor(
         _resetPasswordForProvidusResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.resetPasswordForProvidus(payload, deviceSerialId, partnerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _resetPasswordForProvidusResponse.postValue(Resource.success(it))
@@ -398,7 +358,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _resetPasswordForProvidusResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -407,13 +366,11 @@ class ContactlessRegViewModel @Inject constructor(
                                     gson.fromJson(
                                         errorMessage,
                                         ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
+                                    ).message ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -424,8 +381,7 @@ class ContactlessRegViewModel @Inject constructor(
         _confirmOtpToResetPasswordResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.confirmOTPToSetPassword(payload, deviceSerialId, partnerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _confirmOtpToResetPasswordResponse.postValue(Resource.success(it))
@@ -433,7 +389,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _confirmOtpToResetPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -442,8 +397,7 @@ class ContactlessRegViewModel @Inject constructor(
                                     gson.fromJson(
                                         errorMessage,
                                         ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
+                                    ).message ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
@@ -458,8 +412,7 @@ class ContactlessRegViewModel @Inject constructor(
         _newPasswordResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.setNewPassword(payload, deviceSerialId, partnerId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _newPasswordResponse.postValue(Resource.success(it))
@@ -467,7 +420,6 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _newPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -476,13 +428,11 @@ class ContactlessRegViewModel @Inject constructor(
                                     gson.fromJson(
                                         errorMessage,
                                         ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
+                                    ).message ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -497,17 +447,14 @@ class ContactlessRegViewModel @Inject constructor(
         _existingRegRequestResponse.postValue(Resource.loading(null))
         disposable.add(
             contactlessRegRepo.registerExistingAccount(accountNumber, partnerId, deviceSerialId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _existingRegRequestResponse.postValue(Resource.success(it))
                         _registerMessage.value = Event(it.message)
-                        Log.d("EXISTINGMSG", it.message)
                     }
                     error?.let {
                         _existingRegRequestResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -516,13 +463,11 @@ class ContactlessRegViewModel @Inject constructor(
                                     gson.fromJson(
                                         errorMessage,
                                         ExistingCustomerError::class.java,
-                                    ).message
-                                        ?: "Error"
+                                    ).message ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                            // Timber.e("SHOWME--->$errorMessage")
                         }
                     }
                 },
@@ -540,9 +485,7 @@ class ContactlessRegViewModel @Inject constructor(
                 gson.toJson(accountNumber),
                 partnerId,
                 deviceSerialId,
-            )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe { data, error ->
                     data?.let {
                         _existingRegRequestResponse.postValue(Resource.success(it))
@@ -550,22 +493,20 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _existingRegRequestResponse.postValue(Resource.error(null))
-                    //    Log.d("VIEWWCHECKAA", it.toString())
-                    //    Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
-                            val errorMsg = DPrefs.getString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, "Email already exists!")
+                            val errorMsg = DPrefs.getString(
+                                AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER,
+                                "Email already exists!"
+                            )
                             _registerMessage.value = Event(
                                 try {
-                                    errorMsg
-                                        ?: "Error"
+                                    errorMsg ?: "Error"
                                 } catch (e: Exception) {
                                     "Error"
                                 },
                             )
-                             Timber.e("SHOWME--->$errorMessage")
-                             Log.d("ERRSHOWME--->", errorMessage)
                         }
                     }
                 },
@@ -603,6 +544,7 @@ class ContactlessRegViewModel @Inject constructor(
     private fun saveFullName(fullName: String) {
         DPrefs.putString(AppConstants.FULL_NAME, gson.toJson(fullName))
     }
+
     private fun saveTitle(title: String) {
         DPrefs.putString(AppConstants.TITLE, gson.toJson(title))
     }

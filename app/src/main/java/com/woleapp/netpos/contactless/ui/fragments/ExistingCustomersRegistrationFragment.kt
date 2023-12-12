@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -91,7 +90,6 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                             containerViewId = R.id.auth_container,
                             fragmentName = "Login Fragment",
                         )
-                        Log.d("FBNWAHALA", message)
                     }
                 } else {
                     showAlertDialog(requireContext(), message, "OK") {}
@@ -128,10 +126,6 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
         val newTitle = DPrefs.getString(AppConstants.TITLE, "")
         val title = newTitle.substring(1, newTitle.length - 1)
-
-        Log.d("NEWTITLE", newTitle)
-        Log.d("TITLE", title)
-
         val newContactInfo = DPrefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
             newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")

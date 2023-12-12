@@ -1,6 +1,5 @@
 package com.woleapp.netpos.contactless.network
 
-import android.util.Log
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -99,19 +98,14 @@ class ContactlessRegRepositoryImpl @Inject constructor(
     ).flatMap {
         //val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
         val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
-        Log.d("CONFIRMOTP", otpResponse)
         if (!it.sendResponse.isNullOrEmpty()) {
 
             val jsonObject = JsonParser.parseString(otpResponse).asJsonObject
             val dataObject = jsonObject.getAsJsonObject("data")
-
-            Log.d("JSONRESP", jsonObject.toString())
-            Log.d("DATAOBJ", dataObject.toString())
             // Accessing individual fields
             val status = dataObject.getAsJsonPrimitive("status").asBoolean
             val message = dataObject.getAsJsonPrimitive("message").asString
             val innerData = dataObject.getAsJsonObject("data")
-            Log.d("INNERDATA", innerData.toString())
             val businessName = innerData.getAsJsonPrimitive("businessName").asString
             val address = innerData.getAsJsonPrimitive("address").asString
             val fullName = innerData.getAsJsonPrimitive("fullName").asString
@@ -144,22 +138,17 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         val response = (throwable as? HttpException)?.response()?.errorBody()?.string()
         val sendResponse =
             response?.substringAfter("sendResponse")?.substringAfter("\",\"")?.removeSuffix("\"]")
-        Log.d("SENDRESP", sendResponse.toString())
         // Assuming the response is always in the format provided
         val encryptedMessage = sendResponse?.substringAfter("\",\"")!!
         val firstLetterIndex = encryptedMessage.indexOfFirst { it.isLetter() }
         val lastLetterIndex = encryptedMessage.indexOfLast { it.isLetter() }
-        Log.d("ENCRYPTEDMSG", encryptedMessage)
         if (firstLetterIndex != -1 && lastLetterIndex != -1) {
             val extractedString = encryptedMessage.substring(firstLetterIndex, lastLetterIndex + 1)
             // Implement the decryption logic here (replace with your decryption logic)
             val finalErrorResp = networkEncryptionHelper.decryptData(extractedString)
-            Log.d("FINALLY", finalErrorResp)
-
             val jsonObject = JSONObject(finalErrorResp)
             val message = jsonObject.getJSONObject("data").getString("message")
             DPrefs.putString(AppConstants.FBN_OTP, message)
-            Log.d("MESSSAGE", message)
         }
         Single.just(null)
     }
@@ -221,7 +210,6 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         val jsonObject = JSONObject(finalErrorResp)
         val message = jsonObject.getJSONObject("data").getString("message")
         DPrefs.putString(AppConstants.FBN_ACCOUNT_NUMBER_LOOKUP, message)
-        Log.d("INVALIDDDDD", message)
         Single.just(null)
     }
 
@@ -231,48 +219,41 @@ class ContactlessRegRepositoryImpl @Inject constructor(
         partnerId: String,
         deviceSerialId: String,
     ): Single<GeneralResponse?> = accountLookUpService.encryptedRegisterExistingAccount(
-            EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
-            partnerId,
-            deviceSerialId,
-        ).flatMap {
-            val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
-            if (!it.sendResponse.isNullOrEmpty()) {
-                val jsonObject = JsonParser.parseString(otpResponse).asJsonObject
-                val dataObject = jsonObject.getAsJsonObject("data")
+        EncryptedApiRequestModel(networkEncryptionHelper.encryptData(data)),
+        partnerId,
+        deviceSerialId,
+    ).flatMap {
+        val otpResponse = networkEncryptionHelper.decryptData(it.sendResponse)
+        if (!it.sendResponse.isNullOrEmpty()) {
+            val jsonObject = JsonParser.parseString(otpResponse).asJsonObject
+            val dataObject = jsonObject.getAsJsonObject("data")
 
-                // Accessing individual fields
-                val status = dataObject.getAsJsonPrimitive("status").asBoolean
-                val message = dataObject.getAsJsonPrimitive("message").asString
+            // Accessing individual fields
+            val status = dataObject.getAsJsonPrimitive("status").asBoolean
+            val message = dataObject.getAsJsonPrimitive("message").asString
 
-                Single.just(
-                    GeneralResponse(
-                        true, message
-                    )
+            Single.just(
+                GeneralResponse(
+                    true, message
                 )
-            } else {
-                Single.just(
-                    null,
-                )
-            }
-        }.onErrorResumeNext {
-            val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
-            val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
-            val ans = listOf(resp)
-            val newSize = ans[0].toString().substring(16, 232)
-           // val newSizee = ans[0].toString().substring(16, 229)
-            val finalErrorResp = networkEncryptionHelper.decryptData(newSize)
-            val jsonObject = JSONObject(finalErrorResp)
-            val message = jsonObject.getJSONObject("data").getString("message")
-            Log.d("HEEEINVALIDDDDD", newSize)
-          //  Log.d("OPHEEEINVALIDDDDD", newSizee)
-            Log.d("OKIMCHECKING", "OKIMCHECKING")
-            Log.d("KKNOKIMCHECKING", newResp.toString())
-            Log.d("RESPKKNOKIMCHECKING", resp.toString())
-        //    Log.d("AAADDOKIMCHECKING", jsonObject.toString())
-          //  Log.d("MESSAAADDOKIMCHECKING", message.toString())
-            DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
-            Single.just(null)
+            )
+        } else {
+            Single.just(
+                null,
+            )
         }
+    }.onErrorResumeNext {
+        val newResp = (it as? HttpException)?.response()?.errorBody()?.string()
+        val resp = newResp?.substringAfter("{")?.substringBefore("}")?.replace(":", ",")
+        val ans = listOf(resp)
+        val newSize = ans[0].toString().substring(16, 232)
+        // val newSizee = ans[0].toString().substring(16, 229)
+        val finalErrorResp = networkEncryptionHelper.decryptData(newSize)
+        val jsonObject = JSONObject(finalErrorResp)
+        val message = jsonObject.getJSONObject("data").getString("message")
+        DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
+        Single.just(null)
+    }
 
     override fun encryptedRegisterFBN(
         data: String,
@@ -312,7 +293,6 @@ class ContactlessRegRepositoryImpl @Inject constructor(
             val jsonObject = JSONObject(finalErrorResp)
             val message = jsonObject.getJSONObject("data").getString("message")
             DPrefs.putString(AppConstants.FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER, message)
-            Log.d("FINALLY", finalErrorResp)
         }
         Single.just(null)
     }

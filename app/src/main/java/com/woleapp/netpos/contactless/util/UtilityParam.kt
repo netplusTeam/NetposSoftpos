@@ -22,7 +22,7 @@ object UtilityParam {
     val STRING_REQ_CRED_SEC_K = getCredSecK()
     val STRING_REQ_CRED_IV = getCredIv()
 
-     val encryptionHelper: DataEncryptionAndDecryption =
+      val encryptionHelper: DataEncryptionAndDecryption =
         DataEncryptionAndDecryptionImpl(
             STRING_REQ_CRED_SEC_K,
             STRING_REQ_CRED_IV,
@@ -75,6 +75,10 @@ object UtilityParam {
     private external fun getXClientId(): String
     private external fun getXAccessCode(): String
     private external fun getTlvByteWrapperConstant(): String
+    private external fun getBillsPaymentUserName(): String
+    private external fun getBillsPaymentPassword(): String
+    private external fun getBillsCredentialsUserName(): String
+    private external fun getBillsPaymentCredentialsPassword(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API =
         encryptionHelper.decryptData(getStringNotificationBaseUrlNoApi())
@@ -128,6 +132,10 @@ object UtilityParam {
     val STRING_X_CLIENT_ID = encryptionHelper.decryptData(getXClientId())
     val STRING_X_ACCESS_CODE = encryptionHelper.decryptData(getXAccessCode())
     val STRING_TLV_BYTE_WRAPPER_CONSTANT = encryptionHelper.decryptData(getTlvByteWrapperConstant())
+    val STRING_BILLS_USERNAME = encryptionHelper.decryptData(getBillsPaymentUserName())
+    val STRING_BILLS_PASSWORD = encryptionHelper.decryptData(getBillsPaymentPassword())
+    val STRING_BILLS_CREDENTIALS_USERNAME = encryptionHelper.decryptData(getBillsCredentialsUserName())
+    val STRING_BILLS_CREDENTIALS_PASSWORD = encryptionHelper.decryptData(getBillsPaymentCredentialsPassword())
 //    val STRING_TLV_BYTE_WRAPPER = encryptionHelper.decryptData("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1wic3RhdHVzXCI6dHJ1ZSxcIm1lc3NhZ2VcIjpcIkFjY291bnQgdmVyaWZpZWQgc3VjY2Vzc2Z1bGx5XCIsXCJkYXRhXCI6e1wiYnVzaW5lc3NOYW1lXCI6XCJBTEFCSSBJWUFOVU9MVVdBIEhBTk5BSFwiLFwiYWRkcmVzc1wiOlwiXCIsXCJmdWxsTmFtZVwiOlwiQUxBQkkgSVlBTlVPTFVXQSBIQU5OQUhcIixcImFjY291bnROdW1iZXJcIjpcIjMxMjczMTc2NTVcIixcImVtYWlsXCI6XCJISVlBTlVPTFVXQUBZQUhPTy5DT01cIixcInBob25lXCI6XCIyMzQ3MDExMzI1NDkyXCJ9fSIsImlhdCI6MTY5NjQ0ODEzMCwiZXhwIjoxNjk2NDUxNzMwfQ.lALDMeZad33YA_4dKP8ggKPbmgsYrQEoq34dfq8kD9w")
 
 }

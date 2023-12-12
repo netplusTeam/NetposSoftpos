@@ -12,7 +12,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.BuildConfig
@@ -39,7 +38,6 @@ import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class LoginFragment : BaseFragment() {
@@ -69,39 +67,33 @@ class LoginFragment : BaseFragment() {
             executePendingBindings()
             viewmodel = viewModel
         }
-        resetPasswordBinding = DialogPasswordResetBinding.inflate(inflater, null, false)
-            .apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-                viewmodel = viewModel
-            }
-        passwordResetDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setView(resetPasswordBinding.root)
-                setCancelable(false)
-            }.create()
+        resetPasswordBinding = DialogPasswordResetBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+            viewmodel = viewModel
+        }
+        passwordResetDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(resetPasswordBinding.root)
+            setCancelable(false)
+        }.create()
 
-        confirmOTPBinding = DialogSetNewPasswordBinding.inflate(inflater, null, false)
-            .apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-            }
-        confirmOTPDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setView(confirmOTPBinding.root)
-                setCancelable(false)
-            }.create()
+        confirmOTPBinding = DialogSetNewPasswordBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+        }
+        confirmOTPDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(confirmOTPBinding.root)
+            setCancelable(false)
+        }.create()
 
-        setPasswordBinding = LayoutSetPasswordBinding.inflate(inflater, null, false)
-            .apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-            }
-        setPasswordDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setView(setPasswordBinding.root)
-                setCancelable(false)
-            }.create()
+        setPasswordBinding = LayoutSetPasswordBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+        }
+        setPasswordDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(setPasswordBinding.root)
+            setCancelable(false)
+        }.create()
 
         confirmOTPBinding.closeDialog.setOnClickListener {
             confirmOTPDialog.dismiss()
@@ -124,24 +116,19 @@ class LoginFragment : BaseFragment() {
         binding.btnLogin.setOnClickListener {
             viewModel.login(deviceId)
         }
-        dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Password changed successfully")
-            .setCancelable(false)
-            .setPositiveButton("Continue") { _, _ ->
+        dialog = AlertDialog.Builder(requireContext()).setTitle("Password changed successfully")
+            .setCancelable(false).setPositiveButton("Continue") { _, _ ->
                 setPasswordDialog.dismiss()
-            }
-            .setMessage("Please login to continue")
-            .create()
+            }.setMessage("Please login to continue").create()
 
         binding.register.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
                     "providus",
-                ) || BuildConfig.FLAVOR.contains("providussoftpos") ||
-                BuildConfig.FLAVOR.contains("wemabank") ||
-                BuildConfig.FLAVOR.contains("easypay") || BuildConfig.FLAVOR.contains("fcmbeasypay") ||
-                BuildConfig.FLAVOR.contains("easypayfcmb") ||
-                BuildConfig.FLAVOR.contains("stanbic") ||
-                BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("netpos")
+                ) || BuildConfig.FLAVOR.contains("providussoftpos") || BuildConfig.FLAVOR.contains("wemabank") || BuildConfig.FLAVOR.contains(
+                    "easypay"
+                ) || BuildConfig.FLAVOR.contains("fcmbeasypay") || BuildConfig.FLAVOR.contains("easypayfcmb") || BuildConfig.FLAVOR.contains(
+                    "stanbic"
+                ) || BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("netpos")
             ) {
                 showFragment(
                     NewOrExistingFragment(),
@@ -178,15 +165,13 @@ class LoginFragment : BaseFragment() {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter.isEnabled) {
                 Toast.makeText(requireContext(), "NFC enabled", Toast.LENGTH_SHORT).show()
-                android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("NFC Message")
+                android.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
                     .setMessage("Device has NFC support and is enabled")
                     .setPositiveButton("Close") { dialog, _ ->
                         dialog.dismiss()
                     }.show()
             } else {
-                android.app.AlertDialog.Builder(requireContext())
-                    .setTitle("NFC Message")
+                android.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
                     .setMessage("NFC is not enabled, goto device settings to enable")
                     .setPositiveButton("Settings") { dialog, _ ->
                         dialog.dismiss()
@@ -197,8 +182,7 @@ class LoginFragment : BaseFragment() {
                     }.show()
             }
         } else {
-            android.app.AlertDialog.Builder(requireContext())
-                .setTitle("NFC Message")
+            android.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
                 .setMessage("Device does not have NFC support")
                 .setPositiveButton("Close") { dialog, _ ->
                     dialog.dismiss()
@@ -209,8 +193,6 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        val decrypt = encryptionHelper.decryptData("0dd757c6dd99cb5f506d7bade65e9ba1")
-//        Log.d("YEAAAH", decrypt)
 
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {

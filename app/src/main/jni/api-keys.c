@@ -326,3 +326,27 @@ JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getCredIv(JNIEnv *env, jobject thiz) {
     return (*env)->NewStringUTF(env, "873hdfwyb4+pi_7h");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBillsPaymentUserName(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "219cb697ac0bc06b8fe7a45287ad9658");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBillsPaymentPassword(JNIEnv *env,
+                                                                              jobject thiz) {
+    return (*env)->NewStringUTF(env, "1321ddd5ea6447674a5d94a19c863f7f");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBillsCredentialsUserName(JNIEnv *env,
+                                                                                  jobject thiz) {
+    return (*env) ->NewStringUTF(env, "b46405a96c6d252e367e9545c41dde4d03b456a87ded347a9f66160a38d1f54f");
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBillsPaymentCredentialsPassword(
+        JNIEnv *env, jobject thiz) {
+    return (*env) ->NewStringUTF(env, "3b22ba2050f5dca988d3bf030997b7f9");
+}

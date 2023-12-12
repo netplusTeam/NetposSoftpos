@@ -7,6 +7,10 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.network.StormApiService
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_BILLS_CREDENTIALS_PASSWORD
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_BILLS_CREDENTIALS_USERNAME
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_BILLS_PASSWORD
+import com.woleapp.netpos.contactless.util.UtilityParam.STRING_BILLS_USERNAME
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -26,25 +30,21 @@ fun checkBillsPaymentToken(): Boolean {
 fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
     val liveData = MutableLiveData<Event<Boolean>>()
     val credentials = JsonObject()
-    credentials.addProperty("appname", "bills_payment")
-    credentials.addProperty("password", "!L@ns33mfls")
+    credentials.addProperty("appname", STRING_BILLS_USERNAME)
+    credentials.addProperty("password", STRING_BILLS_PASSWORD)
     Timber.e("get resp")
-    stormApiService.appToken(credentials)
-        .flatMap {
-            Timber.e(it.toString())
-            if (it.success) {
-                val billsCredentials = JsonObject()
-                    .apply {
-                        addProperty("username", "bills@netplusadvisory.com")
-                        addProperty("password", "C0r3M3ltD0wn!!")
-                    }
-                stormApiService.getBillsToken("Bearer ${it.token}", billsCredentials)
-            } else {
-                throw Exception("Login Failed")
+    stormApiService.appToken(credentials).flatMap {
+        Timber.e(it.toString())
+        if (it.success) {
+            val billsCredentials = JsonObject().apply {
+                addProperty("username", STRING_BILLS_CREDENTIALS_USERNAME)
+                addProperty("password", STRING_BILLS_CREDENTIALS_PASSWORD)
             }
+            stormApiService.getBillsToken("Bearer ${it.token}", billsCredentials)
+        } else {
+            throw Exception("Login Failed")
         }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+    }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
         .subscribe { res, error ->
             res?.let {
                 Timber.e(it.toString())
@@ -75,18 +75,17 @@ fun getAppToken(stormApiService: StormApiService): Single<Boolean> {
     credentials.addProperty("appname", UtilityParam.APP_NAME)
     credentials.addProperty("password", UtilityParam.APP_PASSWORD)
     Timber.e("get resp")
-    return stormApiService.appToken(credentials)
-        .flatMap {
-            Timber.e(it.toString())
-            Single.just(
-                if (!it.success) {
-                    false
-                } else {
-                    DPrefs.putString(PREF_APP_TOKEN, it.token)
-                    true
-                },
-            )
-        }
+    return stormApiService.appToken(credentials).flatMap {
+        Timber.e(it.toString())
+        Single.just(
+            if (!it.success) {
+                false
+            } else {
+                DPrefs.putString(PREF_APP_TOKEN, it.token)
+                true
+            },
+        )
+    }
 }
 
 private fun sendSmSReq(message: String, number: String): Single<Any> {
@@ -97,8 +96,8 @@ private fun sendSmSReq(message: String, number: String): Single<Any> {
     }
     Timber.e("payload: $map")
     val auth = "Bearer ${DPrefs.getString(PREF_USER_TOKEN, "")}"
-    val body: RequestBody = map.toString()
-        .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+    val body: RequestBody =
+        map.toString().toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
     return StormApiClient.getSmsServiceInstance().sendSms(auth, body)
 }
 
@@ -110,29 +109,25 @@ fun sendSMS(
 ) {
     val req = if (checkAppToken().not()) {
         Timber.e("app token not found, get it first")
-        getAppToken(StormApiClient.getBillsInstance())
-            .flatMap {
-                sendSmSReq(message, number)
-            }
+        getAppToken(StormApiClient.getBillsInstance()).flatMap {
+            sendSmSReq(message, number)
+        }
     } else {
         sendSmSReq(message, number)
     }
 
-    req
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { t1, t2 ->
-            t1?.let {
-                _smsSent.value = Event(true)
-                Timber.e("Data $it")
+    req.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
+        t1?.let {
+            _smsSent.value = Event(true)
+            Timber.e("Data $it")
+        }
+        t2?.let {
+            Timber.e(it)
+            val httpException = it as? HttpException
+            httpException?.let { e ->
             }
-            t2?.let {
-                Timber.e(it)
-                val httpException = it as? HttpException
-                httpException?.let { e ->
-                }
-                // MqttHelper.sendPayload(MqttTopics.SMS_EVENTS, smsEvent)
-                _smsSent.value = Event(false)
-            }
-        }.disposeWith(compositeDisposable)
+            // MqttHelper.sendPayload(MqttTopics.SMS_EVENTS, smsEvent)
+            _smsSent.value = Event(false)
+        }
+    }.disposeWith(compositeDisposable)
 }
