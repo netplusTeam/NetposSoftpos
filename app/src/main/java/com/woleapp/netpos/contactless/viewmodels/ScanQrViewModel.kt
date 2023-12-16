@@ -6,10 +6,12 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.network.PayByTransferRepository
 import com.woleapp.netpos.contactless.network.Repository
 import com.woleapp.netpos.contactless.util.AppConstants.QR_TRANSACTION_POST_REQUEST_PAYLOAD
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.stringToBase64
 import com.woleapp.netpos.contactless.util.Resource
+import com.woleapp.netpos.contactless.util.UtilityParam.PAY_BY_TRANSFER_BEARER_TOKEN
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -22,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ScanQrViewModel @Inject constructor(
     private val repository: Repository,
+    private val payByTransferRepository: PayByTransferRepository,
     private val gson: Gson,
 ) : ViewModel() {
     private val compositeDisposable = CompositeDisposable()
@@ -37,6 +40,10 @@ class ScanQrViewModel @Inject constructor(
     private val _transactionResponseFromVerve: MutableLiveData<Resource<Any?>> =
         MutableLiveData()
     val transactionResponseFromVerve: LiveData<Resource<Any?>> get() = _transactionResponseFromVerve
+
+    private val _payByTransfer: MutableLiveData<Resource<MerchantDetailsResponse>> =
+        MutableLiveData()
+    val payByTransfer: LiveData<Resource<MerchantDetailsResponse>> get() = _payByTransfer
 
     private val _cardScheme: MutableLiveData<String> = MutableLiveData("")
 
@@ -144,6 +151,34 @@ class ScanQrViewModel @Inject constructor(
                     },
             )
         }
+    }
+
+    fun getMerchantDetails(netPlusPayMid: String) {
+        _payByTransfer.value = Resource.loading(null)
+            compositeDisposable.add(
+                payByTransferRepository.getMerchantDetails(PAY_BY_TRANSFER_BEARER_TOKEN, netPlusPayMid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .flatMap { response ->
+                        Single.just(response.body())
+                    }
+                    .subscribe { data, error ->
+                        data?.let {
+                            _payByTransfer.value = Resource.success(it)
+                        }
+                        error?.let { throwable ->
+                            Timber.d("PAY_BY_TRANSFER_ERROR_VP%s", throwable.localizedMessage)
+                            _payByTransfer.value =
+                                if (throwable is SocketTimeoutException) {
+                                    Resource.timeOut(null)
+                                } else {
+                                    Resource.error(
+                                        null,
+                                    )
+                                }
+                        }
+                    },
+            )
     }
 
     fun saveTheQrToSharedPrefs(qrData: PostQrToServerModel) {

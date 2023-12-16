@@ -32,6 +32,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.google.android.gms.tasks.OnCompleteListener
@@ -67,13 +68,11 @@ import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
-import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
-import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
-import com.woleapp.netpos.contactless.viewmodels.ScanQrViewModel
-import com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel
+import com.woleapp.netpos.contactless.viewmodels.*
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
@@ -240,7 +239,9 @@ class MainActivity :
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 //        // First check if there is an update
 //        checkForAppUpdate()
-
+        val netPlusPayMid = Singletons.getNetPlusPayMid()
+        scanQrViewModel.getMerchantDetails(netPlusPayMid)
+        generateMerchantDetails()
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
@@ -1135,6 +1136,23 @@ class MainActivity :
                 }
         }
     }
+
+    private fun generateMerchantDetails() {
+        observeServerResponseActivity(
+            this,
+            this,
+            scanQrViewModel.payByTransfer,
+            LoadingDialog(),
+            supportFragmentManager,
+        ) {
+            scanQrViewModel.payByTransfer.value?.data?.user?.let {
+                binding.dashboardHeader.constraintLayout.visibility = View.VISIBLE
+                binding.dashboardHeader.merchantDetails.text = it.acctNumber
+                binding.dashboardHeader.bankName.text = it.bank
+            }
+        }
+    }
+
 
 //    private fun checkForAppUpdate() {
 //        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->

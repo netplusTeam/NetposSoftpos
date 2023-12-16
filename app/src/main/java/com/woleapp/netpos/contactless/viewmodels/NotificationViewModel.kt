@@ -36,7 +36,7 @@ class NotificationViewModel @Inject constructor(
     fun registerDeviceToken(
         token: String,
         terminalId: String,
-        username: String,
+        username: String
     ) {
         disposable.add(
             notificationRepository.registerDeviceToken(token, terminalId, username)

@@ -6,8 +6,10 @@ import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
-import com.woleapp.netpos.contactless.network.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.network.*
 import com.woleapp.netpos.contactless.util.UtilityParam.FW_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.PAY_BY_TRANSFER_BASE_URL
+import com.woleapp.netpos.contactless.util.UtilityParam.PAY_BY_TRANSFER_BEARER_TOKEN
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
@@ -62,8 +64,7 @@ object AppModule {
     @Provides
     @Singleton
     @Named("contactlessRegBaseUrl")
-    fun providesBaseUrlForContactlessReg(): String =
-        STRING_CONTACTLESS_EXISTING_BASE_URL
+    fun providesBaseUrlForContactlessReg(): String = STRING_CONTACTLESS_EXISTING_BASE_URL
 
     @Provides
     @Singleton
@@ -74,14 +75,17 @@ object AppModule {
     @Provides
     @Singleton
     @Named("notificationBaseUrl")
-    fun providesBaseUrlForNotification(): String =
-        STRING_NOTIFICATION_BASE_URL
+    fun providesBaseUrlForNotification(): String = STRING_NOTIFICATION_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("payByTransferBaseUrl")
+    fun payByTransferBaseUrl(): String = PAY_BY_TRANSFER_BASE_URL
 
     @Provides
     @Singleton
     @Named("flutterWaveBaseUrl")
-    fun providesBaseUrlForFlutterwave(): String =
-        FW_BASE_URL
+    fun providesBaseUrlForFlutterwave(): String = FW_BASE_URL
 
     @Provides
     @Singleton
@@ -102,29 +106,28 @@ object AppModule {
     fun providesOKHTTPClient(
         @Named("loggingInterceptor") loggingInterceptor: Interceptor,
         @Named("headerInterceptor") headerInterceptor: Interceptor,
-    ): OkHttpClient =
-        OkHttpClient().newBuilder()
-            .connectTimeout(70, TimeUnit.SECONDS)
-            .readTimeout(70, TimeUnit.SECONDS)
-            .writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-            .addInterceptor(headerInterceptor)
-            .addInterceptor(loggingInterceptor)
-            .build()
+    ): OkHttpClient = OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
+        .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true).addInterceptor(headerInterceptor)
+        .addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
     @Named("otpOkHttp")
     fun providesOKHTTPClientForGetVerveOtp(
         @Named("loggingInterceptor") loggingInterceptor: Interceptor,
-    ): OkHttpClient =
-        OkHttpClient().newBuilder()
-            .connectTimeout(70, TimeUnit.SECONDS)
-            .readTimeout(70, TimeUnit.SECONDS)
-            .writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-            .addInterceptor(loggingInterceptor)
-            .build()
+    ): OkHttpClient = OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
+        .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true).addInterceptor(loggingInterceptor).build()
+
+    @Provides
+    @Singleton
+    @Named("payByTransferOkHttp")
+    fun providesOKHTTPClientForPayByTransfer(
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+    ): OkHttpClient = OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
+        .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true).addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
@@ -132,13 +135,9 @@ object AppModule {
     fun providesRetrofit(
         @Named("defaultOkHttp") okhttp: OkHttpClient,
         @Named("defaultBaseUrl") baseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(baseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(baseUrl).client(okhttp)
+        .build()
 
     @Provides
     @Singleton
@@ -146,13 +145,9 @@ object AppModule {
     fun providesRetrofitForVerveOtp(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("otpBaseUrl") otpBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(otpBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(otpBaseUrl)
+        .client(okhttp).build()
 
     @Provides
     @Singleton
@@ -160,13 +155,9 @@ object AppModule {
     fun providesRetrofitForContactlessReg(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("contactlessRegBaseUrl") contactlessRegBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(contactlessRegBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(contactlessRegBaseUrl)
+        .client(okhttp).build()
 
     @Provides
     @Singleton
@@ -174,13 +165,19 @@ object AppModule {
     fun providesRetrofitForContactlessQrPayment(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("contactlessQrPaymentBaseUrl") contactlessQrPaymentBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(contactlessQrPaymentBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .baseUrl(contactlessQrPaymentBaseUrl).client(okhttp).build()
+
+    @Provides
+    @Singleton
+    @Named("payByTransferRetrofit")
+    fun payByTransferService(
+        @Named("payByTransferOkHttp") okhttp: OkHttpClient,
+        @Named("payByTransferBaseUrl") payByTransferBaseUrl: String,
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(payByTransferBaseUrl)
+        .client(okhttp).build()
 
     @Provides
     @Singleton
@@ -188,13 +185,9 @@ object AppModule {
     fun providesRetrofitForNotificationService(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("notificationBaseUrl") notificationBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(notificationBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(notificationBaseUrl)
+        .client(okhttp).build()
 
     @Provides
     @Singleton
@@ -202,13 +195,9 @@ object AppModule {
     fun providesRetrofitForNetposTransactionApiService(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("netpos-transaction-api-base-url") netposTransactionApiServiceBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(netposTransactionApiServiceBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .baseUrl(netposTransactionApiServiceBaseUrl).client(okhttp).build()
 
     @Provides
     @Singleton
@@ -216,13 +205,9 @@ object AppModule {
     fun providesRetrofitForRrnService(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("rrn-service-base-url") netposTransactionApiServiceBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(netposTransactionApiServiceBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .baseUrl(netposTransactionApiServiceBaseUrl).client(okhttp).build()
 
     @Provides
     @Singleton
@@ -230,34 +215,27 @@ object AppModule {
     fun providesRetrofitForFWApiService(
         @Named("otpOkHttp") okhttp: OkHttpClient,
         @Named("flutterWaveBaseUrl") fwApiServiceBaseUrl: String,
-    ): Retrofit =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .baseUrl(fwApiServiceBaseUrl)
-            .client(okhttp)
-            .build()
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(fwApiServiceBaseUrl)
+        .client(okhttp).build()
 
     @Provides
     @Singleton
     fun providesFWApiService(
         @Named("fw-retrofit") retrofit: Retrofit,
-    ): FWApiService =
-        retrofit.create(FWApiService::class.java)
+    ): FWApiService = retrofit.create(FWApiService::class.java)
 
     @Provides
     @Singleton
     fun providesNetposTransactionApiService(
         @Named("netpos-transaction-api-retrofit") retrofit: Retrofit,
-    ): NetPosTransactionsService =
-        retrofit.create(NetPosTransactionsService::class.java)
+    ): NetPosTransactionsService = retrofit.create(NetPosTransactionsService::class.java)
 
     @Provides
     @Singleton
     fun providesRrnService(
         @Named("rrn-retrofit") retrofit: Retrofit,
-    ): RrnApiService =
-        retrofit.create(RrnApiService::class.java)
+    ): RrnApiService = retrofit.create(RrnApiService::class.java)
 
     @Provides
     @Singleton
@@ -288,6 +266,12 @@ object AppModule {
     fun providesNotificationService(
         @Named("notificationRetrofit") retrofit: Retrofit,
     ): NotificationService = retrofit.create(NotificationService::class.java)
+
+    @Provides
+    @Singleton
+    fun payByTransferServiceService(
+        @Named("payByTransferRetrofit") retrofit: Retrofit,
+    ): PayByTransferService = retrofit.create(PayByTransferService::class.java)
 
     @Provides
     @Singleton

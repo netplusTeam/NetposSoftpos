@@ -71,20 +71,17 @@ object RandomPurposeUtil {
     }
 
     @SuppressLint("ConstantLocale")
-    fun getCurrentDateTime() =
-        SimpleDateFormat(
-            "yyyy-MM-dd hh:mm a",
-            Locale.getDefault(),
-        ).format(System.currentTimeMillis())
-            .format(Date())
+    fun getCurrentDateTime() = SimpleDateFormat(
+        "yyyy-MM-dd hh:mm a",
+        Locale.getDefault(),
+    ).format(System.currentTimeMillis()).format(Date())
 
     @SuppressLint("SimpleDateFormat")
     fun dateStr2Long(dateStr: String, inputDateFormat: String): Long {
         val formattedDateString = dateStr.removeSuffix(dateStr.takeLast(3))
         return try {
             val c = Calendar.getInstance()
-            c.time = SimpleDateFormat(inputDateFormat)
-                .parse(dateStr)!!
+            c.time = SimpleDateFormat(inputDateFormat).parse(dateStr)!!
             c.timeInMillis
         } catch (e: ParseException) {
             e.printStackTrace()
@@ -141,14 +138,7 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (
-                        it.data is PostQrToServerResponse ||
-                        it.data is PostQrToServerVerveResponseModel ||
-                        it.data is QrTransactionResponseModel ||
-                        it.data is VerveTransactionResponse ||
-                        it.data is ConfirmOTPResponse ||
-                        it.data is ExistingAccountRegisterResponse
-                    ) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is MerchantDetailsResponse) {
                         successAction()
                     } else {
                         Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT)
@@ -183,15 +173,7 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (
-                        it.data is PostQrToServerResponse ||
-                        it.data is PostQrToServerVerveResponseModel ||
-                        it.data is QrTransactionResponseModel ||
-                        it.data is VerveTransactionResponse ||
-                        it.data is AccountNumberLookUpResponse ||
-                        it.data is ConfirmOTPResponse ||
-                        it.data is ExistingAccountRegisterResponse
-                    ) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse) {
                         successAction()
                     } else {
                         //showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
@@ -242,17 +224,7 @@ object RandomPurposeUtil {
                             Status.SUCCESS -> {
                                 Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
-                                if (
-                                    it.data is PostQrToServerResponse ||
-                                    it.data is PostQrToServerVerveResponseModel ||
-                                    it.data is QrTransactionResponseModel ||
-                                    it.data is VerveTransactionResponse ||
-                                    it.data is AccountNumberLookUpResponse ||
-                                    it.data is ConfirmOTPResponse ||
-                                    it.data is ExistingAccountRegisterResponse ||
-                                    it.data is WemaExistingRegistrationResponse ||
-                                    it.data is String
-                                ) {
+                                if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String) {
                                     successAction()
                                 } else {
                                     Log.d("JUSTCHECKING", it.toString())
@@ -300,29 +272,17 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (
-                        it.data is PostQrToServerResponse ||
-                        it.data is PostQrToServerVerveResponseModel ||
-                        it.data is QrTransactionResponseModel ||
-                        it.data is VerveTransactionResponse ||
-                        it.data is AccountNumberLookUpResponse ||
-                        it.data is ConfirmOTPResponse ||
-                        it.data is ExistingAccountRegisterResponse ||
-                        it.data is String ||
-                        it.data is ResetPasswordResponseForProvidus ||
-                        it.data is GeneralResponse ||
-                        it.data is PayThroughMPGSResponse
-                    ) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is String || it.data is ResetPasswordResponseForProvidus || it.data is GeneralResponse || it.data is PayThroughMPGSResponse) {
                         successAction()
                     } else {
-                     //   showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                        //   showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
                 }
                 Status.LOADING -> {
                     loadingDialog.show()
                 }
                 Status.ERROR -> {
-                  //  showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                    //  showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                 }
@@ -345,18 +305,7 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (
-                        it.data is PostQrToServerResponse ||
-                        it.data is PostQrToServerVerveResponseModel ||
-                        it.data is QrTransactionResponseModel ||
-                        it.data is VerveTransactionResponse ||
-                        it.data is AccountNumberLookUpResponse ||
-                        it.data is ConfirmOTPResponse ||
-                        it.data is ExistingAccountRegisterResponse ||
-                        it.data is String ||
-                        it.data is GeneralResponse ||
-                        it.data is PayThroughMPGSResponse
-                    ) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is String || it.data is GeneralResponse || it.data is PayThroughMPGSResponse) {
                         successAction()
                     } else {
                         showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
@@ -394,16 +343,14 @@ object RandomPurposeUtil {
 
     fun closeSoftKeyboard(context: Context, activity: Activity) {
         activity.currentFocus?.let { view ->
-            val imm =
-                context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 
     fun formatFailedVerveTransRespToExtractIswResponse(transResponse: VerveTransactionResponse): VerveTransactionResponse {
         val iswResponseInStringFormat =
-            transResponse.message.split("response:\n").last().removeSuffix("\n\"")
-                .replace("\\", "")
+            transResponse.message.split("response:\n").last().removeSuffix("\n\"").replace("\\", "")
         val iswResponse = Gson().fromJson(iswResponseInStringFormat, Response::class.java)
         return transResponse.copy(
             code = iswResponse.errors.first().code,
@@ -414,8 +361,8 @@ object RandomPurposeUtil {
     fun alertDialog(
         context: Context,
     ): AlertDialog {
-        val dialogView: View = LayoutInflater.from(context)
-            .inflate(R.layout.layout_loading_dialog, null)
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
         dialogBuilder.setCancelable(false)
         dialogBuilder.setView(dialogView)
@@ -554,8 +501,7 @@ object RandomPurposeUtil {
     fun dateStr2Long(dateStr: String): Long {
         return try {
             val c = Calendar.getInstance()
-            c.time = SimpleDateFormat("yyyy-MM-dd hh:mm")
-                .parse(dateStr)!!
+            c.time = SimpleDateFormat("yyyy-MM-dd hh:mm").parse(dateStr)!!
             c.timeInMillis
         } catch (e: ParseException) {
             e.printStackTrace()
@@ -570,15 +516,12 @@ object RandomPurposeUtil {
         positiveButtonTitle: String,
         onPositiveButtonClick: () -> Unit,
     ) {
-        val alertDialog = AlertDialog.Builder(context)
-            .setMessage(message)
+        val alertDialog = AlertDialog.Builder(context).setMessage(message)
             .setPositiveButton(positiveButtonTitle) { _, _ ->
                 onPositiveButtonClick()
                 // Dismiss the dialog when "Yes" is clicked
                 alertDialog(context).dismiss()
-            }
-            .setCancelable(false)
-            .create()
+            }.setCancelable(false).create()
 
         alertDialog.show()
     }

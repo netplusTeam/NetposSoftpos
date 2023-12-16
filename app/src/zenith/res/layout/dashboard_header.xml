@@ -7,7 +7,9 @@
 
     </data>
 
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/merchant_layout"
         android:layout_width="match_parent"
         android:layout_height="180dp"
         android:background="@color/colorPrimary">
@@ -40,8 +42,9 @@
             android:layout_height="80dp"
             android:contentDescription="@string/user_image"
             android:src="@drawable/netpos_user"
+            android:layout_marginStart="@dimen/margin_10"
             app:layout_constraintBottom_toTopOf="@id/welcome_label"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/netpos_logo"
             app:layout_constraintVertical_bias="0.22000003"
@@ -58,8 +61,8 @@
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/username"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/user_image"
+            app:layout_constraintStart_toStartOf="@+id/user_image"
             app:layout_constraintTop_toBottomOf="@id/user_image" />
 
         <TextView
@@ -72,9 +75,95 @@
             android:textColor="@android:color/white"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/user_image"
+            app:layout_constraintStart_toStartOf="@+id/user_image"
             app:layout_constraintTop_toBottomOf="@id/welcome_label" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.4003477" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.6" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/guideline8"
+            app:layout_constraintEnd_toEndOf="@+id/guideline7"
+            app:layout_constraintTop_toTopOf="@+id/guideline6">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.0053477" />
+
+
+            <TextView
+                android:id="@+id/textView8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_10dp"
+                android:text="PAY BY TRANSFER"
+                android:textColor="@color/white"
+                android:textSize="@dimen/dimen_20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/merchantDetails"
+                app:layout_constraintStart_toStartOf="@+id/constraintLayout"
+                app:layout_constraintTop_toTopOf="@+id/constraintLayout" />
+
+            <TextView
+                android:id="@+id/merchantDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_10"
+                android:text="AAAAA"
+                android:textColor="@color/white"
+                android:textSize="@dimen/dimen_20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="@+id/textView8"
+                app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+            <TextView
+                android:id="@+id/bankName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BBBBB"
+                android:textColor="@color/white"
+                android:textSize="@dimen/dimen_20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="@dimen/margin_10"
+                app:layout_constraintStart_toStartOf="@+id/merchantDetails"
+                app:layout_constraintTop_toBottomOf="@+id/merchantDetails" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.9" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5013477" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/notification"
@@ -103,14 +192,15 @@
                 android:layout_marginTop="@dimen/dimen_30dp"
                 android:background="@drawable/notification_count_bg"
                 android:padding="@dimen/dimen_1dp"
-                tools:text="20"
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="@+id/imageView4"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="20" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </layout>
