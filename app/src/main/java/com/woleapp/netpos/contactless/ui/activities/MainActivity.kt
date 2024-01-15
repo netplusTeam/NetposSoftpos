@@ -7,8 +7,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.ProgressDialog
-import android.content.DialogInterface
-import android.content.Intent
+import android.content.*
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -121,6 +120,7 @@ class MainActivity :
     private val notificationModel: NotificationViewModel by viewModels()
     private lateinit var firebaseInstance: FirebaseMessaging
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
+    private lateinit var copyAccountNumber: String
 
     override fun onStart() {
         super.onStart()
@@ -240,8 +240,15 @@ class MainActivity :
 //        // First check if there is an update
 //        checkForAppUpdate()
         val netPlusPayMid = Singletons.getNetPlusPayMid()
-        scanQrViewModel.getMerchantDetails(netPlusPayMid)
-        generateMerchantDetails()
+        if (BuildConfig.FLAVOR.contains("zenith")){
+            scanQrViewModel.getMerchantDetails(netPlusPayMid)
+        } else if (BuildConfig.FLAVOR.contains("providuspos")){
+            scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")){
+            scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        }
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
@@ -530,6 +537,10 @@ class MainActivity :
         firebaseInstance = FirebaseMessaging.getInstance()
         getFireBaseToken(firebaseInstance) {
             sendTokenToBackend(it, terminalId, userName)
+        }
+
+        binding.dashboardHeader.merchantDetails.setOnClickListener {
+            copyText()
         }
     }
 
@@ -1137,6 +1148,13 @@ class MainActivity :
         }
     }
 
+    private fun copyText() {
+            val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = ClipData.newPlainText("Text copied", copyAccountNumber)
+            clipboardManager.setPrimaryClip(clip)
+            Toast.makeText(this, "Account number copied", Toast.LENGTH_SHORT).show()
+    }
+
     private fun generateMerchantDetails() {
         observeServerResponseActivity(
             this,
@@ -1146,9 +1164,10 @@ class MainActivity :
             supportFragmentManager,
         ) {
             scanQrViewModel.payByTransfer.value?.data?.user?.let {
-                binding.dashboardHeader.constraintLayout.visibility = View.VISIBLE
+                binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
                 binding.dashboardHeader.merchantDetails.text = it.acctNumber
                 binding.dashboardHeader.bankName.text = it.bank
+                copyAccountNumber = it.acctNumber
             }
         }
     }

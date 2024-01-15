@@ -36,6 +36,8 @@ object UtilityParam {
 
     private external fun getFwBaseUrl(): String
     private external fun getPayByTransferBaseUrl(): String
+    private external fun getProvidusMerchantsAccountBaseUrl(): String
+    private external fun getFCMBMerchantsAccountBaseUrl(): String
     private external fun getPayByTransferBearerToken(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
@@ -67,5 +69,7 @@ object UtilityParam {
     val BEARER_TOKEN_FOR_MPGS_TRANSACTION = getBearerTokenForMPGSTransaction()
     val FW_BASE_URL = getFwBaseUrl()
     val PAY_BY_TRANSFER_BASE_URL = getPayByTransferBaseUrl()
+    val PROVIDUS_MERCHANTS_ACCOUNT_BASE_URL = getProvidusMerchantsAccountBaseUrl()
+    val FCMB_MERCHANTS_ACCOUNT_BASE_URL = getFCMBMerchantsAccountBaseUrl()
     val PAY_BY_TRANSFER_BEARER_TOKEN = getPayByTransferBearerToken()
 }

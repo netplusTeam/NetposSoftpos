@@ -154,9 +154,65 @@ class ScanQrViewModel @Inject constructor(
     }
 
     fun getMerchantDetails(netPlusPayMid: String) {
-        _payByTransfer.value = Resource.loading(null)
+            _payByTransfer.value = Resource.loading(null)
             compositeDisposable.add(
                 payByTransferRepository.getMerchantDetails(PAY_BY_TRANSFER_BEARER_TOKEN, netPlusPayMid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .flatMap { response ->
+                        Single.just(response.body())
+                    }
+                    .subscribe { data, error ->
+                        data?.let {
+                            _payByTransfer.value = Resource.success(it)
+                        }
+                        error?.let { throwable ->
+                            Timber.d("PAY_BY_TRANSFER_ERROR_VP%s", throwable.localizedMessage)
+                            _payByTransfer.value =
+                                if (throwable is SocketTimeoutException) {
+                                    Resource.timeOut(null)
+                                } else {
+                                    Resource.error(
+                                        null,
+                                    )
+                                }
+                        }
+                    },
+            )
+    }
+
+    fun getProvidusMerchantDetails(netPlusPayMid: String) {
+            _payByTransfer.value = Resource.loading(null)
+            compositeDisposable.add(
+                payByTransferRepository.getProvidusMerchantDetails(PAY_BY_TRANSFER_BEARER_TOKEN, netPlusPayMid)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .flatMap { response ->
+                        Single.just(response.body())
+                    }
+                    .subscribe { data, error ->
+                        data?.let {
+                            _payByTransfer.value = Resource.success(it)
+                        }
+                        error?.let { throwable ->
+                            Timber.d("PAY_BY_TRANSFER_ERROR_VP%s", throwable.localizedMessage)
+                            _payByTransfer.value =
+                                if (throwable is SocketTimeoutException) {
+                                    Resource.timeOut(null)
+                                } else {
+                                    Resource.error(
+                                        null,
+                                    )
+                                }
+                        }
+                    },
+            )
+    }
+
+    fun getFcmbMerchantDetails(netPlusPayMid: String) {
+            _payByTransfer.value = Resource.loading(null)
+            compositeDisposable.add(
+                payByTransferRepository.getFcmbMerchantDetails(PAY_BY_TRANSFER_BEARER_TOKEN, netPlusPayMid)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .flatMap { response ->

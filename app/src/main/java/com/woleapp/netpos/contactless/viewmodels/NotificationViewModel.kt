@@ -5,13 +5,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.model.AppCampaignModel
+import com.woleapp.netpos.contactless.model.FeedbackRequest
+import com.woleapp.netpos.contactless.model.PayWithQrRequest
 import com.woleapp.netpos.contactless.network.NotificationRepository
 import com.woleapp.netpos.contactless.util.AppConstants.DATA_BASE_ERROR_TAG
 import com.woleapp.netpos.contactless.util.AppConstants.NOTIFICATION_ERROR
+import com.woleapp.netpos.contactless.util.Resource
 import com.woleapp.netpos.contactless.util.RxJavaUtils.getSingleTransformer
 import com.woleapp.netpos.contactless.util.disposeWith
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Scheduler
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 import javax.inject.Named
@@ -44,6 +48,16 @@ class NotificationViewModel @Inject constructor(
                 .subscribe(),
         )
     }
+
+    fun feedbackFromMerchants(feedbackRequest: FeedbackRequest, terminalId: String, deviceId: String) =
+        notificationRepository.feedbackFromMerchants(feedbackRequest, terminalId, deviceId)
+            .flatMap {
+                if (it.isSuccessful) {
+                    Single.just(Resource.success(it.body()))
+                } else {
+                    Single.just(Resource.error(it.errorBody()))
+                }
+            }
 
     fun markMessageAsRead(message: AppCampaignModel) {
         val msg = message.copy(hasBeenRead = true)

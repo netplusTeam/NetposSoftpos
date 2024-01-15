@@ -3,6 +3,7 @@ package com.woleapp.netpos.contactless.network
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.util.Resource
 import io.reactivex.Single
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -13,4 +14,12 @@ interface NotificationService {
     fun registerDeviceToken(
         @Body notificationRegisterDeviceTokenModel: NotificationRegisterDeviceTokenModel
     ): Single<RegisterDeviceTokenResponse>
+
+
+    @POST("merchant-feedback")
+    fun feedbackFromMerchants(
+        @Body feedbackRequest: FeedbackRequest,
+        @Query("partnerId") partnerId: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<Response<FeedbackResponse>>
 }

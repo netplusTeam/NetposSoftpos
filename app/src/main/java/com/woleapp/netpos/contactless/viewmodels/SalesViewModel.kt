@@ -253,7 +253,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         }.observeOn(AndroidSchedulers.mainThread()).subscribe { data, error ->
             data?.let { d -> d.body()?.let { Timber.d(it) } }
             error?.let { Timber.d(it.localizedMessage) }
-        }
+        }.disposeWith(compositeDisposable)
     }
 
     private fun logTransactionBeforeConnectingToNibss(
@@ -278,7 +278,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             t2?.let {
                 Timber.d(it.localizedMessage)
             }
-        }
+        }.disposeWith(compositeDisposable)
     }
 
     private fun logTransactionFirstImpl(

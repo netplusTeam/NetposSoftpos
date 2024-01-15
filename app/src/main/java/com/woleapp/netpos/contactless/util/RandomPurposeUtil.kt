@@ -138,7 +138,7 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is MerchantDetailsResponse) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is MerchantDetailsResponse || it.data is FeedbackResponse) {
                         successAction()
                     } else {
                         Toast.makeText(context, R.string.an_error_occurred, Toast.LENGTH_SHORT)
@@ -220,11 +220,12 @@ object RandomPurposeUtil {
             serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
                 .subscribe { data, error ->
                     data?.let {
+                        Log.d("MMMNOWJUSTCHECKING", it.data.toString())
                         when (it.status) {
                             Status.SUCCESS -> {
                                 Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
-                                if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String) {
+                                if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
                                     successAction()
                                 } else {
                                     Log.d("JUSTCHECKING", it.toString())
@@ -240,6 +241,7 @@ object RandomPurposeUtil {
                             Status.ERROR -> {
                                 loadingDialog.cancel()
                                 loadingDialog.dismiss()
+                                Log.d("MERCHANTERROR", it.data.toString())
                                 if (it.data is String) {
                                     showToast(it.data)
                                 } else {
@@ -271,8 +273,9 @@ object RandomPurposeUtil {
         serverResponse.observe(this.viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
+                    Log.d("KKKOLNOWJUSTCHECKING", it.data.toString())
                     loadingDialog.dismiss()
-                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is String || it.data is ResetPasswordResponseForProvidus || it.data is GeneralResponse || it.data is PayThroughMPGSResponse) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is String || it.data is ResetPasswordResponseForProvidus || it.data is GeneralResponse || it.data is PayThroughMPGSResponse || it.data is FeedbackResponse) {
                         successAction()
                     } else {
                         //   showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
@@ -365,6 +368,19 @@ object RandomPurposeUtil {
             LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
         dialogBuilder.setCancelable(false)
+        dialogBuilder.setView(dialogView)
+
+        return dialogBuilder.create()
+    }
+
+    fun alertDialog(
+        context: Context,
+        setCancelable: Boolean
+    ): AlertDialog {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
+        val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+        dialogBuilder.setCancelable(setCancelable)
         dialogBuilder.setView(dialogView)
 
         return dialogBuilder.create()

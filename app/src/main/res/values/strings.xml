@@ -256,6 +256,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="logout_confirmation_dialog_message">Do you want to logout?</string>
     <string name="app_uploaded_successfully">App uploaded successfully! Restarting the app in 5 seconds!</string>
     <string name="notification">Notification</string>
+    <string name="pay_by_transfer">Pay By Transfer</string>
     <string name="your_account_is_active">YOUR ACCOUNT IS ACTIVE</string>
     <string name="kindly_login">Kindly login to proceed!</string>
     <string name="delete">Delete</string>

@@ -206,8 +206,18 @@ class LoginFragment : BaseFragment() {
                 Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
         }
+        contactlessViewModel.otpMessage.observe(viewLifecycleOwner) {
+            it.getContentIfNotHandled()?.let { message ->
+                if (message.contains("Password")) {
+                    showToast(message)
+                }
+            }
+        }
         binding.forgotPassword.setOnClickListener {
-            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos")) {
+            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                    "zenith"
+                )
+            ) {
                 confirmOTPDialog.show()
             } else {
                 passwordResetDialog.show()
@@ -266,7 +276,7 @@ class LoginFragment : BaseFragment() {
         confirmOTPBinding.btnResetPassword.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
                 confirmOTPForFBN()
-            } else if (BuildConfig.FLAVOR.contains("providuspos")) {
+            } else if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("zenith")) {
                 confirmOTPForProvidus()
             }
         }
@@ -301,7 +311,7 @@ class LoginFragment : BaseFragment() {
             val payload = JsonObject().apply {
                 addProperty("email", email)
             }
-            //           closeSoftKeyboard(requireContext(), this.requireActivity())
+            // closeSoftKeyboard(requireContext(), this.requireActivity())
             contactlessViewModel.resetPasswordForProvidus(payload, initPartnerId(), deviceId)
             observeServerResponse(
                 contactlessViewModel.resetPasswordForProvidusResponse,
@@ -350,7 +360,7 @@ class LoginFragment : BaseFragment() {
             val payload = JsonObject().apply {
                 addProperty("email", email)
             }
-            //           closeSoftKeyboard(requireContext(), this.requireActivity())
+            // closeSoftKeyboard(requireContext(), this.requireActivity())
             contactlessViewModel.resetPassword(payload, initPartnerId(), deviceId)
             observeServerResponse(
                 contactlessViewModel.resetPasswordResponse,

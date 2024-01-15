@@ -192,10 +192,10 @@ private fun initViewsForQrReceipt(
                 R.string.message_place_holder,
                 respFromWebView.message,
             )
-            maskedPan.text = pdfView.appVersion.context.getString(
-                R.string.masked_pan_place_holder,
-                respFromWebView.maskedPan,
-            )
+//            maskedPan.text = pdfView.appVersion.context.getString(
+//                R.string.masked_pan_place_holder,
+//                respFromWebView.maskedPan,
+//            )
             appVersion.text = pdfView.appVersion.context.getString(
                 R.string.app_version_place_holder,
                 "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",

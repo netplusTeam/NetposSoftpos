@@ -7,9 +7,11 @@ import com.woleapp.netpos.contactless.database.dao.AppNotificationDao
 import com.woleapp.netpos.contactless.database.dao.MqttLocalDao
 import com.woleapp.netpos.contactless.database.dao.TransactionResponseDao
 import com.woleapp.netpos.contactless.network.*
+import com.woleapp.netpos.contactless.util.UtilityParam.FCMB_MERCHANTS_ACCOUNT_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.FW_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.PAY_BY_TRANSFER_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.PAY_BY_TRANSFER_BEARER_TOKEN
+import com.woleapp.netpos.contactless.util.UtilityParam.PROVIDUS_MERCHANTS_ACCOUNT_BASE_URL
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_PASSWORD
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_AUTH_USER_NAME
 import com.woleapp.netpos.contactless.util.UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
@@ -81,6 +83,16 @@ object AppModule {
     @Singleton
     @Named("payByTransferBaseUrl")
     fun payByTransferBaseUrl(): String = PAY_BY_TRANSFER_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("providusMerchantsAccountBaseUrl")
+    fun providusMerchantsAccountBaseUrl(): String = PROVIDUS_MERCHANTS_ACCOUNT_BASE_URL
+
+    @Provides
+    @Singleton
+    @Named("fcmbMerchantsAccountBaseUrl")
+    fun fcmbMerchantsAccountBaseUrl(): String = FCMB_MERCHANTS_ACCOUNT_BASE_URL
 
     @Provides
     @Singleton
@@ -181,6 +193,26 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("providusMerchantsAccountRetrofit")
+    fun providusMerchantsAccountService(
+        @Named("payByTransferOkHttp") okhttp: OkHttpClient,
+        @Named("providusMerchantsAccountBaseUrl") payByTransferBaseUrl: String,
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(payByTransferBaseUrl)
+        .client(okhttp).build()
+
+    @Provides
+    @Singleton
+    @Named("fcmbMerchantsAccountRetrofit")
+    fun fcmbMerchantsAccountService(
+        @Named("payByTransferOkHttp") okhttp: OkHttpClient,
+        @Named("fcmbMerchantsAccountBaseUrl") payByTransferBaseUrl: String,
+    ): Retrofit = Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create()).baseUrl(payByTransferBaseUrl)
+        .client(okhttp).build()
+
+    @Provides
+    @Singleton
     @Named("notificationRetrofit")
     fun providesRetrofitForNotificationService(
         @Named("otpOkHttp") okhttp: OkHttpClient,
@@ -272,6 +304,19 @@ object AppModule {
     fun payByTransferServiceService(
         @Named("payByTransferRetrofit") retrofit: Retrofit,
     ): PayByTransferService = retrofit.create(PayByTransferService::class.java)
+
+    @Provides
+    @Singleton
+    fun providusMerchantsAccountDetailsService(
+        @Named("providusMerchantsAccountRetrofit") retrofit: Retrofit,
+    ): ProvidusMerchantsAccountService = retrofit.create(ProvidusMerchantsAccountService::class.java)
+
+    @Provides
+    @Singleton
+    fun fcmbMerchantsAccountDetailsService(
+        @Named("fcmbMerchantsAccountRetrofit") retrofit: Retrofit,
+    ): FcmbMerchantsAccountService = retrofit.create(FcmbMerchantsAccountService::class.java)
+
 
     @Provides
     @Singleton

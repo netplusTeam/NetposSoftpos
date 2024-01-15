@@ -103,6 +103,7 @@ class TransactionsFragment : BaseFragment() {
                 }
                 6 -> showFragment(SalesFragment.newInstance(isVend = true))
                 9 -> showFragment(NotificationFragment())
+                10 -> showFragment(PayByTransferFragment())
                 else -> showFragment(SalesFragment.newInstance(TransactionType.CASH_ADVANCE))
             }
         }
@@ -173,6 +174,7 @@ class TransactionsFragment : BaseFragment() {
                 add(Service(4, "Balance Enquiry", R.drawable.ic_write))
                 if (BuildConfig.FLAVOR.contains("zenith")) {
                     remove(Service(4, "Balance Enquiry", R.drawable.ic_write))
+                    add(Service(10, getString(R.string.pay_by_transfer), R.drawable.ic_notification))
                 }
                 add(Service(5, "Reprint", R.drawable.ic_print))
                 add(Service(9, getString(R.string.notification), R.drawable.ic_notification))

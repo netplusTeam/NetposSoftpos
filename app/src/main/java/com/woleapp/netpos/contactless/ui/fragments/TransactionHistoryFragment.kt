@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.danbamitale.epmslib.entities.TransactionResponse
@@ -14,9 +16,23 @@ import com.woleapp.netpos.contactless.adapter.TransactionClickListener
 import com.woleapp.netpos.contactless.adapter.TransactionsAdapter
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.databinding.FragmentTransactionHistoryBinding
+import com.woleapp.netpos.contactless.databinding.LayoutComplaintsBinding
+import com.woleapp.netpos.contactless.model.FeedbackRequest
 import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
 import com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
+import kotlinx.android.synthetic.main.layout_verify_utility_payment.*
+import javax.inject.Inject
+import javax.inject.Named
 
+@AndroidEntryPoint
 class TransactionHistoryFragment : BaseFragment() {
     private lateinit var globalAction: String
 
@@ -33,6 +49,23 @@ class TransactionHistoryFragment : BaseFragment() {
     private lateinit var binding: FragmentTransactionHistoryBinding
     private val viewModel by activityViewModels<TransactionsViewModel>()
     private lateinit var adapter: TransactionsAdapter
+    private lateinit var feedbackDialog: AlertDialog
+    private lateinit var feedbackBinding: LayoutComplaintsBinding
+    private val notificationModel by activityViewModels<NotificationViewModel>()
+    private lateinit var deviceId: String
+    private lateinit var loader: android.app.AlertDialog
+
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -138,6 +171,111 @@ class TransactionHistoryFragment : BaseFragment() {
                 return true
             }
         })
+
+        feedbackBinding = LayoutComplaintsBinding.inflate(
+            LayoutInflater.from(requireContext()), null, false
+        ).apply {
+            lifecycleOwner = this@TransactionHistoryFragment
+            executePendingBindings()
+        }
+        feedbackDialog =
+            AlertDialog.Builder(requireContext()).setView(feedbackBinding.root).setCancelable(true)
+                .create()
+
+
+        binding.complaintsBtn.setOnClickListener {
+            binding.complaintsBtn.visibility = View.GONE
+            feedbackDialog.show()
+            feedbackBinding.email.setText(Singletons.getCurrentlyLoggedInUser()?.email)
+        }
+
+        feedbackBinding.submitFeedback.setOnClickListener {
+            submitMerchantFeedback()
+        }
+        loader = alertDialog(requireContext(), true)
+        deviceId = getDeviceId(requireContext())
+    }
+
+    private fun submitMerchantFeedback() {
+        when {
+            feedbackBinding.email.text.toString().isEmpty() -> {
+                showToast("Enter your email")
+            }
+            feedbackBinding.subjectEdittext.text.toString().isEmpty() -> {
+                showToast("Please enter the subject of the complaint")
+            }
+            feedbackBinding.feedbackEdittext.text.toString().isEmpty() -> {
+                showToast("Please enter the feedback")
+            }
+            else -> {
+                if (validateSignUpFieldsOnTextChange()) {
+                    submitFeedback()
+                }
+            }
+        }
+    }
+
+    private fun validateSignUpFieldsOnTextChange(): Boolean {
+        var isValidated = true
+
+        feedbackBinding.email.doOnTextChanged { _, _, _, _ ->
+            when {
+                feedbackBinding.email.text.toString().trim().isEmpty() -> {
+                    showToast("Enter your email")
+                    isValidated = false
+                }
+                else -> {
+                    feedbackBinding.emailWrapper.error = null
+                    isValidated = true
+                }
+            }
+        }
+        feedbackBinding.subjectEdittext.doOnTextChanged { _, _, _, _ ->
+            when {
+                feedbackBinding.subjectEdittext.text.toString().trim().isEmpty() -> {
+                    showToast("Please enter the subject of the complaint")
+                    isValidated = false
+                }
+                else -> {
+                    feedbackBinding.subjectWrapper.error = null
+                    isValidated = true
+                }
+            }
+        }
+        feedbackBinding.feedbackEdittext.doOnTextChanged { _, _, _, _ ->
+            when {
+                feedbackBinding.feedbackEdittext.text.toString().trim().isEmpty() -> {
+                    showToast("Please enter the feedback")
+                    isValidated = false
+                }
+                else -> {
+                    feedbackBinding.feedbackWrapper.error = null
+                    isValidated = true
+                }
+            }
+        }
+        return isValidated
+    }
+
+    private fun submitFeedback() {
+        loader.show()
+        val email = feedbackBinding.email.text?.trim().toString()
+        val subject = feedbackBinding.subjectEdittext.text?.trim().toString()
+        val feedback = feedbackBinding.feedbackEdittext.text?.trim().toString()
+
+        val newFeedBack = FeedbackRequest(
+            username = email, subject = subject, feedback = feedback
+        )
+        observeServerResponse(
+            notificationModel.feedbackFromMerchants(newFeedBack, initPartnerId(), deviceId),
+            loader,
+            compositeDisposable,
+            ioScheduler,
+            mainThreadScheduler
+        ) {
+            feedbackDialog.dismiss()
+            showToast("Feedback saved successfully!")
+        }
     }
 
     private fun setSelectedTab(selectedTab: Int = 0) {

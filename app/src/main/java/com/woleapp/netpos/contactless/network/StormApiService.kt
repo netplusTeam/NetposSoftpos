@@ -33,7 +33,12 @@ interface StormApiService {
     @GET("api/agents/{stormId}")
     fun getAgentDetails(@Path("stormId") stormId: String?): Single<User>
 
-    @POST("api/passwordReset")
+//    @POST("api/passwordReset")
+//    fun passwordReset(
+//        @Body payload: JsonObject?
+//    ): Single<Response<Any?>?>
+
+    @POST("api/merchant-password-reset")
     fun passwordReset(
         @Body payload: JsonObject?
     ): Single<Response<Any?>?>
