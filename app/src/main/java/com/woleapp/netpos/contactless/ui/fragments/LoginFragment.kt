@@ -193,6 +193,18 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val ip = encryptionHelper.decryptData("0dd757c6dd99cb5f506d7bade65e9ba1")
+        val port = encryptionHelper.decryptData("ce7186ec525411037dcc7fa26ca74ec2")
+        val first = encryptionHelper.decryptData("776ecba8b33a7c36c77f8a450feba1ac46528d5f0bfb3a20738560f3d6390721427a6839b27bf7ca96c0b19070bfad7a")
+        val second = encryptionHelper.decryptData("0bdda784648c860b2fb4ee6cb550955ed47f17d9b2f719238f69eefb0043d9b9d82eb4dfe06f7e4423a895b73cf88039")
+        val testKey = encryptionHelper.decryptData("67b15408733bf8f1f265602ee046c1b11ee1327dd51e23f932cec0d76d72711a402f0ac41f51d7777731fe5969f71f21")
+        val testKey_2 = encryptionHelper.decryptData("2e8b9ae27fe3ba808e91a253d6905063895a53213aa82f66c60c0c335932e68fcb78a2490b7983262559200b780bf10c")
+        Log.d("FIRST===PORT", first)
+        Log.d("SECOND===PORT", second)
+        Log.d("DATA===IP", ip)
+        Log.d("DATA===PORT", port)
+        Log.d("TEST_KEY", testKey)
+        Log.d("TEST_KEY_2", testKey_2)
 
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
