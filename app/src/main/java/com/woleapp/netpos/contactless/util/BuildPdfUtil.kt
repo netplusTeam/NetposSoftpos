@@ -146,10 +146,10 @@ private fun initViewsForQrReceipt(
                 Singletons.getCurrentlyLoggedInUser()?.business_name
                     ?: "${BuildConfig.FLAVOR} POS MERCHANT",
             )
-            cardOwner.text = pdfView.root.context.getString(
-                R.string.card_owner_place_holder,
-                respFromWebView.customerName,
-            )
+//            cardOwner.text = pdfView.root.context.getString(
+//                R.string.card_owner_place_holder,
+//                respFromWebView.customerName,
+//            )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
@@ -192,10 +192,10 @@ private fun initViewsForQrReceipt(
                 R.string.message_place_holder,
                 respFromWebView.message,
             )
-//            maskedPan.text = pdfView.appVersion.context.getString(
-//                R.string.masked_pan_place_holder,
-//                respFromWebView.maskedPan,
-//            )
+            maskedPan.text = pdfView.appVersion.context.getString(
+                R.string.masked_pan_place_holder,
+                respFromWebView.maskedPan,
+            )
             appVersion.text = pdfView.appVersion.context.getString(
                 R.string.app_version_place_holder,
                 "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
@@ -234,11 +234,11 @@ private fun initViewsForPosReceipt(
                     R.string.stan_place_holder,
                     it.STAN,
                 )
-            cardHolder.text =
-                pdfView.appVersion.context.getString(
-                    R.string.card_holder_place_holder,
-                    it.cardHolder,
-                )
+//            cardHolder.text =
+//                pdfView.appVersion.context.getString(
+//                    R.string.card_holder_place_holder,
+//                    it.cardHolder,
+//                )
             status.text =
                 pdfView.appVersion.context.getString(
                     R.string.transaction_status_place_holder,

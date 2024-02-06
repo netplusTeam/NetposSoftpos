@@ -24,7 +24,7 @@ data class GetZenithPayByTransferUserTransactionsModel(
         return "<b>Amount: &nbsp;&nbsp;</b>${formatAmountToNaira(amount.toDouble())} <br /><b>Payer's Name:</b><br /> $payer_account_name <br /><br /><b>Payer' Account Number: &nbsp;&nbsp;</b>$payer_account_number <br /><b>Paid at: &nbsp;&nbsp;</b> ${
             getDateFromZenithPbtTransDate(paid_at)
         }<br /><br /> <b>Transaction Details: </b><br />$details <br /><br /><b>Transaction Reference:  </b><br />$transaction_reference"
-        Log.d("CHECKKKKK", amount.formatCurrencyAmountUsingCurrentModule())
+        //Log.d("CHECKKKKK", amount.formatCurrencyAmountUsingCurrentModule())
 
     }
 }

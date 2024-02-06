@@ -118,7 +118,7 @@ class RegistrationViewModel @Inject constructor(
                 }
             }else if (BuildConfig.FLAVOR.contains("tingo")) {
                 if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
-                    Log.d("TINGOKM", bankTRegistrationModel.value.toString())
+                    //Log.d("TINGOKM", bankTRegistrationModel.value.toString())
                     _message.value = Event("Password mismatch")
                     return
                 }
@@ -149,7 +149,7 @@ class RegistrationViewModel @Inject constructor(
         registrationFBNModel.value = registrationFBNModel.value?.apply {
             state = data
             if (BuildConfig.DEBUG) {
-                Log.d("STATEFBN", data)
+                //Log.d("STATEFBN", data)
             }
         }
     }

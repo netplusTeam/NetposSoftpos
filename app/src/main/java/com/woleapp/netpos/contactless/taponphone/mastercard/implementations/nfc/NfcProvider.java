@@ -36,7 +36,7 @@ public class NfcProvider implements CardCommunicationProvider {
         // Check if NFC is enabled
         if (!mNFCManager.isNFCEnabled()) {
             nFCEnabled = false;
-            Log.d(TAG, "NFC is not enabled");
+            //Log.d(TAG, "NFC is not enabled");
 
         } else {
             nFCEnabled = true;
@@ -56,12 +56,12 @@ public class NfcProvider implements CardCommunicationProvider {
                 // Command execution time in nano seconds
                 mCommandExecutionTime = endTime - startTime;
             } else {
-                Log.e(TAG, "sendReceive: ISO DEP obtained as null");
+                //Log.e(TAG, "sendReceive: ISO DEP obtained as null");
                 isCardTapped = false;
                 throw new L1RSPException("", ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
             }
         } catch (TagLostException exception) {
-            Log.e(TAG, "TagLostException", exception.getCause());
+            //Log.e(TAG, "TagLostException", exception.getCause());
             isCardTapped = false;
             throw new L1RSPException("Tag Lost", ErrorIndication.L1_Error_Code.TIMEOUT_ERROR);
 

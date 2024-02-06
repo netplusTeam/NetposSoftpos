@@ -142,6 +142,7 @@
             android:fontFamily="@font/poppins_medium"
             android:text="@string/card_owner_place_holder"
             android:textSize="@dimen/dimen_16sp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/stan"

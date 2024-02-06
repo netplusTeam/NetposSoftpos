@@ -167,6 +167,7 @@ class TransactionsFragment : BaseFragment() {
                 if (BuildConfig.FLAVOR.contains("providuspos")) {
                     remove(Service(7, "Purchase With Cashback", R.drawable.purchase))
                 }
+                add(Service(10, getString(R.string.pay_by_transfer), R.drawable.trans))
                 add(Service(3, "Settings", R.drawable.ic_baseline_settings))
                 if (BuildConfig.FLAVOR.contains("polaris")) {
                     remove(Service(3, "Settings", R.drawable.ic_baseline_settings))
@@ -174,7 +175,6 @@ class TransactionsFragment : BaseFragment() {
                 add(Service(4, "Balance Enquiry", R.drawable.ic_write))
                 if (BuildConfig.FLAVOR.contains("zenith")) {
                     remove(Service(4, "Balance Enquiry", R.drawable.ic_write))
-                    add(Service(10, getString(R.string.pay_by_transfer), R.drawable.ic_notification))
                 }
                 add(Service(5, "Reprint", R.drawable.ic_print))
                 add(Service(9, getString(R.string.notification), R.drawable.ic_notification))
@@ -230,7 +230,7 @@ class TransactionsFragment : BaseFragment() {
                         merchantId = UtilityParam.STRING_MERCHANT_ID,
                         naration = requestNarration,
                     )
-                Log.d("QRDATA", qrDataToSendToBackend.naration)
+                //Log.d("QRDATA", qrDataToSendToBackend.naration)
                 scanQrViewModel.setScannedQrIsVerveCard(false)
                 scanQrViewModel.postScannedQrRequestToServer(qrDataToSendToBackend)
                 observeServerResponse(

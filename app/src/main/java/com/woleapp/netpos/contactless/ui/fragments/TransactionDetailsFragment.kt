@@ -175,7 +175,7 @@ class TransactionDetailsFragment : BaseFragment() {
                 }
                 it.cardData?.let { _ ->
                     viewModel.setCardScheme(it.cardScheme!!)
-                    viewModel.setCustomerName(it.customerName ?: "Customer")
+                   // viewModel.setCustomerName(it.customerName ?: "Customer")
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
                     actionAfterCardRead?.invoke()

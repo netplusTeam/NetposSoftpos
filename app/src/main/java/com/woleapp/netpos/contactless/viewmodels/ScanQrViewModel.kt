@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -165,9 +166,10 @@ class ScanQrViewModel @Inject constructor(
                     .subscribe { data, error ->
                         data?.let {
                             _payByTransfer.value = Resource.success(it)
+                            //Log.d("CHECKINGZENITH_IT", it.toString())
                         }
                         error?.let { throwable ->
-                            Timber.d("PAY_BY_TRANSFER_ERROR_VP%s", throwable.localizedMessage)
+                            //Timber.d("PAY_BY_TRANSFER_ERROR_VP%s", throwable.localizedMessage)
                             _payByTransfer.value =
                                 if (throwable is SocketTimeoutException) {
                                     Resource.timeOut(null)

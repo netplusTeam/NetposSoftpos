@@ -31,6 +31,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidationZB
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.util.validatePasswordMismatch
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -498,6 +499,25 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 return
             }
             viewModel.registerExistingAccountForFBN(
+                existingAccountRegReq,
+                partnerId = partnerID,
+                deviceSerialId = deviceSerialID,
+            )
+        } else if (BuildConfig.FLAVOR.contains("zenith")){
+            val existingAccountRegReq = ExistingAccountRegisterRequest(
+                accountNumber = actNumber,
+                businessAddress = addressView.text.toString().trim(),
+                businessName = businessNameView.text.toString().trim(),
+                contactInformation = contactName.text.toString().trim(),
+                username = emailView.text.toString().trim(),
+                password = passwordView.text.toString().trim(),
+                phoneNumber = phoneNumber.text.toString().trim(),
+            )
+            if (!passwordValidationZB(passwordView.text.toString().trim())) {
+                showToast("The password's length must be more than 9 digits and must contain small letters, capital letters and special characters")
+                return
+            }
+            viewModel.registerExistingAccount(
                 existingAccountRegReq,
                 partnerId = partnerID,
                 deviceSerialId = deviceSerialID,

@@ -163,7 +163,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _firstBankAccountNumberResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -201,7 +201,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _confirmOTPResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -235,7 +235,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _getStatesResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -269,7 +269,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _getBranchResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -301,7 +301,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _resetPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -335,7 +335,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _resetPasswordForProvidusResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -367,7 +367,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _confirmOtpToResetPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"
@@ -399,7 +399,7 @@ class ContactlessRegViewModel @Inject constructor(
                     }
                     error?.let {
                         _newPasswordResponse.postValue(Resource.error(null))
-                        Timber.d("ERROR==${it.localizedMessage}")
+                        //Timber.d("ERROR==${it.localizedMessage}")
                         (it as? HttpException).let { httpException ->
                             val errorMessage = httpException?.response()?.errorBody()?.string()
                                 ?: "{\"message\":\"Unexpected error\"}"

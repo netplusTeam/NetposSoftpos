@@ -5,6 +5,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.util.SparseArray
 import android.view.*
 import android.widget.Toast
@@ -160,6 +161,7 @@ class FragmentBarCodeScannerRefactored :
                                     STRING_QR_READ_RESULT_REQUEST_KEY,
                                     bundleOf(STRING_QR_READ_RESULT_BUNDLE_KEY to scannedData),
                                 )
+                                //Log.d("SEEN_DATA_HERE", scannedData.toString())
                             } else {
                                 showSnackBar(binding.root, getString(R.string.invalid_qr))
                             }

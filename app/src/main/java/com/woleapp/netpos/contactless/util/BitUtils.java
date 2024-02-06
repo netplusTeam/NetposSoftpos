@@ -240,7 +240,7 @@ public final class BitUtils {
         try {
             date = sdf.parse(dateTxt);
         } catch (ParseException e) {
-            Log.e("BitUtils", "Parsing date error. date:" + dateTxt + " pattern:" + pPattern);
+            //Log.e("BitUtils", "Parsing date error. date:" + dateTxt + " pattern:" + pPattern);
         }
         return date;
     }

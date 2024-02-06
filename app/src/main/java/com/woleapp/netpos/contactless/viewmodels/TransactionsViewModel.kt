@@ -28,7 +28,7 @@ class TransactionsViewModel : ViewModel() {
     private val _done = MutableLiveData(false)
     private val _beginGetCardDetails = MutableLiveData<Event<Boolean>>()
     private var accountType: IsoAccountType = IsoAccountType.DEFAULT_UNSPECIFIED
-    private lateinit var cardHolderName: String
+//    private lateinit var cardHolderName: String
     private val _message = MutableLiveData<Event<String>>()
     private var cardScheme: String? = null
     private val _showProgressDialog = MutableLiveData<Event<Boolean>>()
@@ -146,7 +146,7 @@ class TransactionsViewModel : ViewModel() {
                 _shouldRefreshNibssKeys.postValue(Event(true))
             }
             _message.postValue(Event("Transaction: ${it.responseMessage}"))
-            it.cardHolder = cardHolderName
+//            it.cardHolder = cardHolderName
             it.cardLabel = cardScheme!!
             it.id = transactionResponse.id
             lastTransactionResponse.postValue(it)
@@ -187,9 +187,9 @@ class TransactionsViewModel : ViewModel() {
         )
     }
 
-    fun setCustomerName(cardHolderName: String) {
-        this.cardHolderName = cardHolderName
-    }
+//    fun setCustomerName(cardHolderName: String) {
+//        this.cardHolderName = cardHolderName
+//    }
 
     fun setAccountType(accountType: IsoAccountType) {
         this.accountType = accountType
@@ -228,7 +228,7 @@ class TransactionsViewModel : ViewModel() {
             }
             _showProgressDialog.postValue(Event(false))
             _message.postValue(Event("Transaction: ${it.responseMessage}"))
-            it.cardHolder = cardHolderName
+         //   it.cardHolder = cardHolderName
             it.cardLabel = cardScheme!!
             it.id = transactionResponse.id
             lastTransactionResponse.postValue(it)
@@ -275,7 +275,7 @@ class TransactionsViewModel : ViewModel() {
                 }
                 _showProgressDialog.postValue(Event(false))
                 _message.postValue(Event("Transaction: ${it.responseMessage}"))
-                it.cardHolder = cardHolderName
+              //  it.cardHolder = cardHolderName
                 it.cardLabel = cardScheme!!
                 it.id = transactionResponse.id
                 lastTransactionResponse.postValue(it)

@@ -220,15 +220,15 @@ object RandomPurposeUtil {
             serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
                 .subscribe { data, error ->
                     data?.let {
-                        Log.d("MMMNOWJUSTCHECKING", it.data.toString())
+                        //Log.d("MMMNOWJUSTCHECKING", it.data.toString())
                         when (it.status) {
                             Status.SUCCESS -> {
-                                Log.d("NOWJUSTCHECKING", it.data.toString())
+                                //Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
                                 if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
                                     successAction()
                                 } else {
-                                    Log.d("JUSTCHECKING", it.toString())
+                                    //Log.d("JUSTCHECKING", it.toString())
 //                                    showSnackBar(
 //                                        this.requireView(),
 //                                        getString(R.string.an_error_occurred),
@@ -241,7 +241,7 @@ object RandomPurposeUtil {
                             Status.ERROR -> {
                                 loadingDialog.cancel()
                                 loadingDialog.dismiss()
-                                Log.d("MERCHANTERROR", it.data.toString())
+                                //Log.d("MERCHANTERROR", it.data.toString())
                                 if (it.data is String) {
                                     showToast(it.data)
                                 } else {
@@ -273,7 +273,6 @@ object RandomPurposeUtil {
         serverResponse.observe(this.viewLifecycleOwner) {
             when (it.status) {
                 Status.SUCCESS -> {
-                    Log.d("KKKOLNOWJUSTCHECKING", it.data.toString())
                     loadingDialog.dismiss()
                     if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is String || it.data is ResetPasswordResponseForProvidus || it.data is GeneralResponse || it.data is PayThroughMPGSResponse || it.data is FeedbackResponse) {
                         successAction()
@@ -440,6 +439,21 @@ object RandomPurposeUtil {
 
     fun passwordValidation(password: String): Boolean {
         return if (password.length > 7) {
+            val letter: Pattern = Pattern.compile("[a-zA-z]")
+            val digit: Pattern = Pattern.compile("[0-9]")
+            //  val special: Pattern = Pattern.compile("[!@#$%&*()_.+=|<>?{}\\[\\]~-]")
+            val special: Pattern = Pattern.compile("[!@#%^&amp;*()_+=\\[\\]>{}'|,\\~`>/.?\\:;-]")
+            // Pattern eight = Pattern.compile (".{8}");
+            val hasLetter: Matcher = letter.matcher(password)
+            val hasDigit: Matcher = digit.matcher(password)
+            val hasSpecial: Matcher = special.matcher(password)
+            hasLetter.find() && hasDigit.find() && hasSpecial.find()
+        } else {
+            false
+        }
+    }
+    fun passwordValidationZB(password: String): Boolean {
+        return if (password.length > 9) {
             val letter: Pattern = Pattern.compile("[a-zA-z]")
             val digit: Pattern = Pattern.compile("[0-9]")
             //  val special: Pattern = Pattern.compile("[!@#$%&*()_.+=|<>?{}\\[\\]~-]")

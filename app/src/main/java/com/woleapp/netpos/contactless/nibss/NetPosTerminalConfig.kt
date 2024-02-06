@@ -129,6 +129,7 @@ class NetPosTerminalConfig {
                             Prefs.putLong(LAST_POS_CONFIGURATION_TIME, System.currentTimeMillis())
                             Prefs.putString(PREF_CONFIG_DATA, gson.toJson(pair.second))
                             Prefs.putString(PREF_KEYHOLDER, gson.toJson(pair.first))
+                            //Log.d("PINKEY", pair.first!!.clearPinKey)
                             this.configData = pair.second
                         }
                         configurationStatus = 1
@@ -153,7 +154,7 @@ class NetPosTerminalConfig {
                 keyHolder?.clearSessionKey ?: "",
                 Build.ID
             ).flatMap {
-                Timber.e("call home result $it")
+                //Timber.e("call home result $it")
                 if (it == "00") {
                     return@flatMap Single.just(Pair(null, null))
                 } else Single.error(Exception("call home failed"))

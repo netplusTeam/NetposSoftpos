@@ -364,7 +364,7 @@ class DashboardFragment : BaseFragment() {
                     Observable.just(Vend(0.0))
                 }
             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-                Timber.e("vend: $it")
+                //Timber.e("vend: $it")
                 count++
                 if (it.amount > 0.0) {
                     progressBar.dismiss()
@@ -389,7 +389,7 @@ class DashboardFragment : BaseFragment() {
                     "Error ${it.localizedMessage}",
                     Toast.LENGTH_SHORT,
                 ).show()
-                Timber.e("Error: ${it.localizedMessage}")
+               // Timber.e("Error: ${it.localizedMessage}")
                 requireActivity().onBackPressed()
             }).disposeWith(compositeDisposable)
         }

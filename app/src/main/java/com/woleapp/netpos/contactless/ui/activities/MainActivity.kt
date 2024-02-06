@@ -242,6 +242,7 @@ class MainActivity :
         val netPlusPayMid = Singletons.getNetPlusPayMid()
         if (BuildConfig.FLAVOR.contains("zenith")){
             scanQrViewModel.getMerchantDetails(netPlusPayMid)
+            //Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
         } else if (BuildConfig.FLAVOR.contains("providuspos")){
             scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
             generateMerchantDetails()
@@ -503,7 +504,7 @@ class MainActivity :
                     return@OnCompleteListener
                 }
                 val token = task.result // this is the token retrieved
-                Log.d("FCM", token)
+                //Log.d("FCM", token)
             },
         )
         qrAmoutDialogBinding = QrAmoutDialogBinding.inflate(layoutInflater, null, false).apply {
@@ -978,7 +979,8 @@ class MainActivity :
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download_share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = it.replace("Card Owner: CUSTOMER", "")
+                            //Log.d("DIALOG_DATA", it)
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 cancel()

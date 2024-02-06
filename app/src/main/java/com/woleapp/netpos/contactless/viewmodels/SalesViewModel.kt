@@ -273,10 +273,10 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             transDateTime,
         ).observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
             t1?.let {
-                Timber.d(it.message)
+                //Timber.d(it.message)
             }
             t2?.let {
-                Timber.d(it.localizedMessage)
+                //Timber.d(it.localizedMessage)
             }
         }.disposeWith(compositeDisposable)
     }
@@ -321,10 +321,10 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             it.cardHolder = customerName.value!!
             it.cardLabel = cardScheme!!
             lastTransactionResponse.postValue(it)
-            Timber.e(it.toString())
-            Timber.tag("AMOUNT_RETURNED").d(it.amount.toString())
-            Timber.e(it.responseCode)
-            Timber.e(it.responseMessage)
+            //Timber.e(it.toString())
+            //Timber.tag("AMOUNT_RETURNED").d(it.amount.toString())
+            //Timber.e(it.responseCode)
+            //Timber.e(it.responseMessage)
             _message.postValue(Event(if (it.responseCode == "00") "Transaction Approved" else "Transaction Not approved"))
             printReceipt(it)
 
@@ -336,7 +336,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             t1?.let {}
             throwable?.let {
                 _message.value = Event("Error: ${it.localizedMessage}")
-                Timber.e(it)
+                //Timber.e(it)
             }
         }.disposeWith(compositeDisposable)
     }
@@ -414,7 +414,7 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             this.cardExpiry = ""
             this.cardHolder = customerName.value ?: ""
         }
-        Timber.e(transactionResponse.toString())
+        //Timber.e(transactionResponse.toString())
         _showPrintDialog.postValue(
             Event(transactionResponse.buildSMSText(remark.value ?: "").toString()),
         )

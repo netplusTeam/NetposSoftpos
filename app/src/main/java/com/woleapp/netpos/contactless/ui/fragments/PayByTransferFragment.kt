@@ -7,14 +7,11 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.google.android.material.textfield.TextInputEditText
@@ -22,15 +19,10 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.databinding.FragmentNotificationBinding
 import com.woleapp.netpos.contactless.databinding.FragmentPayByTransferBinding
-import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.ScanQrViewModel
-import kotlinx.android.synthetic.main.dashboard_header.*
 
 
 class PayByTransferFragment : BaseFragment() {
@@ -39,16 +31,16 @@ class PayByTransferFragment : BaseFragment() {
     private lateinit var accountNumberQRCode: ImageView
     private lateinit var merchantBank: TextInputEditText
     private lateinit var bankAccountNumber: TextInputEditText
-    private val scanQrViewModel : ScanQrViewModel by activityViewModels()
+    private val scanQrViewModel: ScanQrViewModel by activityViewModels()
     private lateinit var loader: AlertDialog
-    private lateinit var copyAccountNumber: String
+    private var copyAccountNumber: String? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pay_by_transfer, container, false)
+        binding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_pay_by_transfer, container, false)
 
         return binding.root
     }
@@ -58,9 +50,17 @@ class PayByTransferFragment : BaseFragment() {
         initViews()
         loader = alertDialog(requireContext())
         generateMerchantDetails()
+        bankAccountNumber.setOnClickListener {
+            if (copyAccountNumber?.isNotEmpty() == true) {
+                copyText()
+            }
+        }
+    }
+
+    private fun convertAccountNumberToQR() {
         val writer = QRCodeWriter()
         try {
-            val bitMatrix = writer.encode("$bankAccountNumber", BarcodeFormat.QR_CODE, 512, 512)
+            val bitMatrix = writer.encode("$copyAccountNumber", BarcodeFormat.QR_CODE, 600, 600)
             val width = bitMatrix.width
             val height = bitMatrix.height
             val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
@@ -72,36 +72,35 @@ class PayByTransferFragment : BaseFragment() {
             binding.accountNumberQr.setImageBitmap(bmp)
         } catch (e: WriterException) {
         }
-
-        bankAccountNumber.setOnClickListener {
-            copyText()
-        }
     }
 
     private fun initViews() {
         with(binding) {
-         accountNumberQRCode = accountNumberQr
-         merchantBank = bankName
-         bankAccountNumber = accountNumber
+            accountNumberQRCode = accountNumberQr
+            merchantBank = bankName
+            bankAccountNumber = accountNumber
         }
     }
 
     private fun generateMerchantDetails() {
-        observeServerResponse(
-            scanQrViewModel.payByTransfer,
-            loader,
-            requireActivity().supportFragmentManager
-        ) {
-            scanQrViewModel.payByTransfer.value?.data?.user?.let {
-                bankAccountNumber.setText(it.acctNumber)
-                merchantBank.setText(it.bank)
-                copyAccountNumber = it.acctNumber
+        scanQrViewModel.payByTransfer.observe(viewLifecycleOwner) { merchantDetails ->
+            if (merchantDetails.data?.user?.acctNumber?.isNotEmpty() == true) {
+                bankAccountNumber.setText(merchantDetails.data.user.acctNumber)
+                merchantBank.setText(merchantDetails.data.user.bank)
+                copyAccountNumber = merchantDetails.data.user.acctNumber
+                binding.scanQrTextView.visibility = View.VISIBLE
+                binding.scanQrView.visibility = View.VISIBLE
+                binding.accountNumberQr.visibility = View.VISIBLE
+                convertAccountNumberToQR()
+            }else{
+                bankAccountNumber.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
             }
         }
     }
 
     private fun copyText() {
-        val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboardManager =
+            requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Text copied", copyAccountNumber)
         clipboardManager.setPrimaryClip(clip)
         showToast("Account number copied")

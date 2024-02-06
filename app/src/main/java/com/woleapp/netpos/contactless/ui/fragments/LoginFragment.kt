@@ -1,8 +1,10 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
+import android.content.Context
 import android.content.Intent
 import android.nfc.NfcManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import com.danbamitale.epmslib.utils.IsoAdapter
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
+import com.solab.iso8583.IsoMessage
+import com.solab.iso8583.MessageFactory
+import com.solab.iso8583.parse.ConfigParser
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.DialogPasswordResetBinding
@@ -36,6 +42,8 @@ import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
+import java.nio.charset.Charset
+import java.text.ParseException
 
 class LoginFragment : BaseFragment() {
 
@@ -114,6 +122,8 @@ class LoginFragment : BaseFragment() {
         binding.btnLogin.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("providuspos")) {
                 viewModel.login(deviceId, partnerID)
+            } else if (BuildConfig.FLAVOR.contains("zenith")) {
+                viewModel.loginZenith(requireContext(), deviceId)
             } else {
                 viewModel.login(deviceId)
             }
@@ -195,6 +205,9 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+//        val pinkKey = context?.let { processISOBitStreamWithJ8583(it, "0810023800000280080001290105050469380105050129002ISWK4199BAEECE251C7E9926A62981F7C5FE53C9BA3350000000000000000000000000000000000000000000000000000000000") }
+//        Log.d("CHECKING_PINKEY", pinkKey.toString())
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
@@ -281,6 +294,7 @@ class LoginFragment : BaseFragment() {
             }
         }
     }
+
 
     private fun confirmOTPForProvidus() {
         activity?.getFragmentManager()?.popBackStack()
@@ -435,5 +449,42 @@ class LoginFragment : BaseFragment() {
             dialog.show()
         }
     }
+
+    fun processISOBitStreamWithJ8583(context: Context, data: String): IsoMessage {
+        val outputData = data.substring(data.indexOf("0"))
+
+        return unpackWith8583(context, outputData)
+    }
+
+    private fun unpackWith8583(context: Context, data: String): IsoMessage {
+        val dataByteArray = data.toByteArray(Charset.forName("UTF-8"))
+        val msgFactory = MessageFactory<IsoMessage>()
+        msgFactory.ignoreLastMissingField = true
+
+        if (com.danbamitale.epmslib.BuildConfig.DEBUG) {
+            Log.d("BREAK DOWN DATA: ", data)
+        }
+
+        try {
+            val xmlReader = context.resources.openRawResource(com.danbamitale.epmslib.R.raw.config)
+                .bufferedReader()
+            xmlReader.use {
+                ConfigParser.configureFromReader(msgFactory, it)
+                val isoMessage = msgFactory.parseMessage(dataByteArray, 0)
+                IsoAdapter.logIsoMessage(isoMessage)
+                return isoMessage
+            }
+        } catch (e: ParseException) {
+            e.printStackTrace()
+            throw RuntimeException("Invalid response received")
+        } catch (e: StringIndexOutOfBoundsException) {
+            e.printStackTrace()
+            throw RuntimeException("Invalid response received")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw RuntimeException(e)
+        }
+    }
+
 }
 

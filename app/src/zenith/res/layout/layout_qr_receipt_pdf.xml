@@ -140,7 +140,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/order_id" />
 
             <TextView
-                android:id="@+id/card_owner"
+                android:id="@+id/trans_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_10dp"
@@ -163,17 +163,18 @@
                 android:textSize="@dimen/dimen_16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@+id/card_owner"
-                app:layout_constraintTop_toBottomOf="@+id/card_owner" />
+                app:layout_constraintStart_toStartOf="@+id/trans_id"
+                app:layout_constraintTop_toBottomOf="@+id/trans_id" />
 
             <TextView
-                android:id="@+id/trans_id"
+                android:id="@+id/card_owner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:fontFamily="@font/poppins_medium"
                 android:text="@string/card_owner_place_holder"
                 android:textSize="@dimen/dimen_16sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/masked_pan"
@@ -192,7 +193,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/trans_id"
+                app:layout_constraintTop_toBottomOf="@+id/card_owner"
                 tools:text="TRANSACTION APPROVED" />
 
             <TextView

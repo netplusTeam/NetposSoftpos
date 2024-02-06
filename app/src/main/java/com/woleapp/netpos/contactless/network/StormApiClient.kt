@@ -24,7 +24,7 @@ class StormApiClient {
 
             val loggingInterceptor = HttpLoggingInterceptor()
             loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            okHttpClientBuilder.addInterceptor(loggingInterceptor)
+            //okHttpClientBuilder.addInterceptor(loggingInterceptor)
 
             return okHttpClientBuilder
         }
@@ -152,7 +152,7 @@ class TokenInterceptor : Interceptor {
         val response = chain.proceed(request)
         val body = response.body
         val bodyString = body?.string()
-        Timber.e("resp: $bodyString")
+        //Timber.e("resp: $bodyString")
         return response.newBuilder().body(bodyString!!.toResponseBody(body.contentType()))
             .build()
     }
@@ -162,7 +162,7 @@ class TokenInterceptor : Interceptor {
 class BlueCodeInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val requestUri = chain.request().url.toUri().toString()
-        Timber.e(requestUri)
+       // Timber.e(requestUri)
         Thread.sleep(3000)
         return getResponse(chain, getResponseCode(requestUri), getResponseString(requestUri))
     }

@@ -91,7 +91,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     amount = temporalTransaction.amount, paid_at = temporalTransaction.paid_at
                 )
             val transactionAmount = transaction.amount
-            Log.d("1234567890", it)
+            //Log.d("1234567890", it)
             sendNotification(
                 "${
                     formatAmountToNaira(transactionAmount.toDouble())
@@ -101,7 +101,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                     )[1]
                 })",
             )
-            Log.d("NOWWCHECKKKKK", transactionAmount.formatCurrencyAmountUsingCurrentModule())
+            //Log.d("NOWWCHECKKKKK", transactionAmount.formatCurrencyAmountUsingCurrentModule())
         }
 
         remoteMessage.data["MessageBody"]?.let { incomingMessage ->

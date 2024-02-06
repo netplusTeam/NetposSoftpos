@@ -28,7 +28,7 @@ fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
     val credentials = JsonObject()
     credentials.addProperty("appname", "bills_payment")
     credentials.addProperty("password", "!L@ns33mfls")
-    Timber.e("get resp")
+    //Timber.e("get resp")
     stormApiService.appToken(credentials)
         .flatMap {
             Timber.e(it.toString())
@@ -47,7 +47,7 @@ fun getBillsToken(stormApiService: StormApiService): LiveData<Event<Boolean>> {
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { res, error ->
             res?.let {
-                Timber.e(it.toString())
+            //    Timber.e(it.toString())
                 if (!it.success) {
                     liveData.value = Event(false)
                     return@let

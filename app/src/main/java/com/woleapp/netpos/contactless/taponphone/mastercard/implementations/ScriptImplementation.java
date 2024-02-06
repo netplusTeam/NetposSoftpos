@@ -31,7 +31,7 @@ public class ScriptImplementation implements ScriptProvider {
     public ApplicationInput onDataReceived(ArrayList<BerTlv> dataSent,
                                            final ArrayList<BerTlv> dataNeeded) {
 
-        Log.d(TAG, "onDataReceived: " + dataSent);
+        //Log.d(TAG, "onDataReceived: " + dataSent);
 
         final ArrayList<BerTlv> dataRequested = new ArrayList<>();
 

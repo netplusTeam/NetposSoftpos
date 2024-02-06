@@ -66,10 +66,8 @@ class RegistrationOTPFragment : BaseFragment() {
         startResendTimer()
         val newPoneNumber = Prefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
         val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
-        Log.d("NUMBERCHECK", phoneNumber)
         val newActNumber = Prefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
         newAccountNumber = newActNumber.substring(1, newActNumber.length-1)
-        Log.d("ACCOUNTNUMBER", newAccountNumber)
         loader = alertDialog(requireContext())
         resendCode.setOnClickListener {
             resendOtp()
