@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.util // ktlint-disable filename
 
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
-import com.danbamitale.epmslib.entities.responseMessage
 
 fun gatewayErrorTransactionResponse(amount: Long = 0, transactionType: TransactionType = TransactionType.PURCHASE, accountType: com.danbamitale.epmslib.utils.IsoAccountType = com.danbamitale.epmslib.utils.IsoAccountType.DEFAULT_UNSPECIFIED) = TransactionResponse().apply {
     this.transactionType = transactionType

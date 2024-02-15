@@ -35,7 +35,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
         tools:ignore="HardcodedDebugMode"
-        tools:replace="android:label,android:theme">
+        tools:replace="android:label, android:theme, android:allowBackup">
 
         <activity
             android:name=".ui.activities.AuthenticationActivity"

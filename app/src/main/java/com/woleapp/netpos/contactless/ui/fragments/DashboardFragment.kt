@@ -15,7 +15,14 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
+import androidx.lifecycle.lifecycleScope
+import com.danbamitale.epmslib.entities.CardData
+import com.danbamitale.epmslib.entities.HostConfig
+import com.danbamitale.epmslib.entities.TransactionRequestData
+import com.danbamitale.epmslib.entities.TransactionType
+import com.danbamitale.epmslib.entities.accountBalances
+import com.danbamitale.epmslib.entities.clearPinKey
+import com.danbamitale.epmslib.entities.isApproved
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -23,37 +30,58 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.netplus.NetPosTySdk
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.AuthenticationEventData
+import com.woleapp.netpos.contactless.model.MqttEvent
+import com.woleapp.netpos.contactless.model.MqttEvents
+import com.woleapp.netpos.contactless.model.MqttStatus
+import com.woleapp.netpos.contactless.model.MqttTopics
+import com.woleapp.netpos.contactless.model.Service
+import com.woleapp.netpos.contactless.model.TransactionMethod
+import com.woleapp.netpos.contactless.model.User
+import com.woleapp.netpos.contactless.model.Vend
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
+import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
+import com.woleapp.netpos.contactless.util.Event
+import com.woleapp.netpos.contactless.util.ICCCardHelper
+import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
+import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
+import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.formatCurrencyAmountUsingCurrentModule
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.Singletons
+import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
+import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
+import com.woleapp.netpos.contactless.util.buildSMSText
+import com.woleapp.netpos.contactless.util.disposeWith
+import com.woleapp.netpos.contactless.util.showCardDialog
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.layout_receipt_pdf.account_type
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
 import java.net.InetSocketAddress
 import java.net.Socket
-import java.text.DecimalFormat
-import java.text.NumberFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class DashboardFragment : BaseFragment() {
@@ -75,6 +103,12 @@ class DashboardFragment : BaseFragment() {
     private lateinit var cardCvv: String
     private lateinit var user: User
 
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        //initialize NetPos Tianyu sdk
+        NetPosTySdk.initialize(requireActivity())
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -120,19 +154,58 @@ class DashboardFragment : BaseFragment() {
         viewModel.getCardData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
-                    showCardDialog(
-                        requireActivity(),
-                        viewLifecycleOwner,
-                    ).observe(viewLifecycleOwner) { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
-                            nfcCardReaderViewModel.initiateNfcPayment(
-                                viewModel.amountLong,
-                                viewModel.cashbackLong,
-                                it,
-                            )
+                    showTransactionMethodDialog() { method ->
+                        when (method) {
+                            TransactionMethod.CONTACTLESS -> {
+                                showCardDialog(
+                                    requireActivity(),
+                                    viewLifecycleOwner,
+                                ).observe(viewLifecycleOwner) { event ->
+                                    event.getContentIfNotHandled()?.let {
+                                        Timber.e(it.toString())
+                                        nfcCardReaderViewModel.initiateNfcPayment(
+                                            viewModel.amountLong,
+                                            viewModel.cashbackLong,
+                                            it,
+                                        )
+                                    }
+                                }
+                            }
+
+                            TransactionMethod.CONTACT -> {
+                                val keyHolder = getKeyHolder()
+                                if (NetPosTySdk.isCardExists() == 0) {
+                                    lifecycleScope.launch(Dispatchers.IO) {
+                                        NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString(), requireContext())
+
+                                        withContext(Dispatchers.Main) {
+                                            val cardDataAndPinBlockPair =
+                                                NetPosTySdk.getCardDataAndPinBlock(keyHolder?.clearPinKey!!)
+
+                                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
+
+                                            showAccountTypeDialogForContact {accountType ->
+                                                nfcCardReaderViewModel.iccCardHelper.apply {
+                                                    this.accountType = accountType
+                                                    val cardData = cardDataAndPinBlockPair.first!!
+                                                    this.cardData = CardData(cardData.track2Data, cardData.nibssIccSubset, cardData.panSequenceNumber, cardData.posEntryMode)
+                                                    this.cardScheme = "${cardData.cardType}"
+                                                    this.cardData?.pinBlock = cardDataAndPinBlockPair.second
+                                                }
+                                                nfcCardReaderViewModel.setIccCardHelperLiveData(nfcCardReaderViewModel.iccCardHelper)
+                                            }
+                                        }
+                                    }
+
+                                    NetPosTySdk.cancelCardRead()
+
+                                } else {
+                                    showToast("Please Insert Card to Continue")
+                                }
+                            }
                         }
                     }
+
                 }
             }
         }
@@ -490,5 +563,37 @@ class DashboardFragment : BaseFragment() {
             create().show()
         }
     }
+
+    private fun showTransactionMethodDialog(onMethodSelected: (TransactionMethod) -> Unit) {
+        val methods = arrayOf("Contactless", "Contact")
+        AlertDialog.Builder(requireActivity())
+            .setTitle("Choose Transaction Method")
+            .setSingleChoiceItems(methods, -1) { dialog, which ->
+                dialog.dismiss()
+                when (which) {
+                    0 -> onMethodSelected(TransactionMethod.CONTACTLESS)
+                    1 -> onMethodSelected(TransactionMethod.CONTACT)
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {
+        val accountTypes = arrayOf("Savings", "Current")
+        AlertDialog.Builder(requireActivity())
+            .setTitle("Choose Account Type")
+            .setSingleChoiceItems(accountTypes, -1) { dialog, which ->
+                dialog.dismiss()
+                when (which) {
+                    0 -> onAccountTypeSelected(IsoAccountType.SAVINGS)
+                    1 -> onAccountTypeSelected(IsoAccountType.CURRENT)
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+
 
 }

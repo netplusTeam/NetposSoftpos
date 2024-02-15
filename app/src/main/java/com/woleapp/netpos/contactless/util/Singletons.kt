@@ -3,7 +3,6 @@ package com.woleapp.netpos.contactless.util
 import com.danbamitale.epmslib.entities.ConfigData
 import com.danbamitale.epmslib.entities.KeyHolder
 import com.danbamitale.epmslib.entities.TransactionResponse
-import com.danbamitale.epmslib.entities.responseMessage
 import com.google.gson.Gson
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.model.ConfigurationData

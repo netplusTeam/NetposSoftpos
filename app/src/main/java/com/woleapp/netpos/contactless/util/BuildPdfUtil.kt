@@ -16,7 +16,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import com.danbamitale.epmslib.entities.TransactionResponse
-import com.danbamitale.epmslib.entities.responseMessage
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.LayoutPosReceiptPdfBinding

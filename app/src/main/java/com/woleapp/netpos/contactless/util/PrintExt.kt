@@ -1,7 +1,6 @@
 package com.woleapp.netpos.contactless.util
 
 import com.danbamitale.epmslib.entities.TransactionResponse
-import com.danbamitale.epmslib.entities.responseMessage
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
