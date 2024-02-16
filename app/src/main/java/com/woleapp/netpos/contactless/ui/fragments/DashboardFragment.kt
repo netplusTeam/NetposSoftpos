@@ -172,37 +172,53 @@ class DashboardFragment : BaseFragment() {
                                 }
                             }
 
+                            //Enabling transaction via contact for Tianyu P10
                             TransactionMethod.CONTACT -> {
                                 val keyHolder = getKeyHolder()
+                                if (keyHolder?.clearPinKey == null) {
+                                    showToast("Key Holder or Clear Pin Key is null")
+                                    return@showTransactionMethodDialog
+                                }
+
                                 if (NetPosTySdk.isCardExists() == 0) {
                                     lifecycleScope.launch(Dispatchers.IO) {
                                         NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString(), requireContext())
 
+                                        val cardDataAndPinBlockPair = NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
+                                        Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
+
+                                        val cardData = cardDataAndPinBlockPair.first
+                                        if (cardData == null) {
+                                            withContext(Dispatchers.Main) {
+                                                showToast("Card data is null")
+                                            }
+                                            return@launch
+                                        }
+
                                         withContext(Dispatchers.Main) {
-                                            val cardDataAndPinBlockPair =
-                                                NetPosTySdk.getCardDataAndPinBlock(keyHolder?.clearPinKey!!)
-
-                                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
-
-                                            showAccountTypeDialogForContact {accountType ->
-                                                nfcCardReaderViewModel.iccCardHelper.apply {
-                                                    this.accountType = accountType
-                                                    val cardData = cardDataAndPinBlockPair.first!!
-                                                    this.cardData = CardData(cardData.track2Data, cardData.nibssIccSubset, cardData.panSequenceNumber, cardData.posEntryMode)
-                                                    this.cardScheme = "${cardData.cardType}"
-                                                    this.cardData?.pinBlock = cardDataAndPinBlockPair.second
+                                            showAccountTypeDialogForContact { accountType ->
+                                                nfcCardReaderViewModel.iccCardHelper.let { iccCardHelper ->
+                                                    iccCardHelper.accountType = accountType
+                                                    iccCardHelper.cardData = CardData(
+                                                        cardData.track2Data,
+                                                        cardData.nibssIccSubset,
+                                                        cardData.panSequenceNumber,
+                                                        cardData.posEntryMode
+                                                    ).apply {
+                                                        pinBlock = cardDataAndPinBlockPair.second
+                                                    }
+                                                    iccCardHelper.cardScheme = "${cardData.cardType}"
+                                                    nfcCardReaderViewModel.setIccCardHelperLiveData(iccCardHelper)
                                                 }
-                                                nfcCardReaderViewModel.setIccCardHelperLiveData(nfcCardReaderViewModel.iccCardHelper)
                                             }
                                         }
                                     }
-
                                     NetPosTySdk.cancelCardRead()
-
                                 } else {
                                     showToast("Please Insert Card to Continue")
                                 }
                             }
+
                         }
                     }
 

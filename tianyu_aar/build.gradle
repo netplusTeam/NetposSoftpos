@@ -1,2 +1,2 @@
 configurations.maybeCreate("default")
-artifacts.add("default", file('tysmartposlib_V66_11764R_20230612165244.aar'))
+artifacts.add("default", file('tysmartposlib_V66.aar'))
