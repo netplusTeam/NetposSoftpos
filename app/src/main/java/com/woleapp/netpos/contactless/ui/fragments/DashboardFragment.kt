@@ -182,7 +182,7 @@ class DashboardFragment : BaseFragment() {
 
                                 if (NetPosTySdk.isCardExists() == 0) {
                                     lifecycleScope.launch(Dispatchers.IO) {
-                                        NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString(), requireContext())
+                                        NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
 
                                         val cardDataAndPinBlockPair = NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
                                         Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
