@@ -72,7 +72,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.layout_receipt_pdf.account_type
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -102,13 +101,6 @@ class DashboardFragment : BaseFragment() {
     private lateinit var loader: AlertDialog
     private lateinit var cardCvv: String
     private lateinit var user: User
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        //initialize NetPos Tianyu sdk
-        NetPosTySdk.initialize(requireActivity())
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -565,7 +557,7 @@ class DashboardFragment : BaseFragment() {
                         me.toString(),
                     )
                 }
-            }
+            }.disposeWith(compositeDisposable)
     }
 
     private fun showMessage(s: String, vararg messageString: String) {

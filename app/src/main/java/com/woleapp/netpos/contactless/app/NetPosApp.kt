@@ -7,6 +7,7 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
+import com.netplus.NetPosTySdk
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessConfiguration
@@ -46,6 +47,9 @@ class NetPosApp : Application() {
             .setUseDefaultSharedPreference(true)
             .build()
         initVisaLib()
+
+        //initialize NetPos Tianyu sdk
+        NetPosTySdk.initialize(applicationContext)
     }
 
     private fun initVisaLib() {
