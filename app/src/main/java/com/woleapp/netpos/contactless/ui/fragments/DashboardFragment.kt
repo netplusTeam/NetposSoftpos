@@ -146,72 +146,65 @@ class DashboardFragment : BaseFragment() {
         viewModel.getCardData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
-                    showTransactionMethodDialog() { method ->
-                        when (method) {
-                            TransactionMethod.CONTACTLESS -> {
-                                showCardDialog(
-                                    requireActivity(),
-                                    viewLifecycleOwner,
-                                ).observe(viewLifecycleOwner) { event ->
-                                    event.getContentIfNotHandled()?.let {
-                                        Timber.e(it.toString())
-                                        nfcCardReaderViewModel.initiateNfcPayment(
-                                            viewModel.amountLong,
-                                            viewModel.cashbackLong,
-                                            it,
+                    if (NetPosTySdk.isCardExists() != 0) {
+                        showCardDialog(
+                            requireActivity(),
+                            viewLifecycleOwner,
+                        ).observe(viewLifecycleOwner) { event ->
+                            event.getContentIfNotHandled()?.let {
+                                Timber.e(it.toString())
+                                nfcCardReaderViewModel.initiateNfcPayment(
+                                    viewModel.amountLong,
+                                    viewModel.cashbackLong,
+                                    it,
+                                )
+                            }
+                        }
+                    } else {
+                        val keyHolder = getKeyHolder()
+                        if (keyHolder?.clearPinKey == null) {
+                            showToast("Key Holder or Clear Pin Key is null")
+                            return@let
+                        }
+
+                        loader.show()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
+
+                            val cardDataAndPinBlockPair =
+                                NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
+                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
+
+                            val cardData = cardDataAndPinBlockPair.first
+                            if (cardData == null) {
+                                withContext(Dispatchers.Main) {
+                                    showToast("Card data is null")
+                                }
+                                return@launch
+                            }
+
+                            withContext(Dispatchers.Main) {
+                                loader.dismiss()
+                                showAccountTypeDialogForContact { accountType ->
+                                    nfcCardReaderViewModel.iccCardHelper.let { iccCardHelper ->
+                                        iccCardHelper.accountType = accountType
+                                        iccCardHelper.cardData = CardData(
+                                            cardData.track2Data,
+                                            cardData.nibssIccSubset,
+                                            cardData.panSequenceNumber,
+                                            cardData.posEntryMode
+                                        ).apply {
+                                            pinBlock = cardDataAndPinBlockPair.second
+                                        }
+                                        iccCardHelper.cardScheme = "${cardData.cardType}"
+                                        nfcCardReaderViewModel.setIccCardHelperLiveData(
+                                            iccCardHelper
                                         )
                                     }
                                 }
                             }
-
-                            //Enabling transaction via contact for Tianyu P10
-                            TransactionMethod.CONTACT -> {
-                                val keyHolder = getKeyHolder()
-                                if (keyHolder?.clearPinKey == null) {
-                                    showToast("Key Holder or Clear Pin Key is null")
-                                    return@showTransactionMethodDialog
-                                }
-
-                                if (NetPosTySdk.isCardExists() == 0) {
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
-
-                                        val cardDataAndPinBlockPair = NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
-                                        Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
-
-                                        val cardData = cardDataAndPinBlockPair.first
-                                        if (cardData == null) {
-                                            withContext(Dispatchers.Main) {
-                                                showToast("Card data is null")
-                                            }
-                                            return@launch
-                                        }
-
-                                        withContext(Dispatchers.Main) {
-                                            showAccountTypeDialogForContact { accountType ->
-                                                nfcCardReaderViewModel.iccCardHelper.let { iccCardHelper ->
-                                                    iccCardHelper.accountType = accountType
-                                                    iccCardHelper.cardData = CardData(
-                                                        cardData.track2Data,
-                                                        cardData.nibssIccSubset,
-                                                        cardData.panSequenceNumber,
-                                                        cardData.posEntryMode
-                                                    ).apply {
-                                                        pinBlock = cardDataAndPinBlockPair.second
-                                                    }
-                                                    iccCardHelper.cardScheme = "${cardData.cardType}"
-                                                    nfcCardReaderViewModel.setIccCardHelperLiveData(iccCardHelper)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    NetPosTySdk.cancelCardRead()
-                                } else {
-                                    showToast("Please Insert Card to Continue")
-                                }
-                            }
-
                         }
+                        NetPosTySdk.cancelCardRead()
                     }
 
                 }
@@ -330,6 +323,7 @@ class DashboardFragment : BaseFragment() {
                         .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
                         .commit()
                 }
+
                 else -> {
                     sendPayload()
                 }
@@ -470,7 +464,7 @@ class DashboardFragment : BaseFragment() {
                     "Error ${it.localizedMessage}",
                     Toast.LENGTH_SHORT,
                 ).show()
-               // Timber.e("Error: ${it.localizedMessage}")
+                // Timber.e("Error: ${it.localizedMessage}")
                 requireActivity().onBackPressed()
             }).disposeWith(compositeDisposable)
         }
@@ -601,7 +595,6 @@ class DashboardFragment : BaseFragment() {
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .show()
     }
-
 
 
 }
