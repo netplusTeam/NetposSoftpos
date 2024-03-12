@@ -15,7 +15,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -39,6 +38,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.netplus.netpostyp10possdk.utils.Utilities.showToast
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
@@ -67,7 +67,6 @@ import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
@@ -1067,7 +1066,12 @@ class MainActivity :
         terminalId: String,
         username: String,
     ) {
-        notificationModel.registerDeviceToken(token, terminalId, username)
+        if(isInternetAvailable(this)) {
+            notificationModel.registerDeviceToken(token, terminalId, username)
+        } else{
+            this.showToast("Please connect to the internet and relaunch")
+        }
+
     }
 
     private fun getFireBaseToken(
