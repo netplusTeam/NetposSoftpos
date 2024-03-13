@@ -6,6 +6,7 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
+import com.netplus.NetPosTySdk
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
 import com.visa.app.ttpkernel.ContactlessConfiguration
 import com.woleapp.netpos.contactless.BuildConfig
@@ -40,6 +41,8 @@ class NetPosApp : Application() {
             Timber.plant(Timber.DebugTree())
         }
         DPrefs.initializeDPrefs(this)
+        //initialize NetPos Tianyu sdk
+        NetPosTySdk.initialize(applicationContext)
     }
 
     private fun initVisaLib() {

@@ -40,6 +40,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.netplus.netpostyp10possdk.utils.Utilities.showToast
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
@@ -1054,7 +1055,11 @@ class MainActivity :
         terminalId: String,
         username: String,
     ) {
-        notificationModel.registerDeviceToken(token, terminalId, username)
+        if(isInternetAvailable(this)) {
+            notificationModel.registerDeviceToken(token, terminalId, username)
+        } else{
+            this.showToast("Please connect to the internet and relaunch")
+        }
     }
 
     private fun getFireBaseToken(

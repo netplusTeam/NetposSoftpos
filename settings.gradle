@@ -1,3 +1,4 @@
 //include ':netpossdk'
 rootProject.name='NetPOS for Droid'
 include ':app', ':epmslib-release'
+include ':tianyu_aar'

@@ -31,9 +31,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
         android:requestLegacyExternalStorage="true"
-        tools:replace="android:label,android:theme"
         android:dataExtractionRules="@xml/data_extraction_rules"
-        tools:ignore="HardcodedDebugMode">
+        tools:ignore="HardcodedDebugMode"
+        tools:replace="android:label, android:theme, android:allowBackup">
+        >
 
         <activity
             android:name=".ui.activities.AuthenticationActivity"

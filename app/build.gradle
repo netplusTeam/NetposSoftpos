@@ -164,6 +164,7 @@ android {
     packagingOptions {
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/DEPENDENCIES'
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -313,4 +314,11 @@ dependencies {
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"
+
+    //tiayu lib
+    api project(':tianyu_aar')
+    //Bouncy Castle cryptography
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    //JPOS
+    implementation 'org.jpos:jpos:2.1.6'
 }

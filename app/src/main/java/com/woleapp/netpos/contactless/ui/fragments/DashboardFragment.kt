@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,13 +15,16 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import com.google.gson.JsonObject
+import com.netplus.NetPosTySdk
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
@@ -29,12 +33,17 @@ import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-impo
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -59,6 +68,7 @@ class DashboardFragment : BaseFragment() {
     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
+    private lateinit var loader: android.app.AlertDialog
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,6 +87,7 @@ class DashboardFragment : BaseFragment() {
         dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
             executePendingBindings()
         }
+        loader = alertDialog(requireContext())
         printerErrorDialog = AlertDialog.Builder(requireContext())
             .apply {
                 setTitle(getString(R.string.printer_error))
@@ -101,25 +112,72 @@ class DashboardFragment : BaseFragment() {
                 showSnackBar(s)
             }
         }
+
         viewModel.getCardData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
-                    showCardDialog(
-                        requireActivity(),
-                        viewLifecycleOwner,
-                    ).observe(viewLifecycleOwner) { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
-                            nfcCardReaderViewModel.initiateNfcPayment(
-                                viewModel.amountLong,
-                                viewModel.cashbackLong,
-                                it,
+                    if (NetPosTySdk.isCardExists() != 0) {
+                        showCardDialog(
+                            requireActivity(),
+                            viewLifecycleOwner,
+                        ).observe(viewLifecycleOwner) { event ->
+                            event.getContentIfNotHandled()?.let {
+                                Timber.e(it.toString())
+                                nfcCardReaderViewModel.initiateNfcPayment(
+                                    viewModel.amountLong,
+                                    viewModel.cashbackLong,
+                                    it,
+                                )
+                            }
+                        }
+                    } else {
+                        val keyHolder = getKeyHolder()
+                        if (keyHolder?.clearPinKey == null) {
+                            showToast("Key Holder or Clear Pin Key is null")
+                            return@let
+                        }
+                        loader.show()
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
+                            val cardDataAndPinBlockPair =
+                                NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
+                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
+                            Log.d("Card_Data",
+                                "${Gson().toJson(cardDataAndPinBlockPair)}, clearPin:${keyHolder.clearPinKey}"
                             )
+                            val cardData = cardDataAndPinBlockPair.first
+                            if (cardData == null) {
+                                withContext(Dispatchers.Main) {
+                                    showToast("Card data is null")
+                                }
+                                return@launch
+                            }
+                            withContext(Dispatchers.Main) {
+                                loader.dismiss()
+                                showAccountTypeDialogForContact { accountType ->
+                                    nfcCardReaderViewModel.iccCardHelper.let { iccCardHelper ->
+                                        iccCardHelper.accountType = accountType
+                                        iccCardHelper.cardData = CardData(
+                                            cardData.track2Data,
+                                            cardData.nibssIccSubset,
+                                            cardData.panSequenceNumber.removeSuffix("f"),
+                                            cardData.posEntryMode
+                                        ).apply {
+                                            pinBlock = cardDataAndPinBlockPair.second
+                                        }
+                                        iccCardHelper.cardScheme = "${cardData.cardType}"
+                                        nfcCardReaderViewModel.setIccCardHelperLiveData(
+                                            iccCardHelper
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
+
         viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 printTypeDialog.show()
@@ -435,5 +493,20 @@ class DashboardFragment : BaseFragment() {
                 }
                 create().show()
             }
+    }
+
+    private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {
+        val accountTypes = arrayOf("Savings", "Current")
+        AlertDialog.Builder(requireActivity())
+            .setTitle("Choose Account Type")
+            .setSingleChoiceItems(accountTypes, -1) { dialog, which ->
+                dialog.dismiss()
+                when (which) {
+                    0 -> onAccountTypeSelected(IsoAccountType.SAVINGS)
+                    1 -> onAccountTypeSelected(IsoAccountType.CURRENT)
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 }
