@@ -173,7 +173,9 @@ class DashboardFragment : BaseFragment() {
 
                             val cardDataAndPinBlockPair =
                                 NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
-                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
+                            Log.d("Card_Data",
+                                "${Gson().toJson(cardDataAndPinBlockPair)}, clearPin:${keyHolder.clearPinKey}"
+                            )
 
                             val cardData = cardDataAndPinBlockPair.first
                             if (cardData == null) {
@@ -191,7 +193,7 @@ class DashboardFragment : BaseFragment() {
                                         iccCardHelper.cardData = CardData(
                                             cardData.track2Data,
                                             cardData.nibssIccSubset,
-                                            cardData.panSequenceNumber,
+                                            cardData.panSequenceNumber.removeSuffix("f"),
                                             cardData.posEntryMode
                                         ).apply {
                                             pinBlock = cardDataAndPinBlockPair.second
@@ -204,7 +206,6 @@ class DashboardFragment : BaseFragment() {
                                 }
                             }
                         }
-                        NetPosTySdk.cancelCardRead()
                     }
 
                 }

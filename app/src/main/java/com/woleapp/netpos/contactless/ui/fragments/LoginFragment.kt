@@ -122,8 +122,8 @@ class LoginFragment : BaseFragment() {
         binding.btnLogin.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("providuspos")) {
                 viewModel.login(deviceId, partnerID)
-            } else if (BuildConfig.FLAVOR.contains("zenith")) {
-                viewModel.loginZenith(requireContext(), deviceId)
+//            } else if (BuildConfig.FLAVOR.contains("zenith")) {
+//                viewModel.loginZenith(requireContext(), deviceId)
             } else {
                 viewModel.login(deviceId)
             }
