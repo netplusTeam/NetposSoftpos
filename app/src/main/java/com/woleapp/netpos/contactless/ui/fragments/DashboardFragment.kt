@@ -141,7 +141,6 @@ class DashboardFragment : BaseFragment() {
                             NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
                             val cardDataAndPinBlockPair =
                                 NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
-                            Log.d("Card_Data", Gson().toJson(cardDataAndPinBlockPair))
                             Log.d("Card_Data",
                                 "${Gson().toJson(cardDataAndPinBlockPair)}, clearPin:${keyHolder.clearPinKey}"
                             )
