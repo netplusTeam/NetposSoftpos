@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.di.customDependencies
 
+import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -34,6 +35,7 @@ class JavaScriptInterface @AssistedInject constructor(
 
     @JavascriptInterface
     fun webViewCallback(webViewResponse: String) {
+        Log.d("WEBVIEWRESPONSE", webViewResponse)
         val responseFromWebView = Gson().fromJson(
             webViewResponse,
             QrTransactionResponseModel::class.java,
