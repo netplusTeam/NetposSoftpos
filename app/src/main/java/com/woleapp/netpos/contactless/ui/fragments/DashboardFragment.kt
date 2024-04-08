@@ -583,7 +583,7 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {
-        val accountTypes = arrayOf("Savings", "Current")
+        val accountTypes = arrayOf("Savings", "Current", "Default")
         AlertDialog.Builder(requireActivity())
             .setTitle("Choose Account Type")
             .setSingleChoiceItems(accountTypes, -1) { dialog, which ->
@@ -591,6 +591,7 @@ class DashboardFragment : BaseFragment() {
                 when (which) {
                     0 -> onAccountTypeSelected(IsoAccountType.SAVINGS)
                     1 -> onAccountTypeSelected(IsoAccountType.CURRENT)
+                    2 -> onAccountTypeSelected(IsoAccountType.DEFAULT_UNSPECIFIED)
                 }
             }
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
