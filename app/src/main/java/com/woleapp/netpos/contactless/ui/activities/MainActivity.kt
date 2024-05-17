@@ -34,6 +34,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
+import com.alcineo.softpos.payment.model.beep.BeepStatus
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.enums.DPrefsDefaultValue
@@ -171,7 +172,6 @@ class MainActivity :
     }
 
     private fun startNfcPayment(nfcDataWrapper: NfcDataWrapper) {
-        Log.d("card_event3", Gson().toJson(nfcDataWrapper))
         when(nfcDataWrapper.cardType) {
             NfcPaymentType.VISA -> {
                 nfcAdapter?.enableReaderMode(
@@ -435,9 +435,7 @@ class MainActivity :
         showFragment(DashboardFragment(), DashboardFragment::class.java.simpleName)
 
         viewModel.enableNfcForegroundDispatcher.observe(this) { event ->
-            Log.d("card_event", Gson().toJson(event))
             event.getContentIfNotHandled()?.let {
-                Log.d("card_event2", Gson().toJson(it))
                 if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD )) {
                     startNfcPayment(it)
                 }
