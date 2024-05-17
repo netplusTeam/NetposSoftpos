@@ -141,6 +141,7 @@
     <string name="please_select_card_type">please select card type</string>
     <string name="visa_card_icon">Visa card icon</string>
     <string name="mastercard_icon">Mastercard icon</string>
+    <string name="verve_card_icon">Verve card icon</string>
     <string name="business_name">Business Name</string>
     <string name="address">Address</string>
     <string name="hint_choose_bank_caps">Choose Bank</string>

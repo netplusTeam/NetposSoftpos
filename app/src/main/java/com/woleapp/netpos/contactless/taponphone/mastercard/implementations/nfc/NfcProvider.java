@@ -7,10 +7,12 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.alcineo.softpos.payment.api.interfaces.NFCListener;
 import com.mastercard.terminalsdk.exception.L1RSPException;
 import com.mastercard.terminalsdk.listeners.CardCommunicationProvider;
 import com.mastercard.terminalsdk.objects.ErrorIndication;
 import com.woleapp.netpos.contactless.BuildConfig;
+import com.woleapp.netpos.contactless.taponphone.verve.VerveNFCListenerImpl;
 
 import java.io.IOException;
 
@@ -32,16 +34,16 @@ public class NfcProvider implements CardCommunicationProvider {
      */
     private long mCommandExecutionTime = 0;
 
+    private NFCListener verveNfcListener = new VerveNFCListenerImpl();
+    public NFCListener getVerveNfcListener() {
+        return verveNfcListener;
+    }
+
     public NfcProvider(Activity currentContext) {
 
         mNFCManager = new NFCManager(currentContext);
         // Check if NFC is enabled
-        if (!mNFCManager.isNFCEnabled()) {
-            nFCEnabled = false;
-
-        } else {
-            nFCEnabled = true;
-        }
+        nFCEnabled = mNFCManager.isNFCEnabled();
         disconnectReader();
     }
 
@@ -138,7 +140,7 @@ public class NfcProvider implements CardCommunicationProvider {
         if (mIsoDep == null) {
             // Establish Connection with reader
             mTagEventListener = new TagEventListener();
-            mNFCManager.enableNFCReaderMode(new ReaderCallbackImpl(mTagEventListener));
+            mNFCManager.enableNFCReaderMode(new ReaderCallbackImpl(mTagEventListener, (VerveNFCListenerImpl) verveNfcListener));
             mIsoDep = null;
             isCardTapped = false;
         }

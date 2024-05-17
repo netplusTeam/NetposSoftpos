@@ -16,6 +16,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -31,6 +32,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.enums.DPrefsDefaultValue
@@ -51,7 +54,12 @@ import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
+import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager.READER_FLAGS
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
+import com.woleapp.netpos.contactless.taponphone.verve.TransactionViewModelFactory
+import com.woleapp.netpos.contactless.taponphone.verve.VerveTransactionViewModel
+import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
 import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
@@ -73,6 +81,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
+import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import com.woleapp.netpos.contactless.viewmodels.ScanQrViewModel
 import com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -125,6 +134,10 @@ class MainActivity :
     private lateinit var userName: String
     private lateinit var token: String
 
+    private lateinit var mVerveTransactionViewModel: VerveTransactionViewModel
+    private var verveNfcListener: NFCListener? = null
+    private val salesViewModel by viewModels<SalesViewModel>()
+
     override fun onStart() {
         super.onStart()
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
@@ -157,13 +170,32 @@ class MainActivity :
         }
     }
 
-    private fun startNfcPayment() {
-        nfcAdapter?.enableReaderMode(
-            this,
-            this,
-            READER_FLAGS,
-            Bundle(),
-        )
+    private fun startNfcPayment(nfcDataWrapper: NfcDataWrapper) {
+        Log.d("card_event3", Gson().toJson(nfcDataWrapper))
+        when(nfcDataWrapper.cardType) {
+            NfcPaymentType.VISA -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    this,
+                    READER_FLAGS,
+                    Bundle(),
+                )
+            }
+            NfcPaymentType.VERVE -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    { tag: Tag? -> verveNfcListener!!.onNfcTagDiscovered(tag) }, READER_FLAGS, null
+                )
+            }
+            else -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    this,
+                    READER_FLAGS,
+                    Bundle(),
+                )
+            }
+        }
     }
 
     private fun stopNfcPayment() {
@@ -399,16 +431,22 @@ class MainActivity :
         if (checkBillsPaymentToken().not()) {
             getBillsToken(StormApiClient.getInstance())
         }
+
         showFragment(DashboardFragment(), DashboardFragment::class.java.simpleName)
+
         viewModel.enableNfcForegroundDispatcher.observe(this) { event ->
+            Log.d("card_event", Gson().toJson(event))
             event.getContentIfNotHandled()?.let {
-                if (it) {
-                    startNfcPayment()
-                } else {
+                Log.d("card_event2", Gson().toJson(it))
+                if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD )) {
+                    startNfcPayment(it)
+                }
+                else if (!it.enable && it.cardType == null) {
                     stopNfcPayment()
                 }
             }
         }
+
         viewModel.showAccountTypeDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 if (it) {
@@ -416,12 +454,14 @@ class MainActivity :
                 }
             }
         }
+
         viewModel.showPinPadDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 Timber.e("show pin dialog")
                 showPinDialog(it)
             }
         }
+
         viewModel.showWaitingDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 dialogContactlessReaderBinding.contactlessHeader.text =
@@ -429,6 +469,7 @@ class MainActivity :
                 dialogContactlessReaderBinding.contactlessHeader.highlightTexts(
                     NfcPaymentType.MASTERCARD.cardScheme,
                     NfcPaymentType.VISA.cardScheme,
+                    NfcPaymentType.VERVE.cardScheme
                 )
                 dialogContactlessReaderBinding.cardScheme.setImageResource(it.icon)
                 waitingDialog.show()
@@ -436,6 +477,7 @@ class MainActivity :
             }
             waitingDialog.dismissIfShowing()
         }
+
         viewModel.smsSent.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 receiptDialogBinding.progress.visibility = View.GONE
@@ -455,6 +497,7 @@ class MainActivity :
                 }
             }
         }
+
         receiptAlertDialog = AlertDialog.Builder(this).setCancelable(false).apply {
             setView(receiptDialogBinding.root)
             receiptDialogBinding.apply {
@@ -533,6 +576,19 @@ class MainActivity :
         firebaseInstance = FirebaseMessaging.getInstance()
         getFireBaseToken(firebaseInstance) {
             sendTokenToBackend(token, terminalId, userName)
+        }
+
+        verveNfcListener = NfcProvider(this).verveNfcListener
+        setUpViewModelForVerve()
+        setUpObserversForVerveTransaction()
+        viewModel.startVerveTransaction.observe(this) { event ->
+            event.getContentIfNotHandled()?.let {
+                if(it) {
+                    mVerveTransactionViewModel.startTransaction(this)
+                } else {
+                    mVerveTransactionViewModel.cancelTransaction()
+                }
+            }
         }
     }
 
@@ -1142,42 +1198,18 @@ class MainActivity :
         }
     }
 
-//    private fun checkForAppUpdate() {
-//        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-//            val isUpdateAvailable = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-//            val isUpdateAllowed = when (updateType) {
-//                AppUpdateType.FLEXIBLE -> info.isFlexibleUpdateAllowed
-//                AppUpdateType.IMMEDIATE -> info.isImmediateUpdateAllowed
-//                else -> false
-//            }
-//
-//            if (isUpdateAvailable && isUpdateAllowed) {
-//                appUpdateManager.startUpdateFlowForResult(
-//                    info,
-//                    updateType,
-//                    this,
-//                    APP_UPDATE_REQUEST_CODE,
-//                )
-//            }
-//        }
-//    }
+    private fun setUpViewModelForVerve() {
+        val transactionParameters = salesViewModel.setupTransactionForVerveSDK()
+        mVerveTransactionViewModel = ViewModelProvider(
+            this,
+            TransactionViewModelFactory(applicationContext, verveNfcListener!!, transactionParameters)
+        )[VerveTransactionViewModel::class.java]
+    }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (requestCode == APP_UPDATE_REQUEST_CODE) {
-//            if (resultCode != APP_UPDATE_REQUEST_CODE) {
-//                Timber.tag(APP_UPDATE_TAG).e("SOMETHING WENT WRONG WHILE TRYING TO UPDATE THE APP")
-//            } else {
-//                Toast.makeText(
-//                    this,
-//                    getString(R.string.app_uploaded_successfully),
-//                    Toast.LENGTH_SHORT,
-//                ).show()
-//                lifecycleScope.launch {
-//                    delay(5000)
-//                    appUpdateManager.completeUpdate()
-//                }
-//            }
-//        }
-//    }
+    private fun setUpObserversForVerveTransaction() {
+        mVerveTransactionViewModel.onTransactionFinishedEvent
+            .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
+                viewModel.doVerveCardTransaction(transactionFullDataDto)
+            }
+    }
 }

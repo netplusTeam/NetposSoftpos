@@ -1,9 +1,12 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.alcineo.softpos.payment.model.transaction.TransactionParameters
+import com.alcineo.utils.common.StringUtils
 import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.maskPan
@@ -11,6 +14,7 @@ import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
 import com.dsofttech.dprefs.utils.DPrefs
+import com.neovisionaries.i18n.CurrencyCode
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.network.NetPosTransactionsService
@@ -30,6 +34,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
+import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -414,5 +420,31 @@ class SalesViewModel @Inject constructor() : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { _, _ ->
             }.disposeWith(compositeDisposable)
+    }
+
+    fun setupTransactionForVerveSDK(): TransactionParameters {
+        val cardInteractionWaitingTime = 15
+        val transactionRefund = null
+        val balanceBefore = null
+        val balanceAfter = null
+        val transactionType = com.alcineo.transaction.TransactionType.PURCHASE
+        val transactionCategoryCode = "F"
+        val transactionMerchantData = StringUtils.convertBytesToHex(
+            "NetPlus".toByteArray(
+                StandardCharsets.UTF_8
+            )
+        )
+
+        return TransactionParameters(
+            cardInteractionWaitingTime,
+            BigDecimal("1.00"),
+            transactionRefund,
+            balanceBefore,
+            balanceAfter,
+            transactionType,
+            CurrencyCode.NGN,
+            transactionCategoryCode,
+            transactionMerchantData
+        )
     }
 }

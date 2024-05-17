@@ -37,7 +37,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.woleapp.netpos.contactless"
         compileSdkVersion 33
-        minSdkVersion 24
+        minSdkVersion 28
         targetSdkVersion 33
         versionCode 42
         versionName "1.0.42"
@@ -321,4 +321,10 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     //JPOS
     implementation 'org.jpos:jpos:2.1.6'
+
+    //VERVE SOFTPOS
+    implementation 'com.google.guava:guava:31.0.1-jre'
+    implementation "androidx.startup:startup-runtime:1.1.1"
+    implementation 'com.neovisionaries:nv-i18n:1.29'
+    implementation 'org.jetbrains:annotations:23.0.0'
 }

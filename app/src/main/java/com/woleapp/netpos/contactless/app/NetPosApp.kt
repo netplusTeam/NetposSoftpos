@@ -12,8 +12,10 @@ import com.visa.app.ttpkernel.ContactlessConfiguration
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.*
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
+import com.woleapp.netpos.contactless.taponphone.verve.VerveSoftPosInitialization
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import java.util.Observable
 
 @HiltAndroidApp
 class NetPosApp : Application() {
@@ -23,6 +25,7 @@ class NetPosApp : Application() {
     private lateinit var configuration: ConfigurationInterface
     lateinit var builder: StringBuilder
     lateinit var nfcProvider: NfcProvider
+    private lateinit var verveSoftPosInitializationObservable: Observable
 
     companion object {
         lateinit var INSTANCE: NetPosApp
@@ -41,8 +44,12 @@ class NetPosApp : Application() {
             Timber.plant(Timber.DebugTree())
         }
         DPrefs.initializeDPrefs(this)
+
         //initialize NetPos Tianyu sdk
         NetPosTySdk.initialize(applicationContext)
+
+        //initialize verve sdk
+        verveSoftPosInitializationObservable = VerveSoftPosInitialization(this)
     }
 
     private fun initVisaLib() {

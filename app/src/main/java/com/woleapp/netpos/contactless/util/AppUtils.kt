@@ -98,14 +98,14 @@ fun vibrateThePhone(context: Context, duration: Long = LONG_150) {
 fun isInternetAvailable(context: Context): Boolean {
     val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     // For Android Q and above (API level 29 and above)
-    if (Build.VERSION.SDK_INT >= VERSION_CODES.Q) {
+    return if (Build.VERSION.SDK_INT >= VERSION_CODES.Q) {
         val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+        capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
     } else {
         // For below Android Q (API level 29)
         @Suppress("DEPRECATION")
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected
+        activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 }
 

@@ -90,6 +90,7 @@ fun showSelectCardDialog(context: Activity, liveData: MutableLiveData<Event<NfcP
         binding.mastercardSelector.isVisible = true
         nfcPaymentType = NfcPaymentType.MASTERCARD
         binding.visaSelector.isVisible = false
+        binding.verveCardSelector.isVisible = false
         binding.proceedButton.isEnabled = true
     }
     binding.visaIcon.setOnClickListener {
@@ -98,6 +99,16 @@ fun showSelectCardDialog(context: Activity, liveData: MutableLiveData<Event<NfcP
         binding.visaSelector.isVisible = true
         binding.proceedButton.isEnabled = true
     }
+
+
+    binding.verveCardIcon.setOnClickListener {
+        binding.verveCardSelector.isVisible = true
+        nfcPaymentType = NfcPaymentType.VERVE
+        binding.visaSelector.isVisible = false
+        binding.mastercardSelector.isVisible = false
+        binding.proceedButton.isEnabled = true
+    }
+
     binding.proceedButton.setOnClickListener {
         selectCardDialog.cancel()
         liveData.postValue(Event(nfcPaymentType))
