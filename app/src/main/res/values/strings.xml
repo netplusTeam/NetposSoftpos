@@ -98,6 +98,7 @@
     <string name="account_name">Account Name</string>
     <string name="lbl_convinience_fee">Convinence Fee</string>
     <string name="proceed">Proceed</string>
+    <string name="verve_card_icon">Verve card icon</string>
     <string name="enter_mobile_number">Mobile Number</string>
     <string name="confirm_mobile_number">Confirm Mobile Number</string>
     <string name="lbl_pay">Pay</string>

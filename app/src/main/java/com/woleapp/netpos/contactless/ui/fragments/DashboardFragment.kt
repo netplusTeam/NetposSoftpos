@@ -30,7 +30,6 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.netplus.NetPosTySdk
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
@@ -146,65 +145,17 @@ class DashboardFragment : BaseFragment() {
         viewModel.getCardData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
-                    if (NetPosTySdk.isCardExists() != 0) {
-                        showCardDialog(
-                            requireActivity(),
-                            viewLifecycleOwner,
-                        ).observe(viewLifecycleOwner) { event ->
-                            event.getContentIfNotHandled()?.let {
-                                Timber.e(it.toString())
-                                nfcCardReaderViewModel.initiateNfcPayment(
-                                    viewModel.amountLong,
-                                    viewModel.cashbackLong,
-                                    it,
-                                )
-                            }
-                        }
-                    } else {
-                        val keyHolder = getKeyHolder()
-                        if (keyHolder?.clearPinKey == null) {
-                            showToast("Key Holder or Clear Pin Key is null")
-                            return@let
-                        }
-
-                        loader.show()
-                        lifecycleScope.launch(Dispatchers.IO) {
-                            NetPosTySdk.launchEmvProcess(viewModel.amountLong.toString())
-
-                            val cardDataAndPinBlockPair =
-                                NetPosTySdk.getCardDataAndPinBlock(keyHolder.clearPinKey)
-                            Log.d("Card_Data",
-                                "${Gson().toJson(cardDataAndPinBlockPair)}, clearPin:${keyHolder.clearPinKey}"
+                    showCardDialog(
+                        requireActivity(),
+                        viewLifecycleOwner,
+                    ).observe(viewLifecycleOwner) { event ->
+                        event.getContentIfNotHandled()?.let {
+                            Timber.e(it.toString())
+                            nfcCardReaderViewModel.initiateNfcPayment(
+                                viewModel.amountLong,
+                                viewModel.cashbackLong,
+                                it,
                             )
-
-                            val cardData = cardDataAndPinBlockPair.first
-                            if (cardData == null) {
-                                withContext(Dispatchers.Main) {
-                                    showToast("Card data is null")
-                                }
-                                return@launch
-                            }
-
-                            withContext(Dispatchers.Main) {
-                                loader.dismiss()
-                                showAccountTypeDialogForContact { accountType ->
-                                    nfcCardReaderViewModel.iccCardHelper.let { iccCardHelper ->
-                                        iccCardHelper.accountType = accountType
-                                        iccCardHelper.cardData = CardData(
-                                            cardData.track2Data,
-                                            cardData.nibssIccSubset,
-                                            cardData.panSequenceNumber.removeSuffix("f"),
-                                            cardData.posEntryMode
-                                        ).apply {
-                                            pinBlock = cardDataAndPinBlockPair.second
-                                        }
-                                        iccCardHelper.cardScheme = "${cardData.cardType}"
-                                        nfcCardReaderViewModel.setIccCardHelperLiveData(
-                                            iccCardHelper
-                                        )
-                                    }
-                                }
-                            }
                         }
                     }
 

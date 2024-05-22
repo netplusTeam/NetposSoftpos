@@ -7,14 +7,15 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
-import com.netplus.NetPosTySdk
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessConfiguration
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
+import com.woleapp.netpos.contactless.taponphone.verve.VerveSoftPosInitialization
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import java.util.Observable
 
 @HiltAndroidApp
 class NetPosApp : Application() {
@@ -24,6 +25,7 @@ class NetPosApp : Application() {
     private lateinit var configuration: ConfigurationInterface
     lateinit var builder: StringBuilder
     lateinit var nfcProvider: NfcProvider
+    private lateinit var verveSoftPosInitializationObservable: Observable
 
     companion object {
         lateinit var INSTANCE: NetPosApp
@@ -48,8 +50,8 @@ class NetPosApp : Application() {
             .build()
         initVisaLib()
 
-        //initialize NetPos Tianyu sdk
-        NetPosTySdk.initialize(applicationContext)
+        //initialize verve sdk
+        verveSoftPosInitializationObservable = VerveSoftPosInitialization(this)
     }
 
     private fun initVisaLib() {

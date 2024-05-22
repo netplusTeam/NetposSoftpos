@@ -17,6 +17,7 @@ class LiveNfcTransReceiver(
         var response: ByteArray? = null
         response = try {
             // send command to emv card
+            mTagCom!!.connect()
             mTagCom!!.transceive(pCommand)
         } catch (e: IOException) {
             throw IOException(e.message)

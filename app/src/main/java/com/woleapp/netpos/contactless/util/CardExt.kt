@@ -53,6 +53,7 @@ fun showCardDialog(
                     //getFakeCardLiveData(liveData)
                     NetPosTerminalConfig.liveData.removeObserver(observer!!)
                 }
+
                 -1 -> {
                     configurationFinished = true
                     if (progressDialog.isShowing)
@@ -63,6 +64,7 @@ fun showCardDialog(
                     } else
                         Toast.makeText(context, "Connection Failed", Toast.LENGTH_SHORT).show()
                 }
+
                 else -> {
                 }
             }
@@ -73,6 +75,7 @@ fun showCardDialog(
         NetPosTerminalConfig.configurationStatus != 1 && NetPosTerminalConfig.isConfigurationInProcess.not() -> NetPosTerminalConfig.init(
             context.applicationContext
         )
+
         NetPosTerminalConfig.isConfigurationInProcess -> if (configurationFinished.not()) progressDialog.show()
         NetPosTerminalConfig.configurationStatus == 1 ->
             showSelectCardDialog(context, liveData)
@@ -90,14 +93,25 @@ fun showSelectCardDialog(context: Activity, liveData: MutableLiveData<Event<NfcP
         binding.mastercardSelector.isVisible = true
         nfcPaymentType = NfcPaymentType.MASTERCARD
         binding.visaSelector.isVisible = false
+        binding.verveCardSelector.isVisible = false
         binding.proceedButton.isEnabled = true
     }
+
     binding.visaIcon.setOnClickListener {
         nfcPaymentType = NfcPaymentType.VISA
         binding.mastercardSelector.isVisible = false
         binding.visaSelector.isVisible = true
         binding.proceedButton.isEnabled = true
     }
+
+    binding.verveCardIcon.setOnClickListener {
+        binding.verveCardSelector.isVisible = true
+        nfcPaymentType = NfcPaymentType.VERVE
+        binding.visaSelector.isVisible = false
+        binding.mastercardSelector.isVisible = false
+        binding.proceedButton.isEnabled = true
+    }
+
     binding.proceedButton.setOnClickListener {
         selectCardDialog.cancel()
         liveData.postValue(Event(nfcPaymentType))

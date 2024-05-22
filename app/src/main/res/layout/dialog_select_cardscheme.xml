@@ -67,6 +67,31 @@
             app:layout_constraintStart_toEndOf="@id/visa_icon"
             app:layout_constraintTop_toTopOf="@id/visa_icon" />
 
+        <View
+            android:visibility="invisible"
+            android:id="@+id/verve_card_selector"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/services_edittext_background"
+            app:layout_constraintBottom_toBottomOf="@id/verve_card_icon"
+            app:layout_constraintEnd_toEndOf="@id/verve_card_icon"
+            app:layout_constraintStart_toStartOf="@id/verve_card_icon"
+            app:layout_constraintTop_toTopOf="@id/verve_card_icon" />
+        <ImageView
+            android:id="@+id/verve_card_icon"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:paddingLeft="@dimen/dimen_80dp"
+            android:paddingRight="@dimen/dimen_80dp"
+            android:layout_marginStart="@dimen/dimen_4dp"
+            android:contentDescription="@string/verve_card_icon"
+            android:src="@drawable/verve_card"
+            android:layout_marginTop="@dimen/dimen_32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/visa_icon"
+            app:layout_constraintTop_toBottomOf="@id/visa_icon" />
+
         <Button
             android:enabled="false"
             android:id="@+id/proceed_button"
@@ -76,7 +101,7 @@
             android:text="@string/proceed"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/visa_icon" />
+            app:layout_constraintTop_toBottomOf="@id/verve_card_icon" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

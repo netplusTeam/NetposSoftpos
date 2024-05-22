@@ -46,4 +46,5 @@
     <dimen name="dimen_7dp">7dp</dimen>
     <dimen name="dimen_6dp">6dp</dimen>
     <dimen name="dimen_55dp">55dp</dimen>
+    <dimen name="dimen_80dp">80dp</dimen>
 </resources>

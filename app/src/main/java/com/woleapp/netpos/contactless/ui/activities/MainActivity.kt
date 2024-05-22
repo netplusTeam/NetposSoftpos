@@ -31,6 +31,8 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.google.android.gms.tasks.OnCompleteListener
@@ -38,7 +40,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.netplus.netpostyp10possdk.utils.Utilities.showToast
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
@@ -50,7 +51,12 @@ import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-impo
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
+import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager.READER_FLAGS
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
+import com.woleapp.netpos.contactless.taponphone.verve.TransactionViewModelFactory
+import com.woleapp.netpos.contactless.taponphone.verve.VerveTransactionViewModel
+import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
 import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
@@ -121,6 +127,10 @@ class MainActivity :
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
     private lateinit var copyAccountNumber: String
 
+    private lateinit var mVerveTransactionViewModel: VerveTransactionViewModel
+    private var verveNfcListener: NFCListener? = null
+    private val salesViewModel by viewModels<SalesViewModel>()
+
     override fun onStart() {
         super.onStart()
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
@@ -153,13 +163,31 @@ class MainActivity :
         }
     }
 
-    private fun startNfcPayment() {
-        nfcAdapter?.enableReaderMode(
-            this,
-            this,
-            READER_FLAGS,
-            Bundle(),
-        )
+    private fun startNfcPayment(nfcDataWrapper: NfcDataWrapper) {
+        when(nfcDataWrapper.cardType) {
+            NfcPaymentType.VISA -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    this,
+                    READER_FLAGS,
+                    Bundle(),
+                )
+            }
+            NfcPaymentType.VERVE -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    { tag: Tag? -> verveNfcListener!!.onNfcTagDiscovered(tag) }, READER_FLAGS, null
+                )
+            }
+            else -> {
+                nfcAdapter?.enableReaderMode(
+                    this,
+                    this,
+                    READER_FLAGS,
+                    Bundle(),
+                )
+            }
+        }
     }
 
     private fun stopNfcPayment() {
@@ -407,9 +435,10 @@ class MainActivity :
         showFragment(DashboardFragment(), DashboardFragment::class.java.simpleName)
         viewModel.enableNfcForegroundDispatcher.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                if (it) {
-                    startNfcPayment()
-                } else {
+                if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD )) {
+                    startNfcPayment(it)
+                }
+                else if (!it.enable && it.cardType == null) {
                     stopNfcPayment()
                 }
             }
@@ -434,6 +463,7 @@ class MainActivity :
                 dialogContactlessReaderBinding.contactlessHeader.highlightTexts(
                     NfcPaymentType.MASTERCARD.cardScheme,
                     NfcPaymentType.VISA.cardScheme,
+                    NfcPaymentType.VERVE.cardScheme
                 )
                 dialogContactlessReaderBinding.cardScheme.setImageResource(it.icon)
                 waitingDialog.show()
@@ -541,6 +571,19 @@ class MainActivity :
 
         binding.dashboardHeader.merchantDetails.setOnClickListener {
             copyText()
+        }
+
+        verveNfcListener = NfcProvider(this).verveNfcListener
+        setUpViewModelForVerve()
+        setUpObserversForVerveTransaction()
+        viewModel.startVerveTransaction.observe(this) { event ->
+            event.getContentIfNotHandled()?.let {
+                if(it) {
+                    mVerveTransactionViewModel.startTransaction(this)
+                } else {
+                    mVerveTransactionViewModel.cancelTransaction()
+                }
+            }
         }
     }
 
@@ -1069,7 +1112,7 @@ class MainActivity :
         if(isInternetAvailable(this)) {
             notificationModel.registerDeviceToken(token, terminalId, username)
         } else{
-            this.showToast("Please connect to the internet and relaunch")
+            Toast.makeText(this, "Please connect to the internet and relaunch", Toast.LENGTH_LONG).show()
         }
 
     }
@@ -1178,43 +1221,17 @@ class MainActivity :
         }
     }
 
-
-//    private fun checkForAppUpdate() {
-//        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-//            val isUpdateAvailable = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-//            val isUpdateAllowed = when (updateType) {
-//                AppUpdateType.FLEXIBLE -> info.isFlexibleUpdateAllowed
-//                AppUpdateType.IMMEDIATE -> info.isImmediateUpdateAllowed
-//                else -> false
-//            }
-//
-//            if (isUpdateAvailable && isUpdateAllowed) {
-//                appUpdateManager.startUpdateFlowForResult(
-//                    info,
-//                    updateType,
-//                    this,
-//                    APP_UPDATE_REQUEST_CODE,
-//                )
-//            }
-//        }
-//    }
-
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//        if (requestCode == APP_UPDATE_REQUEST_CODE) {
-//            if (resultCode != APP_UPDATE_REQUEST_CODE) {
-//                Timber.tag(APP_UPDATE_TAG).e("SOMETHING WENT WRONG WHILE TRYING TO UPDATE THE APP")
-//            } else {
-//                Toast.makeText(
-//                    this,
-//                    getString(R.string.app_uploaded_successfully),
-//                    Toast.LENGTH_SHORT,
-//                ).show()
-//                lifecycleScope.launch {
-//                    delay(5000)
-//                    appUpdateManager.completeUpdate()
-//                }
-//            }
-//        }
-//    }
+    private fun setUpViewModelForVerve() {
+        val transactionParameters = salesViewModel.setupTransactionForVerveSDK()
+        mVerveTransactionViewModel = ViewModelProvider(
+            this,
+            TransactionViewModelFactory(applicationContext, verveNfcListener!!, transactionParameters)
+        )[VerveTransactionViewModel::class.java]
+    }
+    private fun setUpObserversForVerveTransaction() {
+        mVerveTransactionViewModel.onTransactionFinishedEvent
+            .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
+                viewModel.doVerveCardTransaction(transactionFullDataDto)
+            }
+    }
 }

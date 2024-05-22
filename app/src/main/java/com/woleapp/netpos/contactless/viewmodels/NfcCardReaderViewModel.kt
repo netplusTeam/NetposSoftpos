@@ -2,9 +2,11 @@ package com.woleapp.netpos.contactless.viewmodels
 
 import android.os.Build
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.alcineo.softpos.payment.model.transaction.TransactionEndStatus
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.google.gson.Gson
@@ -16,10 +18,12 @@ import com.visa.app.ttpkernel.TtpOutcome
 import com.visa.vac.tc.emvconverter.Utils
 import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
+import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.listener.TransactionListener
 import com.woleapp.netpos.contactless.taponphone.tlv.BerTag
 import com.woleapp.netpos.contactless.taponphone.tlv.BerTlvParser
 import com.woleapp.netpos.contactless.taponphone.tlv.HexUtil
+import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
 import com.woleapp.netpos.contactless.taponphone.visa.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.taponphone.visa.PPSEv21.PPSEManager
 import com.woleapp.netpos.contactless.util.Event
@@ -30,6 +34,7 @@ import io.reactivex.disposables.CompositeDisposable
 import org.apache.commons.lang.StringUtils
 import timber.log.Timber
 import java.io.IOException
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,7 +46,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         MutableLiveData()
     val lastPosTransactionResponse: LiveData<TransactionResponse> get() = _lastPosTransactionResponse
 
-    private val _enableNfcForegroundDispatcher: MutableLiveData<Event<Boolean>> by lazy {
+    private val _enableNfcForegroundDispatcher: MutableLiveData<Event<NfcDataWrapper>> by lazy {
         MutableLiveData()
     }
 
@@ -50,7 +55,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         MutableLiveData()
     val qrTransactionResponseFromWebView: LiveData<QrTransactionResponseFinalModel> get() = _qrTransactionResponseFromWebView
 
-    val enableNfcForegroundDispatcher: LiveData<Event<Boolean>>
+    val enableNfcForegroundDispatcher: LiveData<Event<NfcDataWrapper>>
         get() = _enableNfcForegroundDispatcher
 
     private val _iccCardHelperLiveData: MutableLiveData<Event<ICCCardHelper>> by lazy {
@@ -86,6 +91,12 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
     private lateinit var amountInBytes: ByteArrayWrapper
     private lateinit var cashBackAmountInBytes: ByteArrayWrapper
 
+    private val _startVerveTransaction: MutableLiveData<Event<Boolean>> by lazy {
+        MutableLiveData()
+    }
+    val startVerveTransaction: LiveData<Event<Boolean>>
+        get() = _startVerveTransaction
+
     private val _message: MutableLiveData<Event<String?>> by lazy {
         MutableLiveData(null)
     }
@@ -118,8 +129,69 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             ByteArrayWrapper(StringUtils.leftPad(cashBackAmount.toString(), 12, '0'))
 
         when (nfcPaymentType) {
-            NfcPaymentType.VISA -> _enableNfcForegroundDispatcher.postValue(Event(true))
+            NfcPaymentType.VISA -> {
+                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VISA)))
+            }
             NfcPaymentType.MASTERCARD -> doMasterCardTransaction()
+            NfcPaymentType.VERVE -> {
+                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VERVE)))
+                _startVerveTransaction.postValue(Event(true))
+            }
+        }
+    }
+
+
+    fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto) {
+        _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
+        val transactionResult = transactionFullDataDto.transactionResult
+        val transactionEndStatus = transactionResult?.transactionEndStatus
+        var iccData = ""
+        //destructure transactionResult to interact with its tlv items children and filter out tags and values
+        if (transactionEndStatus == TransactionEndStatus.APPROVED || transactionEndStatus == TransactionEndStatus.DECLINED) {
+            val requiredTagsSet = REQUIRED_TAGS.toSet()
+            //removing this tags as NIBBS rejects icc if they are there
+            val unwantedTagsSet = setOf("57", "5A", "5F24", "5F20")
+            val tagValueMap =
+                transactionResult.transactionOutcomeTlvItems.orEmpty().flatMap { tlvItem ->
+                    val tag = tlvItem.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
+                    // Update iccData only if the tag is in the required set and not in the unwanted set
+                    if (tag in requiredTagsSet && tag !in unwantedTagsSet) {
+                        iccData =
+                            tlvItem.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
+                                .uppercase(Locale.ENGLISH)
+                    }
+                    sequenceOf(tlvItem) + (tlvItem.children.orEmpty().asSequence())
+                }.associate {
+                    val tag = it.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
+                    val value =
+                        it.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
+                            .uppercase(Locale.ENGLISH)
+                    tag to value
+                }.filterKeys { it in requiredTagsSet }.toMutableMap()
+            val track2 = tagValueMap["57"]
+            val pan = track2?.split("D")?.firstOrNull()
+            if (track2 != null && pan != null) {
+                iccCardHelper = ICCCardHelper()
+                iccCardHelper.apply {
+                    cardScheme = NfcPaymentType.VERVE.name
+                    customerName = "CUSTOMER"
+                }
+                val cardData = CardData(
+                    track2,
+                    iccData,
+                    pan,
+                    "051"
+                )
+                iccCardHelper.cardData = cardData
+                _showWaitingDialog.postValue(Event(null))
+                _showPinPadDialog.postValue(Event(pan))
+                Log.d("CardTransaction", "CardData: ${Gson().toJson(cardData)}")
+                _startVerveTransaction.postValue(Event(false))
+            }
+        } else {
+            _showWaitingDialog.postValue(Event(null))
+            _startVerveTransaction.postValue(Event(false))
+            _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card. Please confirm the card brand"))))
         }
     }
 
@@ -249,7 +321,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 null
             }
         }
-        _enableNfcForegroundDispatcher.postValue(Event(false))
+
+        _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
+
         if (outcome == TtpOutcome.COMPLETED) {
             iccCardHelper.apply {
                 cardScheme = NfcPaymentType.VISA.name
@@ -383,7 +457,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
     fun finishNfcReading() {
         Timber.e(iccCardHelper.toString())
-        _enableNfcForegroundDispatcher.postValue(Event(false))
+        _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         _iccCardHelperLiveData.postValue(Event(iccCardHelper))
     }
 

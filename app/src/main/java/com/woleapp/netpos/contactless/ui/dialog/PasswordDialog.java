@@ -165,7 +165,14 @@ public class PasswordDialog {
     private static String encodePinBlock(String pin, String pan) {
         Timber.e(pan);
         String pinP = "0" + pin.length() + pin + "FFFFFFFFFF";
-        String cardNum = "0000" + pan.substring(3, 15);
+        String cardNum;
+        if(pan.length() > 16) {
+            //for cards with 19 pan digits n make it fit into the standard 16-digit field expected by the format 0 PIN block structure.
+            cardNum = "0000" + pan.substring(6, 18);
+        }else{
+            cardNum = "0000" + pan.substring(3, 15);
+        }
+
         // System.out.println(Util.BytesToString(HexDump.hexStringToByteArray("0425A8EF8B7A6E66")));
         String pinblock = ExtensionFunctionsKt.xorHex(pinP, cardNum);
         //System.out.println(ExtensionFunctionsKt.xorHex(pin, cardNum));
