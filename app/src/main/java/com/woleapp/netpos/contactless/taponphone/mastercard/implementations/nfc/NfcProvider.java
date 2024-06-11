@@ -11,7 +11,6 @@ import com.alcineo.softpos.payment.api.interfaces.NFCListener;
 import com.mastercard.terminalsdk.exception.L1RSPException;
 import com.mastercard.terminalsdk.listeners.CardCommunicationProvider;
 import com.mastercard.terminalsdk.objects.ErrorIndication;
-import com.woleapp.netpos.contactless.BuildConfig;
 import com.woleapp.netpos.contactless.taponphone.verve.VerveNFCListenerImpl;
 
 import java.io.IOException;
@@ -26,7 +25,6 @@ public class NfcProvider implements CardCommunicationProvider {
     private TagEventListener mTagEventListener;
     private boolean isCardTapped;
 
-
     private boolean nFCEnabled;
 
     /**
@@ -34,49 +32,41 @@ public class NfcProvider implements CardCommunicationProvider {
      */
     private long mCommandExecutionTime = 0;
 
-    private NFCListener verveNfcListener = new VerveNFCListenerImpl();
+    private final NFCListener verveNfcListener = new VerveNFCListenerImpl();
+
     public NFCListener getVerveNfcListener() {
         return verveNfcListener;
     }
 
     public NfcProvider(Activity currentContext) {
-
         mNFCManager = new NFCManager(currentContext);
-        // Check if NFC is enabled
         nFCEnabled = mNFCManager.isNFCEnabled();
         disconnectReader();
     }
 
     @Override
     public byte[] sendReceive(byte[] bytes) throws L1RSPException {
-
         byte[] response;
         try {
             if (mIsoDep.isConnected()) {
                 long startTime = System.nanoTime();
                 response = mIsoDep.transceive(bytes);
                 long endTime = System.nanoTime();
-                // Command execution time in nano seconds
                 mCommandExecutionTime = endTime - startTime;
             } else {
                 isCardTapped = false;
                 throw new L1RSPException("", ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
             }
         } catch (TagLostException exception) {
-            if (BuildConfig.DEBUG) {
-                Log.e(TAG, "TagLostException", exception.getCause());
-            }
             isCardTapped = false;
             throw new L1RSPException("Tag Lost", ErrorIndication.L1_Error_Code.TIMEOUT_ERROR);
-
         } catch (IOException e) {
             isCardTapped = false;
             throw new L1RSPException(e.getMessage(), ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
-
         }
+
         if (response.length < 2) {
-            throw new L1RSPException("Response Length less than 2 bytes",
-                    ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
+            throw new L1RSPException("Response Length less than 2 bytes", ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
         }
 
         return response;
@@ -84,9 +74,7 @@ public class NfcProvider implements CardCommunicationProvider {
 
     @Override
     public ConnectionObject waitForCard() throws L1RSPException {
-        if (BuildConfig.DEBUG) {
-            Log.i("is card Tapped ", "" + isCardTapped);
-        }
+        Log.i("is card Tapped ", "" + isCardTapped);
         if (isCardTapped) {
             return new ConnectionObjectImpl();
         }
@@ -94,32 +82,32 @@ public class NfcProvider implements CardCommunicationProvider {
             try {
                 mIsoDep = mTagEventListener.getIsoDep();
             } catch (Exception e) {
-                if (BuildConfig.DEBUG) {
-                    Log.e(TAG, "An Exception was encountered: ", e.getCause());
-                }
+                Log.e(TAG, "An Exception was encountered: ", e.getCause());
             }
             if (mIsoDep != null) {
-                if (BuildConfig.DEBUG) {
-                    Log.i(TAG, "connectCard: Card Tapped");
-                }
+                Log.i(TAG, "connectCard: Card Tapped");
                 try {
                     mIsoDep.connect();
                     mIsoDep.setTimeout(10000);
                     isCardTapped = true;
                     return new ConnectionObjectImpl();
                 } catch (IOException | IllegalStateException e) {
-                    throw new L1RSPException(e.getMessage(),
-                            ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
+                    Log.e(TAG, "Connection failed, attempting to revalidate the tag: ", e);
+                    mTagEventListener.invalidateTag();
+                    try {
+                        Thread.sleep(100); // Small delay before retrying
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                    continue; // Retry connection
                 }
             }
         }
-        throw new L1RSPException("Some Connection issue",
-                ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
+        throw new L1RSPException("Some Connection issue", ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
     }
 
     @Override
     public boolean removeCard() {
-
         if (mIsoDep != null && mIsoDep.isConnected()) {
             try {
                 mIsoDep.close();
@@ -130,16 +118,16 @@ public class NfcProvider implements CardCommunicationProvider {
                 return false;
             }
         } else {
+            Log.w(TAG, "removeCard: IsoDep is null or disconnected");
             return true;
         }
     }
 
     @Override
     public boolean connectReader() throws L1RSPException {
-
         if (mIsoDep == null) {
-            // Establish Connection with reader
             mTagEventListener = new TagEventListener();
+            assert mNFCManager != null;
             mNFCManager.enableNFCReaderMode(new ReaderCallbackImpl(mTagEventListener, (VerveNFCListenerImpl) verveNfcListener));
             mIsoDep = null;
             isCardTapped = false;
@@ -175,7 +163,7 @@ public class NfcProvider implements CardCommunicationProvider {
 
     @Override
     public boolean isCardPresent() {
-        return mIsoDep.isConnected();
+        return mIsoDep != null && mIsoDep.isConnected();
     }
 
     @Override
@@ -185,7 +173,6 @@ public class NfcProvider implements CardCommunicationProvider {
 
     @Override
     public long getPreviousCommandExecutionTime() {
-        // return command execution time in microseconds
         return mCommandExecutionTime / 1000;
     }
 
@@ -194,7 +181,6 @@ public class NfcProvider implements CardCommunicationProvider {
     }
 
     private class ConnectionObjectImpl implements ConnectionObject {
-
         @Override
         public InterfaceType getInterfaceType() {
             return InterfaceType.CONTACTLESS;

@@ -6,6 +6,7 @@ import android.nfc.tech.IsoDep;
 
 import com.woleapp.netpos.contactless.taponphone.verve.VerveNFCListenerImpl;
 
+
 class ReaderCallbackImpl implements NfcAdapter.ReaderCallback {
 
     private TagEventListener mTagEventListener;

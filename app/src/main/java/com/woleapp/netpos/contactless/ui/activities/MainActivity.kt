@@ -34,7 +34,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
-import com.alcineo.softpos.payment.model.beep.BeepStatus
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.enums.DPrefsDefaultValue
@@ -44,7 +43,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
-import com.netplus.netpostyp10possdk.utils.Utilities.showToast
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
@@ -1112,7 +1110,7 @@ class MainActivity :
         if(isInternetAvailable(this)) {
             notificationModel.registerDeviceToken(token, terminalId, username)
         } else{
-            this.showToast("Please connect to the internet and relaunch")
+            Toast.makeText(this, "Please connect to the internet and relaunch", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -11,27 +11,35 @@ import java.util.Arrays
 import java.util.Observable
 
 @SuppressLint("LogNotTimber")
-class VerveSoftPosInitialization(context: Context) : Observable() {
+class VerveSoftPosInitialization private constructor(context: Context) : Observable() {
+
     var isDeviceReady = false
 
-    /**
-     * Initialization process
-     * Tasks are ordered and should not be reorganized
-     */
     init {
+        initializeSoftPos(context)
+    }
+
+    private fun initializeSoftPos(context: Context) {
         Thread {
-            SoftposAPI.initialize(context)
+            synchronized(this) {
+                if (!isInitialized) {
+                    SoftposAPI.initialize(context)
+                    isInitialized = true
+                } else {
+                    Log.i(TAG, "SoftposAPI is already initialized")
+                }
+            }
+
             Log.i(
                 TAG,
                 """
-                    
                     -----------------------------------------------------
                     DUID: ${Arrays.toString(DeviceInfoAPI.getDeviceUid())}
                     SoftPOS library version: ${SoftposPropertiesAPI.getSoftposLibraryVersion()}
                     """.trimIndent() + String.format(
                     "\nAndroid version %s, security patch %s",
                     Build.VERSION.SDK_INT,
-                    Build.VERSION.SECURITY_PATCH.replace("-".toRegex(), "")
+                    Build.VERSION.SECURITY_PATCH.replace("-", "")
                 ) +
                         "\n--------------------------------------------------------------------------"
             )
@@ -43,5 +51,16 @@ class VerveSoftPosInitialization(context: Context) : Observable() {
 
     companion object {
         private val TAG = VerveSoftPosInitialization::class.java.simpleName
+        @Volatile
+        private var isInitialized = false
+
+        @Volatile
+        private var instance: VerveSoftPosInitialization? = null
+
+        fun getInstance(context: Context): VerveSoftPosInitialization {
+            return instance ?: synchronized(this) {
+                instance ?: VerveSoftPosInitialization(context).also { instance = it }
+            }
+        }
     }
 }
