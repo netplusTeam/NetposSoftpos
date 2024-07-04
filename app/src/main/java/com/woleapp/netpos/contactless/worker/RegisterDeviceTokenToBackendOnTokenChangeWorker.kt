@@ -1,7 +1,7 @@
 package com.woleapp.netpos.contactless.worker
 
 import android.content.Context
-import androidx.work.Worker
+import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.woleapp.netpos.contactless.model.NotificationRegisterDeviceTokenModel
 import com.woleapp.netpos.contactless.model.RegisterDeviceTokenResponse
@@ -10,39 +10,55 @@ import com.woleapp.netpos.contactless.util.AppConstants.WORKER_INPUT_FIREBASE_DE
 import com.woleapp.netpos.contactless.util.NotificationClient
 import com.woleapp.netpos.contactless.util.RxJavaUtils.getSingleTransformer
 import com.woleapp.netpos.contactless.util.Singletons
-import com.woleapp.netpos.contactless.util.disposeWith
-import io.reactivex.disposables.CompositeDisposable
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class RegisterDeviceTokenToBackendOnTokenChangeWorker(
     val context: Context,
-    private val workParameters: WorkerParameters,
-) : Worker(context, workParameters) {
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-
+    private val workParameters: WorkerParameters
+) : CoroutineWorker(context, workParameters) {
     private val notificationRepository = NotificationClient.getInstance()
 
-    override fun doWork(): Result {
+    override suspend fun doWork(): Result {
         val terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id
         val userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         val deviceToken = inputData.getString(WORKER_INPUT_FIREBASE_DEVICE_TOKEN_TAG)
 
-        val response = terminalId?.let { tid ->
-            var tokenResponse: RegisterDeviceTokenResponse? = null
-            deviceToken?.let { token ->
-                val req = NotificationRegisterDeviceTokenModel(token, tid, userName)
-                notificationRepository.registerDeviceToken(req)
-                    .compose(getSingleTransformer(NOTIFICATION_ERROR))
-                    .subscribe { value ->
-                        tokenResponse = value
-                    }.disposeWith(compositeDisposable)
+        return if (terminalId != null && deviceToken != null) {
+            val req = NotificationRegisterDeviceTokenModel(deviceToken, terminalId, userName)
+            try {
+                val success = registerDeviceToken(req).success
+                if (success) {
+                    Result.success()
+                } else {
+                    Result.retry()
+                }
+            } catch (e: Exception) {
+                Result.retry()
             }
-            tokenResponse?.success
-        } ?: false
-
-        return if (response) {
-            Result.success()
         } else {
             Result.retry()
         }
     }
+
+    private suspend fun registerDeviceToken(req: NotificationRegisterDeviceTokenModel): RegisterDeviceTokenResponse =
+        suspendCancellableCoroutine { cont ->
+            val disposable = notificationRepository.registerDeviceToken(req)
+                .compose(getSingleTransformer(NOTIFICATION_ERROR))
+                .subscribe(
+                    { response ->
+                        cont.resume(response)
+                    },
+                    { error ->
+                        cont.resumeWithException(error)
+                    }
+                )
+
+            // Dispose the disposable if the coroutine is cancelled
+            cont.invokeOnCancellation {
+                disposable.dispose()
+            }
+        }
+
 }

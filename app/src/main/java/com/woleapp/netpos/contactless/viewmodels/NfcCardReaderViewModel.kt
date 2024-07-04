@@ -131,9 +131,11 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         when (nfcPaymentType) {
             NfcPaymentType.VISA -> {
                 _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VISA)))
+                _startVerveTransaction.postValue(Event(false))
             }
             NfcPaymentType.MASTERCARD -> {
                 doMasterCardTransaction()
+                _startVerveTransaction.postValue(Event(false))
             }
             NfcPaymentType.VERVE -> {
                 _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VERVE)))
