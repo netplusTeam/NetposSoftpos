@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.os.Build
+import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -9,6 +10,8 @@ import androidx.lifecycle.ViewModel
 import com.alcineo.softpos.payment.model.transaction.TransactionEndStatus
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.dsofttech.dprefs.utils.DPrefs.putDouble
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.Gson
 import com.mastercard.terminalsdk.listeners.PaymentDataProvider
 import com.mastercard.terminalsdk.utility.ByteArrayWrapper
@@ -144,7 +147,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto) {
+    fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto, firebaseAnalytics: FirebaseAnalytics) {
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
@@ -196,6 +199,10 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 _startVerveTransaction.postValue(Event(false))
             }
         } else {
+            val bundle = Bundle().apply {
+                put(FirebaseAnalytics., "Throwable(\"Error occurred while reading card. Please confirm the card brand\")")
+            }
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
             _showWaitingDialog.postValue(Event(null))
             _startVerveTransaction.postValue(Event(false))
             _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card. Please confirm the card brand"))))

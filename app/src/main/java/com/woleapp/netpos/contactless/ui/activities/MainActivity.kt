@@ -41,6 +41,8 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.visa.app.ttpkernel.ContactlessKernel
@@ -136,6 +138,7 @@ class MainActivity :
     private lateinit var mVerveTransactionViewModel: VerveTransactionViewModel
     private var verveNfcListener: NFCListener? = null
     private val salesViewModel by viewModels<SalesViewModel>()
+    private lateinit var crashlytics: FirebaseCrashlytics
 
     override fun onStart() {
         super.onStart()
@@ -273,6 +276,11 @@ class MainActivity :
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 //        // First check if there is an update
 //        checkForAppUpdate()
+
+
+        // Initialize Crashlytics
+        crashlytics = FirebaseCrashlytics.getInstance()
+        crashlytics.setCrashlyticsCollectionEnabled(true) // Ensure collection is enabled
 
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
@@ -1203,9 +1211,10 @@ class MainActivity :
     }
 
     private fun setUpObserversForVerveTransaction() {
+        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         mVerveTransactionViewModel.onTransactionFinishedEvent
             .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
-                viewModel.doVerveCardTransaction(transactionFullDataDto)
+                viewModel.doVerveCardTransaction(transactionFullDataDto, firebaseAnalytics)
             }
     }
 }
