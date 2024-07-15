@@ -271,6 +271,7 @@ class MainActivity :
         progressDialog?.dismiss()
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
@@ -319,7 +320,6 @@ class MainActivity :
             setMessage("Configuring Terminal, Please wait")
             setCancelable(false)
         }
-
         val mid = Singletons.getConfigData()?.cardAcceptorIdCode ?: ""
         requestNarration =
             if (Singletons.getCurrentlyLoggedInUser()?.terminal_id?.isNotEmpty() == true) {
@@ -1211,10 +1211,9 @@ class MainActivity :
     }
 
     private fun setUpObserversForVerveTransaction() {
-        val firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         mVerveTransactionViewModel.onTransactionFinishedEvent
             .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
-                viewModel.doVerveCardTransaction(transactionFullDataDto, firebaseAnalytics)
+                viewModel.doVerveCardTransaction(transactionFullDataDto)
             }
     }
 }

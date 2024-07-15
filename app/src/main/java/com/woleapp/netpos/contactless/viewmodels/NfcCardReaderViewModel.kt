@@ -12,6 +12,7 @@ import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.dsofttech.dprefs.utils.DPrefs.putDouble
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.mastercard.terminalsdk.listeners.PaymentDataProvider
 import com.mastercard.terminalsdk.utility.ByteArrayWrapper
@@ -147,7 +148,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto, firebaseAnalytics: FirebaseAnalytics) {
+    fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto) {
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
@@ -199,10 +200,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 _startVerveTransaction.postValue(Event(false))
             }
         } else {
-            val bundle = Bundle().apply {
-                put(FirebaseAnalytics., "Throwable(\"Error occurred while reading card. Please confirm the card brand\")")
-            }
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_ITEM, bundle)
+            FirebaseCrashlytics.getInstance().recordException(Throwable("Error occurred while reading card. Please confirm the card brand"))
             _showWaitingDialog.postValue(Event(null))
             _startVerveTransaction.postValue(Event(false))
             _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card. Please confirm the card brand"))))
@@ -235,6 +233,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             selectedAid = ppseManager.selectPPSE(nfcTransceiver)
         } catch (e: IOException) {
             e.printStackTrace()
+            FirebaseCrashlytics.getInstance().recordException(Throwable(e))
+            FirebaseCrashlytics.getInstance().log(e.message.toString())
+            FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
         }
         var outcome: TtpOutcome = TtpOutcome.ABORTED
         var outComeResponse = ""
@@ -276,9 +277,13 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                     "Transaction Declined"
                 }
                 TtpOutcome.ABORTED -> {
+                    FirebaseCrashlytics.getInstance().recordException(Throwable("Transaction Terminated"))
                     "Transaction Terminated"
                 }
                 TtpOutcome.TRYNEXT -> {
+                    FirebaseCrashlytics.getInstance().recordException(Throwable("PPSE:Try Next Application"))
+                    FirebaseCrashlytics.getInstance().log("PPSE:Try Next Application")
+                    FirebaseCrashlytics.getInstance().setCustomKey("error_message", "PPSE:Try Next Application" ?: "Unknown error")
                     "PPSE:Try Next Application"
                 }
                 TtpOutcome.SELECTAGAIN -> {
@@ -332,6 +337,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 }
             }
             selectedAid = if (outcome == TtpOutcome.TRYNEXT) {
+                FirebaseCrashlytics.getInstance().recordException(Throwable("Try Next Application"))
+                FirebaseCrashlytics.getInstance().log("Try Next Application")
+                FirebaseCrashlytics.getInstance().setCustomKey("error_message", "Try Next Application" ?: "Unknown error")
                 ppseManager.nextCandidate()
             } else {
                 null
@@ -349,6 +357,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             Timber.e("failed.......")
             _showWaitingDialog.postValue(Event(null))
             _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card: $outComeResponse"))))
+            FirebaseCrashlytics.getInstance().recordException(Throwable("Error occurred while reading card: $outComeResponse"))
+            FirebaseCrashlytics.getInstance().log(outComeResponse)
+            FirebaseCrashlytics.getInstance().setCustomKey("error_message", outComeResponse ?: "Unknown error")
         }
     }
 
@@ -466,6 +477,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             NetPosApp.INSTANCE.transactionsApi.abortTransaction()
             NetPosApp.INSTANCE.nfcProvider.disconnectReader()
         } catch (e: Exception) {
+            FirebaseCrashlytics.getInstance().recordException(Throwable(e.message))
+            FirebaseCrashlytics.getInstance().log(e.message.toString())
+            FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
         }
     }
 
