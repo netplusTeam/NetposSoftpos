@@ -23,6 +23,9 @@
 -keepattributes *Annotation*
 -keepattributes InnerClasses
 -keepattributes EnclosingMethod
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}
 -keep class *.*.R$*
 -dontskipnonpubliclibraryclasses
 -forceprocessing
@@ -39,6 +42,10 @@
 # Crashlytics code as given below which one can exclude
 -keep class com.crashlytics.* { }
 -keep class com.crashlytics.android.**
+-keep class com.google.firebase.crashlytics.** { *; }
+-keep class com.google.firebase.analytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+-dontwarn com.google.firebase.analytics.**
 # Keep visa sdk
 -keep class com.visa.* { }
 -keep class com.visa.vac.**

@@ -28,7 +28,7 @@ public class NfcProvider implements CardCommunicationProvider {
     private boolean nFCEnabled;
 
     /**
-     * Command execution time in nano seconds
+     * Command execution time in nanoseconds
      */
     private long mCommandExecutionTime = 0;
 
@@ -48,15 +48,15 @@ public class NfcProvider implements CardCommunicationProvider {
     public byte[] sendReceive(byte[] bytes) throws L1RSPException {
         byte[] response;
         try {
-            if (mIsoDep.isConnected()) {
-                long startTime = System.nanoTime();
-                response = mIsoDep.transceive(bytes);
-                long endTime = System.nanoTime();
-                mCommandExecutionTime = endTime - startTime;
-            } else {
-                isCardTapped = false;
-                throw new L1RSPException("", ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
+            if (mIsoDep == null || !mIsoDep.isConnected()) {
+                throw new L1RSPException("IsoDep not connected", ErrorIndication.L1_Error_Code.TRANSMISSION_ERROR);
             }
+
+            long startTime = System.nanoTime();
+            response = mIsoDep.transceive(bytes);
+            long endTime = System.nanoTime();
+            mCommandExecutionTime = endTime - startTime;
+
         } catch (TagLostException exception) {
             isCardTapped = false;
             throw new L1RSPException("Tag Lost", ErrorIndication.L1_Error_Code.TIMEOUT_ERROR);
@@ -78,33 +78,37 @@ public class NfcProvider implements CardCommunicationProvider {
         if (isCardTapped) {
             return new ConnectionObjectImpl();
         }
-        while (!isCardTapped) {
-            try {
-                mIsoDep = mTagEventListener.getIsoDep();
-            } catch (Exception e) {
-                Log.e(TAG, "An Exception was encountered: ", e.getCause());
-            }
-            if (mIsoDep != null) {
-                Log.i(TAG, "connectCard: Card Tapped");
+
+        synchronized (this) {
+            while (!isCardTapped) {
                 try {
-                    mIsoDep.connect();
-                    mIsoDep.setTimeout(10000);
-                    isCardTapped = true;
-                    return new ConnectionObjectImpl();
-                } catch (IOException | IllegalStateException e) {
-                    Log.e(TAG, "Connection failed, attempting to revalidate the tag: ", e);
-                    mTagEventListener.invalidateTag();
+                    mIsoDep = mTagEventListener.getIsoDep();
+                } catch (Exception e) {
+                    Log.e(TAG, "An Exception was encountered: ", e.getCause());
+                }
+                if (mIsoDep != null) {
+                    Log.i(TAG, "connectCard: Card Tapped");
                     try {
-                        Thread.sleep(100); // Small delay before retrying
+                        mIsoDep.connect();
+                        mIsoDep.setTimeout(10000);
+                        isCardTapped = true;
+                        return new ConnectionObjectImpl();
+                    } catch (IOException | IllegalStateException e) {
+                        Log.e(TAG, "Connection failed, attempting to revalidate the tag: ", e);
+                        mTagEventListener.invalidateTag();
+                    }
+                } else {
+                    try {
+                        wait(100);
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                     }
-                    continue; // Retry connection
                 }
             }
         }
         throw new L1RSPException("Some Connection issue", ErrorIndication.L1_Error_Code.PROTOCOL_ERROR);
     }
+
 
     @Override
     public boolean removeCard() {
@@ -138,7 +142,9 @@ public class NfcProvider implements CardCommunicationProvider {
     @Override
     public boolean disconnectReader() {
         try {
-            mIsoDep.close();
+            if (mIsoDep != null) {
+                mIsoDep.close();
+            }
         } catch (IOException e) {
             return false;
         } catch (NullPointerException npe) {

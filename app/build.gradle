@@ -312,14 +312,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx' // Check for latest version
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"
 
     //tiayu lib
-    api project(':tianyu_aar')
     //Bouncy Castle cryptography
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     //JPOS
