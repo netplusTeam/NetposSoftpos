@@ -16,7 +16,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -41,7 +40,6 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
@@ -57,10 +55,10 @@ import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager.READER_FLAGS
-import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import com.woleapp.netpos.contactless.taponphone.verve.TransactionViewModelFactory
 import com.woleapp.netpos.contactless.taponphone.verve.VerveTransactionViewModel
 import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
+import com.woleapp.netpos.contactless.taponphone.verve.nfc.NfcVerveProvider
 import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
@@ -582,7 +580,7 @@ class MainActivity :
             sendTokenToBackend(token, terminalId, userName)
         }
 
-        verveNfcListener = NfcProvider(this).verveNfcListener
+        verveNfcListener = NfcVerveProvider(this).verveNfcListener
         setUpViewModelForVerve()
         setUpObserversForVerveTransaction()
         viewModel.startVerveTransaction.observe(this) { event ->

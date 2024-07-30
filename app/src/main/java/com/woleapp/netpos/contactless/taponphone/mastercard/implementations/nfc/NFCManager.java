@@ -21,17 +21,17 @@ public class NFCManager {
         mNfcAdapter = NfcAdapter.getDefaultAdapter(mActivity);
     }
 
-    boolean isNFCEnabled() {
+    public boolean isNFCEnabled() {
         return mNfcAdapter != null && mNfcAdapter.isEnabled();
     }
 
-    void enableNFCReaderMode(NfcAdapter.ReaderCallback readerCallback) {
+    public void enableNFCReaderMode(NfcAdapter.ReaderCallback readerCallback) {
         if (mNfcAdapter != null) {
             mNfcAdapter.enableReaderMode(mActivity, readerCallback, READER_FLAGS, new Bundle());
         }
     }
 
-    void disableNFCReaderMode() {
+    public void disableNFCReaderMode() {
         if (mNfcAdapter != null) {
             mNfcAdapter.disableReaderMode(mActivity);
         }

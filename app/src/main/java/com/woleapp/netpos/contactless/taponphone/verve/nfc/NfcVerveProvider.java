@@ -1,4 +1,4 @@
-package com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc;
+package com.woleapp.netpos.contactless.taponphone.verve.nfc;
 
 import android.app.Activity;
 import android.nfc.Tag;
@@ -7,14 +7,20 @@ import android.nfc.tech.IsoDep;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+
+import com.alcineo.softpos.payment.api.interfaces.NFCListener;
 import com.mastercard.terminalsdk.exception.L1RSPException;
 import com.mastercard.terminalsdk.listeners.CardCommunicationProvider;
 import com.mastercard.terminalsdk.objects.ErrorIndication;
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager;
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.ReaderCallbackImpl;
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.TagEventListener;
+import com.woleapp.netpos.contactless.taponphone.verve.VerveNFCListenerImpl;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-public class NfcProvider implements CardCommunicationProvider {
+public class NfcVerveProvider implements CardCommunicationProvider {
 
     private final String TAG = "NfcProvider";
 
@@ -31,7 +37,13 @@ public class NfcProvider implements CardCommunicationProvider {
      */
     private long mCommandExecutionTime = 0;
 
-    public NfcProvider(Activity currentContext) {
+    private final NFCListener verveNfcListener = new VerveNFCListenerImpl();
+
+    public NFCListener getVerveNfcListener() {
+        return verveNfcListener;
+    }
+
+    public NfcVerveProvider(Activity currentContext) {
         mNFCManager = new NFCManager(currentContext);
         nFCEnabled = mNFCManager.isNFCEnabled();
         disconnectReader();
@@ -163,7 +175,7 @@ public class NfcProvider implements CardCommunicationProvider {
         if (mIsoDep == null) {
             mTagEventListener = new TagEventListener();
             assert mNFCManager != null;
-            mNFCManager.enableNFCReaderMode(new ReaderCallbackImpl(mTagEventListener));
+            mNFCManager.enableNFCReaderMode(new ReaderCallbackImpl(mTagEventListener, (VerveNFCListenerImpl) verveNfcListener));
             mIsoDep = null;
             isCardTapped = false;
         }
