@@ -30,7 +30,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
@@ -53,10 +52,10 @@ import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NFCManager.READER_FLAGS
-import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import com.woleapp.netpos.contactless.taponphone.verve.TransactionViewModelFactory
 import com.woleapp.netpos.contactless.taponphone.verve.VerveTransactionViewModel
 import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
+import com.woleapp.netpos.contactless.taponphone.verve.nfc.NfcVerveProvider
 import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
@@ -573,7 +572,7 @@ class MainActivity :
             copyText()
         }
 
-        verveNfcListener = NfcProvider(this).verveNfcListener
+        verveNfcListener = NfcVerveProvider(this).verveNfcListener
         setUpViewModelForVerve()
         setUpObserversForVerveTransaction()
         viewModel.startVerveTransaction.observe(this) { event ->

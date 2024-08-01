@@ -5,11 +5,14 @@ import android.util.Log;
 
 import java.io.IOException;
 
-class TagEventListener {
+public class TagEventListener {
+    /**
+     * ISO DEP object to access ISO-DEP (ISO 14443-4) properties and I/O operations on a Tag
+     */
     private IsoDep mIsoDep;
     private static final String TAG = "TagEventListener";
 
-    IsoDep getIsoDep() {
+    public IsoDep getIsoDep() {
         return mIsoDep;
     }
 
@@ -17,7 +20,7 @@ class TagEventListener {
         mIsoDep = isoDep;
     }
 
-    void invalidateTag() {
+    public void invalidateTag() {
         if (mIsoDep != null) {
             try {
                 mIsoDep.close();
