@@ -22,4 +22,9 @@ interface NotificationService {
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<Response<FeedbackResponse>>
+
+    @POST("user/delete-account")
+    fun deleteAccount(
+        @Body accountDeletionRequest: AccountDeletionRequest
+    ): Single<Response<FeedbackResponse>>
 }
