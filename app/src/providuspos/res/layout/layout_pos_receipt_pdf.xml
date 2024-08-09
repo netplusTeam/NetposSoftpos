@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:background="#F5F5F5">
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardCornerRadius="@dimen/margin_20"
+            android:elevation="@dimen/margin_10"
+            app:cardElevation="@dimen/margin_10"
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp"
+                android:background="#F5F5F5">
+
+                <ImageView
+                    android:id="@+id/logo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dimen_40dp"
+                    android:src="@drawable/ic_netpos_logo"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/dimen_5dp" />
+
+                <TextView
+                    android:id="@+id/amount_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Amount"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/logo"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/margin_20" />
+
+                <TextView
+                    android:id="@+id/trans_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="₦ 5,000.56"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textColor="@color/colorPrimaryLight"
+                    android:textSize="24sp"
+                    app:layout_constraintTop_toBottomOf="@id/amount_label"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Approved"
+                    android:padding="@dimen/dimen_3dp"
+                    android:fontFamily="@font/poppins_bold"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/trans_amount"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:layout_marginTop="@dimen/margin_20" />
+
+                <TextView
+                    android:id="@+id/app_version"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_medium"
+                    android:text="@string/app_version_place_holder"
+                    android:textSize="@dimen/dimen_16sp"
+                    app:layout_constraintBottom_toTopOf="@+id/divider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toEndOf="@+id/trans_amount"
+                    app:layout_constraintTop_toTopOf="@+id/logo" />
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/status"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp" />
+                <View
+                    android:id="@+id/divider_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/gray"
+                    app:layout_constraintTop_toBottomOf="@id/status"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Candidate Name -->
+                <TextView
+                    android:id="@+id/candidate_name_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Candidate Name:"
+                    android:layout_marginTop="@dimen/dimen_5dp"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:id="@+id/candidate_name_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/card_owner_place_holder"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/candidate_name_label" />
+
+                <View
+                    android:id="@+id/divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/candidate_name_value"
+                    android:layout_marginTop="8dp" />
+                <!-- PIN -->
+                <TextView
+                    android:id="@+id/pin_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PAN:"
+                    android:visibility="gone"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/divider2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/pin_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="89878912331783"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="@+id/candidate_name_value"
+                    app:layout_constraintTop_toTopOf="@+id/pin_label" />
+
+                <View
+                    android:id="@+id/divider3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/pin_value"
+                    android:layout_marginTop="@dimen/dimen_10dp" />
+
+                <!-- Terminal ID -->
+                <TextView
+                    android:id="@+id/terminal_id_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Terminal ID:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider3"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/terminal_id_place_holder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="@string/terminal_id_place_holder"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/pin_value"
+                    app:layout_constraintStart_toStartOf="@+id/pin_value"
+                    app:layout_constraintTop_toTopOf="@+id/terminal_id_label" />
+
+                <View
+                    android:id="@+id/divider4"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/terminal_id_place_holder"
+                    android:layout_marginTop="@dimen/dimen_10dp" />
+
+                <!-- Product -->
+                <TextView
+                    android:id="@+id/product_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Product:"
+                    android:visibility="gone"
+                    android:textSize="16sp"
+                    app:layout_constraintTop_toBottomOf="@id/divider4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/merchant_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="EKEDC-Prepaid"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/terminal_id_place_holder"
+                    app:layout_constraintStart_toStartOf="@+id/terminal_id_place_holder"
+                    app:layout_constraintTop_toTopOf="@+id/product_label" />
+
+                <View
+                    android:id="@+id/divider5"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/merchant_name"
+                    android:layout_marginTop="10dp" />
+
+                <!-- Source Account Name -->
+                <TextView
+                    android:id="@+id/source_account_name_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Source Account Name:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider5"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/source_account_name_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Samuel Johnson"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/merchant_name"
+                    app:layout_constraintStart_toStartOf="@+id/merchant_name"
+                    app:layout_constraintTop_toTopOf="@+id/source_account_name_label" />
+
+                <View
+                    android:id="@+id/divider6"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/source_account_name_value"
+                    android:layout_marginTop="@dimen/dimen_10dp" />
+
+                <!-- Transaction Reference -->
+                <TextView
+                    android:id="@+id/transaction_reference_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction Reference:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider6"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/rrn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="63898499228828"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/source_account_name_value"
+                    app:layout_constraintStart_toStartOf="@+id/source_account_name_value"
+                    app:layout_constraintTop_toTopOf="@+id/transaction_reference_label" />
+
+
+                <View
+                    android:id="@+id/divider7"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/rrn"
+                    android:layout_marginTop="@dimen/margin_10" />
+
+                <!-- Transaction Date -->
+                <TextView
+                    android:id="@+id/transaction_date_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction Date:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider7"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/date_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="13/02/2021"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/rrn"
+                    app:layout_constraintStart_toStartOf="@+id/rrn"
+                    app:layout_constraintTop_toTopOf="@+id/transaction_date_label" />
+
+                <View
+                    android:id="@+id/divider8"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/date_time"
+                    android:layout_marginTop="@dimen/dimen_10dp" />
+
+                <!-- Transaction Time -->
+                <TextView
+                    android:id="@+id/transaction_time_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction Time:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider8"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/transaction_time_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="12:21:29 AM"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/date_time"
+                    app:layout_constraintStart_toStartOf="@+id/date_time"
+                    app:layout_constraintTop_toTopOf="@+id/transaction_time_label" />
+
+
+                <View
+                    android:id="@+id/divider9"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/transaction_time_value"
+                    android:layout_marginTop="@dimen/dimen_10dp" />
+
+                <!-- Card Type -->
+                <TextView
+                    android:id="@+id/card_type_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Card Type:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider9"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/card_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="Mastercard"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/transaction_time_value"
+                    app:layout_constraintStart_toStartOf="@+id/transaction_time_value"
+                    app:layout_constraintTop_toTopOf="@+id/card_type_label" />
+
+                <View
+                    android:id="@+id/divider10"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/card_type"
+                    android:layout_marginTop="@dimen/margin_10" />
+
+                <!-- Card PAN -->
+                <TextView
+                    android:id="@+id/card_pan_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Card PAN:"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/divider10"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginTop="8dp" />
+
+                <TextView
+                    android:id="@+id/masked_pan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_bold"
+                    android:text="898789******1783"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/card_type"
+                    app:layout_constraintStart_toStartOf="@+id/card_type"
+                    app:layout_constraintTop_toTopOf="@+id/card_pan_label" />
+
+                <View
+                    android:id="@+id/divider11"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/masked_pan"
+                    android:layout_marginTop="@dimen/margin_10" />
+
+
+                <!-- Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:gravity="center_horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/divider11"
+                    android:layout_marginTop="24dp">
+
+                    <Button
+                        android:id="@+id/share_receipt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Share Receipt"
+                        android:drawableLeft="@drawable/ic_share"
+                        android:padding="8dp" />
+
+                    <Button
+                        android:id="@+id/save_receipt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Save Receipt"
+                        android:padding="8dp"
+                        android:layout_marginStart="16dp" />
+
+
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.cardview.widget.CardView>
+    </ScrollView>
+
+</layout>
+

@@ -164,9 +164,7 @@ class TransactionsFragment : BaseFragment() {
                 ) {
                     add(Service(7, "Purchase With Cashback", R.drawable.purchase))
                 }
-                if (BuildConfig.FLAVOR.contains("providuspos")) {
-                    remove(Service(7, "Purchase With Cashback", R.drawable.purchase))
-                }
+
                 add(Service(10, getString(R.string.pay_by_transfer), R.drawable.trans))
                 add(Service(3, "Settings", R.drawable.ic_baseline_settings))
                 if (BuildConfig.FLAVOR.contains("polaris")) {
@@ -178,11 +176,15 @@ class TransactionsFragment : BaseFragment() {
                 }
                 add(Service(5, "Reprint", R.drawable.ic_print))
                 add(Service(9, getString(R.string.notification), R.drawable.ic_notification))
+                if (BuildConfig.FLAVOR.contains("providuspos")) {
+                    remove(Service(4, "Balance Enquiry", R.drawable.ic_write))
+                    remove(Service(7, "Purchase With Cashback", R.drawable.purchase))
+                }
             }
         adapter.submitList(listOfService)
     }
 
-    private fun showPreAuthDialog() {
+    private fun showPreAuthDialog() {git
         val dialog = AlertDialog.Builder(context)
             .apply {
                 setCancelable(false)

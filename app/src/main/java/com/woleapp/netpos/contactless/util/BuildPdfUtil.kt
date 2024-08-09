@@ -228,11 +228,11 @@ private fun initViewsForPosReceipt(
                 R.string.amount_place_holder,
                 divideLongBy100(it.amount).formatCurrencyAmountUsingCurrentModule(),
             )
-            stan.text =
-                pdfView.appVersion.context.getString(
-                    R.string.stan_place_holder,
-                    it.STAN,
-                )
+//            stan.text =
+//                pdfView.appVersion.context.getString(
+//                    R.string.stan_place_holder,
+//                    it.STAN,
+//                )
 //            cardHolder.text =
 //                pdfView.appVersion.context.getString(
 //                    R.string.card_holder_place_holder,
@@ -243,15 +243,15 @@ private fun initViewsForPosReceipt(
                     R.string.transaction_status_place_holder,
                     if (it.responseCode == "00" || it.responseCode == "16") "APPROVED" else "DECLINED",
                 )
-            responseCode.text =
-                pdfView.appVersion.context.getString(
-                    R.string.response_code_place_holder,
-                    it.responseCode,
-                )
-            message.text = pdfView.appVersion.context.getString(
-                R.string.message_place_holder,
-                it.responseMessage,
-            )
+//            responseCode.text =
+//                pdfView.appVersion.context.getString(
+//                    R.string.response_code_place_holder,
+//                    it.responseCode,
+//                )
+//            message.text = pdfView.appVersion.context.getString(
+//                R.string.message_place_holder,
+//                it.responseMessage,
+//            )
             cardType.text =
                 pdfView.appVersion.context.getString(R.string.card_type_place_holder, it.cardLabel)
             appVersion.text = pdfView.appVersion.context.getString(
