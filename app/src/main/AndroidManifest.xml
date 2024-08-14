@@ -17,10 +17,12 @@
         android:name="android.hardware.nfc"
         android:required="false"
         tools:replace="required" />
-
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 
     <application
         android:name=".app.NetPosApp"
@@ -36,7 +38,17 @@
         android:usesCleartextTraffic="false"
         tools:ignore="HardcodedDebugMode"
         tools:replace="android:label, android:theme, android:allowBackup">
+        <activity
+            android:name=".ui.activities.LandingActivity"
+            android:theme="@style/SplashTheme"
+            android:exported="true" >
 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.activities.AuthenticationActivity"
             android:exported="true"
@@ -44,13 +56,8 @@
             android:protectionLevel="signature"
             android:screenOrientation="portrait"
             android:taskAffinity="com.woleapp.netpos.contactless"
-            android:theme="@style/SplashTheme"
             android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ui.activities.MainActivity"
@@ -59,7 +66,7 @@
             android:protectionLevel="signature"
             android:screenOrientation="portrait"
             android:taskAffinity="com.woleapp.netpos.contactless"
-            android:windowSoftInputMode="adjustPan"></activity>
+            android:windowSoftInputMode="adjustPan" />
 
         <receiver
             android:name=".receivers.BatteryReceiver"
@@ -89,11 +96,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_netpos_logo" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+        <!--
+ Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorAccent" />
@@ -111,7 +121,5 @@
                 android:resource="@xml/provider_paths" />
         </provider>
     </application>
-    <uses-permission
-        android:name="com.google.android.gms.permission.AD_ID"
-        tools:node="remove" />
+
 </manifest>

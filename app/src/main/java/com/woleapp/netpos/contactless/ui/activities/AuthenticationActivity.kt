@@ -14,6 +14,7 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
+import com.woleapp.netpos.contactless.ui.fragments.NewOrExistingFragment
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,7 +24,7 @@ class AuthenticationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthenticationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setTheme(R.style.AppTheme)
+//        setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
@@ -57,6 +58,14 @@ class AuthenticationActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.READ_PHONE_STATE),
                 AppConstants.READ_PHONE_STATE_REQUEST_CODE,
             )
+        }
+
+
+        if (intent.getBooleanExtra("navigateToFragment", false)) {
+            // Navigate to the Fragment
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.auth_container, NewOrExistingFragment())
+                .commit()
         }
     }
 

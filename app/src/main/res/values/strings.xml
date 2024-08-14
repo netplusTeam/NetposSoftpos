@@ -276,6 +276,8 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="all_please_enter_no_of_tids">Please Enter your Number of TIDs</string>
     <string name="all_please_enter_rc_no">Please Enter RC Number</string>
     <string name="password_requires_minimum_of_1_uppercase_lowercase_number_special_character"><![CDATA[Password should be at least 10 characters with a minimum of 1 uppercase, lowercase, number & special character]]></string>
+    <string name="skip">Skip</string>
+    <string name="account_deletion">Account Deletion</string>
 
 </resources>
 

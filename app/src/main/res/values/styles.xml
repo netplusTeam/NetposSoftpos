@@ -85,5 +85,14 @@
         <item name="android:windowIsFloating">false</item>
     </style>
 
+    <style name="onBoarding_button">
+        <item name="borderWidth">@dimen/dimen_4dp</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="android:layout_marginTop">@dimen/dimen_80dp</item>
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:layout_marginBottom">@dimen/margin_10</item>
+        <item name="cornerRadius">@dimen/margin_10</item>
+    </style>
+
     <dimen name="text_size_12sp">12sp</dimen>
 </resources>
