@@ -278,6 +278,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="password_requires_minimum_of_1_uppercase_lowercase_number_special_character"><![CDATA[Password should be at least 10 characters with a minimum of 1 uppercase, lowercase, number & special character]]></string>
     <string name="skip">Skip</string>
     <string name="account_deletion">Account Deletion</string>
+    <string name="enter_a_valid_amount">Enter a valid amount</string>
 
 </resources>
 

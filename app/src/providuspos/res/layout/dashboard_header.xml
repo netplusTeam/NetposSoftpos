@@ -42,6 +42,7 @@
             android:id="@+id/user_image"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:visibility="gone"
             android:contentDescription="@string/user_image"
             android:src="@drawable/netpos_user"
             android:background="@color/colorAccent"

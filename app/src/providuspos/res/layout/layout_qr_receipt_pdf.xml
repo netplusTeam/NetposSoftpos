@@ -32,17 +32,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/dimen_40dp"
                     android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:src="@drawable/bankpro_logo"
+                    app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraintLayout2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#F5F5F5"
-                    android:padding="10dp"
                     android:layout_marginTop="@dimen/margin_20"
+                    android:background="#F5F5F5"
+                    android:padding="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/logo">
@@ -53,9 +56,9 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/poppins_bold"
                         android:text="Amount"
-                        android:visibility="gone"
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -80,8 +83,8 @@
                         android:fontFamily="@font/poppins_bold"
                         android:padding="@dimen/dimen_3dp"
                         android:text="@string/transaction_status_place_holder"
-                        android:textSize="16sp"
                         android:textColor="@color/colorPrimary"
+                        android:textSize="16sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/trans_amount" />
@@ -295,12 +298,12 @@
                         app:layout_constraintTop_toBottomOf="@id/divider6" />
 
                     <TextView
-                        android:id="@+id/rrn"
+                        android:id="@+id/orderId"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_10"
                         android:fontFamily="@font/poppins_bold"
-                        android:text="@string/rrn_place_holder"
+                        android:text="@string/order_id_place_holder"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp"
                         app:layout_constraintEnd_toEndOf="@+id/response_code"
@@ -314,7 +317,7 @@
                         android:layout_height="1dp"
                         android:layout_marginTop="@dimen/margin_10"
                         android:background="@color/receipt_gray"
-                        app:layout_constraintTop_toBottomOf="@id/rrn" />
+                        app:layout_constraintTop_toBottomOf="@id/orderId" />
 
                     <!-- Transaction Date -->
                     <TextView
@@ -409,7 +412,7 @@
                         app:layout_constraintTop_toBottomOf="@id/divider10" />
 
                     <TextView
-                        android:id="@+id/card_holder"
+                        android:id="@+id/card_owner"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/margin_10"
@@ -417,8 +420,8 @@
                         android:text="@string/card_owner_place_holder"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp"
-                        android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="@+id/card_type"
+                        android:visibility="visible"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="@+id/card_type"
                         app:layout_constraintTop_toTopOf="@+id/card_pan_label" />
 
@@ -426,10 +429,10 @@
                         android:id="@+id/divider11"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:visibility="gone"
                         android:layout_marginTop="@dimen/margin_10"
                         android:background="@color/receipt_gray"
-                        app:layout_constraintTop_toBottomOf="@id/card_holder" />
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/card_owner" />
 
 
                     <!-- Buttons -->
@@ -446,21 +449,22 @@
                             android:id="@+id/powered_by"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/dimen_10dp"
+                            android:layout_marginTop="1dp"
                             android:fontFamily="@font/poppins_bold"
                             android:text="@string/powered_by_netplus"
+                            android:textColor="@color/colorAccent"
                             android:textSize="@dimen/dimen_16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/colorAccent"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <View
                             android:id="@+id/view3"
                             android:layout_width="match_parent"
                             android:layout_height="@dimen/dimen_1dp"
-                            android:background="@color/colorAccent"
                             android:layout_marginTop="@dimen/dimen_10dp"
+                            android:background="@color/colorAccent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@+id/powered_by" />
@@ -471,9 +475,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/dimen_10dp"
                             android:fontFamily="@font/poppins_medium"
+                            android:text="@string/contact_us"
                             android:textColor="@color/colorPrimary"
                             android:textSize="@dimen/dimen_18sp"
-                            android:text="@string/contact_us"
                             app:layout_constraintStart_toStartOf="@+id/view3"
                             app:layout_constraintTop_toBottomOf="@+id/view3" />
 

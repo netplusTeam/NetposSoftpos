@@ -7,6 +7,7 @@
     <color name="pinTextColor">#000</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#a4a4a4</color>
+    <color name="receipt_gray">#E7E8E8</color>
     <color name="dashboard_color">#eeeeee</color>
     <color name="icon_color">#FBFBFB</color>
     <color name="pinButtonText">#ffffff</color>

@@ -38,26 +38,22 @@
         android:usesCleartextTraffic="false"
         tools:ignore="HardcodedDebugMode"
         tools:replace="android:label, android:theme, android:allowBackup">
-        <activity
-            android:name=".ui.activities.LandingActivity"
-            android:theme="@style/SplashTheme"
-            android:exported="true" >
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ui.activities.AuthenticationActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:protectionLevel="signature"
             android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme"
             android:taskAffinity="com.woleapp.netpos.contactless"
             android:windowSoftInputMode="adjustPan">
 
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.activities.MainActivity"

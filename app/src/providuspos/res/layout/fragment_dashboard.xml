@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewmodel"
+            type="com.woleapp.netpos.contactless.viewmodels.SalesViewModel" />
+
+        <variable
+            name="type"
+            type="String" />
+    </data>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
+        android:fitsSystemWindows="true"
+        android:fillViewport="true"
+        android:clickable="true"
+        android:focusable="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:layout_margin="@dimen/dimen_20dp">
+
+                <TextView
+                    android:id="@+id/sales_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{type}"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Spinner
+                    android:id="@+id/select_transaction_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="100dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintTop_toBottomOf="@id/sales_header" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="@id/select_transaction_spinner"
+                    app:layout_constraintEnd_toEndOf="@id/select_transaction_spinner"
+                    app:layout_constraintTop_toTopOf="@id/select_transaction_spinner"
+                    app:srcCompat="@drawable/ic_arrow_drop_down"
+                    tools:ignore="ContentDescription" />
+
+                <LinearLayout
+                    android:id="@+id/price_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toBottomOf="@id/select_transaction_spinner">
+
+                    <EditText
+                        android:id="@+id/price_textbox"
+                        style="@style/ServicesInputLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:autofillHints="@string/hint_amount"
+                        android:hint="@string/hint_amount"
+                        android:inputType="numberDecimal"
+                        android:text="@={viewmodel.amount}"
+                        android:textSize="@dimen/dimen_16sp"
+                        android:textStyle="italic" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/cashback_input_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/price_input_layout">
+
+                    <TextView
+                        android:id="@+id/cashback_currency_textbox"
+                        style="@style/ServicesInputLayout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/services_edittext_background"
+                        android:text="@string/naira_symbol" />
+
+                    <EditText
+                        android:id="@+id/cashback_textbox"
+                        style="@style/ServicesInputLayout"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:autofillHints="@string/hint_cashback"
+                        android:hint="@string/hint_cashback"
+                        android:inputType="numberDecimal"
+                        android:text="@={viewmodel.cashback}" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/enter_name"
+                    style="@style/ServicesInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="@string/enter_name"
+                    android:background="@drawable/services_edittext_background_disabled"
+                    android:enabled="false"
+                    android:focusable="false"
+                    android:hint="@string/enter_name"
+                    android:inputType="text"
+                    android:text="@={viewmodel.customerName}"
+                    android:visibility="invisible"
+                    app:layout_constraintTop_toBottomOf="@id/cashback_input_layout" />
+
+                <EditText
+                    android:id="@+id/enter_pin"
+                    style="@style/ServicesInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="@string/enter_pin"
+                    android:hint="@string/enter_pin"
+                    android:inputType="numberPassword"
+                    android:text="@={viewmodel.pin}"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/enter_name" />
+
+                <Button
+                    android:id="@+id/process"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen_60dp"
+                    android:layout_marginTop="@dimen/dimen_20dp"
+                    android:paddingHorizontal="48dp"
+                    android:text="@string/proceess"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    app:layout_constraintEnd_toEndOf="@+id/price_input_layout"
+                    app:layout_constraintStart_toStartOf="@+id/price_input_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/price_input_layout"
+                    app:processButtonState="@{viewmodel.transactionState}" />
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:elevation="2dp"
+                    android:paddingVertical="12dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/process"
+                    app:layout_constraintEnd_toEndOf="@id/process"
+                    app:layout_constraintTop_toTopOf="@id/process"
+                    app:paymentProgress="@{viewmodel.transactionState}" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/relativeLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/white"
+                android:layout_marginBottom="@dimen/dimen_56dp"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen_32dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:text="Enter Amount"
+                    android:textColor="@android:color/black"
+                    android:textSize="24.0sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvMessage"
+                    android:layout_width="0.0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:textColor="@android:color/black"
+                    android:textSize="16.0sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+                <EditText
+                    android:id="@+id/etPin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dimen_16dp"
+                    android:layout_marginRight="@dimen/dimen_16dp"
+                    android:background="@android:color/transparent"
+                    android:focusable="false"
+                    android:fontFamily="sans-serif-medium"
+                    android:hint="@string/hint_amount"
+                    android:includeFontPadding="false"
+                    android:lines="1"
+                    android:gravity="center"
+                    android:layout_marginBottom="@dimen/margin_10"
+                    android:maxLength="10"
+                    android:textColor="@android:color/black"
+                    android:textSize="20.0sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/layoutKeyboard"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvMessage" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layoutKeyboard"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen_32dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    app:layout_constraintBottom_toTopOf="@id/btnConfirm"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <View
+                        android:layout_width="0.0dip"
+                        android:layout_height="1.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toTopOf="@id/btn1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <View
+                        android:layout_width="0.0dip"
+                        android:layout_height="1.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toTopOf="@id/btn4"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <View
+                        android:layout_width="0.0dip"
+                        android:layout_height="1.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toTopOf="@id/btn7"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <View
+                        android:layout_width="0.0dip"
+                        android:layout_height="1.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toTopOf="@id/btn0"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <View
+                        android:layout_width="0.0dip"
+                        android:layout_height="1.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btn0" />
+
+                    <View
+                        android:layout_width="1.0dip"
+                        android:layout_height="0.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toBottomOf="@id/btn0"
+                        app:layout_constraintStart_toEndOf="@id/btn1"
+                        app:layout_constraintTop_toTopOf="@id/btn1" />
+
+                    <View
+                        android:layout_width="1.0dip"
+                        android:layout_height="0.0dip"
+                        android:background="@color/colorDivider"
+                        app:layout_constraintBottom_toBottomOf="@id/btn0"
+                        app:layout_constraintStart_toEndOf="@id/btn2"
+                        app:layout_constraintTop_toTopOf="@id/btn1" />
+
+                    <TextView
+                        android:id="@+id/btn1"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_1"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintEnd_toStartOf="@id/btn2"
+                        app:layout_constraintHorizontal_chainStyle="spread"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/btn2"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_2"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn1"
+                        app:layout_constraintEnd_toStartOf="@id/btn3"
+                        app:layout_constraintStart_toEndOf="@id/btn1"
+                        app:layout_constraintTop_toTopOf="@id/btn1" />
+
+                    <TextView
+                        android:id="@+id/btn3"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_3"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btn2"
+                        app:layout_constraintTop_toTopOf="@id/btn1" />
+
+                    <TextView
+                        android:id="@+id/btn4"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_4"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintEnd_toStartOf="@id/btn5"
+                        app:layout_constraintHorizontal_chainStyle="spread"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btn1" />
+
+                    <TextView
+                        android:id="@+id/btn5"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_5"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn4"
+                        app:layout_constraintEnd_toStartOf="@id/btn6"
+                        app:layout_constraintStart_toEndOf="@id/btn4"
+                        app:layout_constraintTop_toTopOf="@id/btn4" />
+
+                    <TextView
+                        android:id="@+id/btn6"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_6"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn4"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btn5"
+                        app:layout_constraintTop_toTopOf="@id/btn4" />
+
+                    <TextView
+                        android:id="@+id/btn7"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_7"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintEnd_toStartOf="@id/btn8"
+                        app:layout_constraintHorizontal_chainStyle="spread"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btn4" />
+
+                    <TextView
+                        android:id="@+id/btn8"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_8"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn7"
+                        app:layout_constraintEnd_toStartOf="@id/btn9"
+                        app:layout_constraintStart_toEndOf="@id/btn7"
+                        app:layout_constraintTop_toTopOf="@id/btn7" />
+
+                    <TextView
+                        android:id="@+id/btn9"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_9"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn7"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btn8"
+                        app:layout_constraintTop_toTopOf="@id/btn7" />
+
+                    <TextView
+                        android:id="@+id/btnEsc"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_esc"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintBottom_toBottomOf="@id/btn0"
+                        app:layout_constraintEnd_toStartOf="@id/btn0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/btn7"
+                        app:layout_constraintTop_toTopOf="@id/btn0" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/btnClear"
+                        android:layout_width="0.0dip"
+                        android:layout_height="70.0dip"
+                        android:background="?selectableItemBackground"
+                        android:padding="24.0dip"
+                        app:layout_constraintBottom_toBottomOf="@id/btn0"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/btn0"
+                        app:layout_constraintTop_toTopOf="@id/btn0"
+                        app:srcCompat="@drawable/ic_cal_clear" />
+
+                    <TextView
+                        android:id="@+id/btn0"
+                        android:layout_width="0.0dip"
+                        android:layout_height="50.0dip"
+                        android:background="?selectableItemBackground"
+                        android:fontFamily="sans-serif"
+                        android:gravity="center"
+                        android:text="@string/btn_cal_0"
+                        android:textColor="@android:color/black"
+                        android:textSize="24.0sp"
+                        app:layout_constraintEnd_toStartOf="@id/btn9"
+                        app:layout_constraintStart_toEndOf="@id/btn7"
+                        app:layout_constraintTop_toBottomOf="@id/btn7" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <Button
+                    android:id="@+id/btnConfirm"
+                    android:layout_width="0.0dip"
+                    android:layout_height="55.0dip"
+                    android:layout_margin="@dimen/dimen_8dp"
+                    android:backgroundTint="@color/pinButtonBackground"
+                    android:fontFamily="sans-serif"
+                    android:gravity="center"
+                    android:text="@string/proceess"
+                    android:textAllCaps="false"
+                    android:textColor="@color/pinButtonText"
+                    android:textSize="20.0sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:processButtonState="@{viewmodel.transactionState}" />
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:elevation="2dp"
+                    android:paddingVertical="12dp"
+                    android:indeterminateTint="@color/colorPrimaryLight"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/btnConfirm"
+                    app:layout_constraintEnd_toEndOf="@+id/btnConfirm"
+                    app:layout_constraintTop_toTopOf="@id/btnConfirm"
+                    app:paymentProgress="@{viewmodel.transactionState}" />
+
+                <androidx.constraintlayout.widget.Group
+                    android:id="@+id/groupKeyboard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:constraint_referenced_ids="layoutKeyboard,btnConfirm" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+</layout>

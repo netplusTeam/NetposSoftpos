@@ -11,17 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
-        tools:context=".ui.activities.LandingActivity">
+        tools:context=".ui.fragments.LandingFragment">
 
-        <ImageView
-            android:id="@+id/bankP_img"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dimen_50dp"
-            android:src="@drawable/bankp_logo"
-            android:layout_marginTop="@dimen/dimen_50dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
 
         <androidx.viewpager.widget.ViewPager
@@ -31,7 +22,7 @@
             app:layout_constraintBottom_toTopOf="@+id/guideline2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/bankP_img" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline2"
@@ -54,21 +45,6 @@
             app:tabGravity="center"
             app:tabIndicatorHeight="0dp" />
 
-        <Button
-            android:id="@+id/activity_next_button"
-            style="@style/onBoarding_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/margin_20"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="@dimen/margin_10"
-            android:text="Next"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/on_boarding_activity_tab_layout"
-            app:layout_constraintTop_toBottomOf="@id/on_boarding_activity_tab_layout"
-            app:layout_constraintVertical_bias="1.0" />
 
         <Button
             android:id="@+id/btn_login"

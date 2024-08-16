@@ -12,9 +12,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.HostConfig
@@ -31,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
+import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
@@ -48,29 +50,20 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
-import com.woleapp.netpos.contactless.util.Event
-import com.woleapp.netpos.contactless.util.ICCCardHelper
-import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
-import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
-import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
-import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
-import com.woleapp.netpos.contactless.util.buildSMSText
-import com.woleapp.netpos.contactless.util.disposeWith
-import com.woleapp.netpos.contactless.util.showCardDialog
-import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.item_mcc.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -98,8 +91,23 @@ class DashboardFragment : BaseFragment() {
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
     private lateinit var loader: AlertDialog
-    private lateinit var cardCvv: String
     private lateinit var user: User
+    private lateinit var tvMessageTv: TextView
+    private lateinit var etPinEt: EditText
+    private lateinit var btnConfirmBtn: Button
+    private lateinit var btnClearIv: ImageView
+    private lateinit var btnEscIv: TextView
+    private lateinit var btn0Tv: TextView
+    private lateinit var btn1Tv: TextView
+    private lateinit var btn2Tv: TextView
+    private lateinit var btn3Tv: TextView
+    private lateinit var btn4Tv: TextView
+    private lateinit var btn5Tv: TextView
+    private lateinit var btn6Tv: TextView
+    private lateinit var btn7Tv: TextView
+    private lateinit var btn8Tv: TextView
+    private lateinit var btn9Tv: TextView
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -211,6 +219,44 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         }
+
+        initViews()
+
+        val integerList = listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
+        integerList.shuffled()
+        setNumberOnTextViews(integerList)
+
+        val builder = StringBuilder()
+        val buttons =
+            arrayOf(btn0Tv, btn1Tv, btn2Tv, btn3Tv, btn4Tv, btn5Tv, btn6Tv, btn7Tv, btn8Tv, btn9Tv)
+        for (i in buttons.indices) {
+            buttons[i].setOnClickListener { v: View ->
+                builder.append((v as TextView).text.toString())
+                etPinEt.setText(builder.toString())
+            }
+        }
+        btnEscIv.setOnClickListener {
+            etPinEt.setText("")
+        }
+        btnClearIv.setOnClickListener {
+            if (builder.isNotEmpty()) {
+                builder.deleteCharAt(builder.length - 1)
+                etPinEt.setText(builder.toString())
+            }
+        }
+        btnConfirmBtn.setOnClickListener {
+            if (etPinEt.text.toString().isEmpty()) {
+                Toast.makeText(context, getString(R.string.enter_a_valid_amount), Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }else{
+                binding.priceTextbox.text = etPinEt.text
+                viewModel.validateField()
+            }
+        }
+
+
+
         binding.process.setOnClickListener {
             viewModel.validateField()
         }
@@ -547,6 +593,40 @@ class DashboardFragment : BaseFragment() {
             }
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .show()
+    }
+
+
+    private fun initViews() {
+        with(binding) {
+            tvMessageTv = tvMessage
+            etPinEt = etPin
+            btnConfirmBtn = btnConfirm
+            btnClearIv = btnClear
+            btnEscIv = btnEsc
+            btn0Tv = btn0
+            btn1Tv = btn1
+            btn2Tv = btn2
+            btn3Tv = btn3
+            btn4Tv = btn4
+            btn5Tv = btn5
+            btn6Tv = btn6
+            btn7Tv = btn7
+            btn8Tv = btn8
+            btn9Tv = btn9
+        }
+    }
+
+    private fun setNumberOnTextViews(integerList: List<String>) {
+        btn0Tv.text = integerList[0]
+        btn1Tv.text = integerList[1]
+        btn2Tv.text = integerList[2]
+        btn3Tv.text = integerList[3]
+        btn4Tv.text = integerList[4]
+        btn5Tv.text = integerList[5]
+        btn6Tv.text = integerList[6]
+        btn7Tv.text = integerList[7]
+        btn8Tv.text = integerList[8]
+        btn9Tv.text = integerList[9]
     }
 
 

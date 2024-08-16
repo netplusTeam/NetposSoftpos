@@ -145,10 +145,10 @@ private fun initViewsForQrReceipt(
                 Singletons.getCurrentlyLoggedInUser()?.business_name
                     ?: "${BuildConfig.FLAVOR} POS MERCHANT",
             )
-//            cardOwner.text = pdfView.root.context.getString(
-//                R.string.card_owner_place_holder,
-//                respFromWebView.customerName,
-//            )
+            cardOwner.text = pdfView.root.context.getString(
+                R.string.card_owner_place_holder,
+                respFromWebView.customerName,
+            )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
@@ -167,16 +167,16 @@ private fun initViewsForQrReceipt(
                 R.string.order_id_place_holder,
                 respFromWebView.rrnOrderId,
             )
-            narration.text =
-                pdfView.appVersion.context.getString(
-                    R.string.narration_place_holder,
-                    respFromWebView.narration,
-                )
-            transId.text =
-                pdfView.appVersion.context.getString(
-                    R.string.trans_ref_place_holder,
-                    respFromWebView.transIdStan,
-                )
+//            narration.text =
+//                pdfView.appVersion.context.getString(
+//                    R.string.narration_place_holder,
+//                    respFromWebView.narration,
+//                )
+//            transId.text =
+//                pdfView.appVersion.context.getString(
+//                    R.string.trans_ref_place_holder,
+//                    respFromWebView.transIdStan,
+//                )
             status.text =
                 pdfView.appVersion.context.getString(
                     R.string.transaction_status_place_holder,
@@ -233,25 +233,25 @@ private fun initViewsForPosReceipt(
 //                    R.string.stan_place_holder,
 //                    it.STAN,
 //                )
-//            cardHolder.text =
-//                pdfView.appVersion.context.getString(
-//                    R.string.card_holder_place_holder,
-//                    it.cardHolder,
-//                )
+            cardHolder.text =
+                pdfView.appVersion.context.getString(
+                    R.string.card_holder_place_holder,
+                    it.cardHolder,
+                )
             status.text =
                 pdfView.appVersion.context.getString(
                     R.string.transaction_status_place_holder,
                     if (it.responseCode == "00" || it.responseCode == "16") "APPROVED" else "DECLINED",
                 )
-//            responseCode.text =
-//                pdfView.appVersion.context.getString(
-//                    R.string.response_code_place_holder,
-//                    it.responseCode,
-//                )
-//            message.text = pdfView.appVersion.context.getString(
-//                R.string.message_place_holder,
-//                it.responseMessage,
-//            )
+            responseCode.text =
+                pdfView.appVersion.context.getString(
+                    R.string.response_code_place_holder,
+                    it.responseCode,
+                )
+            message.text = pdfView.appVersion.context.getString(
+                R.string.message_place_holder,
+                it.responseMessage,
+            )
             cardType.text =
                 pdfView.appVersion.context.getString(R.string.card_type_place_holder, it.cardLabel)
             appVersion.text = pdfView.appVersion.context.getString(

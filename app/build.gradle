@@ -157,6 +157,9 @@ android {
         firstbank {
             java.srcDirs('src/default/java')
         }
+        providuspos {
+            java.srcDirs('src/default/java')
+        }
     }
 
     compileOptions {

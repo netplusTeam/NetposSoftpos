@@ -10,9 +10,11 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.pixplicity.easyprefs.library.Prefs
+import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.ActivityAuthenticationBinding
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
+import com.woleapp.netpos.contactless.ui.fragments.LandingFragment
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
 import com.woleapp.netpos.contactless.ui.fragments.NewOrExistingFragment
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
@@ -24,7 +26,7 @@ class AuthenticationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthenticationBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setTheme(R.style.AppTheme)
+        setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
@@ -47,7 +49,11 @@ class AuthenticationActivity : AppCompatActivity() {
             NetPosTerminalConfig.init(applicationContext)
             finish()
         }
-        showFragment(LoginFragment())
+        if (BuildConfig.FLAVOR.contains("providuspos")){
+            showFragment(LandingFragment())
+        }else{
+            showFragment(LoginFragment())
+        }
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.READ_PHONE_STATE,
