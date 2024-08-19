@@ -384,7 +384,7 @@ class DashboardFragment : BaseFragment() {
         )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
-        progressDialog!!.setMessage("Checking Balance...")
+        progressDialog.setMessage("Checking Balance...")
         progressDialog.show()
         val processor = TransactionProcessor(hostConfig)
         processor.processTransaction(requireContext(), requestData, cardData)

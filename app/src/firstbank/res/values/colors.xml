@@ -6,6 +6,7 @@
     <color name="colorAccent">#edaa01</color>
     <color name="pinTextColor">#000</color>
     <color name="gray">#a4a4a4</color>
+    <color name="privacy_policy_color">#6E6F71</color>
     <color name="pinButtonText">#ffffff</color>
     <color name="white">#ffffff</color>
     <color name="pinButtonBackground">@color/colorPrimary</color>

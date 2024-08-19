@@ -268,4 +268,6 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="please_wait">Please wait</string>
     <string name="nfc_message_title">NFC Message</string>
     <string name="device_doesnt_have_nfc">Device does not have NFC support</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="i_agree_to_the_terms_and_conditions">I have read, accepted and consented to the above Data Privacy Policy and Terms and Conditions of FirstPOS.</string>
 </resources>

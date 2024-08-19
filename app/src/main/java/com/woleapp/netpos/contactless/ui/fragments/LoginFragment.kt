@@ -1,6 +1,8 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.nfc.NfcManager
 import android.os.Bundle
 import android.util.Log
@@ -283,6 +285,11 @@ class LoginFragment : BaseFragment() {
                 confirmOTPForProvidus()
             }
         }
+
+        binding.btnPrivacyPolicy.setOnClickListener {
+            val url = "https://www.firstbanknigeria.com/home/legal/privacy-policy/"
+            openUrl(requireContext(), url)
+        }
     }
 
     private fun confirmOTPForProvidus() {
@@ -437,5 +444,12 @@ class LoginFragment : BaseFragment() {
         ) {
             dialog.show()
         }
+    }
+
+    // Function to open a URL
+    fun openUrl(context: Context, url: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(url)
+        context.startActivity(intent)
     }
 }
