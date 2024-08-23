@@ -131,6 +131,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         when (nfcPaymentType) {
             NfcPaymentType.VISA -> {
                 _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VISA)))
+                _startVerveTransaction.postValue(Event(false))
             }
             NfcPaymentType.MASTERCARD -> doMasterCardTransaction()
             NfcPaymentType.VERVE -> {
@@ -283,7 +284,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             for ((key1, value1) in version) {
                 if (value1 != null) {
                     key = key1 as String
-                    value = Utils.getHexString(value1) as String
+                    value = Utils.getHexString(value1)
                     Timber.e("key is $key")
                     if (key in REQUIRED_TAGS) {
                         icc.append(value)
@@ -298,7 +299,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 key = key1 as String
                 Timber.e("key is $key")
                 if (value1 != null) {
-                    value = Utils.getHexString(value1) as String
+                    value = Utils.getHexString(value1)
                     if (key in REQUIRED_TAGS) {
                         icc.append(value)
                     }
@@ -309,7 +310,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
                 if (value1 != null) {
                     key = key1 as String
                     Timber.e("key is $key")
-                    value = Utils.getHexString(value1) as String
+                    value = Utils.getHexString(value1)
                     if (key in REQUIRED_TAGS) {
                         icc.append(value)
                     }
