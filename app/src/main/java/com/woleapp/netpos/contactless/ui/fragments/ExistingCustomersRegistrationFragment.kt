@@ -108,20 +108,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
 
         val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
-        val email = newEmail.substring(0, newEmail.length)
+        val email = newEmail.substring(1, newEmail.length-1)
 
         val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
-        val phone = newPhone.substring(0, newPhone.length)
+        val phone = newPhone.substring(1, newPhone.length-1)
 
         val newContactInfo = Prefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
-            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
+            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&").replace("\\u0027", "'")
 
-        binding.businessName.setText(businessName.replace("\\u0026", "&"))
+        binding.businessName.setText(businessName.replace("\\u0026", "&").replace("\\u0027", "'"))
         binding.contactInfo.setText(contactInfo)
-        binding.address.setText(businessAddress.replace("\\u0026", "&"))
+        binding.address.setText(businessAddress.replace("\\u0026", "&").replace("\\u0027", "'"))
         binding.phone.setText(phone)
-        binding.email.setText(email.replace("\\u0026", "&"))
+        binding.email.setText(email.replace("\\u0026", "&").replace("\\u0027", "'"))
 
         loader = alertDialog(requireContext())
 
