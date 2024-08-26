@@ -161,8 +161,9 @@ class FragmentBarCodeScannerRefactored :
                                     STRING_QR_READ_RESULT_REQUEST_KEY,
                                     bundleOf(STRING_QR_READ_RESULT_BUNDLE_KEY to scannedData),
                                 )
-                                //Log.d("SEEN_DATA_HERE", scannedData.toString())
+                                Log.d("SEEN_DATA_HERE", scannedData.toString())
                             } else {
+                                Log.d("SEEN_DATA_HERE_1", scannedData.toString())
                                 showSnackBar(binding.root, getString(R.string.invalid_qr))
                             }
                             parentFragmentManager.popBackStack()
