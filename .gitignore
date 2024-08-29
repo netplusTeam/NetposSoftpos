@@ -20,8 +20,8 @@ netpossdk
 epmslib-release
 app/libs
 /keystore.properties
-kozen-appstore.keystore
+/kozen-appstore.keystore
 /app-settings.properties
-staging-env.properties
-signdebug.sh
-netpos.jks
+/staging-env.properties
+/signdebug.sh
+/netpos.jks
