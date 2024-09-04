@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.nfc.NfcManager
 import android.os.Bundle
 import android.util.Log
@@ -293,6 +294,17 @@ class LoginFragment : BaseFragment() {
                 confirmOTPForProvidus()
             }
         }
+
+        binding.privacyPolicy.setOnClickListener {
+            val url = "https://www.providusbank.com/privacy-policy"
+            // Create an intent to open the URL
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(url)
+            }
+            // Start the activity
+            startActivity(intent)
+        }
+
     }
 
 
