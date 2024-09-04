@@ -340,8 +340,8 @@
                         android:text="@string/date_time_place_holder"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp"
-                        app:layout_constraintEnd_toEndOf="@+id/rrn"
-                        app:layout_constraintStart_toStartOf="@+id/rrn"
+                        app:layout_constraintEnd_toEndOf="@+id/orderId"
+                        app:layout_constraintStart_toStartOf="@+id/orderId"
                         app:layout_constraintTop_toTopOf="@+id/transaction_date_label" />
 
                     <View
