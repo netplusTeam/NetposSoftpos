@@ -4,6 +4,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 // ktlint-disable no-wildcard-imports
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.SparseArray
@@ -145,10 +146,21 @@ class FragmentBarCodeScannerRefactored :
                         qrCodeText?.let {
                             vibrateThePhone(requireContext())
                             val scannedData: QrScannedDataModel? = try {
-                                gson.fromJson(base64ToPlainText(it), QrScannedDataModel::class.java)
+                                // Check if 'it' is a URL
+                                val token = if (it.contains("https")) {
+                                    //regex to extract token query parameter
+                                    """[?&]token=([^&]*)""".toRegex().find(it)?.groups?.get(1)?.value
+                                } else {
+                                    it
+                                }
+
+                                gson.fromJson(base64ToPlainText(token!!.replace("%3D", "=")), QrScannedDataModel::class.java)
+
                             } catch (e: Exception) {
+                                Log.e("ERROR", "Failed to process scanned data", e)
                                 null
                             }
+
                             if (scannedData != null) {
                                 viewModel.setCardScheme(scannedData.card_scheme) // Save account type for future ref
                                 Toast.makeText(
@@ -161,7 +173,6 @@ class FragmentBarCodeScannerRefactored :
                                     STRING_QR_READ_RESULT_REQUEST_KEY,
                                     bundleOf(STRING_QR_READ_RESULT_BUNDLE_KEY to scannedData),
                                 )
-                                //Log.d("SEEN_DATA_HERE", scannedData.toString())
                             } else {
                                 showSnackBar(binding.root, getString(R.string.invalid_qr))
                             }

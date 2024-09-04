@@ -19,3 +19,9 @@ terminalcore
 netpossdk
 epmslib-release
 app/libs
+/keystore.properties
+/kozen-appstore.keystore
+/app-settings.properties
+/staging-env.properties
+/signdebug.sh
+/netpos.jks
