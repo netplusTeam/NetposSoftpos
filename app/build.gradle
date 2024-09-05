@@ -164,6 +164,9 @@ android {
         providuspos {
             java.srcDirs('src/default/java')
         }
+        lumina {
+            java.srcDirs('src/default/java')
+        }
     }
 
     compileOptions {

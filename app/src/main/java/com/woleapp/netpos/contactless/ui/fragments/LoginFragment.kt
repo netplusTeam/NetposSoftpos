@@ -295,15 +295,18 @@ class LoginFragment : BaseFragment() {
             }
         }
 
-        binding.privacyPolicy.setOnClickListener {
-            val url = "https://www.providusbank.com/privacy-policy"
-            // Create an intent to open the URL
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(url)
+            binding.testMyPhone.setOnClickListener {
+                if (BuildConfig.FLAVOR.contains("providuspos")){
+                    val url = "https://www.providusbank.com/privacy-policy"
+                // Create an intent to open the URL
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(url)
+                }
+                // Start the activity
+                startActivity(intent)
             }
-            // Start the activity
-            startActivity(intent)
         }
+
 
     }
 
