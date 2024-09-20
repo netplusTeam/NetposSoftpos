@@ -116,7 +116,7 @@ class RegistrationViewModel @Inject constructor(
                 } else {
                     regZenith(bank, deviceSerialId)
                 }
-            }else if (BuildConfig.FLAVOR.contains("tingo")) {
+            }else if (BuildConfig.FLAVOR.contains("tingo") || BuildConfig.FLAVOR.contains("lumina")) {
                 if (bankTRegistrationModel.value?.password != registrationZenithConfirmPassword.value) {
                     //Log.d("TINGOKM", bankTRegistrationModel.value.toString())
                     _message.value = Event("Password mismatch")

@@ -34,6 +34,10 @@ import com.woleapp.netpos.contactless.network.StormApiClient
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.activities.MainActivity
 import com.woleapp.netpos.contactless.util.AppConstants
+import com.woleapp.netpos.contactless.util.EncryptionUtils
+import com.woleapp.netpos.contactless.util.EncryptionUtils.decrypt
+import com.woleapp.netpos.contactless.util.EncryptionUtils.encrypt
+import com.woleapp.netpos.contactless.util.EncryptionUtils.generateSecretKey
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
@@ -44,6 +48,7 @@ import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import java.nio.charset.Charset
+import java.security.SecureRandom
 import java.text.ParseException
 
 class LoginFragment : BaseFragment() {
@@ -206,7 +211,6 @@ class LoginFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
 //        val pinkKey = context?.let { processISOBitStreamWithJ8583(it, "0810023800000280080001290105050469380105050129002ISWK4199BAEECE251C7E9926A62981F7C5FE53C9BA3350000000000000000000000000000000000000000000000000000000000") }
 //        Log.d("CHECKING_PINKEY", pinkKey.toString())
         loader = alertDialog(requireContext())
@@ -295,7 +299,7 @@ class LoginFragment : BaseFragment() {
             }
         }
 
-            binding.testMyPhone.setOnClickListener {
+            binding.privacyPolicy.setOnClickListener {
                 if (BuildConfig.FLAVOR.contains("providuspos")){
                     val url = "https://www.providusbank.com/privacy-policy"
                 // Create an intent to open the URL
@@ -306,7 +310,15 @@ class LoginFragment : BaseFragment() {
                 startActivity(intent)
             }
         }
+        val secretKey = generateSecretKey()
+//        val encryptedData = encrypt("Hello from Kotlin", secretKey)
+//        val encryptedData = "966a289d2b7469a0503efc68051e06404caf6ffffe8979f7c2ee296e6296b98d5c0cb8544bcc34383acc9da0720c324e3555f84ecf2ec12a2ba15a54e54077140fae34287d78d03df44c4e7fe500ec212bff5f56d7bea1dc8ee82223f5011528bbf7d931cd6525bce7f97ca6ae5d597d87b624c1dd9299cfdce9811a1ce46314"
+//        Log.d("ENCRYPT", encryptedData.toString())
+        val iv = ByteArray(12) // 12 bytes IV for GCM
+        SecureRandom().nextBytes(iv) // Generate random IV
 
+//        val decryptedData = decrypt("$encryptedData", "9a3ab2fd104564bb", "$secretKey")
+        Log.d("DECRYPTED_DATA", "$secretKey,,,,, $iv")
 
     }
 
@@ -500,6 +512,7 @@ class LoginFragment : BaseFragment() {
             throw RuntimeException(e)
         }
     }
+
 
 }
 

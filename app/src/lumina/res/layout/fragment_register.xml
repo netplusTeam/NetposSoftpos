@@ -270,6 +270,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/reference"
                 app:errorEnabled="true"
+                android:text=""
                 android:visibility="gone"
                 app:errorTextColor="@color/colorError"
                 android:textColorHint="@android:color/black"

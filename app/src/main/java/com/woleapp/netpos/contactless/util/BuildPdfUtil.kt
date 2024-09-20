@@ -109,7 +109,9 @@ fun createPdf(
     }
 
     val canvas = bitmap?.let { Canvas(it) }
-    pdfView.root.draw(canvas)
+    if (canvas != null) {
+        pdfView.root.draw(canvas)
+    }
 
     if (bitmap != null) {
         Bitmap.createScaledBitmap(bitmap, 595, 842, true)

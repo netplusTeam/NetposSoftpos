@@ -107,7 +107,7 @@ class RegisterFragment : BaseFragment() {
                         fragmentName = "Login Fragment",
                     )
                 }
-                .setMessage("You can start transactions immediately but contact the bank to regularize your EasyPay Account")
+                .setMessage("You can start transactions immediately but contact the bank to regularize your Account")
                 .create()
         }
 

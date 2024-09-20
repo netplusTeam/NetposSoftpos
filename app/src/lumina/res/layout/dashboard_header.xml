@@ -29,12 +29,9 @@
 
         <ImageView
             android:id="@+id/netpos_logo"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
-            android:layout_margin="8dp"
-            android:contentDescription="@string/netpos_logo"
-            android:src="@drawable/ic_netpos_white"
-            app:layout_constraintBottom_toTopOf="@+id/guideline6"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:src="@drawable/lumina_logo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,9 +39,9 @@
             android:id="@+id/user_image"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:visibility="visible"
             android:contentDescription="@string/user_image"
             android:src="@drawable/netpos_user"
-            android:background="@color/colorAccent"
             app:layout_constraintBottom_toTopOf="@id/welcome_label"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
