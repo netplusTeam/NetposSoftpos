@@ -218,11 +218,11 @@
                 android:id="@+id/email_field"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/enter_email_address"
+                android:hint="@string/email_address"
                 android:textColorHint="@android:color/black"
-                app:layout_constraintEnd_toEndOf="@id/textInputBusinessName"
-                app:layout_constraintStart_toStartOf="@id/textInputBusinessName"
-                app:layout_constraintTop_toBottomOf="@id/fragment_branch">
+                app:layout_constraintEnd_toEndOf="@+id/phoneee"
+                app:layout_constraintStart_toStartOf="@+id/phoneee"
+                app:layout_constraintTop_toBottomOf="@+id/phoneee">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email"
@@ -231,6 +231,82 @@
                     android:background="@drawable/edittext_bg"
                     android:drawablePadding="8dp"
                     android:inputType="textEmailAddress"
+                    android:singleLine="true"
+                    android:text="@={viewmodel.registrationZenithModel.emailAddress}"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    app:endIconMode="password_toggle"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/rc_number_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/rc_number"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/textInputBusinessName"
+                app:layout_constraintStart_toStartOf="@id/textInputBusinessName"
+                app:layout_constraintTop_toBottomOf="@+id/email_field">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/rc_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="text"
+                    android:singleLine="true"
+                    android:text="@={viewmodel.registrationZenithModel.emailAddress}"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    app:endIconMode="password_toggle"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/no_of_tids_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/no_Of_TID"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/textInputBusinessName"
+                app:layout_constraintStart_toStartOf="@id/textInputBusinessName"
+                app:layout_constraintTop_toBottomOf="@+id/rc_number_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tids"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:text="@={viewmodel.registrationZenithModel.emailAddress}"
+                    android:textColor="@android:color/black"
+                    android:textColorHint="@android:color/black"
+                    android:textSize="15sp"
+                    app:endIconMode="password_toggle"
+                    tools:text="" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/contact_person_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="@string/contact_person"
+                android:textColorHint="@android:color/black"
+                app:layout_constraintEnd_toEndOf="@id/textInputBusinessName"
+                app:layout_constraintStart_toStartOf="@id/textInputBusinessName"
+                app:layout_constraintTop_toBottomOf="@id/no_of_tids_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/contact_person"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/edittext_bg"
+                    android:drawablePadding="8dp"
+                    android:inputType="number"
                     android:singleLine="true"
                     android:text="@={viewmodel.registrationZenithModel.emailAddress}"
                     android:textColor="@android:color/black"
@@ -248,9 +324,9 @@
                 android:visibility="gone"
                 app:errorTextColor="@color/colorError"
                 android:textColorHint="@android:color/black"
-                app:layout_constraintEnd_toEndOf="@id/email_field"
-                app:layout_constraintStart_toStartOf="@id/email_field"
-                app:layout_constraintTop_toBottomOf="@+id/email_field">
+                app:layout_constraintEnd_toEndOf="@id/contact_person_layout"
+                app:layout_constraintStart_toStartOf="@id/contact_person_layout"
+                app:layout_constraintTop_toBottomOf="@+id/contact_person_layout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/bvn"

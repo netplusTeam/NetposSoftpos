@@ -90,7 +90,6 @@
                     android:layout_marginEnd="16dp"
                     android:hint="@string/fullname"
                     android:textColorHint="@android:color/black"
-                    app:layout_constraintBottom_toTopOf="@id/existing_customers_textInputAddress"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/existing_customers_business_name">
@@ -152,7 +151,6 @@
                     android:textColorHint="@android:color/black"
                     app:errorEnabled="true"
                     app:errorTextColor="@color/colorError"
-                    app:layout_constraintBottom_toTopOf="@id/fragment_state"
                     app:layout_constraintEnd_toEndOf="@id/existing_customers_contact_info"
                     app:layout_constraintStart_toStartOf="@id/existing_customers_contact_info"
                     app:layout_constraintTop_toBottomOf="@+id/fragment_state">
@@ -193,7 +191,6 @@
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
                         android:textSize="15sp"
-                        app:endIconMode="password_toggle"
                         tools:text="" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -228,17 +225,16 @@
                         app:backgroundTint="@color/white" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/email_field"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:hint="@string/enter_email_address"
+                    android:textColorHint="@android:color/black"
                     app:errorEnabled="true"
                     app:errorTextColor="@color/colorError"
-                    android:textColorHint="@android:color/black"
                     app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"
-                    app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"
+                    app:layout_constraintStart_toStartOf="@+id/existing_customers_phoneee"
                     app:layout_constraintTop_toBottomOf="@id/fragment_branch">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -247,43 +243,129 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_bg"
                         android:drawablePadding="8dp"
-                        android:singleLine="true"
-                        android:inputType="textEmailAddress"
                         android:focusableInTouchMode="false"
+                        android:inputType="textEmailAddress"
+                        android:singleLine="true"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
                         android:textSize="15sp"
                         tools:text="" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/rc_number_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/rc_number"
+                    app:errorEnabled="true"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/email_field"
+                    app:layout_constraintStart_toStartOf="@id/email_field"
+                    app:layout_constraintTop_toBottomOf="@+id/email_field">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/rc_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        app:endIconMode="password_toggle"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/no_of_tids_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/no_Of_TID"
+                    app:errorEnabled="true"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/rc_number_layout"
+                    app:layout_constraintStart_toStartOf="@id/rc_number_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/rc_number_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tids"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        app:endIconMode="password_toggle"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/contact_person_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/contact_person"
+                    app:errorEnabled="true"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/no_of_tids_layout"
+                    app:layout_constraintStart_toStartOf="@id/no_of_tids_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/no_of_tids_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/contact_person"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="number"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/password_field"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:hint="@string/password"
-                    app:errorEnabled="true"
-                    app:passwordToggleEnabled="true"
-                    app:errorTextColor="@color/colorError"
                     android:textColorHint="@android:color/black"
-                    app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"
-                    app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"
-                    app:layout_constraintTop_toBottomOf="@+id/email_field">
+                    app:errorEnabled="true"
+                    app:errorTextColor="@color/colorError"
+                    app:layout_constraintEnd_toEndOf="@id/contact_person_layout"
+                    app:layout_constraintStart_toStartOf="@id/contact_person_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/contact_person_layout"
+                    app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/password"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_bg"
+                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*()_+=,\-[\]>{}'|\~`>/.?\:;"
                         android:drawablePadding="8dp"
                         android:inputType="textPassword"
+                        android:maxLength="21"
                         android:singleLine="true"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
-                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*()_+=,\-[\]>{}'|\~`>/.?\:;"
-                        android:maxLength="21"
-                        android:textSize="15sp"
-                        tools:text="" />
+                        android:textSize="15sp" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/password_guide"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/password_requires_minimum_of_1_uppercase_lowercase_number_special_character"
+                    app:layout_constraintEnd_toEndOf="@+id/password_field"
+                    app:layout_constraintStart_toStartOf="@+id/password_field"
+                    app:layout_constraintTop_toBottomOf="@+id/password_field" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/confirm_password_field"
                     android:layout_width="0dp"
@@ -295,7 +377,7 @@
                     app:passwordToggleEnabled="true"
                     app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"
                     app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"
-                    app:layout_constraintTop_toBottomOf="@+id/password_field">
+                    app:layout_constraintTop_toBottomOf="@+id/password_guide">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/confirm_password"
@@ -307,8 +389,7 @@
                         android:singleLine="true"
                         android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&amp;*()_+=,\-[\]>{}'|\~`>/.?\:;"
                         android:maxLength="21"
-                        android:textSize="15sp"
-                        tools:text="" />
+                        android:textSize="15sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
 
