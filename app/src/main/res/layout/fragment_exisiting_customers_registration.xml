@@ -257,6 +257,85 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/rc_number_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/rc_number"
+                    android:visibility="gone"
+                    app:errorEnabled="true"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/email_field"
+                    app:layout_constraintStart_toStartOf="@id/email_field"
+                    app:layout_constraintTop_toBottomOf="@+id/email_field">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/rc_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        app:endIconMode="password_toggle"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/no_of_tids_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/no_Of_TID"
+                    app:errorEnabled="true"
+                    android:visibility="gone"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/rc_number_layout"
+                    app:layout_constraintStart_toStartOf="@id/rc_number_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/rc_number_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tids"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        app:endIconMode="password_toggle"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/contact_person_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/contact_person"
+                    app:errorEnabled="true"
+                    android:visibility="gone"
+                    android:textColorHint="@android:color/black"
+                    app:layout_constraintEnd_toEndOf="@id/no_of_tids_layout"
+                    app:layout_constraintStart_toStartOf="@id/no_of_tids_layout"
+                    app:layout_constraintTop_toBottomOf="@+id/no_of_tids_layout">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/contact_person"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/edittext_bg"
+                        android:drawablePadding="8dp"
+                        android:inputType="text"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@android:color/black"
+                        android:textSize="15sp"
+                        tools:text="" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/password_field"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -267,7 +346,7 @@
                     android:textColorHint="@android:color/black"
                     app:layout_constraintEnd_toEndOf="@id/existing_customers_business_name"
                     app:layout_constraintStart_toStartOf="@id/existing_customers_business_name"
-                    app:layout_constraintTop_toBottomOf="@+id/email_field">
+                    app:layout_constraintTop_toBottomOf="@+id/contact_person_layout">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/password"

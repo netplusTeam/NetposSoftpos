@@ -603,21 +603,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 partnerId = partnerID,
                 deviceSerialId = deviceSerialID,
             )
-        } else if (BuildConfig.FLAVOR.contains("zenith"))
-            {
-                val existingAccountRegReq =
-                    ExistingAccountRegisterRequestBankZ(
-                        accountNumber = actNumber,
-                        businessAddress = addressView.text.toString().trim(),
-                        businessName = businessNameView.text.toString().trim(),
-                        contactInformation = contactName.text.toString().trim(),
-                        username = emailView.text.toString().trim(),
-                        password = passwordView.text.toString().trim(),
-                        phoneNumber = phoneNumber.text.toString().trim(),
-                        no_of_tid = binding.tids.text.toString().trim(),
-                        contact_person = binding.contactPerson.text.toString().trim(),
-                        rc_no = binding.rcNumber.text.toString().trim(),
-                    )
+        } else if (BuildConfig.FLAVOR.contains("zenith")) {
+            val existingAccountRegReq =
+                ExistingAccountRegisterRequestBankZ(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                    no_of_tid = binding.tids.text.toString().trim(),
+                    contact_person = binding.contactPerson.text.toString().trim(),
+                    rc_no = binding.rcNumber.text.toString().trim(),
+                )
 //            if (!passwordValidationZB(passwordView.text.toString().trim())) {
 //                //showToast("The password's length must be more than 9 digits and must contain small letters, capital letters and special characters")
 //                AlertDialog.Builder(requireContext()).setTitle("Password incorrect")
@@ -626,14 +625,14 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 //                        dialog.dismiss()
 //                    }.show()
 //            } else {
-                // Toast.makeText(requireContext(), "PASSED", Toast.LENGTH_SHORT).show()
-                viewModel.registerExistingAccountBankZ(
-                    existingAccountRegReq,
-                    partnerId = partnerID,
-                    deviceSerialId = deviceSerialID,
-                )
-                //    }
-            } else {
+            // Toast.makeText(requireContext(), "PASSED", Toast.LENGTH_SHORT).show()
+//                viewModel.registerExistingAccountBankZ(
+//                    existingAccountRegReq,
+//                    partnerId = partnerID,
+//                    deviceSerialId = deviceSerialID,
+//                )
+            //    }
+        } else {
             val existingAccountRegReq =
                 ExistingAccountRegisterRequest(
                     accountNumber = actNumber,
@@ -662,5 +661,34 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 //            )
             viewModel.clearExistingCustomerLiveData()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Clear sensitive data
+        clearSensitiveData()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Clear sensitive data
+        clearSensitiveData()
+    }
+
+    private fun clearSensitiveData() {
+        // Example: clearing EditText fields
+        binding.state.text?.clear()
+        binding.password.text?.clear()
+        binding.confirmPassword.text?.clear()
+        binding.businessName.text?.clear()
+        binding.contactInfo.text?.clear()
+        binding.phone.text?.clear()
+        binding.email.text?.clear()
+        binding.businessName.text?.clear()
+        binding.address.text?.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

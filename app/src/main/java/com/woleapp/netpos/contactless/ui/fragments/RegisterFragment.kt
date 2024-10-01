@@ -207,7 +207,7 @@ class RegisterFragment : BaseFragment() {
         }
     }
 
-    private fun initViews()  {
+    private fun initViews() {
         with(binding) {
             firstBankStates = state
             firstBankBranches = branch
@@ -253,7 +253,8 @@ class RegisterFragment : BaseFragment() {
         binding.contactInfo.text?.clear()
         binding.phone.text?.clear()
         binding.email.text?.clear()
-        binding.contactInfo.text?.clear()
+        binding.businessName.text?.clear()
+        binding.address.text?.clear()
     }
 
     override fun onDestroy() {
