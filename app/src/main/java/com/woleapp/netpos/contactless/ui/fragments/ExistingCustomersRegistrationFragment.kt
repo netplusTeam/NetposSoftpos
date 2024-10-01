@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
@@ -20,17 +19,14 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.BranchAdapter
 import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentExisitingCustomersRegistrationBinding
-import com.woleapp.netpos.contactless.model.ExistingAccountRegisterRequest
-import com.woleapp.netpos.contactless.model.FBNBranch
-import com.woleapp.netpos.contactless.model.FBNState
-import com.woleapp.netpos.contactless.model.RegistrationForExistingFBNUsersRequest
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidationZB
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.util.validatePasswordMismatch
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -52,6 +48,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var bvnView: TextInputEditText
     private lateinit var referenceView: TextInputEditText
     private lateinit var phoneNumber: TextInputEditText
+    private lateinit var newRcNumber: TextInputEditText
+    private lateinit var newContactPerson: TextInputEditText
+    private lateinit var newNoOfTid: TextInputEditText
     private lateinit var submitBtn: Button
     private lateinit var partnerID: String
     private lateinit var actNumber: String
@@ -85,7 +84,18 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         deviceSerialID = getDeviceId(requireContext())
         viewModel.registerMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                //   Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                if (message.contains("Account created successfully")) {
+                    showAlertDialog(requireContext(), message, "OK") {
+                        showFragment(
+                            LoginFragment(),
+                            containerViewId = R.id.auth_container,
+                            fragmentName = "Login Fragment",
+                        )
+                    }
+                } else {
+                    showAlertDialog(requireContext(), message, "OK") {}
+                }
             }
         }
         if (BuildConfig.FLAVOR.contains("firstbank")) {
@@ -110,20 +120,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
 
         val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
-        val email = newEmail.substring(1, newEmail.length - 1)
+        val email = newEmail.substring(0, newEmail.length)
 
         val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
-        val phone = newPhone.substring(1, newPhone.length - 1)
+        val phone = newPhone.substring(0, newPhone.length)
 
         val newContactInfo = Prefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
-            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&").replace("\\u0027", "'")
+            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
 
-        binding.businessName.setText(businessName.replace("\\u0026", "&").replace("\\u0027", "'"))
+        binding.businessName.setText(businessName.replace("\\u0026", "&"))
         binding.contactInfo.setText(contactInfo)
-        binding.address.setText(businessAddress.replace("\\u0026", "&").replace("\\u0027", "'"))
+        binding.address.setText(businessAddress.replace("\\u0026", "&"))
         binding.phone.setText(phone)
-        binding.email.setText(email.replace("\\u0026", "&").replace("\\u0027", "'"))
+        binding.email.setText(email.replace("\\u0026", "&"))
 
         loader = alertDialog(requireContext())
 
@@ -177,6 +187,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         submitBtn.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
                 registerForFBN()
+            } else if (BuildConfig.FLAVOR.contains("zenith")) {
+                registerBankZ()
             } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") ||
                 BuildConfig.FLAVOR.contains("providuspos")
             ) {
@@ -199,6 +211,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             confirmPasswordView = confirmPassword
             phoneNumber = phone
             submitBtn = btnSubmit
+            newContactPerson = contactPerson
+            newRcNumber = rcNumber
+            newNoOfTid = tids
         }
     }
 
@@ -312,6 +327,66 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
                     registerExistingCustomer()
+                }
+            }
+        }
+    }
+
+    private fun registerBankZ() {
+        when {
+            businessNameView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_business_name))
+            }
+            contactName.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_full_name))
+            }
+            addressView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_location))
+            }
+            phoneNumber.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_phone_number))
+            }
+            emailView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_email_address))
+            }
+            newNoOfTid.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_no_of_tids))
+            }
+//            newRcNumber.text.toString().isEmpty() -> {
+//                showToast(getString(R.string.all_please_enter_rc_no))
+//            }
+            newContactPerson.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_contact_person))
+            }
+            passwordView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.hint_enter_password))
+            }
+            confirmPasswordView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_confirm_password))
+            }
+            !validatePasswordMismatch(
+                passwordView.text.toString(),
+                confirmPasswordView.text.toString(),
+            ) -> {
+                showToast(getString(R.string.all_password_mismatch))
+            }
+            else -> {
+                if (validateSignUpFieldsOnTextChange()) {
+                    activity?.getFragmentManager()?.popBackStack()
+                    val dialogView: View =
+                        LayoutInflater.from(requireContext())
+                            .inflate(R.layout.dialog_terms_and_conditions, null)
+                    val dialogBuilder: AlertDialog.Builder =
+                        AlertDialog.Builder(requireContext())
+                    dialogBuilder.setView(dialogView)
+
+                    val alertDialog: AlertDialog = dialogBuilder.create()
+                    alertDialog.show()
+                    dialogView.findViewById<PDFView>(R.id.pdf).fromAsset("bankZ.pdf").load()
+                    dialogView.findViewById<Button>(R.id.accept_button).setOnClickListener {
+                        alertDialog.dismiss()
+                        registerExistingCustomer()
+                    }
                 }
             }
         }
@@ -528,29 +603,37 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 partnerId = partnerID,
                 deviceSerialId = deviceSerialID,
             )
-        } else if (BuildConfig.FLAVOR.contains("zenith")) {
-            val existingAccountRegReq =
-                ExistingAccountRegisterRequest(
-                    accountNumber = actNumber,
-                    businessAddress = addressView.text.toString().trim(),
-                    businessName = businessNameView.text.toString().trim(),
-                    contactInformation = contactName.text.toString().trim(),
-                    username = emailView.text.toString().trim(),
-                    password = passwordView.text.toString().trim(),
-                    phoneNumber = phoneNumber.text.toString().trim(),
+        } else if (BuildConfig.FLAVOR.contains("zenith"))
+            {
+                val existingAccountRegReq =
+                    ExistingAccountRegisterRequestBankZ(
+                        accountNumber = actNumber,
+                        businessAddress = addressView.text.toString().trim(),
+                        businessName = businessNameView.text.toString().trim(),
+                        contactInformation = contactName.text.toString().trim(),
+                        username = emailView.text.toString().trim(),
+                        password = passwordView.text.toString().trim(),
+                        phoneNumber = phoneNumber.text.toString().trim(),
+                        no_of_tid = binding.tids.text.toString().trim(),
+                        contact_person = binding.contactPerson.text.toString().trim(),
+                        rc_no = binding.rcNumber.text.toString().trim(),
+                    )
+//            if (!passwordValidationZB(passwordView.text.toString().trim())) {
+//                //showToast("The password's length must be more than 9 digits and must contain small letters, capital letters and special characters")
+//                AlertDialog.Builder(requireContext()).setTitle("Password incorrect")
+//                    .setMessage("The password's length must be more than 9 digits and must contain small letters, capital letters and special characters")
+//                    .setPositiveButton("Close") { dialog, _ ->
+//                        dialog.dismiss()
+//                    }.show()
+//            } else {
+                // Toast.makeText(requireContext(), "PASSED", Toast.LENGTH_SHORT).show()
+                viewModel.registerExistingAccountBankZ(
+                    existingAccountRegReq,
+                    partnerId = partnerID,
+                    deviceSerialId = deviceSerialID,
                 )
-            if (!passwordValidationZB(passwordView.text.toString().trim())) {
-                showToast(
-                    "The password's length must be more than 9 digits and must contain small letters, capital letters and special characters",
-                )
-                return
-            }
-            viewModel.registerExistingAccount(
-                existingAccountRegReq,
-                partnerId = partnerID,
-                deviceSerialId = deviceSerialID,
-            )
-        } else {
+                //    }
+            } else {
             val existingAccountRegReq =
                 ExistingAccountRegisterRequest(
                     accountNumber = actNumber,
@@ -572,35 +655,12 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             loader,
             requireActivity().supportFragmentManager,
         ) {
-            showFragment(
-                LoginFragment(),
-                containerViewId = R.id.auth_container,
-                fragmentName = "Login Fragment",
-            )
+//            showFragment(
+//                LoginFragment(),
+//                containerViewId = R.id.auth_container,
+//                fragmentName = "Login Fragment",
+//            )
             viewModel.clearExistingCustomerLiveData()
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // Clear sensitive data
-        clearSensitiveData()
-    }
-
-    private fun clearSensitiveData() {
-        // Example: clearing EditText fields
-        binding.state.text?.clear()
-        binding.branch.text?.clear()
-        binding.password.text?.clear()
-        binding.confirmPassword.text?.clear()
-        binding.businessName.text?.clear()
-        binding.contactInfo.text?.clear()
-        binding.phone.text?.clear()
-        binding.email.text?.clear()
-        binding.contactInfo.text?.clear()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 }
