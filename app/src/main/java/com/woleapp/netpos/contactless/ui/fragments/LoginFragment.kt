@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.nfc.NfcManager
 import android.os.Bundle
 import android.util.Log
@@ -220,32 +221,6 @@ class LoginFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 //        val pinkKey = context?.let { processISOBitStreamWithJ8583(it, "0810023800000280080001290105050469380105050129002ISWK4199BAEECE251C7E9926A62981F7C5FE53C9BA3350000000000000000000000000000000000000000000000000000000000") }
 //        Log.d("CHECKING_PINKEY", pinkKey.toString())
-        // Generate a key
-        val username = "testUser"
-        val password = "testPassword"
-        val deviceId = "testDeviceId"
-
-        // Generate a secret key
-        val secretKey = AESGCMEncryption.generateAndPrintSecretKey()
-
-        // Encrypt the data
-        val encryptedDataBase64 =
-            AESGCMEncryption.encryptFields(
-                username,
-                password,
-                deviceId,
-                "p6Tff5uklnWPbrLfZZ6RU4KZghZCYioSVTygBRdN4k4=",
-            )
-        Log.d("Encrypted", "HELLOOO$encryptedDataBase64")
-
-        // Decrypt the data in Kotlin (just for demonstration)
-        val decryptedText =
-            AESGCMEncryption.decrypt(
-                "wg2T+z4jqH9jzzPZ1B5tDCvMB6VIZ0A0DJnakPZ3j7pjIyYrm25SCduEErbbFfVjU1fVXlmvMLDe",
-                "B4qcsQigBww4u2ps",
-                "p6Tff5uklnWPbrLfZZ6RU4KZghZCYioSVTygBRdN4k4",
-            )
-        Log.d("Decrypted", "$decryptedText")
 
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
@@ -336,18 +311,18 @@ class LoginFragment : BaseFragment() {
             }
         }
 
-//        binding.privacyPolicy.setOnClickListener {
-//            if (BuildConfig.FLAVOR.contains("providuspos")) {
-//                val url = "https://www.providusbank.com/privacy-policy"
-//                // Create an intent to open the URL
-//                val intent =
-//                    Intent(Intent.ACTION_VIEW).apply {
-//                        data = Uri.parse(url)
-//                    }
-//                // Start the activity
-//                startActivity(intent)
-//            }
-//        }
+        if (BuildConfig.FLAVOR.contains("providuspos")) {
+            binding.privacyPolicy.setOnClickListener {
+                val url = "https://www.providusbank.com/privacy-policy"
+                // Create an intent to open the URL
+                val intent =
+                    Intent(Intent.ACTION_VIEW).apply {
+                        data = Uri.parse(url)
+                    }
+                // Start the activity
+                startActivity(intent)
+            }
+        }
     }
 
     private fun confirmOTPForProvidus() {

@@ -13,7 +13,6 @@ import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.github.barteksc.pdfviewer.PDFView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.BuildConfig
@@ -39,7 +38,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ExistingCustomersRegistrationFragment : BaseFragment() {
-
     private lateinit var binding: FragmentExisitingCustomersRegistrationBinding
     private val viewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var loader: AlertDialog
@@ -67,16 +65,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_exisiting_customers_registration,
-            container,
-            false,
-        )
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_exisiting_customers_registration,
+                container,
+                false,
+            )
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         partnerID = initPartnerId()
@@ -108,10 +110,10 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
 
         val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
-        val email = newEmail.substring(1, newEmail.length-1)
+        val email = newEmail.substring(1, newEmail.length - 1)
 
         val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
-        val phone = newPhone.substring(1, newPhone.length-1)
+        val phone = newPhone.substring(1, newPhone.length - 1)
 
         val newContactInfo = Prefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
@@ -126,37 +128,51 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         loader = alertDialog(requireContext())
 
         viewModel.getStatesResponse.observe(viewLifecycleOwner) {
-            val stateAdapter = StatesAdapter(
-                viewModel.listOfStates,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
+            val stateAdapter =
+                StatesAdapter(
+                    viewModel.listOfStates,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
             firstBankStates.setAdapter(stateAdapter)
         }
 
-        firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val statesList = adapterView?.getItemAtPosition(p2) as FBNState
-                listOfStates = statesList.state
-                viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
+        firstBankStates.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val statesList = adapterView?.getItemAtPosition(p2) as FBNState
+                    listOfStates = statesList.state
+                    viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
+                }
             }
-        }
 
         viewModel.getBranchResponse.observe(viewLifecycleOwner) {
-            val branchAdapter = BranchAdapter(
-                viewModel.listOfBranches,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
+            val branchAdapter =
+                BranchAdapter(
+                    viewModel.listOfBranches,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
             firstBankBranches.setAdapter(branchAdapter)
         }
 
-        firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val branchList = adapterView?.getItemAtPosition(p2) as FBNBranch
-                listOfBranches = branchList.branch_name
+        firstBankBranches.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val branchList = adapterView?.getItemAtPosition(p2) as FBNBranch
+                    listOfBranches = branchList.branch_name
+                }
             }
-        }
 
         submitBtn.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
@@ -217,20 +233,23 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains(
+                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") ||
+                        BuildConfig.FLAVOR.contains(
                             "providussoftpos",
                         )
                     ) {
                         activity?.getFragmentManager()?.popBackStack()
-                        val dialogView: View = LayoutInflater.from(requireContext())
-                            .inflate(R.layout.dialog_terms_and_conditions, null)
+                        val dialogView: View =
+                            LayoutInflater.from(requireContext())
+                                .inflate(R.layout.dialog_terms_and_conditions, null)
                         val dialogBuilder: AlertDialog.Builder =
                             AlertDialog.Builder(requireContext())
                         dialogBuilder.setView(dialogView)
 
                         val alertDialog: AlertDialog = dialogBuilder.create()
                         alertDialog.show()
-                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                        if (BuildConfig.FLAVOR.contains("providuspos") ||
+                            BuildConfig.FLAVOR.contains(
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
@@ -329,20 +348,23 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains(
+                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") ||
+                        BuildConfig.FLAVOR.contains(
                             "providussoftpos",
                         )
                     ) {
                         activity?.getFragmentManager()?.popBackStack()
-                        val dialogView: View = LayoutInflater.from(requireContext())
-                            .inflate(R.layout.dialog_terms_and_conditions, null)
+                        val dialogView: View =
+                            LayoutInflater.from(requireContext())
+                                .inflate(R.layout.dialog_terms_and_conditions, null)
                         val dialogBuilder: AlertDialog.Builder =
                             AlertDialog.Builder(requireContext())
                         dialogBuilder.setView(dialogView)
 
                         val alertDialog: AlertDialog = dialogBuilder.create()
                         alertDialog.show()
-                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                        if (BuildConfig.FLAVOR.contains("providuspos") ||
+                            BuildConfig.FLAVOR.contains(
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
@@ -483,19 +505,22 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
     private fun registerExistingCustomer() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
-            val existingAccountRegReq = RegistrationForExistingFBNUsersRequest(
-                accountNumber = actNumber,
-                businessAddress = addressView.text.toString().trim(),
-                businessName = businessNameView.text.toString().trim(),
-                contactInformation = contactName.text.toString().trim(),
-                username = emailView.text.toString().trim(),
-                password = passwordView.text.toString().trim(),
-                state = listOfStates,
-                branch_name = listOfBranches,
-                phoneNumber = phoneNumber.text.toString().trim(),
-            )
+            val existingAccountRegReq =
+                RegistrationForExistingFBNUsersRequest(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    state = listOfStates,
+                    branch_name = listOfBranches,
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                )
             if (!passwordValidation(passwordView.text.toString().trim())) {
-                showToast("The password's length must be more than 7 digits and must contain small letters, capital letters and special characters")
+                showToast(
+                    "The password's length must be more than 7 digits and must contain small letters, capital letters and special characters",
+                )
                 return
             }
             viewModel.registerExistingAccountForFBN(
@@ -503,18 +528,21 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 partnerId = partnerID,
                 deviceSerialId = deviceSerialID,
             )
-        } else if (BuildConfig.FLAVOR.contains("zenith")){
-            val existingAccountRegReq = ExistingAccountRegisterRequest(
-                accountNumber = actNumber,
-                businessAddress = addressView.text.toString().trim(),
-                businessName = businessNameView.text.toString().trim(),
-                contactInformation = contactName.text.toString().trim(),
-                username = emailView.text.toString().trim(),
-                password = passwordView.text.toString().trim(),
-                phoneNumber = phoneNumber.text.toString().trim(),
-            )
+        } else if (BuildConfig.FLAVOR.contains("zenith")) {
+            val existingAccountRegReq =
+                ExistingAccountRegisterRequest(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                )
             if (!passwordValidationZB(passwordView.text.toString().trim())) {
-                showToast("The password's length must be more than 9 digits and must contain small letters, capital letters and special characters")
+                showToast(
+                    "The password's length must be more than 9 digits and must contain small letters, capital letters and special characters",
+                )
                 return
             }
             viewModel.registerExistingAccount(
@@ -523,15 +551,16 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 deviceSerialId = deviceSerialID,
             )
         } else {
-            val existingAccountRegReq = ExistingAccountRegisterRequest(
-                accountNumber = actNumber,
-                businessAddress = addressView.text.toString().trim(),
-                businessName = businessNameView.text.toString().trim(),
-                contactInformation = contactName.text.toString().trim(),
-                username = emailView.text.toString().trim(),
-                password = passwordView.text.toString().trim(),
-                phoneNumber = phoneNumber.text.toString().trim(),
-            )
+            val existingAccountRegReq =
+                ExistingAccountRegisterRequest(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                )
             viewModel.registerExistingAccount(
                 existingAccountRegReq,
                 partnerId = partnerID,
@@ -550,5 +579,28 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             )
             viewModel.clearExistingCustomerLiveData()
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Clear sensitive data
+        clearSensitiveData()
+    }
+
+    private fun clearSensitiveData() {
+        // Example: clearing EditText fields
+        binding.state.text?.clear()
+        binding.branch.text?.clear()
+        binding.password.text?.clear()
+        binding.confirmPassword.text?.clear()
+        binding.businessName.text?.clear()
+        binding.contactInfo.text?.clear()
+        binding.phone.text?.clear()
+        binding.email.text?.clear()
+        binding.contactInfo.text?.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }
