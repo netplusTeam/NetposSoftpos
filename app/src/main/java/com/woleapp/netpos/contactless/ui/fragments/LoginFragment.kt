@@ -237,7 +237,15 @@ class LoginFragment : BaseFragment() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message.contains("Password")) {
                     showToast(message)
+                } else if (message.contains("REJECTED")) {
+                    showToast(message)
                 }
+            }
+        }
+        contactlessViewModel.otpBankPMessage.observe(viewLifecycleOwner) { message ->
+            if (message.contains("You are only allowed")) {
+                showToast(message)
+                confirmOTPDialog.dismiss()
             }
         }
         binding.forgotPassword.setOnClickListener {

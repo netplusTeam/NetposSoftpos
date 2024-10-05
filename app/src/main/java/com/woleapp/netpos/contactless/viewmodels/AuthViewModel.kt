@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
+import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.lifecycle.LiveData
@@ -50,7 +51,10 @@ class AuthViewModel : ViewModel() {
     val message: LiveData<Event<String>>
         get() = _message
 
-    fun loginZenith(context: Context, deviceSerialId: String) {
+    fun loginZenith(
+        context: Context,
+        deviceSerialId: String,
+    ) {
         val username = usernameLiveData.value
         val password = passwordLiveData.value
         if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
@@ -65,7 +69,7 @@ class AuthViewModel : ViewModel() {
             Toast.makeText(
                 context,
                 "The password's length must be more than 9 digits and must contain small letters, capital letters and special characters",
-                Toast.LENGTH_SHORT
+                Toast.LENGTH_SHORT,
             ).show()
             return
         }
@@ -86,7 +90,10 @@ class AuthViewModel : ViewModel() {
         auth(username, password, deviceSerialId)
     }
 
-    fun login(deviceSerialId: String, partnerID: String) {
+    fun login(
+        deviceSerialId: String,
+        partnerID: String,
+    ) {
         val username = usernameLiveData.value
         val password = passwordLiveData.value
         if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
@@ -100,13 +107,18 @@ class AuthViewModel : ViewModel() {
         authProvidus(username, password, deviceSerialId, partnerID)
     }
 
-    private fun auth(username: String, password: String, deviceId: String) {
+    private fun auth(
+        username: String,
+        password: String,
+        deviceId: String,
+    ) {
         authInProgress.value = true
-        val credentials = JsonObject().apply {
-            addProperty("username", username)
-            addProperty("password", password)
-            addProperty("deviceId", deviceId)
-        }
+        val credentials =
+            JsonObject().apply {
+                addProperty("username", username)
+                addProperty("password", password)
+                addProperty("deviceId", deviceId)
+            }
         stormApiService!!.userToken(credentials).flatMap {
             if (!it.success) {
                 throw Exception("Login Failed, Check Credentials")
@@ -115,60 +127,68 @@ class AuthViewModel : ViewModel() {
             val stormId: String = JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
             Prefs.putString(PREF_USER_TOKEN, userToken)
             val userTokenDecoded = JWT(userToken)
-            val user = User().apply {
-                this.netplusPayMid = if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
-                    userTokenDecoded.getClaim("netplusPayMid").asString()
-                } else {
-                    null
-                }
-                this.business_address =
-                    if (userTokenDecoded.claims.containsKey("business_address")) {
-                        userTokenDecoded.getClaim(
-                            "business_address",
-                        ).asString()
-                    } else {
-                        " "
-                    }
-                this.terminal_id = if (userTokenDecoded.claims.containsKey("terminalId")) {
-                    userTokenDecoded.getClaim(
-                        "terminalId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.business_name = if (userTokenDecoded.claims.containsKey("businessName")) {
-                    userTokenDecoded.getClaim(
-                        "businessName",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.netplus_id = if (userTokenDecoded.claims.containsKey("stormId")) {
-                    userTokenDecoded.getClaim(
-                        "stormId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.mid = if (userTokenDecoded.claims.containsKey("mid")) {
-                    userTokenDecoded.getClaim("mid").asString()
-                } else {
-                    " "
-                }
-                this.partnerId = if (userTokenDecoded.claims.containsKey("partnerId")) {
-                    userTokenDecoded.getClaim(
-                        "partnerId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.email = if (userTokenDecoded.claims.containsKey("username")) {
-                    userTokenDecoded.getClaim(
-                        "username",
-                    ).asString()
-                } else {
-                    " "
-                }
+            val user =
+                User().apply {
+                    this.netplusPayMid =
+                        if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
+                            userTokenDecoded.getClaim("netplusPayMid").asString()
+                        } else {
+                            null
+                        }
+                    this.business_address =
+                        if (userTokenDecoded.claims.containsKey("business_address")) {
+                            userTokenDecoded.getClaim(
+                                "business_address",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.terminal_id =
+                        if (userTokenDecoded.claims.containsKey("terminalId")) {
+                            userTokenDecoded.getClaim(
+                                "terminalId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.business_name =
+                        if (userTokenDecoded.claims.containsKey("businessName")) {
+                            userTokenDecoded.getClaim(
+                                "businessName",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.netplus_id =
+                        if (userTokenDecoded.claims.containsKey("stormId")) {
+                            userTokenDecoded.getClaim(
+                                "stormId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.mid =
+                        if (userTokenDecoded.claims.containsKey("mid")) {
+                            userTokenDecoded.getClaim("mid").asString()
+                        } else {
+                            " "
+                        }
+                    this.partnerId =
+                        if (userTokenDecoded.claims.containsKey("partnerId")) {
+                            userTokenDecoded.getClaim(
+                                "partnerId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.email =
+                        if (userTokenDecoded.claims.containsKey("username")) {
+                            userTokenDecoded.getClaim(
+                                "username",
+                            ).asString()
+                        } else {
+                            " "
+                        }
 //                    this.username =
 //                        if (userTokenDecoded.claims.containsKey("username")) {
 //                            userTokenDecoded.getClaim(
@@ -177,14 +197,15 @@ class AuthViewModel : ViewModel() {
 //                        } else {
 //                            " "
 //                        }
-                this.userType = if (userTokenDecoded.claims.containsKey("user_type")) {
-                    userTokenDecoded.getClaim(
-                        "user_type",
-                    ).asString()
-                } else {
-                    " "
+                    this.userType =
+                        if (userTokenDecoded.claims.containsKey("user_type")) {
+                            userTokenDecoded.getClaim(
+                                "user_type",
+                            ).asString()
+                        } else {
+                            " "
+                        }
                 }
-            }
 
             Single.just(user)
         }.subscribeOn(Schedulers.io()).doFinally { authInProgress.postValue(false) }
@@ -200,30 +221,36 @@ class AuthViewModel : ViewModel() {
                         return@let
                     }
                     (it as? HttpException).let { httpException ->
-                        val errorMessage = httpException?.response()?.errorBody()?.string()
-                            ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
-                        _message.value = Event(
-                            try {
-                                gson.fromJson(errorMessage, AuthError::class.java).message
-                                    ?: "Login Failed"
-                            } catch (e: Exception) {
-                                "login failed"
-                            },
-                        )
+                        val errorMessage =
+                            httpException?.response()?.errorBody()?.string()
+                                ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
+                        _message.value =
+                            Event(
+                                try {
+                                    gson.fromJson(errorMessage, AuthError::class.java).message
+                                        ?: "Login Failed"
+                                } catch (e: Exception) {
+                                    "login failed"
+                                },
+                            )
                     }
                 }
             }.disposeWith(disposables)
     }
 
     private fun authProvidus(
-        username: String, password: String, deviceId: String, partnerID: String
+        username: String,
+        password: String,
+        deviceId: String,
+        partnerID: String,
     ) {
         authInProgress.value = true
-        val credentials = JsonObject().apply {
-            addProperty("username", username)
-            addProperty("password", password)
-            addProperty("deviceId", deviceId)
-        }
+        val credentials =
+            JsonObject().apply {
+                addProperty("username", username)
+                addProperty("password", password)
+                addProperty("deviceId", deviceId)
+            }
         stormApiService!!.userTokenProvidus(partnerID, credentials).flatMap {
             if (!it.success) {
                 throw Exception("Login Failed, Check Credentials")
@@ -232,68 +259,80 @@ class AuthViewModel : ViewModel() {
             val stormId: String = JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
             Prefs.putString(PREF_USER_TOKEN, userToken)
             val userTokenDecoded = JWT(userToken)
-            val user = User().apply {
-                this.netplusPayMid = if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
-                    userTokenDecoded.getClaim("netplusPayMid").asString()
-                } else {
-                    null
+            val user =
+                User().apply {
+                    this.netplusPayMid =
+                        if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
+//                            userTokenDecoded.getClaim("netplusPayMid").asString()
+                            "2044LA000016107"
+                        } else {
+                            null
+                        }
+                    this.business_address =
+                        if (userTokenDecoded.claims.containsKey("business_address")) {
+                            userTokenDecoded.getClaim(
+                                "business_address",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.terminal_id =
+                        if (userTokenDecoded.claims.containsKey("terminalId")) {
+//                    userTokenDecoded.getClaim(
+//                        "terminalId",
+//                    ).asString()
+                            "20442R12"
+                        } else {
+                            " "
+                        }
+                    this.business_name =
+                        if (userTokenDecoded.claims.containsKey("businessName")) {
+                            userTokenDecoded.getClaim(
+                                "businessName",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.netplus_id =
+                        if (userTokenDecoded.claims.containsKey("stormId")) {
+                            userTokenDecoded.getClaim(
+                                "stormId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.mid =
+                        if (userTokenDecoded.claims.containsKey("mid")) {
+                            userTokenDecoded.getClaim("mid").asString()
+                        } else {
+                            " "
+                        }
+                    this.partnerId =
+                        if (userTokenDecoded.claims.containsKey("partnerId")) {
+                            userTokenDecoded.getClaim(
+                                "partnerId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.email =
+                        if (userTokenDecoded.claims.containsKey("username")) {
+                            userTokenDecoded.getClaim(
+                                "username",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.userType =
+                        if (userTokenDecoded.claims.containsKey("user_type")) {
+                            userTokenDecoded.getClaim(
+                                "user_type",
+                            ).asString()
+                        } else {
+                            " "
+                        }
                 }
-                this.business_address =
-                    if (userTokenDecoded.claims.containsKey("business_address")) {
-                        userTokenDecoded.getClaim(
-                            "business_address",
-                        ).asString()
-                    } else {
-                        " "
-                    }
-                this.terminal_id = if (userTokenDecoded.claims.containsKey("terminalId")) {
-                    userTokenDecoded.getClaim(
-                        "terminalId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.business_name = if (userTokenDecoded.claims.containsKey("businessName")) {
-                    userTokenDecoded.getClaim(
-                        "businessName",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.netplus_id = if (userTokenDecoded.claims.containsKey("stormId")) {
-                    userTokenDecoded.getClaim(
-                        "stormId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.mid = if (userTokenDecoded.claims.containsKey("mid")) {
-                    userTokenDecoded.getClaim("mid").asString()
-                } else {
-                    " "
-                }
-                this.partnerId = if (userTokenDecoded.claims.containsKey("partnerId")) {
-                    userTokenDecoded.getClaim(
-                        "partnerId",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.email = if (userTokenDecoded.claims.containsKey("username")) {
-                    userTokenDecoded.getClaim(
-                        "username",
-                    ).asString()
-                } else {
-                    " "
-                }
-                this.userType = if (userTokenDecoded.claims.containsKey("user_type")) {
-                    userTokenDecoded.getClaim(
-                        "user_type",
-                    ).asString()
-                } else {
-                    " "
-                }
-            }
+            Log.d("USER", user.toString())
 
             Single.just(user)
         }.subscribeOn(Schedulers.io()).doFinally { authInProgress.postValue(false) }
@@ -309,16 +348,18 @@ class AuthViewModel : ViewModel() {
                         return@let
                     }
                     (it as? HttpException).let { httpException ->
-                        val errorMessage = httpException?.response()?.errorBody()?.string()
-                            ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
-                        _message.value = Event(
-                            try {
-                                gson.fromJson(errorMessage, AuthError::class.java).message
-                                    ?: "Login Failed"
-                            } catch (e: Exception) {
-                                "login failed"
-                            },
-                        )
+                        val errorMessage =
+                            httpException?.response()?.errorBody()?.string()
+                                ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
+                        _message.value =
+                            Event(
+                                try {
+                                    gson.fromJson(errorMessage, AuthError::class.java).message
+                                        ?: "Login Failed"
+                                } catch (e: Exception) {
+                                    "login failed"
+                                },
+                            )
                     }
                 }
             }.disposeWith(disposables)
@@ -331,26 +372,28 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        val payload = JsonObject().apply {
-            addProperty("username", username)
-        }
+        val payload =
+            JsonObject().apply {
+                addProperty("username", username)
+            }
         Prefs.putString(RESET_USERNAME, username)
         stormApiService!!.passwordReset(payload).subscribeOn(Schedulers.io()).doOnSubscribe {
             passwordResetInProgress.postValue(true)
         }.doFinally { passwordResetInProgress.postValue(false) }
             .observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
                 t1?.let {
-                    _message.value = if (it.code() != 200) {
-                        Event("Password reset failed")
-                    } else {
-                        val res = JSONObject(Gson().toJson(it.body()))
-                        if (!res.getBoolean("success")) {
+                    _message.value =
+                        if (it.code() != 200) {
                             Event("Password reset failed")
                         } else {
-                            _passwordResetSent.value = Event(true)
-                            Event("A password reset mail has been sent to $username")
+                            val res = JSONObject(Gson().toJson(it.body()))
+                            if (!res.getBoolean("success")) {
+                                Event("Password reset failed")
+                            } else {
+                                _passwordResetSent.value = Event(true)
+                                Event("A password reset mail has been sent to $username")
+                            }
                         }
-                    }
                 }
                 t2?.let {
                     _message.value = Event("Password reset failed, try again.")
@@ -358,7 +401,10 @@ class AuthViewModel : ViewModel() {
             }.disposeWith(disposables)
     }
 
-    fun resetPasswordForFCMB(partnerID: String, deviceId: String) {
+    fun resetPasswordForFCMB(
+        partnerID: String,
+        deviceId: String,
+    ) {
         val username = usernameLiveData.value
         val password = passwordLiveData.value
         if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
@@ -366,10 +412,11 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        val payload = JsonObject().apply {
-            addProperty("username", username)
-            addProperty("password", password)
-        }
+        val payload =
+            JsonObject().apply {
+                addProperty("username", username)
+                addProperty("password", password)
+            }
         // DPrefs.putString(RESET_USERNAME, username)
         stormApiService!!.passwordResetForProvidus(payload, partnerID, deviceId)
             .subscribeOn(Schedulers.io()).doOnSubscribe {
@@ -377,30 +424,33 @@ class AuthViewModel : ViewModel() {
             }.doFinally { passwordResetInProgress.postValue(false) }
             .observeOn(AndroidSchedulers.mainThread()).subscribe { t1, t2 ->
                 t1?.let {
-                    _message.value = if (it.code() != 200) {
-                        Event("Email address not associated with this device. Please contact administrator")
-                    } else {
-                        val res = JSONObject(Gson().toJson(it.body()))
-                        if (!res.getBoolean("success")) {
-                            Event("Password reset failed")
+                    _message.value =
+                        if (it.code() != 200) {
+                            Event("Email address not associated with this device. Please contact administrator")
                         } else {
-                            _passwordResetSent.value = Event(true)
-                            Event("Password reset successfully!")
+                            val res = JSONObject(Gson().toJson(it.body()))
+                            if (!res.getBoolean("success")) {
+                                Event("Password reset failed")
+                            } else {
+                                _passwordResetSent.value = Event(true)
+                                Event("Password reset successfully!")
+                            }
                         }
-                    }
                 }
                 t2?.let {
                     (it as? HttpException).let { httpException ->
-                        val errorMessage = httpException?.response()?.errorBody()?.string()
-                            ?: "{\"message\":\"Unexpected error\"}"
-                        _message.value = Event(
-                            try {
-                                gson.fromJson(errorMessage, GeneralResponse::class.java).message
-                                    ?: "Error"
-                            } catch (e: Exception) {
-                                "Error"
-                            },
-                        )
+                        val errorMessage =
+                            httpException?.response()?.errorBody()?.string()
+                                ?: "{\"message\":\"Unexpected error\"}"
+                        _message.value =
+                            Event(
+                                try {
+                                    gson.fromJson(errorMessage, GeneralResponse::class.java).message
+                                        ?: "Error"
+                                } catch (e: Exception) {
+                                    "Error"
+                                },
+                            )
                     }
                 }
             }.disposeWith(disposables)

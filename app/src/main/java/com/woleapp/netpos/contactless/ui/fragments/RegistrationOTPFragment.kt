@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,19 +13,17 @@ import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.chaos.view.PinView
-import com.dsofttech.dprefs.utils.DPrefs
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.FragmentRegistrationOTPBinding
 import com.woleapp.netpos.contactless.util.AppConstants
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.closeSoftKeyboard
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import java.util.*
 
@@ -42,23 +39,26 @@ class RegistrationOTPFragment : BaseFragment() {
     private lateinit var deviceSerialID: String
     private var timeSeconds = 60L
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_registration_o_t_p,
-            container,
-            false,
-        )
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_registration_o_t_p,
+                container,
+                false,
+            )
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         partnerID = initPartnerId()
         deviceSerialID = getDeviceId(requireContext())
@@ -67,11 +67,21 @@ class RegistrationOTPFragment : BaseFragment() {
         val newPoneNumber = Prefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
         val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
         val newActNumber = Prefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-        newAccountNumber = newActNumber.substring(1, newActNumber.length-1)
+        newAccountNumber = newActNumber.substring(1, newActNumber.length - 1)
         loader = alertDialog(requireContext())
         resendCode.setOnClickListener {
             resendOtp()
             binding.otpResent.visibility = View.GONE
+        }
+        viewModel.otpBankPMessage.observe(viewLifecycleOwner) { message ->
+            if (message.contains("You are only allowed")) {
+                showToast(message)
+                showFragment(
+                    LoginFragment(),
+                    containerViewId = R.id.auth_container,
+                    fragmentName = "Login Fragment",
+                )
+            }
         }
         otpView.requestFocus()
         val inputMethodManager =
@@ -80,55 +90,71 @@ class RegistrationOTPFragment : BaseFragment() {
             InputMethodManager.SHOW_FORCED,
             InputMethodManager.HIDE_IMPLICIT_ONLY,
         )
-        otpView.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            }
+        otpView.addTextChangedListener(
+            object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int,
+                ) {
+                }
 
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                s?.let {
-                    if (BuildConfig.FLAVOR.contains("zenith") ){
-                        if (it.length == 5){
+                override fun onTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int,
+                ) {
+                    s?.let {
+                        if (BuildConfig.FLAVOR.contains("zenith")) {
+                            if (it.length == 5) {
+                                closeSoftKeyboard(requireContext(), requireActivity())
+                                viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
+                                observeServerResponse(
+                                    viewModel.confirmOTPResponse,
+                                    loader,
+                                    requireActivity().supportFragmentManager,
+                                ) {
+                                    showFragment(
+                                        ExistingCustomersRegistrationFragment(),
+                                        containerViewId = R.id.auth_container,
+                                        fragmentName = "Register Existing Customer Fragment",
+                                    )
+                                    viewModel.clearOTPResponseLiveData()
+                                }
+                            }
+                        } else if (it.length == 6) {
                             closeSoftKeyboard(requireContext(), requireActivity())
-                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
-                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
-                                showFragment(
-                                    ExistingCustomersRegistrationFragment(),
-                                    containerViewId = R.id.auth_container,
-                                    fragmentName = "Register Existing Customer Fragment",
-                                )
-                                viewModel.clearOTPResponseLiveData()
-                            }
-                        }
-                    }else if (it.length == 6) {
-                        closeSoftKeyboard(requireContext(), requireActivity())
-                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providussoftpos")) {
-                            viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
-                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
-                                showFragment(
-                                    ExistingCustomersRegistrationFragment(),
-                                    containerViewId = R.id.auth_container,
-                                    fragmentName = "Register Existing Customer Fragment",
-                                )
-                                viewModel.clearOTPResponseLiveData()
-                            }
-                        } else {
-                            viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
-                            observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
-                                showFragment(
-                                    ExistingCustomersRegistrationFragment(),
-                                    containerViewId = R.id.auth_container,
-                                    fragmentName = "Register Existing Customer Fragment",
-                                )
-                                viewModel.clearOTPResponseLiveData()
+                            if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providussoftpos")) {
+                                viewModel.confirmOTP("", newAccountNumber, s.toString(), partnerID)
+                                observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
+                                    showFragment(
+                                        ExistingCustomersRegistrationFragment(),
+                                        containerViewId = R.id.auth_container,
+                                        fragmentName = "Register Existing Customer Fragment",
+                                    )
+                                    viewModel.clearOTPResponseLiveData()
+                                }
+                            } else {
+                                viewModel.confirmOTP(phoneNumber, newAccountNumber, s.toString(), partnerID)
+                                observeServerResponse(viewModel.confirmOTPResponse, loader, requireActivity().supportFragmentManager) {
+                                    showFragment(
+                                        ExistingCustomersRegistrationFragment(),
+                                        containerViewId = R.id.auth_container,
+                                        fragmentName = "Register Existing Customer Fragment",
+                                    )
+                                    viewModel.clearOTPResponseLiveData()
+                                }
                             }
                         }
                     }
                 }
-            }
-            override fun afterTextChanged(s: Editable?) {
-            }
-        })
 
+                override fun afterTextChanged(s: Editable?) {
+                }
+            },
+        )
     }
 
     private fun resendOtp() {
@@ -152,29 +178,32 @@ class RegistrationOTPFragment : BaseFragment() {
         }
     }
 
-
     private fun startResendTimer() {
         resendCode.isEnabled = false
         val timer = Timer()
 
         // Schedule a task to run repeatedly at a fixed rate
-        timer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                // Code to run repeatedly at a fixed rate
-                timeSeconds--
-                activity?.runOnUiThread {
-                    resendCode.text = "Resend OTP in $timeSeconds seconds"
-                }
-                if (timeSeconds <= 0) {
-                    timeSeconds = 60L
-                    timer.cancel()
+        timer.scheduleAtFixedRate(
+            object : TimerTask() {
+                override fun run() {
+                    // Code to run repeatedly at a fixed rate
+                    timeSeconds--
                     activity?.runOnUiThread {
-                        resendCode.isEnabled = true
-                        resendCode.text = getString(R.string.resend_code)
+                        resendCode.text = "Resend OTP in $timeSeconds seconds"
+                    }
+                    if (timeSeconds <= 0) {
+                        timeSeconds = 60L
+                        timer.cancel()
+                        activity?.runOnUiThread {
+                            resendCode.isEnabled = true
+                            resendCode.text = getString(R.string.resend_code)
+                        }
                     }
                 }
-            }
-        }, 0, 1000) // run 1000 milliseconds (1 second)
+            },
+            0,
+            1000,
+        ) // run 1000 milliseconds (1 second)
 
         // To stop the timer, cancel it after a specified number of milliseconds
 //        timer.schedule(object : TimerTask() {
@@ -185,7 +214,4 @@ class RegistrationOTPFragment : BaseFragment() {
 //            }
 //        }, 5000) // 5000 milliseconds (5 seconds)
     }
-
 }
-
-
