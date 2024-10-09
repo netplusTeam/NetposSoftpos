@@ -126,16 +126,27 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         customerName.value = name
     }
 
-    fun validateField() {
+    private fun validateAmountAndCashback(): Boolean {
         amountDbl = (
-            amount.value!!.toDoubleOrNull() ?: run {
-                _message.value = Event("Enter a valid amount")
-                return
-            }
-            ) * 100
+                amount.value!!.toDoubleOrNull() ?: run {
+                    _message.value = Event("Enter a valid amount")
+                    return false
+                }
+                ) * 100
         this.amountLong = amountDbl.toLong()
         this.cashbackLong = cashback.value?.toDoubleOrNull()?.times(100)?.toLong() ?: 0L
-        _getCardData.value = Event(true)
+        return true
+    }
+
+    fun validateFieldForNFC() {
+        if (validateAmountAndCashback()) {
+            _getCardData.value = Event(true)
+        }
+    }
+
+    // Specific function for Bluetooth validation
+    fun validateFieldForBluetooth() {
+        validateAmountAndCashback()
     }
 
     fun payThroughMPGS(

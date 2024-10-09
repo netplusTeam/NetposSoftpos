@@ -33,6 +33,9 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
+        maven {
+            url 'https://gitlab.com/api/v4/projects/4128550/packages/maven'
+        }
 //        maven {
 //            url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
 //        }

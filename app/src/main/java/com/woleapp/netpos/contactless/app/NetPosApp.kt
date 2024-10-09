@@ -4,13 +4,18 @@ import android.app.Activity
 import android.app.Application
 import android.content.ContextWrapper
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessConfiguration
-import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.CardCommProviderStub
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.DisplayImplementation
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.OutcomeObserver
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.ResourceProviderImplementation
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.UnpredictableNumberImplementation
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import com.woleapp.netpos.contactless.taponphone.verve.VerveSoftPosInitialization
 import dagger.hilt.android.HiltAndroidApp
@@ -29,6 +34,9 @@ class NetPosApp : Application() {
 
     companion object {
         lateinit var INSTANCE: NetPosApp
+
+        @JvmStatic
+        var cr100Pos: QPOSService? = null
 
         fun assignInstance(instance: NetPosApp) {
             INSTANCE = instance

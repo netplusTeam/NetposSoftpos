@@ -14,6 +14,7 @@ import android.location.LocationManager
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -292,13 +293,20 @@ class MainActivity :
         }.create()
         receiptDialogBinding = DialogTransactionResultBinding.inflate(layoutInflater, null, false)
             .apply { executePendingBindings() }
+
         if (!EasyPermissions.hasPermissions(
                 applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-            )
+                Manifest.permission.BLUETOOTH,  // Required for older Android versions
+                Manifest.permission.BLUETOOTH_ADMIN  // Required for managing Bluetooth
+            ) || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !EasyPermissions.hasPermissions(
+                applicationContext,
+                Manifest.permission.BLUETOOTH_SCAN,  // Required for Android 12+
+                Manifest.permission.BLUETOOTH_CONNECT  // Required for Android 12+
+            ))
         ) {
             EasyPermissions.requestPermissions(
                 this,
@@ -308,8 +316,20 @@ class MainActivity :
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                // Conditionally request Bluetooth permissions for Android 12 and above
+                *if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    arrayOf(
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_CONNECT
+                    )
+                } else {
+                    arrayOf()
+                }
             )
         }
+
         progressDialog = ProgressDialog(this).apply {
             setMessage("Configuring Terminal, Please wait")
             setCancelable(false)

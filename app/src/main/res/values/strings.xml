@@ -269,8 +269,10 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="no_transactions">No transactions to print</string>
     <string name="please_wait">Please wait</string>
     <string name="nfc_message_title">NFC Message</string>
-    <string name="device_doesnt_have_nfc">Device does not have NFC support</string>
+    <string name="device_doesnt_have_nfc">Device does not have NFC support. Please connect to the CR100 bluetooth device to continue</string>
     <string name="cvv_cannot_be_empty">"CVV can't be empty"</string>
     <string name="cvv_too_short">"CVV is not complete"</string>
     <string name="enter_cvv_number">Enter Card CVV</string>
+    <string name="str_connecting">connecting to </string>
+    <string name="prompt_message">message prompt:</string>
 </resources>
