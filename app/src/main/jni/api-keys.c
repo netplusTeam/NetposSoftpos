@@ -70,13 +70,13 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getBaseUrlStormUtilities(J
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getConfigurationDataIp(JNIEnv *env,
                                                                              jobject thiz) {
-    return (*env)->NewStringUTF(env, "196.6.103.18"); // 196.46.20.30 UPTSA
+    return (*env)->NewStringUTF(env, "196.46.20.30"); //  UPTSA 196.6.103.18
 }
 
 JNIEXPORT jstring JNICALL
 Java_com_woleapp_netpos_contactless_util_UtilityParam_getConfigurationDataPort(JNIEnv *env,
                                                                                jobject thiz) {
-    return (*env)->NewStringUTF(env, "4016"); // 5334 UPTSA
+    return (*env)->NewStringUTF(env, "5334"); //  UPTSA  4016
 }
 
 JNIEXPORT jstring JNICALL
