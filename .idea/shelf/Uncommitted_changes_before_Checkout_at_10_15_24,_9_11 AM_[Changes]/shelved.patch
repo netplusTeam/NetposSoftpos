@@ -1,0 +1,338 @@
+Index: app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/DashboardFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>@file:Suppress(\"DEPRECATION\")\n\npackage com.woleapp.netpos.contactless.ui.fragments\n\nimport android.app.AlertDialog\nimport android.app.ProgressDialog\nimport android.content.DialogInterface\nimport android.os.Build\nimport android.os.Bundle\nimport android.text.InputFilter\nimport android.util.Log\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport android.widget.EditText\nimport android.widget.Toast\nimport androidx.fragment.app.activityViewModels\nimport androidx.lifecycle.lifecycleScope\nimport com.danbamitale.epmslib.entities.CardData\nimport com.danbamitale.epmslib.entities.HostConfig\nimport com.danbamitale.epmslib.entities.TransactionRequestData\nimport com.danbamitale.epmslib.entities.TransactionType\nimport com.danbamitale.epmslib.entities.accountBalances\nimport com.danbamitale.epmslib.entities.clearPinKey\nimport com.danbamitale.epmslib.entities.isApproved\nimport com.danbamitale.epmslib.extensions.formatCurrencyAmount\nimport com.danbamitale.epmslib.processors.TransactionProcessor\nimport com.danbamitale.epmslib.utils.IsoAccountType\nimport com.dsofttech.dprefs.utils.DPrefs\nimport com.google.android.material.snackbar.Snackbar\nimport com.google.gson.Gson\nimport com.google.gson.JsonObject\nimport com.pixplicity.easyprefs.library.Prefs\nimport com.woleapp.netpos.contactless.R\nimport com.woleapp.netpos.contactless.adapter.ServiceAdapter\nimport com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding\nimport com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding\nimport com.woleapp.netpos.contactless.model.AuthenticationEventData\nimport com.woleapp.netpos.contactless.model.MqttEvent\nimport com.woleapp.netpos.contactless.model.MqttEvents\nimport com.woleapp.netpos.contactless.model.MqttStatus\nimport com.woleapp.netpos.contactless.model.MqttTopics\nimport com.woleapp.netpos.contactless.model.Service\nimport com.woleapp.netpos.contactless.model.TransactionMethod\nimport com.woleapp.netpos.contactless.model.User\nimport com.woleapp.netpos.contactless.model.Vend\nimport com.woleapp.netpos.contactless.mqtt.MqttHelper\nimport com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig\nimport com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog\nimport com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener\nimport com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG\nimport com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter\nimport com.woleapp.netpos.contactless.util.Event\nimport com.woleapp.netpos.contactless.util.ICCCardHelper\nimport com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA\nimport com.woleapp.netpos.contactless.util.PREF_KEYHOLDER\nimport com.woleapp.netpos.contactless.util.PREF_USER\nimport com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog\nimport com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse\nimport com.woleapp.netpos.contactless.util.Singletons\nimport com.woleapp.netpos.contactless.util.Singletons.getKeyHolder\nimport com.woleapp.netpos.contactless.util.UtilityParam\nimport com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY\nimport com.woleapp.netpos.contactless.util.buildSMSText\nimport com.woleapp.netpos.contactless.util.disposeWith\nimport com.woleapp.netpos.contactless.util.showCardDialog\nimport com.woleapp.netpos.contactless.util.showToast\nimport com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel\nimport com.woleapp.netpos.contactless.viewmodels.SalesViewModel\nimport io.reactivex.Observable\nimport io.reactivex.android.schedulers.AndroidSchedulers\nimport io.reactivex.disposables.CompositeDisposable\nimport io.reactivex.schedulers.Schedulers\nimport kotlinx.coroutines.Dispatchers\nimport kotlinx.coroutines.launch\nimport kotlinx.coroutines.withContext\nimport timber.log.Timber\nimport java.io.BufferedReader\nimport java.io.InputStreamReader\nimport java.io.PrintWriter\nimport java.net.InetSocketAddress\nimport java.net.Socket\nimport java.util.concurrent.TimeUnit\n\nclass DashboardFragment : BaseFragment() {\n\n    private lateinit var progressDialog: ProgressDialog\n    private lateinit var binding: FragmentDashboardBinding\n    private lateinit var amountEditText: EditText\n    private lateinit var adapter: ServiceAdapter\n    private var compositeDisposable = CompositeDisposable()\n    private val nfcCardReaderViewModel by activityViewModels<NfcCardReaderViewModel>()\n    private var observer: ((Event<ICCCardHelper>) -> Unit)? = null\n    private val viewModel by activityViewModels<SalesViewModel>()\n    private var isVend: Boolean = false\n    private lateinit var transactionType: TransactionType\n    private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding\n    private lateinit var printTypeDialog: AlertDialog\n    private lateinit var printerErrorDialog: AlertDialog\n    private lateinit var loader: AlertDialog\n    private lateinit var cardCvv: String\n    private lateinit var user: User\n    override fun onCreateView(\n        inflater: LayoutInflater,\n        container: ViewGroup?,\n        savedInstanceState: Bundle?,\n    ): View {\n        binding = FragmentDashboardBinding.inflate(inflater, container, false)\n        amountEditText = binding.priceTextbox\n        amountEditText.apply {\n            filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(8, 2))\n        }\n        transactionType = TransactionType.PURCHASE\n        isVend = arguments?.getBoolean(\"IS_VEND\", false) ?: false\n        viewModel.isVend(isVend)\n\n        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {\n            executePendingBindings()\n        }\n        loader = alertDialog(requireContext())\n\n        printerErrorDialog = AlertDialog.Builder(requireContext()).apply {\n            setTitle(getString(R.string.printer_error))\n            setIcon(R.drawable.ic_warning)\n            setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->\n                d.cancel()\n                viewModel.showReceiptDialog()\n            }\n            setNegativeButton(getString(R.string.dismiss)) { d, _ ->\n                d.cancel()\n                viewModel.finish()\n            }\n        }.create()\n        binding.apply {\n            viewmodel = viewModel\n            lifecycleOwner = viewLifecycleOwner\n            executePendingBindings()\n            type = transactionType.name\n        }\n        viewModel.message.observe(viewLifecycleOwner) {\n            it.getContentIfNotHandled()?.let { s ->\n                showSnackBar(s)\n            }\n        }\n        viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                printTypeDialog.show()\n            }\n        }\n\n        viewModel.toastMessage.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()\n            }\n        }\n        viewModel.finish.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (it) {\n                    requireActivity().onBackPressed()\n                }\n            }\n        }\n        viewModel.showPrinterError.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (printTypeDialog.isShowing) {\n                    printTypeDialog.cancel()\n                }\n                if (printerErrorDialog.isShowing) {\n                    printerErrorDialog.cancel()\n                }\n                printerErrorDialog.apply {\n                    setMessage(it)\n                }.show()\n            }\n        }\n\n        viewModel.showPrintDialog.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                nfcCardReaderViewModel.setLastPosTransactionResponse(viewModel.lastPosTransaction.value!!)\n                nfcCardReaderViewModel.prepareSMS(it)\n            }\n        }\n\n        viewModel.shouldRefreshNibssKeys.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (it) {\n                    NetPosTerminalConfig.init(\n                        requireContext().applicationContext,\n                        configureSilently = true,\n                    )\n                }\n            }\n        }\n        binding.process.setOnClickListener {\n            showCardDialog(\n                requireActivity(),\n                viewLifecycleOwner,\n            ).observe(viewLifecycleOwner) { event ->\n                event.getContentIfNotHandled()?.let {\n                    binding.priceTextbox.setText(it.amount)\n                    it.nfcPaymentType?.let { it1 ->\n                        nfcCardReaderViewModel.initiateNfcPayment(\n                            it.amount.toLong(),\n                            viewModel.cashbackLong,\n                            it,\n                        )\n                    }\n                }\n            }\n//            viewModel.validateField()\n        }\n\n        // toast the error messages\n        viewModel.payThroughMPGSMessage.observe(viewLifecycleOwner) {\n            it.getContentIfNotHandled()?.let { message ->\n                showToast(message)\n            }\n        }\n\n        // user object to get netposmid and netplusmid\n        user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, \"\"), User::class.java)\n\n        nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                it.error?.let { error ->\n                    Timber.e(error)\n                    Toast.makeText(\n                        requireContext(),\n                        error.message,\n                        Toast.LENGTH_LONG,\n                    ).show()\n                }\n                it.cardData?.let { card ->\n                    viewModel.setCardScheme(it.cardScheme!!)\n                    viewModel.setCustomerName(it.customerName ?: \"Customer\")\n//                    viewModel.setAccountType(it.accountType!!)\n                    viewModel.setAccountType(IsoAccountType.SAVINGS)\n                    viewModel.cardData = it.cardData\n                    if (!user.userType!!.contains(\"regular\", true)) {\n                        EnterCvvNumberDialog(object : PinPadDialogListener {\n                            override fun onError(errorMessage: String) {\n                                showToast(errorMessage)\n                                return\n                            }\n\n                            override fun onConfirm(data: String) {\n                                viewModel.setTransactionStateToStarted()\n                                viewModel.payThroughMPGS(\n                                    card.pan,\n                                    data,\n                                    card.expiryDate,\n                                    user.netplusPayMid.toString(),\n                                    DPrefs.getString(PIN_KEY, \"\"),\n                                )\n                            }\n                        }).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)\n                    } else {\n                        viewModel.makePayment(requireContext(), transactionType)\n                    }\n                }\n            }\n        }\n\n        adapter = ServiceAdapter {\n            when (it.id) {\n                0 -> showFragment(TransactionsFragment())\n                2 -> showFragment(NipNotificationFragment.newInstance())\n                3 -> showFragment(BillsFragment())\n                5 -> {\n                    parentFragmentManager.beginTransaction()\n                        .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)\n                        .commit()\n                }\n                else -> {\n                    sendPayload()\n                }\n            }\n        }\n\n        progressDialog = ProgressDialog(requireContext())\n        return binding.root\n    }\n\n    override fun onResume() {\n        super.onResume()\n        // Observe the LiveData\n        viewModel.text.observe(viewLifecycleOwner) { newText ->\n            binding.priceTextbox.setText(newText)\n        }\n\n    }\n\n    private fun sendPayload() {\n        val event = MqttEvent<AuthenticationEventData>()\n        val authEventData =\n            AuthenticationEventData(event.business_name!!, event.storm_id!!, event.deviceSerial!!)\n        event.apply {\n            this.event = MqttEvents.AUTHENTICATION.event\n            this.status = MqttStatus.SUCCESS.name\n            this.code = MqttStatus.SUCCESS.code\n            timestamp = System.currentTimeMillis()\n            this.geo = \"lat:51.507351-long:-0.127758\"\n            this.data = authEventData\n        }\n        MqttHelper.sendPayload(MqttTopics.AUTHENTICATION, event)\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        setServices()\n        vend()\n        observer = { event ->\n            event.getContentIfNotHandled()?.let {\n                it.error?.let { error ->\n                    Timber.e(error)\n                    Toast.makeText(requireContext(), error.localizedMessage, Toast.LENGTH_SHORT)\n                        .show()\n                }\n                it.cardData?.let { cardData ->\n                    checkBalance(cardData, it.accountType!!)\n                }\n            }\n        }\n\n        observeServerResponse(\n            viewModel.payThroughMPGSResponse,\n            loader,\n            requireActivity().supportFragmentManager,\n        ) {\n            if (viewModel.payThroughMPGSResponse.value?.data == null) {\n                showSnackBar(getString(R.string.an_error_occurred))\n            } else {\n                showFragment(\n                    CompleteQrPaymentWebViewFragment(),\n                    containerViewId = R.id.container_main,\n                    fragmentName = \"CompletePaymentThroughMPGS Fragment\",\n                )\n            }\n        }\n    }\n\n    private fun setServices() {\n        val listOfServices = ArrayList<Service>().apply {\n            add(Service(0, \"Transaction\", R.drawable.ic_trans))\n            add(Service(1, \"Balance Inquiry\", R.drawable.ic_write))\n            add(Service(4, \"View End Of Day Transactions\", R.drawable.ic_print))\n            add(Service(5, \"Settings\", R.drawable.ic_baseline_settings))\n        }\n        adapter.submitList(listOfServices)\n    }\n\n    private fun vend() {\n        if (isVend) {\n            var count = 0\n            val progressBar = ProgressDialog(context).apply {\n                this.setCancelable(false)\n                this.setButton(DialogInterface.BUTTON_NEGATIVE, \"Cancel\") { dialog, _ ->\n                    dialog.cancel()\n                    compositeDisposable.clear()\n                    requireActivity().onBackPressed()\n                }\n                this.setMessage(\"Waiting for amount.\")\n                show()\n            }\n            val socket = Socket()\n            var printWriter: PrintWriter? = null\n            var reader: BufferedReader? = null\n            Observable.fromCallable {\n                socket.soTimeout = 120_000\n                socket.connect(\n                    InetSocketAddress(\n                        UtilityParam.VEND_IP,\n                        UtilityParam.VEND_PORT.toInt(),\n                    ),\n                )\n                printWriter = PrintWriter(socket.getOutputStream(), true)\n                reader = BufferedReader(InputStreamReader(socket.getInputStream()))\n                val firstData = reader?.readLine()\n                Timber.e(firstData)\n            }.flatMap {\n                Observable.interval(0, 5, TimeUnit.SECONDS)\n            }.flatMap {\n                val out = JsonObject().apply {\n                    addProperty(\"serial_number\", Build.ID)\n                    addProperty(\"status\", \"\")\n                }.toString()\n                printWriter?.println(out)\n                try {\n                    val s = reader?.readLine()\n                    Timber.e(s)\n                    val vend = Singletons.gson.fromJson(s, Vend::class.java)\n                    // socket.close()\n                    Observable.just(vend)\n                } catch (e: Exception) {\n                    Observable.just(Vend(0.0))\n                }\n            }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({\n                //Timber.e(\"vend: $it\")\n                count++\n                if (it.amount > 0.0) {\n                    progressBar.dismiss()\n                    Toast.makeText(context, \"received\", Toast.LENGTH_SHORT).show()\n                    Toast.makeText(context, it.amount.toString(), Toast.LENGTH_LONG).show()\n                    binding.priceTextbox.setText(it.amount.toLong().toString())\n                    compositeDisposable.clear()\n                } else if (count > 12) {\n                    progressBar.dismiss()\n                    Toast.makeText(\n                        context,\n                        \"Did not receive amount after waiting\",\n                        Toast.LENGTH_LONG,\n                    ).show()\n                    compositeDisposable.clear()\n                    requireActivity().onBackPressed()\n                }\n            }, {\n                progressBar.dismiss()\n                Toast.makeText(\n                    requireContext(),\n                    \"Error ${it.localizedMessage}\",\n                    Toast.LENGTH_SHORT,\n                ).show()\n                // Timber.e(\"Error: ${it.localizedMessage}\")\n                requireActivity().onBackPressed()\n            }).disposeWith(compositeDisposable)\n        }\n    }\n\n    private fun showSnackBar(message: String) {\n        if (message == \"Transaction not approved\") {\n            AlertDialog.Builder(requireContext()).apply {\n                setTitle(\"Response\")\n                setMessage(message)\n                show()\n            }\n        }\n\n        Snackbar.make(\n            requireActivity().findViewById(\n                R.id.container_main,\n            ),\n            message,\n            Snackbar.LENGTH_LONG,\n        ).show()\n    }\n\n    private fun checkBalance(\n        cardData: CardData,\n        accountType: IsoAccountType = IsoAccountType.DEFAULT_UNSPECIFIED,\n    ) {\n        if (NetPosTerminalConfig.getKeyHolder() == null) {\n            Toast.makeText(requireContext(), \"Terminal not configured\", Toast.LENGTH_LONG).show()\n            return\n        }\n\n        val hostConfig = HostConfig(\n            NetPosTerminalConfig.getTerminalId(),\n            NetPosTerminalConfig.connectionData,\n            NetPosTerminalConfig.getKeyHolder()!!,\n            NetPosTerminalConfig.getConfigData()!!,\n        )\n        val requestData =\n            TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)\n        progressDialog.setMessage(\"Checking Balance...\")\n        progressDialog.show()\n        val processor = TransactionProcessor(hostConfig)\n        processor.processTransaction(requireContext(), requestData, cardData)\n            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())\n            .subscribe { response, error ->\n                if (progressDialog.isShowing) {\n                    progressDialog.dismiss()\n                }\n                error?.let {\n                    it.printStackTrace()\n                    Toast.makeText(\n                        requireContext(),\n                        \"Error ${it.localizedMessage}\",\n                        Toast.LENGTH_SHORT,\n                    ).show()\n                }\n\n                response?.let {\n                    if (it.responseCode == \"A3\") {\n                        Prefs.remove(PREF_CONFIG_DATA)\n                        Prefs.remove(PREF_KEYHOLDER)\n                        NetPosTerminalConfig.init(\n                            requireContext().applicationContext,\n                            configureSilently = true,\n                        )\n                    }\n\n                    val me = it.buildSMSText(\"Account Balance Check\")\n\n                    val messageString = if (it.isApproved) {\n                        \"Account Balance:\\n \" + it.accountBalances.joinToString(\"\\n\") { accountBalance ->\n                            \"${accountBalance.accountType}, ${\n                                accountBalance.amount.div(100).formatCurrencyAmount()\n                            }\"\n                        }\n                    } else {\n                        \"${it.responseMessage}(${it.responseCode})\"\n                    }\n\n                    showMessage(\n                        if (it.isApproved) \"Approved\" else \"Declined\",\n                        messageString,\n                        me.toString(),\n                    )\n                }\n            }.disposeWith(compositeDisposable)\n    }\n\n    private fun showMessage(s: String, vararg messageString: String) {\n        AlertDialog.Builder(requireContext()).apply {\n            setTitle(s)\n            setMessage(messageString.first())\n            setPositiveButton(\"Ok\") { dialog, _ ->\n                dialog.dismiss()\n                nfcCardReaderViewModel.prepareSMS(messageString.reversed().joinToString(\"\\n\"))\n            }\n            create().show()\n        }\n    }\n\n    private fun showTransactionMethodDialog(onMethodSelected: (TransactionMethod) -> Unit) {\n        val methods = arrayOf(\"Contactless\", \"Contact\")\n        AlertDialog.Builder(requireActivity())\n            .setTitle(\"Choose Transaction Method\")\n            .setSingleChoiceItems(methods, -1) { dialog, which ->\n                dialog.dismiss()\n                when (which) {\n                    0 -> onMethodSelected(TransactionMethod.CONTACTLESS)\n                    1 -> onMethodSelected(TransactionMethod.CONTACT)\n                }\n            }\n            .setNegativeButton(\"Cancel\") { dialog, _ -> dialog.dismiss() }\n            .show()\n    }\n\n    private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {\n        val accountTypes = arrayOf(\"Savings\", \"Current\", \"Default\")\n        AlertDialog.Builder(requireActivity())\n            .setTitle(\"Choose Account Type\")\n            .setSingleChoiceItems(accountTypes, -1) { dialog, which ->\n                dialog.dismiss()\n                when (which) {\n                    0 -> onAccountTypeSelected(IsoAccountType.SAVINGS)\n                    1 -> onAccountTypeSelected(IsoAccountType.CURRENT)\n                    2 -> onAccountTypeSelected(IsoAccountType.DEFAULT_UNSPECIFIED)\n                }\n            }\n            .setNegativeButton(\"Cancel\") { dialog, _ -> dialog.dismiss() }\n            .show()\n    }\n\n\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/DashboardFragment.kt b/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/DashboardFragment.kt
+--- a/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/DashboardFragment.kt	
++++ b/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/DashboardFragment.kt	
+@@ -15,20 +15,17 @@
+ import android.widget.EditText
+ import android.widget.Toast
+ import androidx.fragment.app.activityViewModels
+-import androidx.lifecycle.lifecycleScope
+ import com.danbamitale.epmslib.entities.CardData
+ import com.danbamitale.epmslib.entities.HostConfig
+ import com.danbamitale.epmslib.entities.TransactionRequestData
+ import com.danbamitale.epmslib.entities.TransactionType
+ import com.danbamitale.epmslib.entities.accountBalances
+-import com.danbamitale.epmslib.entities.clearPinKey
+ import com.danbamitale.epmslib.entities.isApproved
+ import com.danbamitale.epmslib.extensions.formatCurrencyAmount
+ import com.danbamitale.epmslib.processors.TransactionProcessor
+ import com.danbamitale.epmslib.utils.IsoAccountType
+ import com.dsofttech.dprefs.utils.DPrefs
+ import com.google.android.material.snackbar.Snackbar
+-import com.google.gson.Gson
+ import com.google.gson.JsonObject
+ import com.pixplicity.easyprefs.library.Prefs
+ import com.woleapp.netpos.contactless.R
+@@ -71,9 +68,6 @@
+ import io.reactivex.android.schedulers.AndroidSchedulers
+ import io.reactivex.disposables.CompositeDisposable
+ import io.reactivex.schedulers.Schedulers
+-import kotlinx.coroutines.Dispatchers
+-import kotlinx.coroutines.launch
+-import kotlinx.coroutines.withContext
+ import timber.log.Timber
+ import java.io.BufferedReader
+ import java.io.InputStreamReader
+@@ -83,7 +77,6 @@
+ import java.util.concurrent.TimeUnit
+ 
+ class DashboardFragment : BaseFragment() {
+-
+     private lateinit var progressDialog: ProgressDialog
+     private lateinit var binding: FragmentDashboardBinding
+     private lateinit var amountEditText: EditText
+@@ -100,6 +93,7 @@
+     private lateinit var loader: AlertDialog
+     private lateinit var cardCvv: String
+     private lateinit var user: User
++
+     override fun onCreateView(
+         inflater: LayoutInflater,
+         container: ViewGroup?,
+@@ -114,23 +108,25 @@
+         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
+         viewModel.isVend(isVend)
+ 
+-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+-            executePendingBindings()
+-        }
++        dialogPrintTypeBinding =
++            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
++                executePendingBindings()
++            }
+         loader = alertDialog(requireContext())
+ 
+-        printerErrorDialog = AlertDialog.Builder(requireContext()).apply {
+-            setTitle(getString(R.string.printer_error))
+-            setIcon(R.drawable.ic_warning)
+-            setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
+-                d.cancel()
+-                viewModel.showReceiptDialog()
+-            }
+-            setNegativeButton(getString(R.string.dismiss)) { d, _ ->
+-                d.cancel()
+-                viewModel.finish()
+-            }
+-        }.create()
++        printerErrorDialog =
++            AlertDialog.Builder(requireContext()).apply {
++                setTitle(getString(R.string.printer_error))
++                setIcon(R.drawable.ic_warning)
++                setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
++                    d.cancel()
++                    viewModel.showReceiptDialog()
++                }
++                setNegativeButton(getString(R.string.dismiss)) { d, _ ->
++                    d.cancel()
++                    viewModel.finish()
++                }
++            }.create()
+         binding.apply {
+             viewmodel = viewModel
+             lifecycleOwner = viewLifecycleOwner
+@@ -236,24 +232,27 @@
+ //                    viewModel.setAccountType(it.accountType!!)
+                     viewModel.setAccountType(IsoAccountType.SAVINGS)
+                     viewModel.cardData = it.cardData
++                    Log.d("CHECK_CARD", it.cardData.toString())
+                     if (!user.userType!!.contains("regular", true)) {
+-                        EnterCvvNumberDialog(object : PinPadDialogListener {
+-                            override fun onError(errorMessage: String) {
+-                                showToast(errorMessage)
+-                                return
+-                            }
++                        EnterCvvNumberDialog(
++                            object : PinPadDialogListener {
++                                override fun onError(errorMessage: String) {
++                                    showToast(errorMessage)
++                                    return
++                                }
+ 
+-                            override fun onConfirm(data: String) {
+-                                viewModel.setTransactionStateToStarted()
+-                                viewModel.payThroughMPGS(
+-                                    card.pan,
+-                                    data,
+-                                    card.expiryDate,
+-                                    user.netplusPayMid.toString(),
+-                                    DPrefs.getString(PIN_KEY, ""),
+-                                )
+-                            }
+-                        }).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
++                                override fun onConfirm(data: String) {
++                                    viewModel.setTransactionStateToStarted()
++                                    viewModel.payThroughMPGS(
++                                        card.pan,
++                                        data,
++                                        card.expiryDate,
++                                        user.netplusPayMid.toString(),
++                                        DPrefs.getString(PIN_KEY, ""),
++                                    )
++                                }
++                            },
++                        ).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
+                     } else {
+                         viewModel.makePayment(requireContext(), transactionType)
+                     }
+@@ -261,21 +260,22 @@
+             }
+         }
+ 
+-        adapter = ServiceAdapter {
+-            when (it.id) {
+-                0 -> showFragment(TransactionsFragment())
+-                2 -> showFragment(NipNotificationFragment.newInstance())
+-                3 -> showFragment(BillsFragment())
+-                5 -> {
+-                    parentFragmentManager.beginTransaction()
+-                        .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
+-                        .commit()
+-                }
+-                else -> {
+-                    sendPayload()
+-                }
+-            }
+-        }
++        adapter =
++            ServiceAdapter {
++                when (it.id) {
++                    0 -> showFragment(TransactionsFragment())
++                    2 -> showFragment(NipNotificationFragment.newInstance())
++                    3 -> showFragment(BillsFragment())
++                    5 -> {
++                        parentFragmentManager.beginTransaction()
++                            .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
++                            .commit()
++                    }
++                    else -> {
++                        sendPayload()
++                    }
++                }
++            }
+ 
+         progressDialog = ProgressDialog(requireContext())
+         return binding.root
+@@ -287,7 +287,6 @@
+         viewModel.text.observe(viewLifecycleOwner) { newText ->
+             binding.priceTextbox.setText(newText)
+         }
+-
+     }
+ 
+     private fun sendPayload() {
+@@ -305,7 +304,10 @@
+         MqttHelper.sendPayload(MqttTopics.AUTHENTICATION, event)
+     }
+ 
+-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
++    override fun onViewCreated(
++        view: View,
++        savedInstanceState: Bundle?,
++    ) {
+         super.onViewCreated(view, savedInstanceState)
+         setServices()
+         vend()
+@@ -340,28 +342,30 @@
+     }
+ 
+     private fun setServices() {
+-        val listOfServices = ArrayList<Service>().apply {
+-            add(Service(0, "Transaction", R.drawable.ic_trans))
+-            add(Service(1, "Balance Inquiry", R.drawable.ic_write))
+-            add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
+-            add(Service(5, "Settings", R.drawable.ic_baseline_settings))
+-        }
++        val listOfServices =
++            ArrayList<Service>().apply {
++                add(Service(0, "Transaction", R.drawable.ic_trans))
++                add(Service(1, "Balance Inquiry", R.drawable.ic_write))
++                add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
++                add(Service(5, "Settings", R.drawable.ic_baseline_settings))
++            }
+         adapter.submitList(listOfServices)
+     }
+ 
+     private fun vend() {
+         if (isVend) {
+             var count = 0
+-            val progressBar = ProgressDialog(context).apply {
+-                this.setCancelable(false)
+-                this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
+-                    dialog.cancel()
+-                    compositeDisposable.clear()
+-                    requireActivity().onBackPressed()
+-                }
+-                this.setMessage("Waiting for amount.")
+-                show()
+-            }
++            val progressBar =
++                ProgressDialog(context).apply {
++                    this.setCancelable(false)
++                    this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
++                        dialog.cancel()
++                        compositeDisposable.clear()
++                        requireActivity().onBackPressed()
++                    }
++                    this.setMessage("Waiting for amount.")
++                    show()
++                }
+             val socket = Socket()
+             var printWriter: PrintWriter? = null
+             var reader: BufferedReader? = null
+@@ -380,10 +384,11 @@
+             }.flatMap {
+                 Observable.interval(0, 5, TimeUnit.SECONDS)
+             }.flatMap {
+-                val out = JsonObject().apply {
+-                    addProperty("serial_number", Build.ID)
+-                    addProperty("status", "")
+-                }.toString()
++                val out =
++                    JsonObject().apply {
++                        addProperty("serial_number", Build.ID)
++                        addProperty("status", "")
++                    }.toString()
+                 printWriter?.println(out)
+                 try {
+                     val s = reader?.readLine()
+@@ -395,7 +400,7 @@
+                     Observable.just(Vend(0.0))
+                 }
+             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+-                //Timber.e("vend: $it")
++                // Timber.e("vend: $it")
+                 count++
+                 if (it.amount > 0.0) {
+                     progressBar.dismiss()
+@@ -453,12 +458,13 @@
+             return
+         }
+ 
+-        val hostConfig = HostConfig(
+-            NetPosTerminalConfig.getTerminalId(),
+-            NetPosTerminalConfig.connectionData,
+-            NetPosTerminalConfig.getKeyHolder()!!,
+-            NetPosTerminalConfig.getConfigData()!!,
+-        )
++        val hostConfig =
++            HostConfig(
++                NetPosTerminalConfig.getTerminalId(),
++                NetPosTerminalConfig.connectionData,
++                NetPosTerminalConfig.getKeyHolder()!!,
++                NetPosTerminalConfig.getConfigData()!!,
++            )
+         val requestData =
+             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
+         progressDialog.setMessage("Checking Balance...")
+@@ -491,15 +497,17 @@
+ 
+                     val me = it.buildSMSText("Account Balance Check")
+ 
+-                    val messageString = if (it.isApproved) {
+-                        "Account Balance:\n " + it.accountBalances.joinToString("\n") { accountBalance ->
+-                            "${accountBalance.accountType}, ${
+-                                accountBalance.amount.div(100).formatCurrencyAmount()
+-                            }"
+-                        }
+-                    } else {
+-                        "${it.responseMessage}(${it.responseCode})"
+-                    }
++                    val messageString =
++                        if (it.isApproved) {
++                            "Account Balance:\n " +
++                                it.accountBalances.joinToString("\n") { accountBalance ->
++                                    "${accountBalance.accountType}, ${
++                                        accountBalance.amount.div(100).formatCurrencyAmount()
++                                    }"
++                                }
++                        } else {
++                            "${it.responseMessage}(${it.responseCode})"
++                        }
+ 
+                     showMessage(
+                         if (it.isApproved) "Approved" else "Declined",
+@@ -510,7 +518,10 @@
+             }.disposeWith(compositeDisposable)
+     }
+ 
+-    private fun showMessage(s: String, vararg messageString: String) {
++    private fun showMessage(
++        s: String,
++        vararg messageString: String,
++    ) {
+         AlertDialog.Builder(requireContext()).apply {
+             setTitle(s)
+             setMessage(messageString.first())
+@@ -552,6 +563,4 @@
+             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+             .show()
+     }
+-
+-
+ }

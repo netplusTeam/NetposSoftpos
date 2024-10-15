@@ -57,6 +57,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var deviceSerialID: String
     private lateinit var listOfStates: String
     private lateinit var listOfBranches: String
+    private lateinit var businessAddress: String
+    private lateinit var email: String
+    private lateinit var phone: String
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -116,23 +119,34 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         val newBusinessName = Prefs.getString(AppConstants.BUSINESS_NAME, "")
         val businessName = newBusinessName.substring(1, newBusinessName.length - 1)
 
-        val newBusinessAddress = Prefs.getString(AppConstants.BUSINESS_ADDRESS, "")
-        val businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
+        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providussoftpos")) {
+            val newBusinessAddress = Prefs.getString(AppConstants.BUSINESS_ADDRESS, "")
+            businessAddress = newBusinessAddress.substring(1, newBusinessAddress.length - 1)
 
-        val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
-        val email = newEmail.substring(0, newEmail.length)
+            val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
+            email = newEmail.substring(1, newEmail.length - 1)
 
-        val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
-        val phone = newPhone.substring(0, newPhone.length)
+            val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
+            phone = newPhone.substring(1, newPhone.length - 1)
+        } else {
+            val newBusinessAddress = Prefs.getString(AppConstants.BUSINESS_ADDRESS, "")
+            businessAddress = newBusinessAddress.substring(0, newBusinessAddress.length)
+
+            val newEmail = Prefs.getString(AppConstants.EMAIL_ADDRESS, "")
+            email = newEmail.substring(0, newEmail.length)
+
+            val newPhone = Prefs.getString(AppConstants.PHONE_NUMBER, "")
+            phone = newPhone.substring(0, newPhone.length)
+        }
 
         val newContactInfo = Prefs.getString(AppConstants.FULL_NAME, "")
         val contactInfo =
             newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
 
         binding.businessName.setText(businessName.replace("\\u0026", "&"))
-        binding.contactInfo.setText(contactInfo)
+        binding.contactInfo.setText(contactInfo.replace("\\u0026", "&"))
         binding.address.setText(businessAddress.replace("\\u0026", "&"))
-        binding.phone.setText(phone)
+        binding.phone.setText(phone.replace("\\u0026", "&"))
         binding.email.setText(email.replace("\\u0026", "&"))
 
         loader = alertDialog(requireContext())

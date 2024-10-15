@@ -31,42 +31,50 @@ class TransactionDetailsFragment : BaseFragment() {
     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        binding = FragmentTransactionDetailsBinding.inflate(inflater, container, false)
-            .apply {
-                lifecycleOwner = viewLifecycleOwner
+        binding =
+            FragmentTransactionDetailsBinding.inflate(inflater, container, false)
+                .apply {
+                    lifecycleOwner = viewLifecycleOwner
+                    executePendingBindings()
+                    viewmodel = viewModel
+                }
+        dialogPrintTypeBinding =
+            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
                 executePendingBindings()
-                viewmodel = viewModel
             }
-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-        }
-        printerErrorDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setTitle("Printer Error")
-                setIcon(R.drawable.ic_warning)
-                setPositiveButton("Send Receipt") { d, _ ->
-                    d.cancel()
-                    viewModel.showReceiptDialog()
+        printerErrorDialog =
+            AlertDialog.Builder(requireContext())
+                .apply {
+                    setTitle("Printer Error")
+                    setIcon(R.drawable.ic_warning)
+                    setPositiveButton("Send Receipt") { d, _ ->
+                        d.cancel()
+                        viewModel.showReceiptDialog()
+                    }
+                    setNegativeButton("Dismiss") { d, _ ->
+                        d.cancel()
+                        // viewModel.finish()
+                    }
+                }.create()
+        progressDialog =
+            ProgressDialog(requireContext())
+                .apply {
+                    setCancelable(false)
+                    setMessage("Please wait")
                 }
-                setNegativeButton("Dismiss") { d, _ ->
-                    d.cancel()
-                    // viewModel.finish()
-                }
-            }.create()
-        progressDialog = ProgressDialog(requireContext())
-            .apply {
-                setCancelable(false)
-                setMessage("Please wait")
-            }
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         viewModel.selectedAction.observe(viewLifecycleOwner) {
             if (it == HISTORY_ACTION_DEFAULT) {
@@ -175,7 +183,7 @@ class TransactionDetailsFragment : BaseFragment() {
                 }
                 it.cardData?.let { _ ->
                     viewModel.setCardScheme(it.cardScheme!!)
-                   // viewModel.setCustomerName(it.customerName ?: "Customer")
+                    // viewModel.setCustomerName(it.customerName ?: "Customer")
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
                     actionAfterCardRead?.invoke()
@@ -185,6 +193,7 @@ class TransactionDetailsFragment : BaseFragment() {
     }
 
     private var actionAfterCardRead: (() -> Unit)? = null
+
     private fun gotoAction(action: () -> Unit) {
         actionAfterCardRead = action
         showCardDialog(

@@ -1,0 +1,106 @@
+Index: app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/TransactionDetailsFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>@file:Suppress(\"DEPRECATION\")\n\npackage com.woleapp.netpos.contactless.ui.fragments\n\nimport android.app.ProgressDialog\nimport android.os.Bundle\nimport android.view.LayoutInflater\nimport android.view.View\nimport android.view.ViewGroup\nimport android.widget.Toast\nimport androidx.appcompat.app.AlertDialog\nimport androidx.fragment.app.activityViewModels\nimport com.google.android.material.snackbar.Snackbar\nimport com.woleapp.netpos.contactless.R\nimport com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding\nimport com.woleapp.netpos.contactless.databinding.FragmentTransactionDetailsBinding\nimport com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig\nimport com.woleapp.netpos.contactless.util.HISTORY_ACTION_DEFAULT\nimport com.woleapp.netpos.contactless.util.HISTORY_ACTION_PREAUTH\nimport com.woleapp.netpos.contactless.util.builder\nimport com.woleapp.netpos.contactless.util.showCardDialog\nimport com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel\nimport com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel\nimport timber.log.Timber\n\nclass TransactionDetailsFragment : BaseFragment() {\n    private val viewModel by activityViewModels<TransactionsViewModel>()\n    private val nfcCardReaderViewModel by activityViewModels<NfcCardReaderViewModel>()\n    private lateinit var binding: FragmentTransactionDetailsBinding\n    private lateinit var progressDialog: ProgressDialog\n    private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding\n    private lateinit var printTypeDialog: AlertDialog\n    private lateinit var printerErrorDialog: AlertDialog\n    override fun onCreateView(\n        inflater: LayoutInflater,\n        container: ViewGroup?,\n        savedInstanceState: Bundle?,\n    ): View {\n        binding = FragmentTransactionDetailsBinding.inflate(inflater, container, false)\n            .apply {\n                lifecycleOwner = viewLifecycleOwner\n                executePendingBindings()\n                viewmodel = viewModel\n            }\n        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {\n            executePendingBindings()\n        }\n        printerErrorDialog = AlertDialog.Builder(requireContext())\n            .apply {\n                setTitle(\"Printer Error\")\n                setIcon(R.drawable.ic_warning)\n                setPositiveButton(\"Send Receipt\") { d, _ ->\n                    d.cancel()\n                    viewModel.showReceiptDialog()\n                }\n                setNegativeButton(\"Dismiss\") { d, _ ->\n                    d.cancel()\n                    // viewModel.finish()\n                }\n            }.create()\n        progressDialog = ProgressDialog(requireContext())\n            .apply {\n                setCancelable(false)\n                setMessage(\"Please wait\")\n            }\n        return binding.root\n    }\n\n    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {\n        super.onViewCreated(view, savedInstanceState)\n        viewModel.selectedAction.observe(viewLifecycleOwner) {\n            if (it == HISTORY_ACTION_DEFAULT) {\n                binding.actionButton.visibility = View.GONE\n            } else {\n                binding.actionButton.text = it\n            }\n            if (it == HISTORY_ACTION_PREAUTH) {\n                binding.actionButton.visibility = View.GONE\n                if (viewModel.lastTransactionResponse.value!!.responseCode == \"00\") {\n                    binding.preAuthComplete.visibility = View.VISIBLE\n                    binding.preAuthRefund.visibility = View.VISIBLE\n                } else {\n                    val m = \"This Pre Auth Transaction wasn't successful\"\n                    binding.message.text = m\n                }\n            }\n        }\n        binding.preAuthRefund.setOnClickListener {\n            gotoAction { viewModel.preAuthRefund(requireContext()) }\n        }\n\n        binding.preAuthComplete.setOnClickListener {\n            gotoAction { viewModel.doSaleCompletion(requireContext()) }\n        }\n        binding.actionButton.setOnClickListener {\n            nfcCardReaderViewModel.setLastPosTransactionResponse(viewModel.lastTransactionResponse.value!!)\n            viewModel.performAction()\n        }\n        binding.details.text = viewModel.lastTransactionResponse.value!!.builder().toString()\n        viewModel.done.observe(viewLifecycleOwner) {\n            if (it) {\n                // Toast.makeText(requireContext(), \"Done\", Toast.LENGTH_SHORT).show()\n                viewModel.reset()\n            }\n        }\n        viewModel.showProgressDialog.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (it) progressDialog.show() else progressDialog.dismiss()\n            }\n        }\n        viewModel.beginGetCardDetails.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let { startCardReader ->\n                if (startCardReader) {\n                    gotoAction { viewModel.refundTransaction(requireContext()) }\n                }\n            }\n        }\n        viewModel.message.observe(viewLifecycleOwner) {\n            it.getContentIfNotHandled()?.let { s ->\n                showSnackBar(s)\n            }\n        }\n\n        viewModel.toastMessage.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()\n            }\n        }\n\n        viewModel.showPrintDialog.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                nfcCardReaderViewModel.prepareSMS(it)\n            }\n        }\n        viewModel.shouldRefreshNibssKeys.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (it) {\n                    NetPosTerminalConfig.init(\n                        requireContext().applicationContext,\n                        configureSilently = true,\n                    )\n                }\n            }\n        }\n\n        viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                printTypeDialog.show()\n            }\n        }\n\n        viewModel.showPrinterError.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                if (printTypeDialog.isShowing) {\n                    printTypeDialog.cancel()\n                }\n                if (printerErrorDialog.isShowing) {\n                    printerErrorDialog.cancel()\n                }\n                printerErrorDialog.apply {\n                    setMessage(it)\n                }.show()\n            }\n        }\n        nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                it.error?.let { error ->\n                    Timber.e(error)\n                    Toast.makeText(\n                        requireContext(),\n                        error.message,\n                        Toast.LENGTH_LONG,\n                    )\n                        .show()\n                }\n                it.cardData?.let { _ ->\n                    viewModel.setCardScheme(it.cardScheme!!)\n                   // viewModel.setCustomerName(it.customerName ?: \"Customer\")\n                    viewModel.setAccountType(it.accountType!!)\n                    viewModel.cardData = it.cardData\n                    actionAfterCardRead?.invoke()\n                }\n            }\n        }\n    }\n\n    private var actionAfterCardRead: (() -> Unit)? = null\n    private fun gotoAction(action: () -> Unit) {\n        actionAfterCardRead = action\n        showCardDialog(\n            requireActivity(),\n            viewLifecycleOwner,\n        ).observe(viewLifecycleOwner) { event ->\n            event.getContentIfNotHandled()?.let {\n                nfcCardReaderViewModel.initiateNfcPayment(10, 0, it)\n            }\n        }\n    }\n\n    private fun showSnackBar(message: String) {\n        if (message == \"Transaction not approved\") {\n            AlertDialog.Builder(requireContext())\n                .apply {\n                    setTitle(\"Response\")\n                    setMessage(message)\n                    show()\n                }\n        }\n        Snackbar.make(\n            requireActivity().findViewById(\n                R.id.container_main,\n            ),\n            message,\n            Snackbar.LENGTH_LONG,\n        ).show()\n    }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/TransactionDetailsFragment.kt b/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/TransactionDetailsFragment.kt
+--- a/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/TransactionDetailsFragment.kt	
++++ b/app/src/main/java/com/woleapp/netpos/contactless/ui/fragments/TransactionDetailsFragment.kt	
+@@ -31,42 +31,50 @@
+     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
+     private lateinit var printTypeDialog: AlertDialog
+     private lateinit var printerErrorDialog: AlertDialog
++
+     override fun onCreateView(
+         inflater: LayoutInflater,
+         container: ViewGroup?,
+         savedInstanceState: Bundle?,
+     ): View {
+-        binding = FragmentTransactionDetailsBinding.inflate(inflater, container, false)
+-            .apply {
+-                lifecycleOwner = viewLifecycleOwner
+-                executePendingBindings()
+-                viewmodel = viewModel
+-            }
+-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+-            executePendingBindings()
+-        }
+-        printerErrorDialog = AlertDialog.Builder(requireContext())
+-            .apply {
+-                setTitle("Printer Error")
+-                setIcon(R.drawable.ic_warning)
+-                setPositiveButton("Send Receipt") { d, _ ->
+-                    d.cancel()
+-                    viewModel.showReceiptDialog()
+-                }
+-                setNegativeButton("Dismiss") { d, _ ->
+-                    d.cancel()
+-                    // viewModel.finish()
+-                }
+-            }.create()
+-        progressDialog = ProgressDialog(requireContext())
+-            .apply {
+-                setCancelable(false)
+-                setMessage("Please wait")
+-            }
++        binding =
++            FragmentTransactionDetailsBinding.inflate(inflater, container, false)
++                .apply {
++                    lifecycleOwner = viewLifecycleOwner
++                    executePendingBindings()
++                    viewmodel = viewModel
++                }
++        dialogPrintTypeBinding =
++            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
++                executePendingBindings()
++            }
++        printerErrorDialog =
++            AlertDialog.Builder(requireContext())
++                .apply {
++                    setTitle("Printer Error")
++                    setIcon(R.drawable.ic_warning)
++                    setPositiveButton("Send Receipt") { d, _ ->
++                        d.cancel()
++                        viewModel.showReceiptDialog()
++                    }
++                    setNegativeButton("Dismiss") { d, _ ->
++                        d.cancel()
++                        // viewModel.finish()
++                    }
++                }.create()
++        progressDialog =
++            ProgressDialog(requireContext())
++                .apply {
++                    setCancelable(false)
++                    setMessage("Please wait")
++                }
+         return binding.root
+     }
+ 
+-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
++    override fun onViewCreated(
++        view: View,
++        savedInstanceState: Bundle?,
++    ) {
+         super.onViewCreated(view, savedInstanceState)
+         viewModel.selectedAction.observe(viewLifecycleOwner) {
+             if (it == HISTORY_ACTION_DEFAULT) {
+@@ -175,7 +183,7 @@
+                 }
+                 it.cardData?.let { _ ->
+                     viewModel.setCardScheme(it.cardScheme!!)
+-                   // viewModel.setCustomerName(it.customerName ?: "Customer")
++                    // viewModel.setCustomerName(it.customerName ?: "Customer")
+                     viewModel.setAccountType(it.accountType!!)
+                     viewModel.cardData = it.cardData
+                     actionAfterCardRead?.invoke()
+@@ -185,6 +193,7 @@
+     }
+ 
+     private var actionAfterCardRead: (() -> Unit)? = null
++
+     private fun gotoAction(action: () -> Unit) {
+         actionAfterCardRead = action
+         showCardDialog(
