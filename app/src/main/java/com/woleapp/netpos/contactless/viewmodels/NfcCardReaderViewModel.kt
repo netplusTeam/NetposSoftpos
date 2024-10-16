@@ -17,6 +17,8 @@ import com.visa.app.ttpkernel.ContactlessKernel
 import com.visa.app.ttpkernel.TtpOutcome
 import com.visa.vac.tc.emvconverter.Utils
 import com.woleapp.netpos.contactless.app.NetPosApp
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
 import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.listener.TransactionListener
@@ -408,6 +410,25 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             _showWaitingDialog.postValue(Event(null))
             _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card: $outComeResponse"))))
         }
+    }
+
+    fun doCr100Transaction(data:BtCardInfo) {
+        val (pan, track2, icc, cardType) = data
+
+        iccCardHelper = ICCCardHelper()
+        iccCardHelper.apply {
+            cardScheme = cardType!!.cardScheme
+            customerName = "CUSTOMER"
+        }
+        val cardData = CardData(
+            track2,
+            "",
+            pan,
+            "051"
+        )
+        iccCardHelper.cardData = cardData
+        _showPinPadDialog.postValue(Event(pan))
+        hideBluetoothDialog()
     }
 
     private fun createVisaCardData(icc: StringBuilder) {

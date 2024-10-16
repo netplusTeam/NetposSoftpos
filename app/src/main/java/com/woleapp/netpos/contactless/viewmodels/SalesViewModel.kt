@@ -144,9 +144,8 @@ class SalesViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    // Specific function for Bluetooth validation
-    fun validateFieldForBluetooth() {
-        validateAmountAndCashback()
+    fun validateFieldForBluetooth(): Boolean {
+        return validateAmountAndCashback()
     }
 
     fun payThroughMPGS(

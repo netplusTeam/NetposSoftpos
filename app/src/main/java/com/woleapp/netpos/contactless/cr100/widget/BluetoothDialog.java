@@ -31,33 +31,20 @@ public class BluetoothDialog {
      *Error message prompt box
      */
     public static AlertDialog ErrorDialog;
-
-
-
     public static AlertDialog manualExitDialog;
 
     public static void manualExitDialog(Activity mContext, String msg, OnMyClickListener listener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         View view = View.inflate(mContext, R.layout.bluetooth_alert_dialog, null);
-        View viewv = view.findViewById(R.id.view_v);
-        viewv.setVisibility(View.VISIBLE);
+        View vView = view.findViewById(R.id.view_v);
+        vView.setVisibility(View.VISIBLE);
         TextView mtvInfo = view.findViewById(R.id.tvInfo);
         mtvInfo.setText(msg);
-        Button mbtnConfirm = view.findViewById(R.id.btnConfirm);
-        Button mbtnCancel = view.findViewById(R.id.btnCancel);
-        mbtnCancel.setVisibility(View.VISIBLE);
-        mbtnConfirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onConfirm();
-            }
-        });
-        mbtnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                listener.onCancel();
-            }
-        });
+        Button mBtnConfirm = view.findViewById(R.id.btnConfirm);
+        Button mBtnCancel = view.findViewById(R.id.btnCancel);
+        mBtnCancel.setVisibility(View.VISIBLE);
+        mBtnConfirm.setOnClickListener(v -> listener.onConfirm());
+        mBtnCancel.setOnClickListener(v -> listener.onCancel());
 
         manualExitDialog = builder.create();
         if (!mContext.isFinishing()) {

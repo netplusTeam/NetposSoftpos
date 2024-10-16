@@ -3,21 +3,31 @@ package com.woleapp.netpos.contactless.cr100
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.util.Log
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.dspread.xpos.CQPOSService
 import com.dspread.xpos.QPOSService
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC.extractTrack2AndPanValues
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.findTagValue
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getCardSchemeFromAid
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getTlvC0AndC2FromNfcBatch
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.parse
 import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
 import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
 import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
 import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
 import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -26,19 +36,22 @@ import java.util.Hashtable
 class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val context: FragmentActivity) : CQPOSService() {
 
     private var blueTitle: String? = null
+    private val job = Job()
+    private val customScope = CoroutineScope(Dispatchers.Main + job)
+
+    private var _cardInfoFlow = MutableStateFlow(BtCardInfo())
+    val cardInfoFlow: StateFlow<BtCardInfo> = _cardInfoFlow
 
     fun setBlueTitle(blueTitle: String) {
         this.blueTitle = blueTitle
     }
 
     override fun onDoTradeResult(result: QPOSService.DoTradeResult?, decodeData: Hashtable<String, String>?) {
-        hideBluetoothDialog()
         Log.d("BLUETOOTH_DEVICE", "Trade Detected: ${Singletons.gson.toJson(decodeData)}")
-        var cardNo = ""
+
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
 
-            val maskedPAN = decodeData!!["maskedPAN"]
-            val encTrack2 = decodeData["encTrack2"]
+            val encTrack2 = decodeData!!["encTrack2"]
             val trackKsn = decodeData["trackksn"]
 
             val clearPan: String = DUKPK2009CBC.getData(
@@ -47,19 +60,39 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 DUKPK2009CBC.Enum_key.DATA,
                 DUKPK2009CBC.Enum_mode.CBC
             )
-            val (realPan, track2) = extractTrack2AndPanValues(clearPan)
 
-            Log.d("BLUETOOTH_DEVICE", "Decrypted Track2: $track2, decrypted pan: $realPan")
+            val panTrack2Pair = extractTrack2AndPanValues(clearPan)
+            val (realPan, track2) = panTrack2Pair
+            _cardInfoFlow.value = _cardInfoFlow.value.copy(realPan = realPan, track2 = track2)
 
-            GlobalScope.launch {
+            customScope.launch {
                 delay(200)
                 if (cr100Pos!!.nfcBatchData != null) {
                     val tlv = cr100Pos!!.nfcBatchData["tlv"]
-                    Log.d("BLUETOOTH_DEVICE", "TLV $tlv")
+
+                    val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
+
+                    val decryptedIcc = DUKPK2009CBC.getData(tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
+                        DUKPK2009CBC.Enum_mode.CBC)
+
+                    val cardTypeAid = findTagValue(decryptedIcc)
+
+                    val cardType = getCardSchemeFromAid(cardTypeAid)
+
+                    // Update the decryptedIcc and cardType in the StateFlow
+                    _cardInfoFlow.value = _cardInfoFlow.value.copy(
+                        decryptedIcc = decryptedIcc,
+                        cardType = cardType
+                    )
+
+                    Log.d("BLUETOOTH_DEVICE", "C0: ${tagC0.value}, C2: ${tagC2.value}, icc: $decryptedIcc, cardType: ${cardTypeAid}, cardType: ${cardType?.cardScheme}")
                 }
             }
+        } else {
+            hideDialogAndShowToast(result)
         }
     }
+
 
     override fun onQposInfoResult(posInfoData: Hashtable<String, String>?) {
         val isSupportedTrack1 = posInfoData?.get("isSupportedTrack1") ?: ""
@@ -82,25 +115,27 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         var msg = ""
         when (transactionResult) {
             QPOSService.TransactionResult.APPROVED -> {}
-            QPOSService.TransactionResult.TERMINATED -> {}
-            QPOSService.TransactionResult.DECLINED -> {}
-            QPOSService.TransactionResult.CANCEL -> {}
-            QPOSService.TransactionResult.CAPK_FAIL -> {}
-            QPOSService.TransactionResult.NOT_ICC -> {}
-            QPOSService.TransactionResult.SELECT_APP_FAIL -> {}
-            QPOSService.TransactionResult.DEVICE_ERROR -> {}
-            QPOSService.TransactionResult.TRADE_LOG_FULL -> msg = "The trade log is full! Please clear the trade log."
-            QPOSService.TransactionResult.CARD_NOT_SUPPORTED -> {}
-            QPOSService.TransactionResult.MISSING_MANDATORY_DATA -> {}
-            QPOSService.TransactionResult.CARD_BLOCKED_OR_NO_EMV_APPS -> {}
-            QPOSService.TransactionResult.INVALID_ICC_DATA -> {}
-            QPOSService.TransactionResult.FALLBACK -> msg = "Trans fallback"
-            QPOSService.TransactionResult.NFC_TERMINATED -> msg = "NFC Terminated"
-            QPOSService.TransactionResult.CARD_REMOVED -> msg = "Card Removed"
-            QPOSService.TransactionResult.CONTACTLESS_TRANSACTION_NOT_ALLOW -> msg = "Transaction Not Allowed"
-            QPOSService.TransactionResult.CARD_BLOCKED -> msg = "Card Blocked"
-            QPOSService.TransactionResult.TRANS_TOKEN_INVALID -> msg = "Token Invalid"
-            QPOSService.TransactionResult.APP_BLOCKED -> msg = "App Blocked"
+            QPOSService.TransactionResult.TERMINATED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.DECLINED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CANCEL -> {
+
+            }
+            QPOSService.TransactionResult.CAPK_FAIL -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.NOT_ICC -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.SELECT_APP_FAIL -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.DEVICE_ERROR -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.TRADE_LOG_FULL -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CARD_NOT_SUPPORTED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.MISSING_MANDATORY_DATA -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CARD_BLOCKED_OR_NO_EMV_APPS -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.INVALID_ICC_DATA -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.FALLBACK -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.NFC_TERMINATED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CARD_REMOVED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CONTACTLESS_TRANSACTION_NOT_ALLOW -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.CARD_BLOCKED -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.TRANS_TOKEN_INVALID -> hideDialogAndShowToast(transactionResult)
+            QPOSService.TransactionResult.APP_BLOCKED -> hideDialogAndShowToast(transactionResult)
             else -> msg = transactionResult?.name.orEmpty()
         }
     }
@@ -121,7 +156,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
             BluetoothToolsBean.setBulueToothName("Bluetooth (${it.substring(0, 6)}...${it.substring(it.length - 3)})")
         }
         val keyIndex = getBluetoothKeyIndex()
-        cr100Pos?.doTrade(0, 30)
+        cr100Pos?.doTrade(keyIndex, 60)
     }
 
     override fun onRequestNoQposDetected() {
@@ -131,12 +166,14 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     @SuppressLint("MissingPermission")
     override fun onDeviceFound(device: BluetoothDevice?) {
         device?.let {
-            val itm = hashMapOf<String, Any>(
-                "ICON" to if (device.bondState == BluetoothDevice.BOND_BONDED) R.drawable.bluetooth_blue else R.drawable.bluetooth_blue_unbond,
-                "TITLE" to "${device.name} (${device.address})",
-                "ADDRESS" to device.address
-            )
-            bluetoothAdapter.setData(itm)
+            if (device.name != null) {
+                val itm = hashMapOf<String, Any>(
+                    "ICON" to if (device.bondState == BluetoothDevice.BOND_BONDED) R.drawable.bluetooth_blue else R.drawable.bluetooth_blue_unbond,
+                    "TITLE" to "${device.name} (${device.address})",
+                    "ADDRESS" to device.address
+                )
+                bluetoothAdapter.setData(itm)
+            }
         } ?: run {
             Log.d("BLUETOOTH_DEVICE", "Device not found")
         }
@@ -156,7 +193,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         val terminalTime = SimpleDateFormat("yyyyMMddHHmmss").format(
             Calendar.getInstance().time
         )
-        Log.d("BLUETOOTH_DEVICE", "TIMER Called: $terminalTime")
         cr100Pos?.sendTime(terminalTime)
 
     }
@@ -165,7 +201,9 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onRequestQposDisconnected() {}
 
-    override fun onError(errorState: QPOSService.Error?) {}
+    override fun onError(errorState: QPOSService.Error?) {
+        hideDialogAndShowToast(errorState)
+    }
 
     override fun onReturnReversalData(tlv: String?) {}
 
@@ -287,17 +325,29 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onRequestWaitingUser() {
         Log.d("BLUETOOTH_DEVICE", "Waiting for User")
-        context.showBluetoothDialog(bluetoothAdapter, true) { selectedItem ->
-            println("Selected Bluetooth item: $selectedItem")
-        }
+        context.showBluetoothDialog(bluetoothAdapter, true)
     }
 
     override fun onRequestSetAmount() {
         Log.d("BLUETOOTH_DEVICE", "Set Amount Called")
-        cr100Pos?.setAmount("88", null, "566", QPOSService.TransactionType.SERVICES)
+        cr100Pos?.setAmount("10", null, "566", QPOSService.TransactionType.SERVICES)
     }
 
-    private fun buildCvmPinBlock(value: Hashtable<String, String>, pin: String): String {
-        return "pinBlock2"
+
+    fun resetCardInfoFlow() {
+        _cardInfoFlow.value = BtCardInfo()
+        cr100Pos!!.cancelTrade()
+
+    }
+
+    private fun <T> hideDialogAndShowToast(errorState: T?) {
+        hideBluetoothDialog()
+        Toast.makeText(context, "Oops, something went wrong: $errorState", Toast.LENGTH_LONG)
+            .show()
+    }
+
+    fun cleanup() {
+        job.cancel()
+        _cardInfoFlow.value = BtCardInfo()
     }
 }

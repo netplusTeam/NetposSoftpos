@@ -2,19 +2,18 @@ package com.woleapp.netpos.contactless.cr100.widget
 
 import android.app.AlertDialog
 import android.view.View
-import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.woleapp.netpos.contactless.R
+import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 
 var bluetoothDialog: AlertDialog? = null
 
 fun FragmentActivity.showBluetoothDialog(
     bluetoothAdapter: BluetoothAdapter,
-    showGifOnly: Boolean = false,
-    onBluetoothItemSelected: (Map<String, *>) -> Unit
+    showGifOnly: Boolean = false
 ) {
 
     // Create AlertDialog builder
@@ -26,33 +25,25 @@ fun FragmentActivity.showBluetoothDialog(
 
 
     val recyclerView = dialogView.findViewById<RecyclerView>(R.id.lv_indicator_BTPOS)
-    val gifView = dialogView.findViewById<pl.droidsonroids.gif.GifImageView>(R.id.giv_checkcard)
-    val bluetoothImageView = dialogView.findViewById<ImageView>(R.id.iv_blue)
+    val gifViewHolder = dialogView.findViewById<LinearLayout>(R.id.ll_gif)
+
     recyclerView.layoutManager = LinearLayoutManager(this)
     recyclerView.adapter = bluetoothAdapter
 
     if (showGifOnly) {
-        gifView.visibility = View.VISIBLE
+        gifViewHolder.visibility = View.VISIBLE
         recyclerView.visibility = View.GONE
-        bluetoothImageView.visibility = View.GONE
     } else {
-        gifView.visibility = View.GONE
+        gifViewHolder.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
-        bluetoothImageView.visibility = View.VISIBLE
     }
 
 
     bluetoothDialog = dialogBuilder.create()
-    bluetoothDialog?.show()
-
-    // Observe the LiveData for selected Bluetooth items
-    val selectedBluetoothItem: LiveData<MutableMap<String, *>>? = bluetoothAdapter.selectedBluetoothItem
-    selectedBluetoothItem?.observe(this) { selectedItem ->
-        selectedItem?.let {
-            onBluetoothItemSelected(it)
-//            bluetoothDialog.dismiss()
-        }
+    bluetoothDialog?.setOnCancelListener {
+        cr100Pos?.cancelTrade()
     }
+    bluetoothDialog?.show()
 }
 
 fun hideBluetoothDialog() {

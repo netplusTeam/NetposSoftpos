@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.cr100.utils
 
+import com.woleapp.netpos.contactless.BuildConfig
 import java.math.BigInteger
 import java.security.Key
 import java.util.Locale
@@ -32,8 +33,8 @@ object DUKPK2009CBC {
         var ipek: ByteArray? = null
         val byte_ksn = parseHexStr2Byte(ksnV)
         ipek = if (clearIpek == null || clearIpek.length == 0) {
-            val bdk = "0123456789ABCDEFFEDCBA9876543210"
-            val byte_bdk = parseHexStr2Byte(bdk)
+
+            val byte_bdk = parseHexStr2Byte(BuildConfig.CR100_BDK_VALUE)
             GenerateIPEK(byte_ksn, byte_bdk)
         } else {
             parseHexStr2Byte(clearIpek)

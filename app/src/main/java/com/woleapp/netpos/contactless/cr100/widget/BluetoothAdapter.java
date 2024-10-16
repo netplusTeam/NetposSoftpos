@@ -2,15 +2,12 @@ package com.woleapp.netpos.contactless.cr100.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.woleapp.netpos.contactless.R;
@@ -24,14 +21,6 @@ public class BluetoothAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private ArrayList<Map<String, ?>> datas;
 
     private OnBluetoothItemClickListener mEvent;
-
-    // MutableLiveData to hold the selected Bluetooth item
-    private final MutableLiveData<Map<String, ?>> selectedBluetoothItem = new MutableLiveData<>();
-
-    // Expose LiveData for observing selected Bluetooth item
-    public LiveData<Map<String, ?>> getSelectedBluetoothItem() {
-        return selectedBluetoothItem;
-    }
 
     public BluetoothAdapter(Context context, ArrayList<Map<String, ?>> data) {
         this.mContext = context;
@@ -76,10 +65,7 @@ public class BluetoothAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 ((MyViewHolder) holder).iconImage.setBackgroundResource(idIcon);
                 ((MyViewHolder) holder).txt.setText(sTitleName);
 
-                // Set click listener to capture item selection
                 holder.itemView.setOnClickListener(v -> {
-                    Log.w("BluetoothAdapter", "Item clicked: " + position);
-                    selectedBluetoothItem.setValue(itemData);
                     if (mEvent != null) {
                         mEvent.onItemClick(position, itemData);
                     }

@@ -143,7 +143,13 @@ public class PasswordDialog {
             }
             // Use DPrefs to save Pin key
             DPrefs.INSTANCE.putString(UtilityParam.INSTANCE.getPIN_KEY(), etPin.getText().toString().trim());
-            pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+
+            if(Singletons.INSTANCE.getKeyHolder() != null) {
+                pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+            } else {
+                Toast.makeText(context, "Terminal not configured", Toast.LENGTH_SHORT).show();
+            }
+
             dialog.cancel();
         });
 
