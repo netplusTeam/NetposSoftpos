@@ -1,10 +1,12 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.woleapp.netpos.contactless.ui.activities
 
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
@@ -17,17 +19,21 @@ import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.fragments.LandingFragment
 import com.woleapp.netpos.contactless.ui.fragments.LoginFragment
 import com.woleapp.netpos.contactless.ui.fragments.NewOrExistingFragment
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.isDebuggableModeEnabled
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class AuthenticationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthenticationBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
+
+        window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
 //        if (RootUtil.isDeviceRooted) {
@@ -49,9 +55,9 @@ class AuthenticationActivity : AppCompatActivity() {
             NetPosTerminalConfig.init(applicationContext)
             finish()
         }
-        if (BuildConfig.FLAVOR.contains("providuspos")){
+        if (BuildConfig.FLAVOR.contains("providuspos")) {
             showFragment(LandingFragment())
-        }else{
+        } else {
             showFragment(LoginFragment())
         }
         if (ActivityCompat.checkSelfPermission(
@@ -65,7 +71,6 @@ class AuthenticationActivity : AppCompatActivity() {
                 AppConstants.READ_PHONE_STATE_REQUEST_CODE,
             )
         }
-
 
         if (intent.getBooleanExtra("navigateToFragment", false)) {
             // Navigate to the Fragment
