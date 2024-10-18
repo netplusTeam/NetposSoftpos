@@ -281,7 +281,7 @@ class AuthViewModel : ViewModel() {
 //                            userTokenDecoded.getClaim(
 //                                "terminalId",
 //                            ).asString()
-                            "20442R12"
+                            "2UP10458" // 20442R12
                         } else {
                             " "
                         }
