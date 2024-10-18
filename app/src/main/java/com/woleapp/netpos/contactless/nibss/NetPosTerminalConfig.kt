@@ -39,7 +39,7 @@ class NetPosTerminalConfig {
             ConnectionData(
                 ipAddress = configurationData.ip,
                 ipPort = configurationData.port.toInt(),
-                isSSL = true,
+                isSSL = false,
             )
         private var terminalId: String? = null
         var isConfigurationInProcess = false

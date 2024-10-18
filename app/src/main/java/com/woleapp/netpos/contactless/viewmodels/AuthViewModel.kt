@@ -263,8 +263,8 @@ class AuthViewModel : ViewModel() {
                 User().apply {
                     this.netplusPayMid =
                         if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
-                            userTokenDecoded.getClaim("netplusPayMid").asString()
-//                            "2044LA000016107"
+//                            userTokenDecoded.getClaim("netplusPayMid").asString()
+                            "2044LA000016107"
                         } else {
                             null
                         }
@@ -278,10 +278,10 @@ class AuthViewModel : ViewModel() {
                         }
                     this.terminal_id =
                         if (userTokenDecoded.claims.containsKey("terminalId")) {
-                            userTokenDecoded.getClaim(
-                                "terminalId",
-                            ).asString()
-//                            "20442R12"
+//                            userTokenDecoded.getClaim(
+//                                "terminalId",
+//                            ).asString()
+                            "20442R12"
                         } else {
                             " "
                         }
