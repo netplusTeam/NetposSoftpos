@@ -13,7 +13,6 @@ import android.text.Spanned
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.util.Base64
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -40,21 +39,22 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 object RandomPurposeUtil {
-    private val bankList = mapOf(
-        "firstbank" to "firstbank",
-        "easypay" to "fcmb",
-        "fcmbeasypay" to "fcmb",
-        "easypayfcmb" to "fcmb",
-        "providuspos" to "providus",
-        "stanbic" to "stanbic",
-        "providus" to "providus",
-        "providussoftpos" to "providus",
-        "wemabank" to "wemabank",
-        "zenith" to "zenith",
-        "unitybank" to "unitybank",
-        "polaris" to "polaris",
-        "netpos" to "netpos",
-    )
+    private val bankList =
+        mapOf(
+            "firstbank" to "firstbank",
+            "easypay" to "fcmb",
+            "fcmbeasypay" to "fcmb",
+            "easypayfcmb" to "fcmb",
+            "providuspos" to "providus",
+            "stanbic" to "stanbic",
+            "providus" to "providus",
+            "providussoftpos" to "providus",
+            "wemabank" to "wemabank",
+            "zenith" to "zenith",
+            "unitybank" to "unitybank",
+            "polaris" to "polaris",
+            "netpos" to "netpos",
+        )
 
     fun stringToBase64(text: String): String {
         val data: ByteArray = text.toByteArray()
@@ -66,18 +66,25 @@ object RandomPurposeUtil {
         return String(decodedString)
     }
 
-    fun LifecycleOwner.showSnackBar(rootView: View, message: String) {
+    fun LifecycleOwner.showSnackBar(
+        rootView: View,
+        message: String,
+    ) {
         Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
     }
 
     @SuppressLint("ConstantLocale")
-    fun getCurrentDateTime() = SimpleDateFormat(
-        "yyyy-MM-dd hh:mm a",
-        Locale.getDefault(),
-    ).format(System.currentTimeMillis()).format(Date())
+    fun getCurrentDateTime() =
+        SimpleDateFormat(
+            "yyyy-MM-dd hh:mm a",
+            Locale.getDefault(),
+        ).format(System.currentTimeMillis()).format(Date())
 
     @SuppressLint("SimpleDateFormat")
-    fun dateStr2Long(dateStr: String, inputDateFormat: String): Long {
+    fun dateStr2Long(
+        dateStr: String,
+        inputDateFormat: String,
+    ): Long {
         val formattedDateString = dateStr.removeSuffix(dateStr.takeLast(3))
         return try {
             val c = Calendar.getInstance()
@@ -108,11 +115,12 @@ object RandomPurposeUtil {
     ): SpannableString {
         val spannedText = SpannableString(text)
         val styleSpan = StyleSpan(Typeface.BOLD)
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                clickAction()
+        val clickableSpan =
+            object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    clickAction()
+                }
             }
-        }
         if (startIndex < 0) throw IndexOutOfBoundsException("$startIndex must be at least 0")
         if (text.isEmpty()) throw IndexOutOfBoundsException("$text can't be empty")
         if (endIndex > text.length) throw IndexOutOfBoundsException("$endIndex can't be greater than the length of $text")
@@ -176,7 +184,7 @@ object RandomPurposeUtil {
                     if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse) {
                         successAction()
                     } else {
-                        //showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
+                        // showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
                     }
                 }
                 Status.LOADING -> {
@@ -220,15 +228,15 @@ object RandomPurposeUtil {
             serverResponse.subscribeOn(ioScheduler).observeOn(mainThreadSchedulers)
                 .subscribe { data, error ->
                     data?.let {
-                        //Log.d("MMMNOWJUSTCHECKING", it.data.toString())
+                        // Log.d("MMMNOWJUSTCHECKING", it.data.toString())
                         when (it.status) {
                             Status.SUCCESS -> {
-                                //Log.d("NOWJUSTCHECKING", it.data.toString())
+                                // Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
                                 if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
                                     successAction()
                                 } else {
-                                    //Log.d("JUSTCHECKING", it.toString())
+                                    // Log.d("JUSTCHECKING", it.toString())
 //                                    showSnackBar(
 //                                        this.requireView(),
 //                                        getString(R.string.an_error_occurred),
@@ -241,7 +249,7 @@ object RandomPurposeUtil {
                             Status.ERROR -> {
                                 loadingDialog.cancel()
                                 loadingDialog.dismiss()
-                                //Log.d("MERCHANTERROR", it.data.toString())
+                                // Log.d("MERCHANTERROR", it.data.toString())
                                 if (it.data is String) {
                                     showToast(it.data)
                                 } else {
@@ -331,7 +339,10 @@ object RandomPurposeUtil {
         serverResponse.observeOnce(this.viewLifecycleOwner, null)
     }
 
-    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>?) {
+    fun <T> LiveData<T>.observeOnce(
+        lifecycleOwner: LifecycleOwner,
+        observer: Observer<T>?,
+    ) {
         observe(
             lifecycleOwner,
             object : Observer<T> {
@@ -343,7 +354,10 @@ object RandomPurposeUtil {
         )
     }
 
-    fun closeSoftKeyboard(context: Context, activity: Activity) {
+    fun closeSoftKeyboard(
+        context: Context,
+        activity: Activity,
+    ) {
         activity.currentFocus?.let { view ->
             val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
@@ -360,9 +374,7 @@ object RandomPurposeUtil {
         )
     }
 
-    fun alertDialog(
-        context: Context,
-    ): AlertDialog {
+    fun alertDialog(context: Context): AlertDialog {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
@@ -374,7 +386,7 @@ object RandomPurposeUtil {
 
     fun alertDialog(
         context: Context,
-        setCancelable: Boolean
+        setCancelable: Boolean,
     ): AlertDialog {
         val dialogView: View =
             LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
@@ -391,19 +403,20 @@ object RandomPurposeUtil {
     }
 
     fun getDeviceId(context: Context): String {
-        val deviceId: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        } else {
-            val mTelephony = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            if (mTelephony.deviceId != null) {
-                mTelephony.deviceId
+        val deviceId: String =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             } else {
-                Settings.Secure.getString(
-                    context.contentResolver,
-                    Settings.Secure.ANDROID_ID,
-                )
+                val mTelephony = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                if (mTelephony.deviceId != null) {
+                    mTelephony.deviceId
+                } else {
+                    Settings.Secure.getString(
+                        context.contentResolver,
+                        Settings.Secure.ANDROID_ID,
+                    )
+                }
             }
-        }
         return deviceId
     }
 
@@ -411,20 +424,21 @@ object RandomPurposeUtil {
 
     fun initPartnerId(): String {
         var partnerID = ""
-        val bankList = mapOf(
-            "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
-            "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "stanbic" to "377F47E9-55F9-45E0-B77A-1BAA4BC88026",
-            "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
-            "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
-            "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
-            "lumina" to "5111287c-4d89-4ad8-822b-4ac83946282c",
-        )
+        val bankList =
+            mapOf(
+                "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
+                "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "stanbic" to "377F47E9-55F9-45E0-B77A-1BAA4BC88026",
+                "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
+                "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
+                "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
+                "lumina" to "db5ce8c7-25a4-44f5-ac38-6a1f5d8905e1",
+            )
 
         for (element in bankList) {
             if (element.key == BuildConfig.FLAVOR) {
@@ -453,6 +467,7 @@ object RandomPurposeUtil {
             false
         }
     }
+
     fun passwordValidationZB(password: String): Boolean {
         return if (password.length > 9) {
             val letter: Pattern = Pattern.compile("[a-zA-z]")
@@ -500,7 +515,7 @@ object RandomPurposeUtil {
                 transactionTimeInMillis = transactionTimeInMillis,
                 transactionType = transactionType.name,
                 transmissionDateTime = getCurrentDateTime(),
-                agentName = Singletons.getCurrentlyLoggedInUser()?.email!!
+                agentName = Singletons.getCurrentlyLoggedInUser()?.email!!,
             )
         }
     }
@@ -540,19 +555,19 @@ object RandomPurposeUtil {
         }
     }
 
-
     fun showAlertDialog(
         context: Context,
         message: String,
         positiveButtonTitle: String,
         onPositiveButtonClick: () -> Unit,
     ) {
-        val alertDialog = AlertDialog.Builder(context).setMessage(message)
-            .setPositiveButton(positiveButtonTitle) { _, _ ->
-                onPositiveButtonClick()
-                // Dismiss the dialog when "Yes" is clicked
-                alertDialog(context).dismiss()
-            }.setCancelable(false).create()
+        val alertDialog =
+            AlertDialog.Builder(context).setMessage(message)
+                .setPositiveButton(positiveButtonTitle) { _, _ ->
+                    onPositiveButtonClick()
+                    // Dismiss the dialog when "Yes" is clicked
+                    alertDialog(context).dismiss()
+                }.setCancelable(false).create()
 
         alertDialog.show()
     }
@@ -562,11 +577,12 @@ object RandomPurposeUtil {
         return dateTime.replace("T", " ").removeSuffix(".000Z")
     }
 
-    fun increaseHourInDate(paidAt: String): String = paidAt.split("T").let {
-        val originalHour = it.last().split(":").first().toInt()
-        val lastPart = it.last().split("$originalHour:")
-        it.first().plus("T${originalHour.plus(1)}:${lastPart.last()}")
-    }
+    fun increaseHourInDate(paidAt: String): String =
+        paidAt.split("T").let {
+            val originalHour = it.last().split(":").first().toInt()
+            val lastPart = it.last().split("$originalHour:")
+            it.first().plus("T${originalHour.plus(1)}:${lastPart.last()}")
+        }
 
     fun formatAmountToNaira(amount: Double): String {
         val format = NumberFormat.getCurrencyInstance(Locale("en", "NG"))
