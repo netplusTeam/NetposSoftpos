@@ -3,12 +3,12 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.gms.flags.Singletons
 import com.google.android.material.tabs.TabLayoutMediator
@@ -20,6 +20,7 @@ import com.woleapp.netpos.contactless.model.MerchantDetail
 import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.util.PREF_ACCOUNT_NUMBER
 import com.woleapp.netpos.contactless.util.PREF_USER
+import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import kotlinx.android.synthetic.main.fragment_request_nfc.*
 
 class RequestNfcFragment : Fragment() {
@@ -28,6 +29,7 @@ class RequestNfcFragment : Fragment() {
     private lateinit var images: List<Int>
     private lateinit var adapter: ImageRequestNFCAdapter
     private val handler = Handler(Looper.getMainLooper())
+    private val viewModel by activityViewModels<SalesViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,9 +81,12 @@ class RequestNfcFragment : Fragment() {
                 ),
                 MerchantDetail::class.java,
             )
-        Log.d("ERROR", accountNumber.acctNumber)
         binding.customername.setText(user.business_name)
         binding.accountNumber.setText(accountNumber.acctNumber)
+
+        binding.requestBtn.setOnClickListener {
+//            viewModel.requestNfcDevice()
+        }
     }
 
     private fun autoSwipeViewPager() {
