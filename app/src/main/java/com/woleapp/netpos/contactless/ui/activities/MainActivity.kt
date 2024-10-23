@@ -15,6 +15,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -270,19 +271,16 @@ class MainActivity :
 //        checkForAppUpdate()
         window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         val netPlusPayMid = Singletons.getNetPlusPayMid()
-        if (BuildConfig.FLAVOR.contains("zenith"))
-            {
-                scanQrViewModel.getMerchantDetails(netPlusPayMid)
-                // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
-            } else if (BuildConfig.FLAVOR.contains("providuspos"))
-            {
-                scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
-                generateMerchantDetails()
-            } else if (BuildConfig.FLAVOR.contains("fcmbeasypay"))
-            {
-                scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
-                generateMerchantDetails()
-            }
+        if (BuildConfig.FLAVOR.contains("zenith")) {
+            scanQrViewModel.getMerchantDetails(netPlusPayMid)
+            // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
+        } else if (BuildConfig.FLAVOR.contains("providuspos")) {
+            scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
+            scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        }
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
@@ -1252,6 +1250,8 @@ class MainActivity :
                 binding.dashboardHeader.merchantDetails.text = it.acctNumber
                 binding.dashboardHeader.bankName.text = it.bank
                 copyAccountNumber = it.acctNumber
+                Log.d("CHECK_ACCOUNT", it.acctNumber)
+                Prefs.putString(PREF_ACCOUNT_NUMBER, gson.toJson(it))
             }
         }
     }

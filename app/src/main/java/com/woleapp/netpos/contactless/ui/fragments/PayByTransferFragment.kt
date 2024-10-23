@@ -7,7 +7,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,15 +17,16 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.WriterException
 import com.google.zxing.qrcode.QRCodeWriter
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.FragmentPayByTransferBinding
+import com.woleapp.netpos.contactless.util.PREF_ACCOUNT_NUMBER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.ScanQrViewModel
 
-
 class PayByTransferFragment : BaseFragment() {
-
     private lateinit var binding: FragmentPayByTransferBinding
     private lateinit var accountNumberQRCode: ImageView
     private lateinit var merchantBank: TextInputEditText
@@ -36,7 +36,9 @@ class PayByTransferFragment : BaseFragment() {
     private var copyAccountNumber: String? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
         binding =
@@ -45,7 +47,10 @@ class PayByTransferFragment : BaseFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         initViews()
         loader = alertDialog(requireContext())
@@ -92,7 +97,8 @@ class PayByTransferFragment : BaseFragment() {
                 binding.scanQrView.visibility = View.VISIBLE
                 binding.accountNumberQr.visibility = View.VISIBLE
                 convertAccountNumberToQR()
-            }else{
+                Prefs.putString(PREF_ACCOUNT_NUMBER, Singletons.gson.toJson(merchantDetails.data.user.acctNumber))
+            } else {
                 bankAccountNumber.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null)
             }
         }

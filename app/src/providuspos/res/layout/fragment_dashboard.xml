@@ -484,11 +484,35 @@
                     android:textColor="@color/pinButtonText"
                     android:textSize="20.0sp"
                     android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/request_a_device"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:processButtonState="@{viewmodel.transactionState}" />
 
+                <LinearLayout
+                    android:id="@+id/request_a_device"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="@dimen/margin_15"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@+id/btnConfirm"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Don't have an NFC device? " />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:layout_marginStart="@dimen/dimen_5dp"
+                        android:textColor="@color/colorPrimary"
+                        android:text="Request a device " />
+                </LinearLayout>
                 <ProgressBar
                     android:layout_width="wrap_content"
                     android:layout_height="0dp"

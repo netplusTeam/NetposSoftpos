@@ -5,36 +5,33 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.text.InputFilter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.lifecycleScope
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.HostConfig
 import com.danbamitale.epmslib.entities.TransactionRequestData
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.entities.accountBalances
-import com.danbamitale.epmslib.entities.clearPinKey
 import com.danbamitale.epmslib.entities.isApproved
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.AuthenticationEventData
@@ -64,9 +61,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.item_mcc.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -76,7 +70,6 @@ import java.net.Socket
 import java.util.concurrent.TimeUnit
 
 class DashboardFragment : BaseFragment() {
-
     private lateinit var progressDialog: ProgressDialog
     private lateinit var binding: FragmentDashboardBinding
     private lateinit var amountEditText: EditText
@@ -107,6 +100,7 @@ class DashboardFragment : BaseFragment() {
     private lateinit var btn7Tv: TextView
     private lateinit var btn8Tv: TextView
     private lateinit var btn9Tv: TextView
+    private var nfcAdapter: NfcAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -122,23 +116,25 @@ class DashboardFragment : BaseFragment() {
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-        }
+        dialogPrintTypeBinding =
+            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+                executePendingBindings()
+            }
         loader = alertDialog(requireContext())
 
-        printerErrorDialog = AlertDialog.Builder(requireContext()).apply {
-            setTitle(getString(R.string.printer_error))
-            setIcon(R.drawable.ic_warning)
-            setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
-                d.cancel()
-                viewModel.showReceiptDialog()
-            }
-            setNegativeButton(getString(R.string.dismiss)) { d, _ ->
-                d.cancel()
-                viewModel.finish()
-            }
-        }.create()
+        printerErrorDialog =
+            AlertDialog.Builder(requireContext()).apply {
+                setTitle(getString(R.string.printer_error))
+                setIcon(R.drawable.ic_warning)
+                setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
+                    d.cancel()
+                    viewModel.showReceiptDialog()
+                }
+                setNegativeButton(getString(R.string.dismiss)) { d, _ ->
+                    d.cancel()
+                    viewModel.finish()
+                }
+            }.create()
         binding.apply {
             viewmodel = viewModel
             lifecycleOwner = viewLifecycleOwner
@@ -166,7 +162,6 @@ class DashboardFragment : BaseFragment() {
                             )
                         }
                     }
-
                 }
             }
         }
@@ -249,13 +244,11 @@ class DashboardFragment : BaseFragment() {
                 Toast.makeText(context, getString(R.string.enter_a_valid_amount), Toast.LENGTH_SHORT)
                     .show()
                 return@setOnClickListener
-            }else{
+            } else {
                 binding.priceTextbox.text = etPinEt.text
                 viewModel.validateField()
             }
         }
-
-
 
         binding.process.setOnClickListener {
             viewModel.validateField()
@@ -287,23 +280,25 @@ class DashboardFragment : BaseFragment() {
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
                     if (!user.userType!!.contains("regular", true)) {
-                        EnterCvvNumberDialog(object : PinPadDialogListener {
-                            override fun onError(errorMessage: String) {
-                                showToast(errorMessage)
-                                return
-                            }
+                        EnterCvvNumberDialog(
+                            object : PinPadDialogListener {
+                                override fun onError(errorMessage: String) {
+                                    showToast(errorMessage)
+                                    return
+                                }
 
-                            override fun onConfirm(data: String) {
-                                viewModel.setTransactionStateToStarted()
-                                viewModel.payThroughMPGS(
-                                    card.pan,
-                                    data,
-                                    card.expiryDate,
-                                    user.netplusPayMid.toString(),
-                                    DPrefs.getString(PIN_KEY, ""),
-                                )
-                            }
-                        }).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
+                                override fun onConfirm(data: String) {
+                                    viewModel.setTransactionStateToStarted()
+                                    viewModel.payThroughMPGS(
+                                        card.pan,
+                                        data,
+                                        card.expiryDate,
+                                        user.netplusPayMid.toString(),
+                                        DPrefs.getString(PIN_KEY, ""),
+                                    )
+                                }
+                            },
+                        ).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
                     } else {
                         viewModel.makePayment(requireContext(), transactionType)
                     }
@@ -311,21 +306,47 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        adapter = ServiceAdapter {
-            when (it.id) {
-                0 -> showFragment(TransactionsFragment())
-                2 -> showFragment(NipNotificationFragment.newInstance())
-                3 -> showFragment(BillsFragment())
-                5 -> {
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
-                        .commit()
-                }
+        adapter =
+            ServiceAdapter {
+                when (it.id) {
+                    0 -> showFragment(TransactionsFragment())
+                    2 -> showFragment(NipNotificationFragment.newInstance())
+                    3 -> showFragment(BillsFragment())
+                    5 -> {
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
+                            .commit()
+                    }
 
-                else -> {
-                    sendPayload()
+                    else -> {
+                        sendPayload()
+                    }
                 }
             }
+
+        nfcAdapter = (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
+        if (nfcAdapter != null) {
+            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+            if (nfcAdapter?.isEnabled == false) {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+        } else {
+            binding.requestADevice.visibility = View.VISIBLE
+        }
+        binding.requestADevice.setOnClickListener {
+            showFragment(
+                RequestNfcFragment(),
+                containerViewId = R.id.container_main,
+                fragmentName = "RequestNfcFragment",
+            )
         }
 
         progressDialog = ProgressDialog(requireContext())
@@ -347,7 +368,10 @@ class DashboardFragment : BaseFragment() {
         MqttHelper.sendPayload(MqttTopics.AUTHENTICATION, event)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         setServices()
         vend()
@@ -382,28 +406,30 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun setServices() {
-        val listOfServices = ArrayList<Service>().apply {
-            add(Service(0, "Transaction", R.drawable.ic_trans))
-            add(Service(1, "Balance Inquiry", R.drawable.ic_write))
-            add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
-            add(Service(5, "Settings", R.drawable.ic_baseline_settings))
-        }
+        val listOfServices =
+            ArrayList<Service>().apply {
+                add(Service(0, "Transaction", R.drawable.ic_trans))
+                add(Service(1, "Balance Inquiry", R.drawable.ic_write))
+                add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
+                add(Service(5, "Settings", R.drawable.ic_baseline_settings))
+            }
         adapter.submitList(listOfServices)
     }
 
     private fun vend() {
         if (isVend) {
             var count = 0
-            val progressBar = ProgressDialog(context).apply {
-                this.setCancelable(false)
-                this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
-                    dialog.cancel()
-                    compositeDisposable.clear()
-                    requireActivity().onBackPressed()
+            val progressBar =
+                ProgressDialog(context).apply {
+                    this.setCancelable(false)
+                    this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
+                        dialog.cancel()
+                        compositeDisposable.clear()
+                        requireActivity().onBackPressed()
+                    }
+                    this.setMessage("Waiting for amount.")
+                    show()
                 }
-                this.setMessage("Waiting for amount.")
-                show()
-            }
             val socket = Socket()
             var printWriter: PrintWriter? = null
             var reader: BufferedReader? = null
@@ -422,10 +448,11 @@ class DashboardFragment : BaseFragment() {
             }.flatMap {
                 Observable.interval(0, 5, TimeUnit.SECONDS)
             }.flatMap {
-                val out = JsonObject().apply {
-                    addProperty("serial_number", Build.ID)
-                    addProperty("status", "")
-                }.toString()
+                val out =
+                    JsonObject().apply {
+                        addProperty("serial_number", Build.ID)
+                        addProperty("status", "")
+                    }.toString()
                 printWriter?.println(out)
                 try {
                     val s = reader?.readLine()
@@ -437,7 +464,7 @@ class DashboardFragment : BaseFragment() {
                     Observable.just(Vend(0.0))
                 }
             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-                //Timber.e("vend: $it")
+                // Timber.e("vend: $it")
                 count++
                 if (it.amount > 0.0) {
                     progressBar.dismiss()
@@ -495,12 +522,13 @@ class DashboardFragment : BaseFragment() {
             return
         }
 
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!,
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
         progressDialog.setMessage("Checking Balance...")
@@ -533,15 +561,17 @@ class DashboardFragment : BaseFragment() {
 
                     val me = it.buildSMSText("Account Balance Check")
 
-                    val messageString = if (it.isApproved) {
-                        "Account Balance:\n " + it.accountBalances.joinToString("\n") { accountBalance ->
-                            "${accountBalance.accountType}, ${
-                                accountBalance.amount.div(100).formatCurrencyAmount()
-                            }"
+                    val messageString =
+                        if (it.isApproved) {
+                            "Account Balance:\n " +
+                                it.accountBalances.joinToString("\n") { accountBalance ->
+                                    "${accountBalance.accountType}, ${
+                                        accountBalance.amount.div(100).formatCurrencyAmount()
+                                    }"
+                                }
+                        } else {
+                            "${it.responseMessage}(${it.responseCode})"
                         }
-                    } else {
-                        "${it.responseMessage}(${it.responseCode})"
-                    }
 
                     showMessage(
                         if (it.isApproved) "Approved" else "Declined",
@@ -552,7 +582,10 @@ class DashboardFragment : BaseFragment() {
             }.disposeWith(compositeDisposable)
     }
 
-    private fun showMessage(s: String, vararg messageString: String) {
+    private fun showMessage(
+        s: String,
+        vararg messageString: String,
+    ) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle(s)
             setMessage(messageString.first())
@@ -595,7 +628,6 @@ class DashboardFragment : BaseFragment() {
             .show()
     }
 
-
     private fun initViews() {
         with(binding) {
             tvMessageTv = tvMessage
@@ -628,6 +660,4 @@ class DashboardFragment : BaseFragment() {
         btn8Tv.text = integerList[8]
         btn9Tv.text = integerList[9]
     }
-
-
 }

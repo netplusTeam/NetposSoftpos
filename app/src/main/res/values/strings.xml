@@ -282,6 +282,9 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="verve_card_icon">Verve card icon</string>
     <string name="password_requires_minimum_of_1_uppercase_lowercase_number_special_character"><![CDATA[Password should be at least 10 characters with a minimum of 1 uppercase, lowercase, number & special character]]></string>
     <string name="enter_a_valid_amount">Please enter a valid amount</string>
+    <string name="request_nfc">Near Field Communication (NFC) is a short-range wireless technology that enables devices to communicate with each other when they are within close proximity, typically less than 4 cm apart. NFC devices can be used for various applications, such as contactless payments, data transfer, and smart device interactions.</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="account_number">Account Number</string>
 </resources>
 
 
