@@ -1,7 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
-import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.lifecycle.LiveData
@@ -129,6 +128,12 @@ class AuthViewModel : ViewModel() {
             val userTokenDecoded = JWT(userToken)
             val user =
                 User().apply {
+                    this.nfc_interest =
+                        if (userTokenDecoded.claims.containsKey("nfc_interest")) {
+                            userTokenDecoded.getClaim("nfc_interest").asString()
+                        } else {
+                            null
+                        }
                     this.netplusPayMid =
                         if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
                             userTokenDecoded.getClaim("netplusPayMid").asString()
@@ -261,10 +266,15 @@ class AuthViewModel : ViewModel() {
             val userTokenDecoded = JWT(userToken)
             val user =
                 User().apply {
+                    this.nfc_interest =
+                        if (userTokenDecoded.claims.containsKey("nfc_interest")) {
+                            userTokenDecoded.getClaim("nfc_interest").asString()
+                        } else {
+                            null
+                        }
                     this.netplusPayMid =
                         if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
                             userTokenDecoded.getClaim("netplusPayMid").asString()
-//                            "2044LA000016107"
                         } else {
                             null
                         }
@@ -281,7 +291,6 @@ class AuthViewModel : ViewModel() {
                             userTokenDecoded.getClaim(
                                 "terminalId",
                             ).asString()
-//                            "20442R12"
                         } else {
                             " "
                         }
@@ -332,7 +341,6 @@ class AuthViewModel : ViewModel() {
                             " "
                         }
                 }
-            Log.d("USER", user.toString())
 
             Single.just(user)
         }.subscribeOn(Schedulers.io()).doFinally { authInProgress.postValue(false) }

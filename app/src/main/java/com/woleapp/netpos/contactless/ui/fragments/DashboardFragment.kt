@@ -5,23 +5,16 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
-import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
-import android.provider.Settings
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.activityViewModels
-import com.danbamitale.epmslib.entities.CardData
-import com.danbamitale.epmslib.entities.HostConfig
-import com.danbamitale.epmslib.entities.TransactionRequestData
-import com.danbamitale.epmslib.entities.TransactionType
-import com.danbamitale.epmslib.entities.accountBalances
-import com.danbamitale.epmslib.entities.isApproved
+import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -31,28 +24,17 @@ import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
-import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
-import com.woleapp.netpos.contactless.model.AuthenticationEventData
-import com.woleapp.netpos.contactless.model.MqttEvent
-import com.woleapp.netpos.contactless.model.MqttEvents
-import com.woleapp.netpos.contactless.model.MqttStatus
-import com.woleapp.netpos.contactless.model.MqttTopics
-import com.woleapp.netpos.contactless.model.Service
-import com.woleapp.netpos.contactless.model.TransactionMethod
-import com.woleapp.netpos.contactless.model.User
-import com.woleapp.netpos.contactless.model.Vend
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
@@ -241,7 +223,11 @@ class DashboardFragment : BaseFragment() {
         }
         btnConfirmBtn.setOnClickListener {
             if (etPinEt.text.toString().isEmpty()) {
-                Toast.makeText(context, getString(R.string.enter_a_valid_amount), Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    context,
+                    getString(R.string.enter_a_valid_amount),
+                    Toast.LENGTH_SHORT,
+                )
                     .show()
                 return@setOnClickListener
             } else {
@@ -323,8 +309,10 @@ class DashboardFragment : BaseFragment() {
                     }
                 }
             }
-
-        nfcAdapter = (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
+        val showNfcRequest =
+            Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).nfc_interest
+        nfcAdapter =
+            (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
@@ -338,9 +326,10 @@ class DashboardFragment : BaseFragment() {
                         )
                     }.show()
             }
-        } else {
+        } else if (showNfcRequest == "0") {
             binding.requestADevice.visibility = View.VISIBLE
         }
+
         binding.requestADevice.setOnClickListener {
             showFragment(
                 RequestNfcFragment(),

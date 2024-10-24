@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,26 +11,48 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.gms.flags.Singletons
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ImageRequestNFCAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRequestNfcBinding
 import com.woleapp.netpos.contactless.model.MerchantDetail
+import com.woleapp.netpos.contactless.model.RequestNfcRequest
 import com.woleapp.netpos.contactless.model.User
-import com.woleapp.netpos.contactless.util.PREF_ACCOUNT_NUMBER
-import com.woleapp.netpos.contactless.util.PREF_USER
-import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
+import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.Scheduler
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.fragment_request_nfc.*
+import javax.inject.Inject
+import javax.inject.Named
 
+@AndroidEntryPoint
 class RequestNfcFragment : Fragment() {
     private lateinit var binding: FragmentRequestNfcBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var images: List<Int>
     private lateinit var adapter: ImageRequestNFCAdapter
     private val handler = Handler(Looper.getMainLooper())
-    private val viewModel by activityViewModels<SalesViewModel>()
+    private val viewModel by activityViewModels<NotificationViewModel>()
+    private lateinit var deviceId: String
+    private lateinit var loader: AlertDialog
+
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    @Named("io-scheduler")
+    lateinit var ioScheduler: Scheduler
+
+    @Inject
+    @Named("main-scheduler")
+    lateinit var mainThreadScheduler: Scheduler
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -85,8 +108,11 @@ class RequestNfcFragment : Fragment() {
         binding.accountNumber.setText(accountNumber.acctNumber)
 
         binding.requestBtn.setOnClickListener {
-//            viewModel.requestNfcDevice()
+            requestDevice()
         }
+
+        loader = alertDialog(requireContext(), true)
+        deviceId = getDeviceId(requireContext())
     }
 
     private fun autoSwipeViewPager() {
@@ -105,6 +131,37 @@ class RequestNfcFragment : Fragment() {
             }
 
         handler.post(runnable)
+    }
+
+    private fun requestDevice() {
+        if (binding.customername.text?.isNotEmpty() == true || binding.accountNumber.text?.isNotEmpty() == true) {
+            requestNfcDevice()
+        }
+    }
+
+    private fun requestNfcDevice() {
+        loader.show()
+
+        val email =
+            Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).email
+        val nfcRequest =
+            RequestNfcRequest(
+                email.toString(),
+            )
+        observeServerResponse(
+            viewModel.requestNfcDevice(
+                nfcRequest,
+                initPartnerId(),
+                deviceId,
+            ),
+            loader,
+            compositeDisposable,
+            ioScheduler,
+            mainThreadScheduler,
+        ) {
+            requireActivity().supportFragmentManager.popBackStack()
+            showToast("Request received successfully!")
+        }
     }
 
     override fun onDestroy() {

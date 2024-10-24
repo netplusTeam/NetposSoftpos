@@ -9,6 +9,7 @@ import com.woleapp.netpos.contactless.util.UtilityParam
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -18,9 +19,9 @@ class StormApiClient {
         private fun getBaseOkhttpClientBuilder(): OkHttpClient.Builder {
             val okHttpClientBuilder = OkHttpClient.Builder()
 
-//            val loggingInterceptor = HttpLoggingInterceptor()
-//            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
-            // okHttpClientBuilder.addInterceptor(loggingInterceptor)
+            val loggingInterceptor = HttpLoggingInterceptor()
+            loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+            okHttpClientBuilder.addInterceptor(loggingInterceptor)
 
             return okHttpClientBuilder
         }
