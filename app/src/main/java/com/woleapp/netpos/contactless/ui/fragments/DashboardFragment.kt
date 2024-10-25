@@ -5,9 +5,11 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +26,7 @@ import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.*
