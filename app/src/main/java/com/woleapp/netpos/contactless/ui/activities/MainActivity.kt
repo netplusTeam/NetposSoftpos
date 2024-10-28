@@ -280,7 +280,7 @@ class MainActivity :
         }
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
-        NetPosApp.INSTANCE.initMposLibrary(this)
+        NetPosApp.INSTANCE. initMposLibrary(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         initViews()
         dialogContactlessReaderBinding =

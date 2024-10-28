@@ -17,7 +17,7 @@
             android:background="@color/white"
             android:gravity="center"
             android:orientation="horizontal"
-            android:visibility="gone"
+            android:visibility="visible"
             >
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -48,18 +48,18 @@
                     app:lottie_loop="true"
                     app:lottie_rawRes="@raw/nfc_reading" />
 
+
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/cardScheme"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     app:layout_constraintBottom_toBottomOf="@id/giv_checkcard"
                     app:layout_constraintEnd_toEndOf="@id/giv_checkcard"
-                    app:layout_constraintHorizontal_bias="0.498"
+                    app:layout_constraintHorizontal_bias="0.493"
                     app:layout_constraintStart_toStartOf="@id/giv_checkcard"
                     app:layout_constraintTop_toTopOf="@id/giv_checkcard"
-                    app:layout_constraintVertical_bias="0.495"
+                    app:layout_constraintVertical_bias="0.531"
                     app:srcCompat="@drawable/ic_mastercard_logo_new" />
-
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/cardScheme2"
@@ -67,10 +67,10 @@
                     android:layout_height="30dp"
                     app:layout_constraintBottom_toBottomOf="@id/giv_checkcard"
                     app:layout_constraintEnd_toEndOf="@id/giv_checkcard"
-                    app:layout_constraintHorizontal_bias="0.496"
+                    app:layout_constraintHorizontal_bias="0.493"
                     app:layout_constraintStart_toStartOf="@id/giv_checkcard"
                     app:layout_constraintTop_toTopOf="@id/giv_checkcard"
-                    app:layout_constraintVertical_bias="0.359"
+                    app:layout_constraintVertical_bias="0.395"
                     app:srcCompat="@drawable/visacards" />
 
                 <androidx.appcompat.widget.AppCompatImageView
