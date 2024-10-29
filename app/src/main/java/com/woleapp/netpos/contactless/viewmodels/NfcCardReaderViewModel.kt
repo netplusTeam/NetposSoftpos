@@ -18,6 +18,8 @@ import com.visa.app.ttpkernel.ContactlessKernel
 import com.visa.app.ttpkernel.TtpOutcome
 import com.visa.vac.tc.emvconverter.Utils
 import com.woleapp.netpos.contactless.app.NetPosApp
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
 import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.listener.TransactionListener
@@ -149,31 +151,73 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
-        var iccData = ""
+        val iccData: String
 
         //destructure transactionResult to interact with its tlv items children and filter out tags and values
         if (transactionEndStatus == TransactionEndStatus.APPROVED || transactionEndStatus == TransactionEndStatus.DECLINED) {
-            val requiredTagsSet = REQUIRED_TAGS.toSet()
-            //removing this tags as NIBBS rejects icc if they are there
             val unwantedTagsSet = setOf("57", "5A", "5F24", "5F20")
+            val requiredTagsSet = REQUIRED_TAGS.toSet()
+
+            // Define required order dynamically by removing unwanted tags from requiredTagsSet
+            val requiredOrder = requiredTagsSet.filterNot { it in unwantedTagsSet }
+
             val tagValueMap =
                 transactionResult.transactionOutcomeTlvItems.orEmpty().flatMap { tlvItem ->
-                    val tag = tlvItem.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
-
-                    // Update iccData only if the tag is in the required set and not in the unwanted set
-                    if (tag in requiredTagsSet && tag !in unwantedTagsSet) {
-                        iccData =
-                            tlvItem.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
-                                .uppercase(Locale.ENGLISH)
-                    }
-                    sequenceOf(tlvItem) + (tlvItem.children.orEmpty().asSequence())
+                    Log.d("ICC2", "$tlvItem")
+                    sequenceOf(tlvItem) + tlvItem.children.orEmpty().asSequence()
                 }.associate {
                     val tag = it.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
-                    val value =
-                        it.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
-                            .uppercase(Locale.ENGLISH)
-                    tag to value
-                }.filterKeys { it in requiredTagsSet }.toMutableMap()
+                    val tagValue = when (tag) {
+                        // Special case for tag 9F10: Always set length to 20 byte
+                        "9F10" -> "20" + it.value.joinToString(separator = "") { byte ->
+                            "%02x".format(byte)
+                        }.uppercase(Locale.ENGLISH)
+                        // Special case for tag 57(track2): Return value without adding length
+                        "57" -> it.value.joinToString(separator = "") { byte ->
+                            "%02x".format(byte)
+                        }.uppercase(Locale.ENGLISH)
+                        // For other tags, conditionally add 0 before length if it's a single digit
+                        else -> {
+                            val lengthValue = if (it.length.value < 10) {
+                                "0${it.length.value}"
+                            } else {
+                                it.length.value.toString()
+                            }
+                            lengthValue + it.value.joinToString(separator = "") { byte ->
+                                "%02x".format(byte)
+                            }.uppercase(Locale.ENGLISH)
+                        }
+                    }
+                    Log.d("ICC", "TAG: $tag, VALUE: $tagValue, length: ${it.length.value}")
+                    tag to tagValue
+                }.filterKeys { it in requiredTagsSet }
+                    .filterKeys { it != "8E" } // Remove tag 8E because there's no value returned from the dto
+                    .toMutableMap()
+
+            // Replace or add specific tags with given values
+            val replacementTags = mapOf(
+                "9C" to "0100",
+                "9F09" to "020002",
+                "9F03" to "06000000000000",
+                "9F1E" to "083132333435363738",
+                "9F27" to "0180"
+            )
+
+            // Add or replace tags in the tagValueMap
+            replacementTags.forEach { (tag, value) ->
+                tagValueMap[tag] = value
+            }
+
+            // Iterate over the requiredOrder to concatenate in the correct order for icc
+            val orderedIccData = StringBuilder()
+            requiredOrder.forEach { tag ->
+                tagValueMap[tag]?.let { value ->
+                    orderedIccData.append(tag).append(value)
+                }
+            }
+
+            // Assign the orderedIccData to iccData
+            iccData = orderedIccData.toString()
 
             val track2 = tagValueMap["57"]
             val pan = track2?.split("D")?.firstOrNull()
@@ -358,6 +402,24 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             FirebaseCrashlytics.getInstance().log(e.message.toString())
             FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
         }
+    }
+
+    fun doCr100Transaction(data: BtCardInfo) {
+        val (pan, track2, icc, cardType) = data
+        iccCardHelper = ICCCardHelper()
+        iccCardHelper.apply {
+            cardScheme = cardType!!.cardScheme
+            customerName = "CUSTOMER"
+        }
+        val cardData = CardData(
+            track2,
+            "",
+            pan,
+            "051"
+        )
+        iccCardHelper.cardData = cardData
+        _showPinPadDialog.postValue(Event(pan))
+        hideBluetoothDialog()
     }
 
 

@@ -17,6 +17,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
+            android:text="@string/please_tap_your_card_on_the_netpos_lite_device"
             app:layout_constraintBottom_toTopOf="@id/contactless_anim"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed" />

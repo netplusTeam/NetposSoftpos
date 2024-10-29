@@ -1,9 +1,8 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.content.Intent
-import android.nfc.NfcManager
+import android.nfc.NfcAdapter
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.BuildConfig
@@ -38,7 +36,7 @@ import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.woleapp.netpos.contactless.util.checkNfcStatus
 
 @AndroidEntryPoint
 class LoginFragment : BaseFragment() {
@@ -57,6 +55,7 @@ class LoginFragment : BaseFragment() {
     private lateinit var partnerID: String
     private lateinit var savedAcctNumber: String
     private lateinit var dialog: AlertDialog
+    private var  nfcAdapter: NfcAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,6 +67,9 @@ class LoginFragment : BaseFragment() {
             executePendingBindings()
             viewmodel = viewModel
         }
+
+        nfcAdapter = checkNfcStatus()
+
         resetPasswordBinding = DialogPasswordResetBinding.inflate(inflater, null, false)
             .apply {
                 lifecycleOwner = viewLifecycleOwner
@@ -170,12 +172,9 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun testNfcSupport() {
-        val nfcManager: NfcManager =
-            requireActivity().getSystemService(AppCompatActivity.NFC_SERVICE) as NfcManager
-        val nfcAdapter = nfcManager.defaultAdapter
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
-            if (nfcAdapter.isEnabled) {
+            if (nfcAdapter!!.isEnabled) {
                 Toast.makeText(requireContext(), "NFC enabled", Toast.LENGTH_SHORT).show()
                 android.app.AlertDialog.Builder(requireContext())
                     .setTitle("NFC Message")
@@ -198,7 +197,7 @@ class LoginFragment : BaseFragment() {
         } else {
             android.app.AlertDialog.Builder(requireContext())
                 .setTitle("NFC Message")
-                .setMessage("Device does not have NFC support")
+                .setMessage(getString(R.string.device_doesnt_have_nfc))
                 .setPositiveButton("Close") { dialog, _ ->
                     dialog.dismiss()
                     // finish()

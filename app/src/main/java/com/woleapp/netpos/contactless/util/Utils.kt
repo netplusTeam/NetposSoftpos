@@ -2,12 +2,15 @@ package com.woleapp.netpos.contactless.util
 
 import android.content.IntentFilter
 import android.nfc.NfcAdapter
+import android.nfc.NfcManager
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.nfc.tech.MifareClassic
 import android.nfc.tech.MifareUltralight
 import android.nfc.tech.NfcA
+import android.text.TextUtils
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import timber.log.Timber
 import java.text.SimpleDateFormat
@@ -153,4 +156,27 @@ fun validatePasswordMismatch(password: String, confirmPassword: String): Boolean
 
 fun Fragment.showToast(message: String) {
     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+}
+
+fun Fragment.checkNfcStatus(): NfcAdapter? {
+    val nfcManager: NfcManager =
+        requireActivity().getSystemService(AppCompatActivity.NFC_SERVICE) as NfcManager
+    return nfcManager.defaultAdapter
+}
+fun getBluetoothKeyIndex(): Int {
+    val s = ""
+    if (TextUtils.isEmpty(s)) {
+        return 0
+    }
+    var i = 0
+    try {
+        i = s.toInt()
+        if (i > 9 || i < 0) {
+            i = 0
+        }
+    } catch (e: java.lang.Exception) {
+        i = 0
+        return i
+    }
+    return i
 }

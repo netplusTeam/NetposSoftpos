@@ -11,12 +11,11 @@ buildscript {
         mavenLocal()
         google()
         mavenCentral()
-        jcenter()
         gradlePluginPortal()
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:8.0.2'
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.20'
         classpath 'gradle.plugin.com.github.sgtsilvio.gradle:android-retrofix:0.3.6'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -29,20 +28,7 @@ buildscript {
 }
 
 allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-        jcenter()
-        maven { url 'https://jitpack.io' }
-//        maven {
-//            url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
-//        }
 
-        flatDir {
-            dirs 'libs'
-        }
-    }
 
 }
 
