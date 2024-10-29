@@ -15,6 +15,11 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def propertiesFile = rootProject.file("local.properties")
+def properties = new Properties()
+properties.load(propertiesFile.newDataInputStream())
+
+
 android {
     signingConfigs {
         netpos_signing_config {
@@ -57,6 +62,7 @@ android {
             }
             resValue "string", "app_name", "NetPOS Debug"
             applicationIdSuffix ".debug"
+            buildConfigField "String", "CR100_BDK_VALUE", "\"${properties['CR100_BDK_VALUE']}\""
         }
         release {
             signingConfig signingConfigs.netpos_signing_config
@@ -66,6 +72,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "CR100_BDK_VALUE", "\"${properties['CR100_BDK_VALUE']}\""
         }
         nibssserverdebug {
             initWith debug
@@ -188,6 +195,12 @@ android {
             path file('src/main/jni/Android.mk')
         }
     }
+
+    configurations {
+        configureEach {
+            exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        }
+    }
 }
 
 dependencies {
@@ -303,7 +316,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
 
     //pdf viewer
-    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+    implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.1'
 
     //workmanager
     def work_version = "2.7.0-alpha05"
@@ -331,7 +344,10 @@ dependencies {
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation "androidx.startup:startup-runtime:1.1.1"
     implementation 'com.neovisionaries:nv-i18n:1.29'
-    implementation 'org.jetbrains:annotations:23.0.0'
+
+    //DSPREAD CR100
+    implementation 'com.dspread.library:dspread_pos_sdk:5.2.2'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"

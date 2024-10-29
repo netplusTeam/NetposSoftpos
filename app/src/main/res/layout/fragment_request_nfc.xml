@@ -16,7 +16,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager2"
@@ -26,7 +26,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- TabLayout for the dots/indicators -->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
                 android:layout_width="wrap_content"
@@ -116,11 +115,14 @@
                 android:id="@+id/request_btn"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/dimen_56dp"
-                android:text="Request nfc device"
                 android:layout_marginTop="@dimen/margin_20"
+                android:text="Request nfc device"
+                android:layout_marginBottom="@dimen/dimen_60dp"
                 app:layout_constraintEnd_toEndOf="@+id/account_number_layout"
                 app:layout_constraintStart_toStartOf="@+id/account_number_layout"
-                app:layout_constraintTop_toBottomOf="@+id/account_number_layout" />
+                app:layout_constraintTop_toBottomOf="@+id/account_number_layout"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
