@@ -44,6 +44,7 @@ data class User(
     @SerializedName("phoneNumber")
     var business_phone_number: String? = null,
     var nfc_interest: String? = null,
+    var accountNumber: String? = null,
     var mid: String? = null,
     var partnerId: String? = null,
     var netplusPayMid: String? = null,

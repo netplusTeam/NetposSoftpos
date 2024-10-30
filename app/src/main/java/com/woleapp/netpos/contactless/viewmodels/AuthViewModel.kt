@@ -147,6 +147,13 @@ class AuthViewModel
                                     null
                                 }
 
+                            this.accountNumber =
+                                if (userTokenDecoded.claims.containsKey("accountNumber")) {
+                                    userTokenDecoded.getClaim("accountNumber").asString()
+                                } else {
+                                    null
+                                }
+
                             this.netplusPayMid =
                                 if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
                                     userTokenDecoded.getClaim("netplusPayMid").asString()

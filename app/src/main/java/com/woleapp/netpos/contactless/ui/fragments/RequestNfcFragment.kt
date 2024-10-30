@@ -11,12 +11,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ImageRequestNFCAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRequestNfcBinding
-import com.woleapp.netpos.contactless.model.MerchantDetail
 import com.woleapp.netpos.contactless.model.RequestNfcRequest
 import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.util.*
@@ -28,7 +28,6 @@ import com.woleapp.netpos.contactless.viewmodels.NotificationViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.android.synthetic.main.fragment_request_nfc.*
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -36,6 +35,7 @@ import javax.inject.Named
 class RequestNfcFragment : Fragment() {
     private lateinit var binding: FragmentRequestNfcBinding
     private lateinit var viewPager: ViewPager2
+    private lateinit var tabLayout: TabLayout
     private lateinit var images: List<Int>
     private lateinit var adapter: ImageRequestNFCAdapter
     private val handler = Handler(Looper.getMainLooper())
@@ -71,6 +71,7 @@ class RequestNfcFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewPager = binding.viewPager2
+        tabLayout = binding.tabLayout
 
         // Add images from your drawable folder
         images =
@@ -94,16 +95,8 @@ class RequestNfcFragment : Fragment() {
                 ),
                 User::class.java,
             )
-        val accountNumber =
-            Singletons.gson.fromJson(
-                Prefs.getString(
-                    PREF_ACCOUNT_NUMBER,
-                    "",
-                ),
-                MerchantDetail::class.java,
-            )
         binding.customername.setText(user.business_name)
-        binding.accountNumber.setText(accountNumber.acctNumber)
+        binding.accountNumber.setText(user.accountNumber)
 
         binding.requestBtn.setOnClickListener {
             requestDevice()
