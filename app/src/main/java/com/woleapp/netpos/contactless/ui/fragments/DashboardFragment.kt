@@ -4,10 +4,12 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.InputFilter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,15 +17,27 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
+import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
+import com.woleapp.netpos.contactless.cr100.MyQposClass
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
+import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
+import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
@@ -31,16 +45,12 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
-import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -66,6 +76,18 @@ class DashboardFragment : BaseFragment() {
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
     private lateinit var loader: android.app.AlertDialog
+
+    private lateinit var cardCvv: String
+    private lateinit var user: User
+
+    private lateinit var listener: MyQposClass
+    private var nfcAdapter: NfcAdapter? = null
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var lvIndicatorBTPOS: RecyclerView? = null
+    private var blueToothAddress = ""
+    private var blueTitle: String? = null
+    private var startTime = 0L
+    private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -180,7 +202,13 @@ class DashboardFragment : BaseFragment() {
             }
         }
         binding.process.setOnClickListener {
-            viewModel.validateField()
+            if (nfcAdapter != null) {
+                viewModel.validateFieldForNFC()
+            } else {
+                if (viewModel.validateFieldForBluetooth()) {
+                    initIntent()
+                }
+            }
         }
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
@@ -215,6 +243,7 @@ class DashboardFragment : BaseFragment() {
                         .addToBackStack(null)
                         .commit()
                 }
+
                 else -> {
                     sendPayload()
                 }
@@ -244,6 +273,9 @@ class DashboardFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setServices()
         vend()
+        lvIndicatorBTPOS = view.findViewById(R.id.lv_indicator_BTPOS)
+        bluetoothAdapter = BluetoothAdapter(requireActivity(), null)
+
         observer = { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
@@ -462,4 +494,137 @@ class DashboardFragment : BaseFragment() {
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .show()
     }
+
+    private fun openCr100(mode: QPOSService.CommunicationMode) {
+        listener = MyQposClass(bluetoothAdapter, requireActivity())
+        cr100Pos = QPOSService.getInstance(mode)
+
+        if (cr100Pos == null) {
+            showToast("Unknown communication mode")
+            return
+        }
+
+        cr100Pos!!.setConext(requireActivity())
+        val handler = Looper.myLooper()?.let { Handler(it) }
+        cr100Pos!!.initListener(handler, listener)
+
+        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+
+
+        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+            if (cardInfo.isValid()) {
+                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+                listener.resetCardInfoFlow()
+            }
+        }
+    }
+
+    private fun deviceType(type: Int) {
+        if (BluetoothDialog.manualExitDialog != null) {
+            BluetoothDialog.manualExitDialog.dismiss()
+        }
+
+        requireActivity().showBluetoothDialog(bluetoothAdapter)
+        if (type == BLUETOOTH) {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+            }
+            posType = POS_TYPE.BLUETOOTH
+            cr100Pos?.scanQPos2Mode(requireActivity(), 10)
+        } else {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH_BLE)
+            }
+            posType = POS_TYPE.BLUETOOTH_BLE
+            cr100Pos?.startScanQposBLE(10)
+        }
+        refreshAdapter()
+        bluetoothAdapter.notifyDataSetChanged()
+    }
+
+    private fun initIntent() {
+        scanBlue()
+        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+
+        if (cr100Pos!!.bluetoothState) {
+            BluetoothDialog.manualExitDialog(requireActivity(),
+                "Do you want to continue with the previous connection?",
+                object : BluetoothDialog.OnMyClickListener {
+                    override fun onCancel() {
+                        cr100Pos?.disconnectBT()
+                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                        deviceType(BLUETOOTH)
+                        refreshAdapter()
+                        bluetoothAdapter.notifyDataSetChanged()
+                        BluetoothDialog.manualExitDialog.dismiss()
+                    }
+
+                    override fun onConfirm() {
+                        if (BluetoothToolsBean.getBlueToothName() != null) {
+                            showToast(BluetoothToolsBean.getBlueToothName())
+                        }
+
+                        val keyIndex: Int = getBluetoothKeyIndex()
+                        cr100Pos?.doTrade(keyIndex, 60)
+                        BluetoothDialog.manualExitDialog.dismiss()
+                    }
+                })
+        } else {
+            lvIndicatorBTPOS?.adapter = bluetoothAdapter
+            deviceType(BLUETOOTH)
+            refreshAdapter()
+            bluetoothAdapter.notifyDataSetChanged()
+
+        }
+    }
+
+
+    private fun scanBlue() {
+        lvIndicatorBTPOS?.layoutManager = LinearLayoutManager(
+            requireActivity(), LinearLayoutManager.VERTICAL, false
+        )
+
+        bluetoothAdapter.setOnBluetoothItemClickListener { position, itemData ->
+            onBTPosSelected(itemData)
+            BluetoothDialog.loading(requireActivity(), getString(R.string.str_connecting))
+            BluetoothToolsBean.setConectedState("CONNECTED")
+        }
+    }
+
+    private fun onBTPosSelected(itemData: Map<String?, *>) {
+        cr100Pos?.stopScanQPos2Mode()
+        startTime = System.currentTimeMillis()
+        blueToothAddress = itemData["ADDRESS"]!! as String
+        blueTitle = itemData["TITLE"] as String?
+        blueTitle =
+            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+                ?.get(0)
+        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
+        blueTitle?.let { listener.setBlueTitle(it) }
+    }
+
+
+    private fun refreshAdapter() {
+        bluetoothAdapter.clearData()
+        val data = java.util.ArrayList<Map<String, *>>()
+        bluetoothAdapter.setListData(data)
+    }
+
+    private fun BtCardInfo.isValid(): Boolean {
+        return realPan.isNotEmpty() &&
+                track2.isNotEmpty() &&
+                decryptedIcc.isNotEmpty() &&
+                cardType != null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (cr100Pos != null) {
+            listener.cleanup()
+            cr100Pos!!.cancelTrade()
+            cr100Pos!!.disconnectBT()
+        }
+    }
+
+
 }

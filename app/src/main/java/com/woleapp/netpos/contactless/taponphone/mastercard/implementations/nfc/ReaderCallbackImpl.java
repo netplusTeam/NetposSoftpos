@@ -7,20 +7,24 @@ import android.nfc.tech.IsoDep;
 import com.woleapp.netpos.contactless.taponphone.verve.VerveNFCListenerImpl;
 
 
-class ReaderCallbackImpl implements NfcAdapter.ReaderCallback {
+public class ReaderCallbackImpl implements NfcAdapter.ReaderCallback {
 
-    private TagEventListener mTagEventListener;
-    private VerveNFCListenerImpl mNfcListenerImpl;
+    private final TagEventListener mTagEventListener;
+    private VerveNFCListenerImpl mNfcVerveListenerImpl;
 
-    ReaderCallbackImpl(final TagEventListener tagEventListener, VerveNFCListenerImpl nfcListenerImpl) {
+    ReaderCallbackImpl(final TagEventListener tagEventListener) {
         this.mTagEventListener = tagEventListener;
-        this.mNfcListenerImpl = nfcListenerImpl;
+    }
+
+    public ReaderCallbackImpl(final TagEventListener tagEventListener, VerveNFCListenerImpl nfcListenerImpl) {
+        this.mTagEventListener = tagEventListener;
+        this.mNfcVerveListenerImpl = nfcListenerImpl;
     }
 
     @Override
     public void onTagDiscovered(final Tag tag) {
         mTagEventListener.setIsoDep(IsoDep.get(tag));
-        mNfcListenerImpl.onNfcTagDiscovered(tag);
+//        mNfcVerveListenerImpl.onNfcTagDiscovered(tag);
     }
 
 }

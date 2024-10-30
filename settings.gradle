@@ -1,4 +1,21 @@
 //include ':netpossdk'
 rootProject.name='NetPOS for Droid'
 include ':app', ':epmslib-release'
-include ':tianyu_aar'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+        jcenter()
+        maven {
+            url 'https://gitlab.com/api/v4/projects/4128550/packages/maven'
+        }
+
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}

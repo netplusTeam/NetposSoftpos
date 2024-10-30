@@ -6,11 +6,14 @@ import android.util.Log
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.alcineo.softpos.payment.model.CardStatus
 import com.alcineo.utils.common.StringUtils
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.io.IOException
 
 class VerveNFCListenerImpl : NFCListener {
     private var lastTagRead: IsoDep? = null
+
     override fun activateNFC() {}
+
     override fun deactivateNFC() {
         lastTagRead?.let {
             try {
@@ -19,6 +22,7 @@ class VerveNFCListenerImpl : NFCListener {
                 Log.e(TAG, "deactivateNFC: ", e)
             }
         }
+        lastTagRead = null
     }
 
     override fun getCardStatus(): CardStatus {
@@ -47,15 +51,31 @@ class VerveNFCListenerImpl : NFCListener {
     }
 
     override fun onNfcTagDiscovered(tag: Tag) {
-        Log.d("nb: ", " $tag")
+        Log.d(TAG, "onNfcTagDiscovered: $tag")
+        lastTagRead?.let {
+            try {
+                it.close()
+            } catch (e: IOException) {
+                Log.e(TAG, "onNfcTagDiscovered - closing previous tag: ", e)
+                FirebaseCrashlytics.getInstance().setCustomKey("onNfcTagDiscovered - closing previous tag:", e.message ?: "Unknown error")
+            }
+        }
+
         lastTagRead = IsoDep.get(tag)
         lastTagRead?.let {
             try {
                 it.connect()
+                it.timeout = 3000
             } catch (e: IOException) {
-                Log.e(TAG, "onNfcTagRead: ", e)
+                FirebaseCrashlytics.getInstance().setCustomKey("onNfcTagDiscovered - closing previous tag:", e.message ?: "Unknown error")
+                try {
+                    it.close()
+                } catch (closeException: IOException) {
+                    Log.e(TAG, "Error closing IsoDep: ", closeException)
+                    FirebaseCrashlytics.getInstance().setCustomKey("Error closing IsoDep:", e.message ?: "Unknown error")
+                }
+                lastTagRead = null
             }
-            it.timeout = 3000
         }
     }
 

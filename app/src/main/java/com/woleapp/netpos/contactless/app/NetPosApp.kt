@@ -3,6 +3,7 @@ package com.woleapp.netpos.contactless.app
 import android.app.Activity
 import android.app.Application
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
@@ -28,6 +29,9 @@ class NetPosApp : Application() {
 
     companion object {
         lateinit var INSTANCE: NetPosApp
+
+        @JvmStatic
+        var cr100Pos: QPOSService? = null
 
         fun assignInstance(instance: NetPosApp) {
             INSTANCE = instance

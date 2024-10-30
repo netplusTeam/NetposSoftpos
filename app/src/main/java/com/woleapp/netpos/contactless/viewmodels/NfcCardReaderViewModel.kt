@@ -1,7 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.os.Build
-import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -10,8 +9,6 @@ import androidx.lifecycle.ViewModel
 import com.alcineo.softpos.payment.model.transaction.TransactionEndStatus
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.TransactionResponse
-import com.dsofttech.dprefs.utils.DPrefs.putDouble
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.gson.Gson
 import com.mastercard.terminalsdk.listeners.PaymentDataProvider
@@ -21,6 +18,8 @@ import com.visa.app.ttpkernel.ContactlessKernel
 import com.visa.app.ttpkernel.TtpOutcome
 import com.visa.vac.tc.emvconverter.Utils
 import com.woleapp.netpos.contactless.app.NetPosApp
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
 import com.woleapp.netpos.contactless.taponphone.NfcDataWrapper
 import com.woleapp.netpos.contactless.taponphone.mastercard.listener.TransactionListener
@@ -134,16 +133,16 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
         when (nfcPaymentType) {
             NfcPaymentType.VISA -> {
-                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VISA)))
                 _startVerveTransaction.postValue(Event(false))
+                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VISA)))
             }
             NfcPaymentType.MASTERCARD -> {
                 doMasterCardTransaction()
                 _startVerveTransaction.postValue(Event(false))
             }
             NfcPaymentType.VERVE -> {
-                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VERVE)))
                 _startVerveTransaction.postValue(Event(true))
+                _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(true, NfcPaymentType.VERVE)))
             }
         }
     }
@@ -152,31 +151,73 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
-        var iccData = ""
+        val iccData: String
 
         //destructure transactionResult to interact with its tlv items children and filter out tags and values
         if (transactionEndStatus == TransactionEndStatus.APPROVED || transactionEndStatus == TransactionEndStatus.DECLINED) {
-            val requiredTagsSet = REQUIRED_TAGS.toSet()
-            //removing this tags as NIBBS rejects icc if they are there
             val unwantedTagsSet = setOf("57", "5A", "5F24", "5F20")
+            val requiredTagsSet = REQUIRED_TAGS.toSet()
+
+            // Define required order dynamically by removing unwanted tags from requiredTagsSet
+            val requiredOrder = requiredTagsSet.filterNot { it in unwantedTagsSet }
+
             val tagValueMap =
                 transactionResult.transactionOutcomeTlvItems.orEmpty().flatMap { tlvItem ->
-                    val tag = tlvItem.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
-
-                    // Update iccData only if the tag is in the required set and not in the unwanted set
-                    if (tag in requiredTagsSet && tag !in unwantedTagsSet) {
-                        iccData =
-                            tlvItem.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
-                                .uppercase(Locale.ENGLISH)
-                    }
-                    sequenceOf(tlvItem) + (tlvItem.children.orEmpty().asSequence())
+                    Log.d("ICC2", "$tlvItem")
+                    sequenceOf(tlvItem) + tlvItem.children.orEmpty().asSequence()
                 }.associate {
                     val tag = it.tag.toString().removePrefix("TlvTag(").removeSuffix(")")
-                    val value =
-                        it.value.joinToString(separator = "") { byte -> "%02x".format(byte) }
-                            .uppercase(Locale.ENGLISH)
-                    tag to value
-                }.filterKeys { it in requiredTagsSet }.toMutableMap()
+                    val tagValue = when (tag) {
+                        // Special case for tag 9F10: Always set length to 20 byte
+                        "9F10" -> "20" + it.value.joinToString(separator = "") { byte ->
+                            "%02x".format(byte)
+                        }.uppercase(Locale.ENGLISH)
+                        // Special case for tag 57(track2): Return value without adding length
+                        "57" -> it.value.joinToString(separator = "") { byte ->
+                            "%02x".format(byte)
+                        }.uppercase(Locale.ENGLISH)
+                        // For other tags, conditionally add 0 before length if it's a single digit
+                        else -> {
+                            val lengthValue = if (it.length.value < 10) {
+                                "0${it.length.value}"
+                            } else {
+                                it.length.value.toString()
+                            }
+                            lengthValue + it.value.joinToString(separator = "") { byte ->
+                                "%02x".format(byte)
+                            }.uppercase(Locale.ENGLISH)
+                        }
+                    }
+                    Log.d("ICC", "TAG: $tag, VALUE: $tagValue, length: ${it.length.value}")
+                    tag to tagValue
+                }.filterKeys { it in requiredTagsSet }
+                    .filterKeys { it != "8E" } // Remove tag 8E because there's no value returned from the dto
+                    .toMutableMap()
+
+            // Replace or add specific tags with given values
+            val replacementTags = mapOf(
+                "9C" to "0100",
+                "9F09" to "020002",
+                "9F03" to "06000000000000",
+                "9F1E" to "083132333435363738",
+                "9F27" to "0180"
+            )
+
+            // Add or replace tags in the tagValueMap
+            replacementTags.forEach { (tag, value) ->
+                tagValueMap[tag] = value
+            }
+
+            // Iterate over the requiredOrder to concatenate in the correct order for icc
+            val orderedIccData = StringBuilder()
+            requiredOrder.forEach { tag ->
+                tagValueMap[tag]?.let { value ->
+                    orderedIccData.append(tag).append(value)
+                }
+            }
+
+            // Assign the orderedIccData to iccData
+            iccData = orderedIccData.toString()
 
             val track2 = tagValueMap["57"]
             val pan = track2?.split("D")?.firstOrNull()
@@ -218,15 +259,13 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         val contactlessConfiguration = ContactlessConfiguration.getInstance()
 
         contactlessConfiguration.terminalData["9F02"] = amountInBytes.bytes
-
         contactlessConfiguration.terminalData["9F03"] = cashBackAmountInBytes.bytes
 
         // Select PPSE
         var selectedAid: ByteArray? = null
-        val ppseManager =
-            PPSEManager()
+        val ppseManager = PPSEManager()
         try {
-            // Set suppported AID
+            // Set supported AID
             ppseManager.setSupportedApps(supportedAids)
 
             // Perform Select PPSE
@@ -237,131 +276,153 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             FirebaseCrashlytics.getInstance().log(e.message.toString())
             FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
         }
+
         var outcome: TtpOutcome = TtpOutcome.ABORTED
         var outComeResponse = ""
+
         while (selectedAid != null) {
-            // Get the ContactlessConfiguration instance
-            // Specify the terminal settings for this transaction
-            val myData = contactlessConfiguration.terminalData
-            myData["4F"] = selectedAid // set the selected aid
-            myData["9F4E"] = byteArrayOf(
-                0x00.toByte(),
-                0x11.toByte(),
-                0x22.toByte(),
-                0x33.toByte(),
-                0x44.toByte(),
-                0x55.toByte(),
-                0x66.toByte(),
-                0x77.toByte(),
-                0x88.toByte(),
-                0x99.toByte(),
-                0xAA.toByte(),
-                0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte(),
-            )
+            try {
+                // Get the ContactlessConfiguration instance
+                // Specify the terminal settings for this transaction
+                val myData = contactlessConfiguration.terminalData
+                myData["4F"] = selectedAid // set the selected aid
+                myData["9F4E"] = byteArrayOf(
+                    0x00.toByte(),
+                    0x11.toByte(),
+                    0x22.toByte(),
+                    0x33.toByte(),
+                    0x44.toByte(),
+                    0x55.toByte(),
+                    0x66.toByte(),
+                    0x77.toByte(),
+                    0x88.toByte(),
+                    0x99.toByte(),
+                    0xAA.toByte(),
+                    0xBB.toByte(), 0xCC.toByte(), 0xDD.toByte(), 0xEE.toByte(), 0xFF.toByte(),
+                )
 
-            Timber.e("available keys")
-            myData.forEach {
-                Timber.e(it.key)
-            }
-            // Call TTP Kernel performTransaction
-            val contactlessResult =
-                contactlessKernel.performTransaction(nfcTransceiver, contactlessConfiguration)
+                Timber.e("available keys")
+                myData.forEach {
+                    Timber.e(it.key)
+                }
+                // Call TTP Kernel performTransaction
+                val contactlessResult =
+                    contactlessKernel.performTransaction(nfcTransceiver, contactlessConfiguration)
 
-            // Check the transaction outcome
-            outcome = contactlessResult.finalOutcome
-            outComeResponse = when (outcome) {
-                TtpOutcome.COMPLETED -> {
-                    "Online Approval Requested"
+                // Check the transaction outcome
+                outcome = contactlessResult.finalOutcome
+                outComeResponse = when (outcome) {
+                    TtpOutcome.COMPLETED -> {
+                        "Online Approval Requested"
+                    }
+                    TtpOutcome.DECLINED -> {
+                        "Transaction Declined"
+                    }
+                    TtpOutcome.ABORTED -> {
+                        "Transaction Terminated"
+                    }
+                    TtpOutcome.TRYNEXT -> {
+                        "PPSE:Try Next Application"
+                    }
+                    TtpOutcome.SELECTAGAIN -> {
+                        "GPO Returned 6986. Application Try Again."
+                    }
+                    else -> {
+                        ""
+                    }
                 }
-                TtpOutcome.DECLINED -> {
-                    "Transaction Declined"
-                }
-                TtpOutcome.ABORTED -> {
-                    FirebaseCrashlytics.getInstance().recordException(Throwable("Transaction Terminated"))
-                    "Transaction Terminated"
-                }
-                TtpOutcome.TRYNEXT -> {
-                    FirebaseCrashlytics.getInstance().recordException(Throwable("PPSE:Try Next Application"))
-                    FirebaseCrashlytics.getInstance().log("PPSE:Try Next Application")
-                    FirebaseCrashlytics.getInstance().setCustomKey("error_message", "PPSE:Try Next Application" ?: "Unknown error")
-                    "PPSE:Try Next Application"
-                }
-                TtpOutcome.SELECTAGAIN -> {
-                    "GPO Returned 6986. Application Try Again."
-                }
-                else -> {
-                    ""
-                }
-            }
 
-            // Display the TTP Kernel version
-            contactlessKernel.kernelData
+                // Display the TTP Kernel version
+                contactlessKernel.kernelData
 
-            // Display the TTP Kernel data
-            val version = contactlessKernel.kernelData
-            var key: String
-            var value: String
-            for ((key1, value1) in version) {
-                if (value1 != null) {
-                    key = key1 as String
-                    value = Utils.getHexString(value1) as String
+                // Display the TTP Kernel data
+                val version = contactlessKernel.kernelData
+                for ((key, value1) in version) {
+                    if (value1 != null) {
+                        val value = Utils.getHexString(value1) as String
+                        Timber.e("key is $key")
+                        if (key in REQUIRED_TAGS) {
+                            icc.append(value)
+                        }
+                    }
+                }
+
+                // Display the transaction results
+                val cardData = contactlessResult.data
+                for ((key, value1) in cardData) {
                     Timber.e("key is $key")
-                    if (key in REQUIRED_TAGS) {
-                        icc.append(value)
+                    if (value1 != null) {
+                        val value = Utils.getHexString(value1) as String
+                        if (key in REQUIRED_TAGS) {
+                            icc.append(value)
+                        }
                     }
-                    // mainLog.text = mainLog.text.toString() + "\n" + key + ":" + value
                 }
-            }
+                val internalData = contactlessResult.internalData
+                for ((key, value1) in internalData) {
+                    if (value1 != null) {
+                        val value = Utils.getHexString(value1) as String
+                        Timber.e("key is $key")
+                        if (key in REQUIRED_TAGS) {
+                            icc.append(value)
+                        }
+                    }
+                }
 
-            // Display the transaction results
-            val cardData = contactlessResult.data
-            for ((key1, value1) in cardData) {
-                key = key1 as String
-                Timber.e("key is $key")
-                if (value1 != null) {
-                    value = Utils.getHexString(value1) as String
-                    if (key in REQUIRED_TAGS) {
-                        icc.append(value)
-                    }
+                selectedAid = if (outcome == TtpOutcome.TRYNEXT) {
+                    ppseManager.nextCandidate()
+                } else {
+                    null
                 }
-            }
-            val internalData = contactlessResult.internalData
-            for ((key1, value1) in internalData) {
-                if (value1 != null) {
-                    key = key1 as String
-                    Timber.e("key is $key")
-                    value = Utils.getHexString(value1) as String
-                    if (key in REQUIRED_TAGS) {
-                        icc.append(value)
-                    }
-                }
-            }
-            selectedAid = if (outcome == TtpOutcome.TRYNEXT) {
-                FirebaseCrashlytics.getInstance().recordException(Throwable("Try Next Application"))
-                FirebaseCrashlytics.getInstance().log("Try Next Application")
-                FirebaseCrashlytics.getInstance().setCustomKey("error_message", "Try Next Application" ?: "Unknown error")
-                ppseManager.nextCandidate()
-            } else {
-                null
+            } catch (e: Exception) {
+                e.printStackTrace()
+                FirebaseCrashlytics.getInstance().recordException(Throwable(e))
+                FirebaseCrashlytics.getInstance().log(e.message.toString())
+                FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
+                break
             }
         }
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
-        // This is where the error is coming from
-        if (outcome == TtpOutcome.COMPLETED) {
-            iccCardHelper.apply {
-                cardScheme = NfcPaymentType.VISA.name
-                customerName = "CUSTOMER"
+
+        try {
+            if (outcome == TtpOutcome.COMPLETED) {
+                iccCardHelper.apply {
+                    cardScheme = NfcPaymentType.VISA.name
+                    customerName = "CUSTOMER"
+                }
+                createVisaCardData(icc)
+            } else {
+                Timber.e("failed.......")
+                _showWaitingDialog.postValue(Event(null))
+                _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card: $outComeResponse"))))
             }
-            createVisaCardData(icc)
-        } else {
-            Timber.e("failed.......")
-            _showWaitingDialog.postValue(Event(null))
-            _iccCardHelperLiveData.postValue(Event(ICCCardHelper(error = Throwable("Error occurred while reading card: $outComeResponse"))))
-            FirebaseCrashlytics.getInstance().recordException(Throwable("Error occurred while reading card: $outComeResponse"))
-            FirebaseCrashlytics.getInstance().log(outComeResponse)
-            FirebaseCrashlytics.getInstance().setCustomKey("error_message", outComeResponse ?: "Unknown error")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            FirebaseCrashlytics.getInstance().recordException(Throwable(e))
+            FirebaseCrashlytics.getInstance().log(e.message.toString())
+            FirebaseCrashlytics.getInstance().setCustomKey("error_message", e.message ?: "Unknown error")
         }
     }
+
+    fun doCr100Transaction(data: BtCardInfo) {
+        val (pan, track2, icc, cardType) = data
+        iccCardHelper = ICCCardHelper()
+        iccCardHelper.apply {
+            cardScheme = cardType!!.cardScheme
+            customerName = "CUSTOMER"
+        }
+        val cardData = CardData(
+            track2,
+            "",
+            pan,
+            "051"
+        )
+        iccCardHelper.cardData = cardData
+        _showPinPadDialog.postValue(Event(pan))
+        hideBluetoothDialog()
+    }
+
+
 
     private fun createVisaCardData(icc: StringBuilder) {
         Timber.e("create visa card")

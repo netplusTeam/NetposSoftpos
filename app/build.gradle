@@ -17,7 +17,12 @@ def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
+def propertiesFile = rootProject.file("local.properties")
+def properties = new Properties()
+properties.load(propertiesFile.newDataInputStream())
+
 android {
+    namespace "com.woleapp.netpos.contactless"
     signingConfigs {
         netpos_signing_config {
             keyAlias keystoreProperties['keyAlias']
@@ -29,7 +34,10 @@ android {
     }
 //    compileSdkVersion 33
   //  buildToolsVersion "29.0.3"
-    buildFeatures.dataBinding = true
+    buildFeatures {
+        dataBinding = true
+        buildConfig = true
+    }
     ndkVersion "21.3.6528147"
     defaultConfig {
         configurations.all {
@@ -64,6 +72,7 @@ android {
             }
             resValue "string", "app_name", "NetPOS Debug"
             applicationIdSuffix ".debug"
+            buildConfigField "String", "CR100_BDK_VALUE", "\"${properties['CR100_BDK_VALUE']}\""
         }
         release {
             signingConfig signingConfigs.netpos_signing_config
@@ -71,9 +80,10 @@ android {
             resValue "string", "app_name", "NetPOS Contactless"
             buildConfigField "boolean", "DEBUG", "false"
             debuggable false
-            minifyEnabled false
-            shrinkResources false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "CR100_BDK_VALUE", "\"${properties['CR100_BDK_VALUE']}\""
         }
     }
 
@@ -177,6 +187,12 @@ android {
             path file('src/main/jni/Android.mk')
         }
     }
+
+    configurations {
+        configureEach {
+            exclude group: 'org.bouncycastle', module: 'bcprov-jdk15on'
+        }
+    }
 }
 
 dependencies {
@@ -214,7 +230,7 @@ dependencies {
 
     //android lifecycle components
 //    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-//    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 //    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
 //    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 //    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
@@ -290,7 +306,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
+    implementation 'com.github.amitshekhariitbhu.Android-Debug-Database:debug-db:v1.0.6'
 
     // Lootie
     implementation "com.airbnb.android:lottie:$lottieVersion"
@@ -298,7 +314,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
 
     //pdf viewer
-    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
+    implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.1'
 
     //workmanager
     def work_version = "2.7.0-alpha05"
@@ -312,14 +328,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx' // Check for latest version
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"
 
-    //tiayu lib
-    api project(':tianyu_aar')
     //Bouncy Castle cryptography
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     //JPOS
@@ -329,5 +343,8 @@ dependencies {
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation "androidx.startup:startup-runtime:1.1.1"
     implementation 'com.neovisionaries:nv-i18n:1.29'
-    implementation 'org.jetbrains:annotations:23.0.0'
+
+    //DSPREAD CR100
+    implementation 'com.dspread.library:dspread_pos_sdk:5.2.2'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 }

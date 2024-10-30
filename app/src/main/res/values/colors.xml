@@ -17,4 +17,5 @@
     <color name="white">#FFFFFF</color>
     <color name="color_light_sky_blue">#034971</color>
     <color name="color_sky_blue">#076296</color>
+    <color name="gainsboro">#dcdcdc</color>
 </resources>

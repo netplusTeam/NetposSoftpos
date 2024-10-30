@@ -20,9 +20,11 @@ import androidx.constraintlayout.widget.Group;
 import com.danbamitale.epmslib.entities.KeyHolder;
 import com.danbamitale.epmslib.entities.KeyHolderKt;
 import com.danbamitale.epmslib.utils.TripleDES;
+import com.dsofttech.dprefs.utils.DPrefs;
 import com.woleapp.netpos.contactless.R;
 import com.woleapp.netpos.contactless.util.ExtensionFunctionsKt;
 import com.woleapp.netpos.contactless.util.Singletons;
+import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,7 +142,13 @@ public class PasswordDialog {
                 Toast.makeText(context, context.getString(R.string.pin_too_short), Toast.LENGTH_SHORT).show();
                 return;
             }
-            pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+
+            if(Singletons.INSTANCE.getKeyHolder() != null) {
+                pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+            } else {
+                Toast.makeText(context, "Terminal not configured", Toast.LENGTH_SHORT).show();
+            }
+
             dialog.cancel();
         });
 
