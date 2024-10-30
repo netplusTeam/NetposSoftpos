@@ -43,6 +43,7 @@ data class User(
     var business_state: String? = null,
     @SerializedName("phoneNumber")
     var business_phone_number: String? = null,
+    var nfc_interest: String? = null,
     var mid: String? = null,
     var partnerId: String? = null,
     var netplusPayMid: String? = null,
