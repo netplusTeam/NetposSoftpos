@@ -11,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
@@ -42,6 +43,7 @@ class RequestNfcFragment : Fragment() {
     private val viewModel by activityViewModels<NotificationViewModel>()
     private lateinit var deviceId: String
     private lateinit var loader: AlertDialog
+    private lateinit var tabLayout: TabLayout
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -76,8 +78,6 @@ class RequestNfcFragment : Fragment() {
         images =
             arrayListOf(
                 R.drawable.nfc_img_1,
-                R.drawable.nfc_img_2,
-                R.drawable.nfc_img_3,
             )
 
         adapter = ImageRequestNFCAdapter(requireContext(), images)
