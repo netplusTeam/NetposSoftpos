@@ -4,11 +4,13 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
@@ -30,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
@@ -634,7 +637,7 @@ class DashboardFragment : BaseFragment() {
             cardType != null
     }
 
-    private fun checkForNFC()  {
+    private fun checkForNFC() {
         val showNfcRequest =
             Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).nfc_interest
         nfcAdapter =

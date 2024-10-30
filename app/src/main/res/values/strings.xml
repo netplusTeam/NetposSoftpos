@@ -272,6 +272,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="device_doesnt_have_nfc">Device does not have NFC support. Please connect to the NetPOS Lite bluetooth device to continue</string>
     <string name="str_connecting">connecting to </string>
     <string name="prompt_message">message prompt:</string>
+    <string name="request_nfc">Near Field Communication (NFC) is a short-range wireless technology that enables devices to communicate with each other when they are within close proximity, typically less than 4 cm apart. NFC devices can be used for various applications, such as contactless payments, data transfer, and smart device interactions.</string>
     <string name="please_tap_your_card_on_the_netpos_lite_device">Please tap your card on the NetPOS Lite device</string>
     <string name="no_bluetooth_device_found_message">No Bluetooth devices found. Please switch on bluetooth on your device and power on the NetPOS Lite device. Pair and connect to continue.</string>
 </resources>
