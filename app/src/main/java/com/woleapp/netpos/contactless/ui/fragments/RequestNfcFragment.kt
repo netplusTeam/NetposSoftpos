@@ -97,7 +97,7 @@ class RequestNfcFragment : Fragment() {
                 User::class.java,
             )
         val accountNumber =
-            com.woleapp.netpos.contactless.util.Singletons.gson.fromJson(
+            Singletons.gson.fromJson(
                 Prefs.getString(
                     PREF_ACCOUNT_NUMBER,
                     "",

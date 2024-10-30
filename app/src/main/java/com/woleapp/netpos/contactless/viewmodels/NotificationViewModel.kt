@@ -9,6 +9,7 @@ import com.woleapp.netpos.contactless.model.RequestNfcRequest
 import com.woleapp.netpos.contactless.network.NotificationRepository
 import com.woleapp.netpos.contactless.util.AppConstants.DATA_BASE_ERROR_TAG
 import com.woleapp.netpos.contactless.util.AppConstants.NOTIFICATION_ERROR
+import com.woleapp.netpos.contactless.util.Resource
 import com.woleapp.netpos.contactless.util.RxJavaUtils.getSingleTransformer
 import com.woleapp.netpos.contactless.util.disposeWith
 import dagger.hilt.android.lifecycle.HiltViewModel

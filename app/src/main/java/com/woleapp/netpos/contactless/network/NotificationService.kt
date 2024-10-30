@@ -17,5 +17,5 @@ interface NotificationService {
         @Body requestNfcRequest: RequestNfcRequest,
         @Query("partnerId") partnerId: String,
         @Query("deviceId") deviceId: String,
-    ): Single<Response<FeedbackResponse>>
+    ): Single<retrofit2.Response<FeedbackResponse>>
 }
