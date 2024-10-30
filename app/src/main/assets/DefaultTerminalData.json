@@ -9,7 +9,7 @@
     }, {
         "tag": "9F39",
         "name": "Point-of-Service (POS) Entry Mode",
-        "value": "91"
+        "value": "00"
     }, {
         "tag": "9F53",
         "name": "Transaction Category Code",
