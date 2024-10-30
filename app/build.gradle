@@ -313,6 +313,9 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
 
+    //easyprefs
+    implementation 'com.pixplicity.easyprefs:EasyPrefs:1.10.0'
+
     //pdf viewer
     implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.1'
 

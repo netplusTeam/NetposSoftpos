@@ -30,6 +30,7 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.app.NetPosApp
