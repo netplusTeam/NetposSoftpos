@@ -30,7 +30,6 @@ import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
 import com.woleapp.netpos.contactless.app.NetPosApp
@@ -640,7 +639,7 @@ class DashboardFragment : BaseFragment() {
 
     private fun checkForNFC() {
         val showNfcRequest =
-            Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).nfc_interest
+            Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).nfc_interest
         nfcAdapter =
             (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
         if (nfcAdapter != null) {

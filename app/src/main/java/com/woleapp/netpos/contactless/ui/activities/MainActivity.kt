@@ -143,9 +143,10 @@ class MainActivity :
         when ( // NetPosTerminalConfig.isConfigurationInProcess -> showProgressDialog()
             NetPosTerminalConfig.configurationStatus
         ) {
-            -1 -> NetPosTerminalConfig.init(
-                applicationContext,
-            )
+            -1 ->
+                NetPosTerminalConfig.init(
+                    applicationContext,
+                )
             1 -> {
                 dismissProgressDialogIfShowing()
             }
@@ -171,7 +172,7 @@ class MainActivity :
     }
 
     private fun startNfcPayment(nfcDataWrapper: NfcDataWrapper) {
-        when(nfcDataWrapper.cardType) {
+        when (nfcDataWrapper.cardType) {
             NfcPaymentType.VISA -> {
                 nfcAdapter?.enableReaderMode(
                     this,
@@ -183,7 +184,9 @@ class MainActivity :
             NfcPaymentType.VERVE -> {
                 nfcAdapter?.enableReaderMode(
                     this,
-                    { tag: Tag? -> verveNfcListener!!.onNfcTagDiscovered(tag) }, READER_FLAGS, null
+                    { tag: Tag? -> verveNfcListener!!.onNfcTagDiscovered(tag) },
+                    READER_FLAGS,
+                    null,
                 )
             }
             else -> {
@@ -256,8 +259,9 @@ class MainActivity :
     }
 
     private fun checkTokenExpiry() {
-        val token = DPrefs.getString(PREF_USER_TOKEN)
-            .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
+        val token =
+            DPrefs.getString(PREF_USER_TOKEN)
+                .let { if (it == DPrefsDefaultValue.DEFAULT_VALUE_STRING.value) null else it }
         token?.let {
             if (JWTHelper.isExpired(it)) {
                 logout()
@@ -269,13 +273,11 @@ class MainActivity :
         progressDialog?.dismiss()
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 //        // First check if there is an update
 //        checkForAppUpdate()
-
 
         // Initialize Crashlytics
         crashlytics = FirebaseCrashlytics.getInstance()
@@ -290,12 +292,14 @@ class MainActivity :
             DialogContatclessReaderBinding.inflate(layoutInflater).apply {
                 executePendingBindings()
             }
-        waitingDialog = AlertDialog.Builder(this).apply {
-            setView(dialogContactlessReaderBinding.root)
-            // setCancelable(false)
-        }.create()
-        receiptDialogBinding = DialogTransactionResultBinding.inflate(layoutInflater, null, false)
-            .apply { executePendingBindings() }
+        waitingDialog =
+            AlertDialog.Builder(this).apply {
+                setView(dialogContactlessReaderBinding.root)
+                // setCancelable(false)
+            }.create()
+        receiptDialogBinding =
+            DialogTransactionResultBinding.inflate(layoutInflater, null, false)
+                .apply { executePendingBindings() }
         if (!EasyPermissions.hasPermissions(
                 applicationContext,
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -314,10 +318,11 @@ class MainActivity :
                 Manifest.permission.READ_EXTERNAL_STORAGE,
             )
         }
-        progressDialog = ProgressDialog(this).apply {
-            setMessage("Configuring Terminal, Please wait")
-            setCancelable(false)
-        }
+        progressDialog =
+            ProgressDialog(this).apply {
+                setMessage("Configuring Terminal, Please wait")
+                setCancelable(false)
+            }
         val mid = Singletons.getConfigData()?.cardAcceptorIdCode ?: ""
         requestNarration =
             if (Singletons.getCurrentlyLoggedInUser()?.terminal_id?.isNotEmpty() == true) {
@@ -379,20 +384,21 @@ class MainActivity :
                     Toast.makeText(this, "scan failed", Toast.LENGTH_SHORT).show()
                 }
             }
-        alertDialog = AlertDialog.Builder(this).run {
-            setCancelable(false)
-            title = "Message"
-            setPositiveButton("Retry") { dialog, _ ->
-                NetPosTerminalConfig.init(applicationContext)
-                dialog.dismiss()
+        alertDialog =
+            AlertDialog.Builder(this).run {
+                setCancelable(false)
+                title = "Message"
+                setPositiveButton("Retry") { dialog, _ ->
+                    NetPosTerminalConfig.init(applicationContext)
+                    dialog.dismiss()
+                }
+                setNegativeButton("Cancel") { dialog, _ ->
+                    Toast.makeText(applicationContext, "Configuration cancelled", Toast.LENGTH_LONG)
+                        .show()
+                    dialog.dismiss()
+                }
+                create()
             }
-            setNegativeButton("Cancel") { dialog, _ ->
-                Toast.makeText(applicationContext, "Configuration cancelled", Toast.LENGTH_LONG)
-                    .show()
-                dialog.dismiss()
-            }
-            create()
-        }
         val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
         if (user == null) {
             val intent = Intent(this, AuthenticationActivity::class.java)
@@ -401,33 +407,35 @@ class MainActivity :
             return
         }
         binding.dashboardHeader.username.text = user.business_name
-        binding.dashboardBottomNavigationView.setOnItemSelectedListener(object :
-            NavigationBarView.OnItemSelectedListener {
-            override fun onNavigationItemSelected(item: MenuItem): Boolean {
-                when (item.itemId) {
-                    R.id.homeFragment -> {
-                        showFragment(DashboardFragment(), "Dashboard")
-                    }
-                    R.id.transaction -> {
-                        showFragment(TransactionsFragment(), "Transactions")
-                    }
-                    R.id.scanQR -> {
-                        showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
-                    }
-                    R.id.endOfDay -> {
-                        showCalendarDialog()
-                    }
-                    else -> {
-                        if (BuildConfig.FLAVOR.contains("polaris")) {
-                            showFragment(SettingsFragment(), "Settings")
-                        } else {
-                            showFragment(DisplayQrFragment(), "DisplayQR")
+        binding.dashboardBottomNavigationView.setOnItemSelectedListener(
+            object :
+                NavigationBarView.OnItemSelectedListener {
+                override fun onNavigationItemSelected(item: MenuItem): Boolean {
+                    when (item.itemId) {
+                        R.id.homeFragment -> {
+                            showFragment(DashboardFragment(), "Dashboard")
+                        }
+                        R.id.transaction -> {
+                            showFragment(TransactionsFragment(), "Transactions")
+                        }
+                        R.id.scanQR -> {
+                            showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
+                        }
+                        R.id.endOfDay -> {
+                            showCalendarDialog()
+                        }
+                        else -> {
+                            if (BuildConfig.FLAVOR.contains("polaris")) {
+                                showFragment(SettingsFragment(), "Settings")
+                            } else {
+                                showFragment(DisplayQrFragment(), "DisplayQR")
+                            }
                         }
                     }
+                    return true
                 }
-                return true
-            }
-        })
+            },
+        )
 
         binding.dashboardHeader.logout.setOnClickListener {
             logoutConfirmation()
@@ -440,10 +448,9 @@ class MainActivity :
 
         viewModel.enableNfcForegroundDispatcher.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD )) {
+                if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD)) {
                     startNfcPayment(it)
-                }
-                else if (!it.enable && it.cardType == null) {
+                } else if (!it.enable && it.cardType == null) {
                     stopNfcPayment()
                 }
             }
@@ -471,7 +478,7 @@ class MainActivity :
                 dialogContactlessReaderBinding.contactlessHeader.highlightTexts(
                     NfcPaymentType.MASTERCARD.cardScheme,
                     NfcPaymentType.VISA.cardScheme,
-                    NfcPaymentType.VERVE.cardScheme
+                    NfcPaymentType.VERVE.cardScheme,
                 )
                 dialogContactlessReaderBinding.cardScheme.setImageResource(it.icon)
                 waitingDialog.show()
@@ -500,31 +507,32 @@ class MainActivity :
             }
         }
 
-        receiptAlertDialog = AlertDialog.Builder(this).setCancelable(false).apply {
-            setView(receiptDialogBinding.root)
-            receiptDialogBinding.apply {
-                closeBtn.setOnClickListener {
-                    receiptDialogBinding.telephone.text?.clear()
-                    receiptAlertDialog.dismiss()
-                }
-                sendButton.setOnClickListener {
-                    if (receiptDialogBinding.telephone.text.toString().length != 11) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Please enter a valid phone number",
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        return@setOnClickListener
+        receiptAlertDialog =
+            AlertDialog.Builder(this).setCancelable(false).apply {
+                setView(receiptDialogBinding.root)
+                receiptDialogBinding.apply {
+                    closeBtn.setOnClickListener {
+                        receiptDialogBinding.telephone.text?.clear()
+                        receiptAlertDialog.dismiss()
                     }
-                    viewModel.sendSmS(
-                        receiptDialogBinding.transactionContent.text.toString(),
-                        receiptDialogBinding.telephone.text.toString(),
-                    )
-                    progress.visibility = View.VISIBLE
-                    sendButton.isEnabled = false
+                    sendButton.setOnClickListener {
+                        if (receiptDialogBinding.telephone.text.toString().length != 11) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Please enter a valid phone number",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            return@setOnClickListener
+                        }
+                        viewModel.sendSmS(
+                            receiptDialogBinding.transactionContent.text.toString(),
+                            receiptDialogBinding.telephone.text.toString(),
+                        )
+                        progress.visibility = View.VISIBLE
+                        sendButton.isEnabled = false
+                    }
                 }
-            }
-        }.create()
+            }.create()
         receiptAlertDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         viewModel.showQrPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
@@ -547,10 +555,11 @@ class MainActivity :
                 sendTokenToBackend(token, terminalId, userName)
             },
         )
-        qrAmoutDialogBinding = QrAmoutDialogBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-            lifecycleOwner = this@MainActivity
-        }
+        qrAmoutDialogBinding =
+            QrAmoutDialogBinding.inflate(layoutInflater, null, false).apply {
+                executePendingBindings()
+                lifecycleOwner = this@MainActivity
+            }
 
         verveCardQrAmountDialogBinding =
             LayoutVerveCardQrAmountDialogBinding.inflate(layoutInflater, null, false).apply {
@@ -558,20 +567,24 @@ class MainActivity :
                 lifecycleOwner = this@MainActivity
             }
 
-        qrAmountDialog = AlertDialog.Builder(this).apply {
-            setView(qrAmoutDialogBinding.root)
-        }.create()
+        qrAmountDialog =
+            AlertDialog.Builder(this).apply {
+                setView(qrAmoutDialogBinding.root)
+            }.create()
 
-        qrAmountDialogForVerveCard = AlertDialog.Builder(this).apply {
-            setView(verveCardQrAmountDialogBinding.root)
-        }.create()
+        qrAmountDialogForVerveCard =
+            AlertDialog.Builder(this).apply {
+                setView(verveCardQrAmountDialogBinding.root)
+            }.create()
         deviceNotSupportedAlertDialog =
             AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
                 .setCancelable(false)
                 .setMessage(getString(R.string.device_doesnt_have_nfc))
-                .setPositiveButton(getString(R.string.close)) { dialog, _ ->
+                .setNegativeButton(getString(R.string.close)) { dialog, _ ->
                     dialog.dismiss()
                     // finish()
+                }.setPositiveButton(getString(R.string.nfc)) { dialog, _ ->
+                    showFragment(RequestNfcFragment(), "RequestNfcFragment")
                 }.create()
         terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
         userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
@@ -585,7 +598,7 @@ class MainActivity :
         setUpObserversForVerveTransaction()
         viewModel.startVerveTransaction.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
-                if(it) {
+                if (it) {
                     mVerveTransactionViewModel.startTransaction(this)
                 } else {
                     mVerveTransactionViewModel.cancelTransaction()
@@ -613,39 +626,50 @@ class MainActivity :
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+    override fun onPermissionsGranted(
+        requestCode: Int,
+        perms: MutableList<String>,
+    ) {
         getLocationUpdates()
     }
 
-    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+    override fun onPermissionsDenied(
+        requestCode: Int,
+        perms: MutableList<String>,
+    ) {
     }
 
     @SuppressLint("MissingPermission")
     private fun getLocationUpdates() {
         val locationManager = this.getSystemService(LOCATION_SERVICE) as LocationManager
-        val locationListener: LocationListener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                // Called when a new location is found by the network location provider.
-                location.let {
-                    DPrefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
+        val locationListener: LocationListener =
+            object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    // Called when a new location is found by the network location provider.
+                    location.let {
+                        DPrefs.putString(PREF_LAST_LOCATION, "lat:${it.latitude} long:${it.longitude}")
+                    }
+                }
+
+                @Deprecated(
+                    "Deprecated from api",
+                    ReplaceWith("Check documentation, mfpm"),
+                )
+                override fun onStatusChanged(
+                    provider: String?,
+                    status: Int,
+                    extras: Bundle?,
+                ) {
+                }
+
+                override fun onProviderEnabled(provider: String) {
+                    Timber.e("On Provider enabled: $provider")
+                }
+
+                override fun onProviderDisabled(provider: String) {
+                    Timber.e("On Provider disabled $provider")
                 }
             }
-
-            @Deprecated(
-                "Deprecated from api",
-                ReplaceWith("Check documentation, mfpm"),
-            )
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-            }
-
-            override fun onProviderEnabled(provider: String) {
-                Timber.e("On Provider enabled: $provider")
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                Timber.e("On Provider disabled $provider")
-            }
-        }
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER,
             0L,
@@ -672,7 +696,10 @@ class MainActivity :
         ).showDialog()
     }
 
-    private fun showFragment(targetFragment: Fragment, className: String) {
+    private fun showFragment(
+        targetFragment: Fragment,
+        className: String,
+    ) {
         try {
             supportFragmentManager.beginTransaction().apply {
                 replace(R.id.container_main, targetFragment, className)
@@ -686,27 +713,30 @@ class MainActivity :
 
     private fun showSelectAccountTypeDialog() {
         var dialogSelectAccountTypeBinding: DialogSelectAccountTypeBinding
-        val dialog = AlertDialog.Builder(this).apply {
-            dialogSelectAccountTypeBinding = DialogSelectAccountTypeBinding.inflate(
-                LayoutInflater.from(context),
-                null,
-                false,
-            ).apply {
-                executePendingBindings()
-            }
-            setView(dialogSelectAccountTypeBinding.root)
-            setCancelable(false)
-        }.create()
+        val dialog =
+            AlertDialog.Builder(this).apply {
+                dialogSelectAccountTypeBinding =
+                    DialogSelectAccountTypeBinding.inflate(
+                        LayoutInflater.from(context),
+                        null,
+                        false,
+                    ).apply {
+                        executePendingBindings()
+                    }
+                setView(dialogSelectAccountTypeBinding.root)
+                setCancelable(false)
+            }.create()
         dialogSelectAccountTypeBinding.accountTypes.setOnCheckedChangeListener { _, checkedId ->
-            val accountType = when (checkedId) {
-                R.id.savings_account -> IsoAccountType.SAVINGS
-                R.id.current_account -> IsoAccountType.CURRENT
-                R.id.credit_account -> IsoAccountType.CREDIT
-                R.id.bonus_account -> IsoAccountType.BONUS_ACCOUNT
-                R.id.investment_account -> IsoAccountType.INVESTMENT_ACCOUNT
-                R.id.universal_account -> IsoAccountType.UNIVERSAL_ACCOUNT
-                else -> IsoAccountType.DEFAULT_UNSPECIFIED
-            }
+            val accountType =
+                when (checkedId) {
+                    R.id.savings_account -> IsoAccountType.SAVINGS
+                    R.id.current_account -> IsoAccountType.CURRENT
+                    R.id.credit_account -> IsoAccountType.CREDIT
+                    R.id.bonus_account -> IsoAccountType.BONUS_ACCOUNT
+                    R.id.investment_account -> IsoAccountType.INVESTMENT_ACCOUNT
+                    R.id.universal_account -> IsoAccountType.UNIVERSAL_ACCOUNT
+                    else -> IsoAccountType.DEFAULT_UNSPECIFIED
+                }
             dialog.dismiss()
             Timber.e("$checkedId")
             viewModel.iccCardHelper.apply {
@@ -893,12 +923,13 @@ class MainActivity :
                 }
             }
         }
-        val bottomSheet = BottomSheetDialog(this, R.style.SheetDialog).apply {
-            dismissWithAnimation = true
-            setCancelable(false)
-            setContentView(endOfDay.root)
-            show()
-        }
+        val bottomSheet =
+            BottomSheetDialog(this, R.style.SheetDialog).apply {
+                dismissWithAnimation = true
+                setCancelable(false)
+                setContentView(endOfDay.root)
+                show()
+            }
         endOfDay.view.setOnClickListener {
             transactionViewModel.setEndOfDayList(transactions)
             bottomSheet.dismiss()
@@ -922,12 +953,13 @@ class MainActivity :
             amountDouble?.let {
                 qrAmoutDialogBinding.amount.text?.clear()
                 qrAmountDialog.cancel()
-                val qrDataToSendToBackend = PostQrToServerModel(
-                    it,
-                    qrData.data,
-                    merchantId = UtilityParam.STRING_MERCHANT_ID,
-                    naration = requestNarration,
-                )
+                val qrDataToSendToBackend =
+                    PostQrToServerModel(
+                        it,
+                        qrData.data,
+                        merchantId = UtilityParam.STRING_MERCHANT_ID,
+                        naration = requestNarration,
+                    )
                 scanQrViewModel.setScannedQrIsVerveCard(false)
                 scanQrViewModel.postScannedQrRequestToServer(qrDataToSendToBackend)
                 observeServerResponseActivity(
@@ -1053,8 +1085,9 @@ class MainActivity :
     private fun downloadPdfImpl() {
         viewModel.lastPosTransactionResponse.value?.let {
             if (it.TVR.contains(IS_QR_TRANSACTION)) {
-                val qrTransaction = it.copy(TVR = it.TVR.replace(IS_QR_TRANSACTION, ""))
-                    .mapTransactionResponseToQrTransaction()
+                val qrTransaction =
+                    it.copy(TVR = it.TVR.replace(IS_QR_TRANSACTION, ""))
+                        .mapTransactionResponseToQrTransaction()
                 initViewsForPdfLayout(
                     qrPdfView,
                     qrTransaction,
@@ -1113,9 +1146,9 @@ class MainActivity :
         terminalId: String,
         username: String,
     ) {
-        if(isInternetAvailable(this)) {
+        if (isInternetAvailable(this)) {
             notificationModel.registerDeviceToken(token, terminalId, username)
-        } else{
+        } else {
             Toast.makeText(this, "Please connect to the internet and relaunch", Toast.LENGTH_SHORT).show()
         }
     }
@@ -1145,13 +1178,14 @@ class MainActivity :
         if (pin.length == 4) {
             amountDouble?.let {
                 qrAmountDialogForVerveCard.cancel()
-                val qrDataToSendToBackend = PostQrToServerModel(
-                    it,
-                    qrData.data,
-                    merchantId = UtilityParam.STRING_MERCHANT_ID,
-                    padding = formattedPadding,
-                    naration = requestNarration,
-                )
+                val qrDataToSendToBackend =
+                    PostQrToServerModel(
+                        it,
+                        qrData.data,
+                        merchantId = UtilityParam.STRING_MERCHANT_ID,
+                        padding = formattedPadding,
+                        naration = requestNarration,
+                    )
                 scanQrViewModel.setScannedQrIsVerveCard(true)
                 scanQrViewModel.saveTheQrToSharedPrefs(qrDataToSendToBackend.copy(orderId = AppConstants.getGUID()))
                 scanQrViewModel.postScannedQrRequestToServer(qrDataToSendToBackend)
@@ -1202,10 +1236,11 @@ class MainActivity :
 
     private fun setUpViewModelForVerve() {
         val transactionParameters = salesViewModel.setupTransactionForVerveSDK()
-        mVerveTransactionViewModel = ViewModelProvider(
-            this,
-            TransactionViewModelFactory(applicationContext, verveNfcListener!!, transactionParameters)
-        )[VerveTransactionViewModel::class.java]
+        mVerveTransactionViewModel =
+            ViewModelProvider(
+                this,
+                TransactionViewModelFactory(applicationContext, verveNfcListener!!, transactionParameters),
+            )[VerveTransactionViewModel::class.java]
     }
 
     private fun setUpObserversForVerveTransaction() {

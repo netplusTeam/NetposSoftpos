@@ -11,9 +11,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ImageRequestNFCAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRequestNfcBinding
@@ -88,8 +88,8 @@ class RequestNfcFragment : Fragment() {
         // Auto-scroll
         autoSwipeViewPager()
         val user =
-            com.woleapp.netpos.contactless.util.Singletons.gson.fromJson(
-                Prefs.getString(
+            Singletons.gson.fromJson(
+                DPrefs.getString(
                     PREF_USER,
                     "",
                 ),
@@ -134,7 +134,7 @@ class RequestNfcFragment : Fragment() {
         loader.show()
 
         val email =
-            Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).email
+            Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).username
         val nfcRequest =
             RequestNfcRequest(
                 email.toString(),

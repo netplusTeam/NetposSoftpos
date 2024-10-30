@@ -10,6 +10,7 @@ data class User(
     @SerializedName("name")
     var name: String? = null,
     @SerializedName("username")
+    var username: String? = null,
     var email: String? = null,
     @SerializedName("password")
     var password: String? = null,
