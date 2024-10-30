@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.network
 
 import com.woleapp.netpos.contactless.model.NotificationRegisterDeviceTokenModel
+import com.woleapp.netpos.contactless.model.RequestNfcRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 
