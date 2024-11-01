@@ -274,6 +274,7 @@ object RandomPurposeUtil {
                                     it.data is ConfirmOTPResponse ||
                                     it.data is ExistingAccountRegisterResponse ||
                                     it.data is BankWExistingRegistrationResponse ||
+                                    it.data is FeedbackResponse ||
                                     it.data is String
                                 ) {
                                     successAction()

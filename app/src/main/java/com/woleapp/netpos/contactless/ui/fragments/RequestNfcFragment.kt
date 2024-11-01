@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
 import com.dsofttech.dprefs.utils.DPrefs
@@ -32,7 +31,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 @AndroidEntryPoint
-class RequestNfcFragment : Fragment() {
+class RequestNfcFragment : BaseFragment() {
     private lateinit var binding: FragmentRequestNfcBinding
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
@@ -150,7 +149,11 @@ class RequestNfcFragment : Fragment() {
             ioScheduler,
             mainThreadScheduler,
         ) {
-            requireActivity().supportFragmentManager.popBackStack()
+            showFragment(
+                DashboardFragment(),
+                containerViewId = R.id.container_main,
+                fragmentName = "Dashboard Fragment",
+            )
             showToast("Request received successfully!")
         }
     }
