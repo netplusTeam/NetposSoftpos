@@ -128,6 +128,12 @@ class AuthViewModel : ViewModel() {
             val userTokenDecoded = JWT(userToken)
             val user =
                 User().apply {
+                    this.accountNumber =
+                        if (userTokenDecoded.claims.containsKey("accountNumber")) {
+                            userTokenDecoded.getClaim("accountNumber").asString()
+                        } else {
+                            null
+                        }
                     this.nfc_interest =
                         if (userTokenDecoded.claims.containsKey("nfc_interest")) {
                             userTokenDecoded.getClaim("nfc_interest").asString()
@@ -266,6 +272,12 @@ class AuthViewModel : ViewModel() {
             val userTokenDecoded = JWT(userToken)
             val user =
                 User().apply {
+                    this.accountNumber =
+                        if (userTokenDecoded.claims.containsKey("accountNumber")) {
+                            userTokenDecoded.getClaim("accountNumber").asString()
+                        } else {
+                            null
+                        }
                     this.nfc_interest =
                         if (userTokenDecoded.claims.containsKey("nfc_interest")) {
                             userTokenDecoded.getClaim("nfc_interest").asString()

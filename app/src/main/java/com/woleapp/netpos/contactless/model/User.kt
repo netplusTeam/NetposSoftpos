@@ -15,8 +15,8 @@ data class User(
     var password: String? = null,
     @SerializedName("mobile_no")
     var phone: String? = null,
-    @SerializedName("bankAccountNumber")
-    var account_number: String? = null,
+    @SerializedName("accountNumber")
+    var accountNumber: String? = null,
     @SerializedName("bankName")
     var bank: String? = null,
     @SerializedName("bvnNumber")

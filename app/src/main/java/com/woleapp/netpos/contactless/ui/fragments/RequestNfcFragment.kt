@@ -16,7 +16,6 @@ import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ImageRequestNFCAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRequestNfcBinding
-import com.woleapp.netpos.contactless.model.MerchantDetail
 import com.woleapp.netpos.contactless.model.RequestNfcRequest
 import com.woleapp.netpos.contactless.model.User
 import com.woleapp.netpos.contactless.util.*
@@ -89,23 +88,15 @@ class RequestNfcFragment : Fragment() {
         // Auto-scroll
         autoSwipeViewPager()
         val user =
-            com.woleapp.netpos.contactless.util.Singletons.gson.fromJson(
+            Singletons.gson.fromJson(
                 Prefs.getString(
                     PREF_USER,
                     "",
                 ),
                 User::class.java,
             )
-        val accountNumber =
-            com.woleapp.netpos.contactless.util.Singletons.gson.fromJson(
-                Prefs.getString(
-                    PREF_ACCOUNT_NUMBER,
-                    "",
-                ),
-                MerchantDetail::class.java,
-            )
         binding.customername.setText(user.business_name)
-        binding.accountNumber.setText(accountNumber.acctNumber)
+        binding.accountNumber.setText(user.accountNumber)
 
         binding.requestBtn.setOnClickListener {
             requestDevice()

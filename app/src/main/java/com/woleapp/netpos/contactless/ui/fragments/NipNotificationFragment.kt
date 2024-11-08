@@ -49,31 +49,34 @@ class NipNotificationFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         binding = FragmentNipNotificationsBinding.inflate(inflater, container, false)
-        adapter = ServiceAdapter {
-            when (it.id) {
-                0 -> {
-                    Toast.makeText(requireContext(), "Please wait!!!", Toast.LENGTH_SHORT).show()
-                    getCode()
-                }
-                1 -> addFragmentWithoutRemove(
-                    NipNotificationListFragment.newInstance(
-                        NipNotificationListFragment.LAST_TWO,
-                    ),
-                )
-                2 -> {
-                    showCalendarDialog()
-                }
+        adapter =
+            ServiceAdapter {
+                when (it.id) {
+                    0 -> {
+                        Toast.makeText(requireContext(), "Please wait!!!", Toast.LENGTH_SHORT).show()
+                        getCode()
+                    }
+                    1 ->
+                        addFragmentWithoutRemove(
+                            NipNotificationListFragment.newInstance(
+                                NipNotificationListFragment.LAST_TWO,
+                            ),
+                        )
+                    2 -> {
+                        showCalendarDialog()
+                    }
 
-                3 -> addFragmentWithoutRemove(NipNotificationSearch())
+                    3 -> addFragmentWithoutRemove(NipNotificationSearch())
+                }
             }
-        }
         binding.rvTransactions.layoutManager = GridLayoutManager(context, 2)
         binding.rvTransactions.adapter = adapter
         setService()
-        event = MqttEvent<NipEvent>()
-            .apply {
-                this.geo = "lat:51.507351-long:-0.127758"
-            }
+        event =
+            MqttEvent<NipEvent>()
+                .apply {
+                    this.geo = "lat:51.507351-long:-0.127758"
+                }
 
         return binding.root
     }
@@ -131,17 +134,18 @@ class NipNotificationFragment : BaseFragment() {
     }
 
     private fun showDialogForAccountTransfer(code: String) {
-        val bankDetailsBinding: LayoutBankDetailsBinding = LayoutBankDetailsBinding.inflate(
-            layoutInflater,
-            null,
-            false,
-        )
+        val bankDetailsBinding: LayoutBankDetailsBinding =
+            LayoutBankDetailsBinding.inflate(
+                layoutInflater,
+                null,
+                false,
+            )
         val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.SheetDialog)
         bottomSheetDialog.setCancelable(false)
         bottomSheetDialog.setContentView(bankDetailsBinding.root)
         val user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
         val bank = user.bank ?: ""
-        val accountNumber = user.account_number ?: ""
+        val accountNumber = user.accountNumber ?: ""
         val accountName = user.business_name ?: ""
         val accountNumber2 = ""
         val bank2 = ""
@@ -189,13 +193,14 @@ class NipNotificationFragment : BaseFragment() {
     }
 
     private fun setService() {
-        val listOfService = ArrayList<Service>()
-            .apply {
-                add(Service(0, "New", R.drawable.ic_add))
-                add(Service(1, "Last Two Transfers", R.drawable.ic_write))
-                add(Service(2, "End Of Day Notification", R.drawable.ic_end_of_day))
-                add(Service(3, "Search with Reference", R.drawable.ic_search))
-            }
+        val listOfService =
+            ArrayList<Service>()
+                .apply {
+                    add(Service(0, "New", R.drawable.ic_add))
+                    add(Service(1, "Last Two Transfers", R.drawable.ic_write))
+                    add(Service(2, "End Of Day Notification", R.drawable.ic_end_of_day))
+                    add(Service(3, "Search with Reference", R.drawable.ic_search))
+                }
         adapter.submitList(listOfService)
     }
 }
