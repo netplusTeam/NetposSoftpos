@@ -238,7 +238,7 @@ class DashboardFragment : BaseFragment() {
                 viewModel.validateFieldForNFC()
             } else {
                 if(viewModel.validateFieldForBluetooth()) {
-                    initIntent()
+                    initCr100Intent()
                 }
 
             }
@@ -625,33 +625,39 @@ class DashboardFragment : BaseFragment() {
         bluetoothAdapter.notifyDataSetChanged()
     }
 
-    private fun initIntent() {
+    private fun initCr100Intent() {
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
         if (cr100Pos!!.bluetoothState) {
-            BluetoothDialog.manualExitDialog(requireActivity(),
-                "Do you want to continue with the previous connection?",
-                object : BluetoothDialog.OnMyClickListener {
-                    override fun onCancel() {
-                        cr100Pos?.disconnectBT()
-                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
-                        deviceType(BLUETOOTH)
-                        refreshAdapter()
-                        bluetoothAdapter.notifyDataSetChanged()
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
+//            BluetoothDialog.manualExitDialog(requireActivity(),
+//                "Do you want to continue with the previous connection?",
+//                object : BluetoothDialog.OnMyClickListener {
+//                    override fun onCancel() {
+//                        cr100Pos?.disconnectBT()
+//                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
+//                        deviceType(BLUETOOTH)
+//                        refreshAdapter()
+//                        bluetoothAdapter.notifyDataSetChanged()
+//                        BluetoothDialog.manualExitDialog.dismiss()
+//                    }
+//
+//                    override fun onConfirm() {
+//                        if (BluetoothToolsBean.getBlueToothName() != null) {
+//                            showToast(BluetoothToolsBean.getBlueToothName())
+//                        }
+//
+//                        val keyIndex: Int = getBluetoothKeyIndex()
+//                        cr100Pos?.doTrade(keyIndex, 60)
+//                        BluetoothDialog.manualExitDialog.dismiss()
+//                    }
+//                })
+            if (BluetoothToolsBean.getBlueToothName() != null) {
+                showToast(BluetoothToolsBean.getBlueToothName())
+            }
 
-                    override fun onConfirm() {
-                        if (BluetoothToolsBean.getBlueToothName() != null) {
-                            showToast(BluetoothToolsBean.getBlueToothName())
-                        }
-
-                        val keyIndex: Int = getBluetoothKeyIndex()
-                        cr100Pos?.doTrade(keyIndex, 60)
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
-                })
+            val keyIndex: Int = getBluetoothKeyIndex()
+            cr100Pos?.doTrade(keyIndex, 60)
         } else {
             lvIndicatorBTPOS?.adapter = bluetoothAdapter
             deviceType(BLUETOOTH)
