@@ -3,6 +3,8 @@ package com.woleapp.netpos.contactless.mqtt
 import android.content.Context
 import android.util.Base64
 import com.woleapp.netpos.contactless.BuildConfig
+import com.woleapp.netpos.contactless.util.decryptOpenSslFile
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.security.KeyFactory
 import java.security.KeyStore
@@ -20,7 +22,7 @@ object SSLUtil {
     fun getTrustManagerFactory(context: Context): TrustManagerFactory? {
         // load CA certificate
         val caCert =
-            getX509Certificate(context.assets.open(if (BuildConfig.APPMODE_PROD) "cacert.pem" else "test_cacert.pem"))
+            getDecryptedX509Certificate(context, if (BuildConfig.APPMODE_PROD) "cacert.pem.enc" else "test_cacert.pem.enc")
         val caKs = KeyStore.getInstance(KeyStore.getDefaultType())
         caKs.load(null, null)
         caKs.setCertificateEntry("ca-certificate", caCert)
@@ -33,8 +35,7 @@ object SSLUtil {
     fun getKeyMangerFactory(context: Context): KeyManagerFactory? {
         val password = "netpos_password"
         // load client certificate
-        val cert =
-            getX509Certificate(context.resources.assets.open(if (BuildConfig.APPMODE_PROD) "netpos_device.pem" else "netpos_client_cert.pem"))
+        val cert = getDecryptedX509Certificate(context, if (BuildConfig.APPMODE_PROD) "netpos_device.pem.enc" else "netpos_client_cert.pem.enc")
 
         val key = getFromString(context)
         // client key and certificates are sent to server so it can authenticate us
@@ -55,7 +56,7 @@ object SSLUtil {
     @Throws(Exception::class)
     @JvmStatic
     fun getFromString(context: Context): PrivateKey? {
-        var reader = String(context.resources.assets.open(if (BuildConfig.APPMODE_PROD) "device.key" else "netpos_client_key.key").readBytes())
+        var reader = String(decryptOpenSslFile(context, if (BuildConfig.APPMODE_PROD) "device.key.enc" else "netpos_client_key.key.enc"))
         reader = reader.replace("-----BEGIN RSA PRIVATE KEY-----\n", "")
         reader = reader.replace("-----END RSA PRIVATE KEY-----", "")
         // Base64 decode the data
@@ -66,8 +67,23 @@ object SSLUtil {
         return kf.generatePrivate(keySpec)
     }
 
-    @JvmStatic
-    fun getX509Certificate(inputStream: InputStream): X509Certificate {
+//    @JvmStatic
+//    fun getX509Certificate(inputStream: InputStream): X509Certificate {
+//        val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
+//        return inputStream.use {
+//            cf.generateCertificate(it) as X509Certificate
+//        }
+//    }
+
+
+    private fun getDecryptedX509Certificate(context: Context, encryptedFileName: String): X509Certificate {
+        val decryptedData = decryptOpenSslFile(context, encryptedFileName)
+        val inputStream = ByteArrayInputStream(decryptedData)
+        return getX509Certificate(inputStream)
+    }
+
+    // The getX509Certificate function as provided
+    private fun getX509Certificate(inputStream: InputStream): X509Certificate {
         val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
         return inputStream.use {
             cf.generateCertificate(it) as X509Certificate

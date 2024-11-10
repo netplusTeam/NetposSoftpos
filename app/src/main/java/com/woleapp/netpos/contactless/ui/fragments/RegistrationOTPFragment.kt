@@ -176,14 +176,6 @@ class RegistrationOTPFragment : BaseFragment() {
             }
         }, 0, 1000) // run 1000 milliseconds (1 second)
 
-        // To stop the timer, cancel it after a specified number of milliseconds
-//        timer.schedule(object : TimerTask() {
-//            override fun run() {
-//                // Cancel the timer
-//                timer.cancel()
-//                println("Timer canceled")
-//            }
-//        }, 5000) // 5000 milliseconds (5 seconds)
     }
 
 }

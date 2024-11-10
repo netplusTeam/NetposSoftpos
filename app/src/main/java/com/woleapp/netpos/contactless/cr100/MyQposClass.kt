@@ -58,7 +58,8 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 trackKsn,
                 encTrack2,
                 DUKPK2009CBC.Enum_key.DATA,
-                DUKPK2009CBC.Enum_mode.CBC
+                DUKPK2009CBC.Enum_mode.CBC,
+                context
             )
 
             val panTrack2Pair = extractTrack2AndPanValues(clearPan)
@@ -73,7 +74,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                     val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
 
                     val decryptedIcc = DUKPK2009CBC.getData(tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
-                        DUKPK2009CBC.Enum_mode.CBC)
+                        DUKPK2009CBC.Enum_mode.CBC, context)
 
                     val cardTypeAid = findTagValue(decryptedIcc)
 
@@ -85,7 +86,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                         cardType = cardType
                     )
 
-                    Log.d("BLUETOOTH_DEVICE", "C0: ${tagC0.value}, C2: ${tagC2.value}, icc: $decryptedIcc, cardType: ${cardTypeAid}, cardType: ${cardType?.cardScheme}")
                 }
             }
         } else {

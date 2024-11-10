@@ -179,11 +179,7 @@ public class PasswordDialog {
             cardNum = "0000" + pan.substring(3, 15);
         }
 
-        // System.out.println(Util.BytesToString(HexDump.hexStringToByteArray("0425A8EF8B7A6E66")));
         String pinblock = ExtensionFunctionsKt.xorHex(pinP, cardNum);
-        //System.out.println(ExtensionFunctionsKt.xorHex(pin, cardNum));
-        System.out.println(pinblock);
-        //System.out.println(TripleDES.encrypt(pinblock, pinKey));
         KeyHolder keyHolder = Singletons.INSTANCE.getKeyHolder();
         return TripleDES.encrypt(pinblock, KeyHolderKt.getClearPinKey(keyHolder));
     }
