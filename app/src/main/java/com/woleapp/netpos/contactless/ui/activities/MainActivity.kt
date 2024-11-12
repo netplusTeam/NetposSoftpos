@@ -435,20 +435,47 @@ class MainActivity :
                         R.id.homeFragment -> {
                             showFragment(DashboardFragment(), "Dashboard")
                         }
+                        R.id.payments -> {
+                            showFragment(PaymentFragment(), "Payments")
+                        }
+                        R.id.scanQR -> {
+                            val dialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_layout, null)
+                            val dialog =
+                                AlertDialog.Builder(this@MainActivity)
+                                    .setView(dialogView)
+                                    .create()
+                            dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+                            // Access items
+                            val item1 = dialogView.findViewById<TextView>(R.id.item1)
+                            val item2 = dialogView.findViewById<TextView>(R.id.item2)
+
+                            // Set click listeners
+                            item1.setOnClickListener {
+                                // Navigate to Destination 1
+                                showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
+                                dialog.dismiss() // Dismiss the dialog if needed
+                            }
+
+                            item2.setOnClickListener {
+                                // Navigate to Destination 2
+                                showFragment(DisplayQrFragment(), "DisplayQR")
+                                dialog.dismiss() // Dismiss the dialog if needed
+                            }
+
+                            dialog.show()
+                        }
                         R.id.transaction -> {
                             showFragment(TransactionsFragment(), "Transactions")
                         }
-                        R.id.scanQR -> {
-                            showFragment(ScanQrCodeLandingPage(), "ScanQRLandingPage")
-                        }
-                        R.id.endOfDay -> {
-                            showCalendarDialog()
-                        }
+//                        R.id.endOfDay -> {
+//                            showCalendarDialog()
+//                        }
                         else -> {
                             if (BuildConfig.FLAVOR.contains("polaris")) {
                                 showFragment(SettingsFragment(), "Settings")
                             } else {
-                                showFragment(DisplayQrFragment(), "DisplayQR")
+                                showCalendarDialog()
                             }
                         }
                     }

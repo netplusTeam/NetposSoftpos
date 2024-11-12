@@ -8,16 +8,22 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/transaction"
+        android:id="@+id/payments"
         android:enabled="true"
         android:icon="@drawable/ic_trans"
-        android:title="Transactions" />
+        android:title="Payments" />
 
     <item
         android:id="@+id/scanQR"
         android:enabled="true"
         android:icon="@drawable/ic_qr_code"
-        android:title="Scan QR" />
+        android:title="QR" />
+
+    <item
+        android:id="@+id/transaction"
+        android:enabled="true"
+        android:icon="@drawable/ic_trans"
+        android:title="Transactions" />
 
     <item
         android:id="@+id/endOfDay"
@@ -25,17 +31,10 @@
         android:icon="@drawable/ic_end_of_day"
         android:title="End Of Day" />
 
-<!--    <item-->
-<!--        android:id="@+id/settings"-->
-<!--        android:enabled="true"-->
-<!--        android:icon="@drawable/ic_baseline_settings"-->
-<!--        android:title="Settings" />-->
-
-
-    <item
-        android:id="@+id/displayQR"
-        android:enabled="true"
-        android:icon="@drawable/ic_qr_code"
-        android:title="Display QR" />
+    <!--    <item-->
+    <!--        android:id="@+id/settings"-->
+    <!--        android:enabled="true"-->
+    <!--        android:icon="@drawable/ic_baseline_settings"-->
+    <!--        android:title="Settings" />-->
 
 </menu>
