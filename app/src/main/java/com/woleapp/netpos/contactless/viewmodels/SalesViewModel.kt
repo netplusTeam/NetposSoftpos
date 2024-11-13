@@ -3,6 +3,7 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,10 +15,12 @@ import com.danbamitale.epmslib.extensions.maskPan
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
+import com.google.gson.Gson
 import com.neovisionaries.i18n.CurrencyCode
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.payment.PaymentResponseDto
 import com.woleapp.netpos.contactless.network.ContactlessQrPaymentRepository
 import com.woleapp.netpos.contactless.network.NetPosTransactionsService
 import com.woleapp.netpos.contactless.network.RrnApiService
@@ -122,6 +125,10 @@ class SalesViewModel
             MutableLiveData()
         val payThroughMPGSResponse: LiveData<Resource<PayThroughMPGSResponse>> get() = _payThroughMPGSResponse
 
+        private val _paymentTransactionsResponse: MutableLiveData<Resource<PaymentResponseDto>> =
+            MutableLiveData()
+        val paymentTransactionsResponse: LiveData<Resource<PaymentResponseDto>> get() = _paymentTransactionsResponse
+
         private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
         val payThroughMPGSMessage: LiveData<Event<String>>
             get() = _payThroughMPGSMessage
@@ -192,6 +199,48 @@ class SalesViewModel
                     _payThroughMPGSResponse.postValue(Resource.error(null))
                 }
             }.disposeWith(compositeDisposable)
+        }
+
+        fun getPaymentTransactions(
+            username: String,
+            page: Int,
+        ) = netposTransactionApiService.getPaymentTransactions(
+            username,
+            page,
+        ).flatMap {
+            if (it.isSuccessful) {
+                Log.d("SECCESSSSS", "OKAYY")
+                _paymentTransactionsResponse.postValue(Resource.success(it.body()))
+                Single.just(Resource.success(it.body()))
+            } else {
+                try {
+                    val gson = Gson()
+//                         errorMsg = gson.fromJson(it.errorBody()?.charStream(), ExistingCustomerError::class.java).message
+                    //      Prefs.putString(WALLET_RESPONSE, errorMsg)
+                    // Log.d("CHECKRESULT=====>", justForTest.toString())
+                } catch (e: java.lang.Exception) {
+                    //
+                }
+                Single.just(Resource.error(it.errorBody()))
+            }
+
+//
+//                .subscribeOn(ioScheduler).observeOn(mainThreadScheduler).subscribe {
+//                    data,
+//                    error,
+//                ->
+//                data?.let {
+//                    if (it.isSuccessful) {
+//                        _paymentTransactionsResponse.postValue(Resource.success(it.body()))
+//                    } else {
+//                        _paymentTransactionsResponse.postValue(Resource.error(null))
+//                    }
+//                }
+//
+//                error?.let {
+//                    _paymentTransactionsResponse.postValue(Resource.error(null))
+//                }
+//            }.disposeWith(compositeDisposable)
         }
 
         fun setTransactionStateToStarted() {
@@ -509,17 +558,6 @@ class SalesViewModel
             }.flatMap {
                 if (!(it.code() in 200..299 || it.code() in 400..499)) {
                     val data = TransactionResponseXForTracking(rrn, transactionResponse, status)
-                }
-                Single.just(it.body())
-            }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { _, _ ->
-            }.disposeWith(compositeDisposable)
-        }
-
-        fun getPaymentTransactions(username: String) {
-            netposTransactionApiService.getPaymentTransactions(username).doOnError {
-            }.flatMap {
-                if (!(it.code() in 200..299 || it.code() in 400..499)) {
-                    // do nothing
                 }
                 Single.just(it.body())
             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe { _, _ ->

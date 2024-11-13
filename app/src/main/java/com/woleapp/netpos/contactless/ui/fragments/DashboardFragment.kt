@@ -22,12 +22,6 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.*
-import com.danbamitale.epmslib.entities.CardData
-import com.danbamitale.epmslib.entities.HostConfig
-import com.danbamitale.epmslib.entities.TransactionRequestData
-import com.danbamitale.epmslib.entities.TransactionType
-import com.danbamitale.epmslib.entities.accountBalances
-import com.danbamitale.epmslib.entities.isApproved
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -57,23 +51,9 @@ import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListe
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.BLUETOOTH
-import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
-import com.woleapp.netpos.contactless.util.Event
-import com.woleapp.netpos.contactless.util.ICCCardHelper
-import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
-import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
-import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.Singletons
-import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
-import com.woleapp.netpos.contactless.util.buildSMSText
-import com.woleapp.netpos.contactless.util.checkNfcStatus
-import com.woleapp.netpos.contactless.util.disposeWith
-import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
-import com.woleapp.netpos.contactless.util.showCardDialog
-import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -275,8 +255,7 @@ class DashboardFragment : BaseFragment() {
                     context,
                     getString(R.string.enter_a_valid_amount),
                     Toast.LENGTH_SHORT,
-                )
-                    .show()
+                ).show()
                 return@setOnClickListener
             } else {
                 binding.priceTextbox.text = etPinEt.text
@@ -780,7 +759,8 @@ class DashboardFragment : BaseFragment() {
         blueToothAddress = itemData["ADDRESS"]!! as String
         blueTitle = itemData["TITLE"] as String?
         blueTitle =
-            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()?.get(0)
+            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+                ?.get(0)
         cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
         blueTitle?.let { listener.setBlueTitle(it) }
     }
@@ -792,10 +772,7 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun BtCardInfo.isValid(): Boolean {
-        return realPan.isNotEmpty() &&
-            track2.isNotEmpty() &&
-            decryptedIcc.isNotEmpty() &&
-            cardType != null
+        return realPan.isNotEmpty() && track2.isNotEmpty() && decryptedIcc.isNotEmpty() && cardType != null
     }
 
     override fun onDestroy() {

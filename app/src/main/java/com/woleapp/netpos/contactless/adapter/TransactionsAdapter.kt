@@ -61,11 +61,13 @@ class TransactionsViewHolder private constructor(val binding: LayoutTransactionI
             if (transactionResponse.responseCode == "00") {
                 binding.transactionStatus.text =
                     "Approved"
-                binding.transactionStatus.setTextColor(R.color.success)
+                binding.transactionStatus.setBackgroundResource(R.drawable.success)
+                binding.transactionStatusImg.setBackgroundResource(R.drawable.approved)
             } else {
                 binding.transactionStatus.text =
                     "Declined"
-                binding.transactionStatus.setTextColor(R.color.failed)
+                binding.transactionStatus.setBackgroundResource(R.drawable.failed)
+                binding.transactionStatusImg.setBackgroundResource(R.drawable.declined)
             }
             binding.holderName.text = transactionResponse.cardHolder
             binding.transactionRef.text = transactionResponse.RRN

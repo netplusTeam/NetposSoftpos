@@ -28,6 +28,7 @@ import com.google.gson.Gson
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.model.payment.PaymentResponseDto
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
 import io.reactivex.Scheduler
@@ -181,7 +182,7 @@ object RandomPurposeUtil {
             when (it.status) {
                 Status.SUCCESS -> {
                     loadingDialog.dismiss()
-                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse) {
+                    if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is PaymentResponseDto) {
                         successAction()
                     } else {
                         // showSnackBar(this.requireView(), getString(R.string.an_error_occurred))
@@ -233,7 +234,7 @@ object RandomPurposeUtil {
                             Status.SUCCESS -> {
                                 // Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
-                                if (it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
+                                if (it.data is PaymentResponseDto || it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
                                     successAction()
                                 } else {
                                     // Log.d("JUSTCHECKING", it.toString())
@@ -249,7 +250,6 @@ object RandomPurposeUtil {
                             Status.ERROR -> {
                                 loadingDialog.cancel()
                                 loadingDialog.dismiss()
-                                // Log.d("MERCHANTERROR", it.data.toString())
                                 if (it.data is String) {
                                     showToast(it.data)
                                 } else {

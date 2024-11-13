@@ -21,8 +21,9 @@ interface NetPosTransactionsService {
         @Body data: DataToLogAfterConnectingToNibss,
     ): Single<Response<LogToBackendResponse>>
 
-    @GET("/pos_transaction/{username}")
+    @GET("/pos_transactions_by_user/{username}")
     fun getPaymentTransactions(
         @Path("username") username: String,
+        @Query("page") page: Int,
     ): Single<Response<PaymentResponseDto>>
 }
