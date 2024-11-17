@@ -313,7 +313,7 @@ dependencies {
     // Lootie
     implementation "com.airbnb.android:lottie:$lottieVersion"
 
-    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
+    implementation 'com.google.firebase:firebase-messaging-ktx:=3.0.8'
 
     //pdf viewer
     implementation 'com.github.mhiew:android-pdf-viewer:3.2.0-beta.1'
@@ -349,6 +349,8 @@ dependencies {
     implementation 'com.dspread.library:dspread_pos_sdk:5.2.2'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.25'
 
+    //iText
+    implementation 'com.itextpdf:itext7-core:7.1.15'
     // App Update
 //    implementation "com.google.android.play:app-update:2.1.0"
 //    implementation "com.google.android.play:app-update-ktx:2.1.0"

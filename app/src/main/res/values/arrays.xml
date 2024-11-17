@@ -68,4 +68,12 @@
         <item>035</item>
         <item>057</item>
     </string-array>
+
+    <string-array name="transaction_types">
+        <item>All</item>
+        <item>POS</item>
+        <item>Transfer</item>
+        <!-- Add other transaction types as needed -->
+    </string-array>
+
 </resources>

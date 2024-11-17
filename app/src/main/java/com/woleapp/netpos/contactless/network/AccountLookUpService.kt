@@ -3,23 +3,20 @@ package com.woleapp.netpos.contactless.network
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.model.*
 import io.reactivex.Single
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.Response
-
 
 interface AccountLookUpService {
-
-//    @POST("account-lookup")
+    //    @POST("account-lookup")
 //    fun findAccount(
 //        @Body accountNumber: AccountNumberLookUpRequest,
 //        @Query("partnerId") partnerId: String,
 //        @Query("deviceSerialId") deviceSerialId: String,
 //    ): Single<AccountNumberLookUpResponse>
-
 
     @POST("account-lookup")
     fun findAccount(
@@ -27,7 +24,6 @@ interface AccountLookUpService {
         @Query("partnerId") partnerId: String,
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<Response<AccountNumberLookUpResponse>>
-
 
     @POST("account-lookup")
     fun findAccountForFirstBankUser(

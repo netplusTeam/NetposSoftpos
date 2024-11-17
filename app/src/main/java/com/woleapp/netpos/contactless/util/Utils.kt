@@ -122,16 +122,18 @@ private fun toReversedDec(bytes: ByteArray): Long {
     return result
 }
 
-val NFC_INTENT_FILTER = arrayOf(
-    IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
-    IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
-)
-val TECH_LIST = arrayOf(
+val NFC_INTENT_FILTER =
     arrayOf(
-        NfcA::class.java.name,
-        IsoDep::class.java.name,
-    ),
-)
+        IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED),
+        IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED),
+    )
+val TECH_LIST =
+    arrayOf(
+        arrayOf(
+            NfcA::class.java.name,
+            IsoDep::class.java.name,
+        ),
+    )
 
 const val NFC_A_TAG = "TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcA]"
 const val NFC_B_TAG = "TAG: Tech [android.nfc.tech.IsoDep, android.nfc.tech.NfcB]"
@@ -151,7 +153,10 @@ fun getCurrentDateTimeAsFormattedString(): String {
         .replace("-", "_").replace(" ", "_at_")
 }
 
-fun validatePasswordMismatch(password: String, confirmPassword: String): Boolean {
+fun validatePasswordMismatch(
+    password: String,
+    confirmPassword: String,
+): Boolean {
     return password == confirmPassword
 }
 
@@ -163,7 +168,12 @@ fun Fragment.checkNfcStatus(): NfcAdapter? {
     val nfcManager: NfcManager =
         requireActivity().getSystemService(AppCompatActivity.NFC_SERVICE) as NfcManager
     return nfcManager.defaultAdapter
+}
 
+fun Fragment.checkNfcStatusRegistration(): NfcAdapter {
+    val nfcManager: NfcManager =
+        requireActivity().getSystemService(AppCompatActivity.NFC_SERVICE) as NfcManager
+    return nfcManager.defaultAdapter
 }
 
 fun getBluetoothKeyIndex(): Int {

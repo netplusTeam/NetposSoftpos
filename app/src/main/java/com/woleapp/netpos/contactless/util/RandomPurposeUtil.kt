@@ -29,6 +29,7 @@ import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.model.payment.PaymentResponseDto
+import com.woleapp.netpos.contactless.model.payment.transactions.AllTransactionsResponseDto
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
 import io.reactivex.Scheduler
@@ -234,7 +235,7 @@ object RandomPurposeUtil {
                             Status.SUCCESS -> {
                                 // Log.d("NOWJUSTCHECKING", it.data.toString())
                                 loadingDialog.dismiss()
-                                if (it.data is PaymentResponseDto || it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse) {
+                                if (it.data is PaymentResponseDto || it.data is PostQrToServerResponse || it.data is PostQrToServerVerveResponseModel || it.data is QrTransactionResponseModel || it.data is VerveTransactionResponse || it.data is AccountNumberLookUpResponse || it.data is ConfirmOTPResponse || it.data is ExistingAccountRegisterResponse || it.data is WemaExistingRegistrationResponse || it.data is String || it.data is FeedbackResponse || it.data is AllTransactionsResponseDto) {
                                     successAction()
                                 } else {
                                     // Log.d("JUSTCHECKING", it.toString())
@@ -421,6 +422,32 @@ object RandomPurposeUtil {
     }
 
     fun getBankName(): String? = bankList[BuildConfig.FLAVOR]
+
+    fun initPartnerName(): String {
+        var partnerName = ""
+        val bankList =
+            mapOf(
+                "firstbank" to "FirstPOS",
+                "easypay" to "FCMBEasyPay",
+                "fcmbeasypay" to "FCMBEasyPay",
+                "easypayfcmb" to "FCMBEasyPay",
+                "providuspos" to "Providus SoftPOS",
+                "stanbic" to "Stanbic",
+                "providus" to "Providus SoftPOS",
+                "providussoftpos" to "Providus SoftPOS",
+                "wemabank" to "WEMA",
+                "zenith" to "ZPOS",
+                "tingo" to "Tingo",
+                "lumina" to "Lumina",
+            )
+
+        for (element in bankList) {
+            if (element.key == BuildConfig.FLAVOR) {
+                partnerName = element.value
+            }
+        }
+        return partnerName
+    }
 
     fun initPartnerId(): String {
         var partnerID = ""

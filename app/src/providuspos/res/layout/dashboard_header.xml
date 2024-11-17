@@ -29,12 +29,13 @@
 
         <ImageView
             android:id="@+id/netpos_logo"
-            android:layout_width="100dp"
-            android:layout_height="80dp"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
             android:layout_margin="8dp"
             android:contentDescription="@string/netpos_logo"
             android:src="@drawable/ic_netpos_white"
             app:layout_constraintBottom_toBottomOf="@+id/username"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -82,7 +83,7 @@
             app:layout_constraintBottom_toTopOf="@+id/parent_constraint_layout"
             app:layout_constraintEnd_toEndOf="@+id/user_image"
             app:layout_constraintStart_toStartOf="@+id/user_image"
-            app:layout_constraintTop_toBottomOf="@id/welcome_label" />
+            app:layout_constraintTop_toBottomOf="@id/parent_constraint_layout" />
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/guideline6"

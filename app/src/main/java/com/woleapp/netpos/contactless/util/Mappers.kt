@@ -8,7 +8,7 @@ import com.danbamitale.epmslib.utils.IsoAccountType
 import com.woleapp.netpos.contactless.model.FirebaseNotificationModelResponse
 import com.woleapp.netpos.contactless.model.GetZenithPayByTransferUserTransactionsModel
 import com.woleapp.netpos.contactless.model.QrTransactionResponseFinalModel
-import com.woleapp.netpos.contactless.util.Mappers.mapToTransactionResponse
+import com.woleapp.netpos.contactless.model.payment.transactions.Transaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 
@@ -90,6 +90,51 @@ object Mappers {
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@mapToTransactionResponse.terminalId
             merchantId = this@mapToTransactionResponse.merchantId
+        }
+    }
+
+    fun Transaction.toTransactionResponse(): TransactionResponse {
+        var currentDateTime = ""
+        currentDateTime =
+            if (this@toTransactionResponse.time.isNullOrEmpty()) {
+                this@toTransactionResponse.dateCreated
+            } else {
+                this@toTransactionResponse.time
+            }
+        return TransactionResponse().apply {
+            transactionType = TransactionType.PURCHASE
+            maskedPan = ""
+            amount =
+                if (this@toTransactionResponse.amount == 0) {
+                    0L
+                } else {
+                    this@toTransactionResponse.amount.toDouble().toLong()
+                }
+            transmissionDateTime = currentDateTime
+            STAN = ""
+            RRN =
+                if (this@toTransactionResponse.rrn.isNullOrEmpty()) {
+                    this@toTransactionResponse.transaction_reference
+                } else {
+                    this@toTransactionResponse.rrn
+                }
+            responseCode =
+                if (this@toTransactionResponse.responseCode.isNullOrEmpty()) {
+                    "00"
+                } else {
+                    this@toTransactionResponse.responseCode
+                }
+            cardLabel = ""
+            cardHolder = "CUSTOMER"
+//                if (this@toTransactionResponse.cardHolder.isEmpty()) {
+//                    this@toTransactionResponse.payer_account_name
+//                } else {
+//                    "CUSTOMER"
+//                }
+            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+            accountType = IsoAccountType.DEFAULT_UNSPECIFIED
+            terminalId = this@toTransactionResponse.terminalId
+            merchantId = this@toTransactionResponse.merchantId
         }
     }
 }

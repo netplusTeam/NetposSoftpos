@@ -20,7 +20,7 @@ import com.neovisionaries.i18n.CurrencyCode
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.model.*
-import com.woleapp.netpos.contactless.model.payment.PaymentResponseDto
+import com.woleapp.netpos.contactless.model.payment.transactions.AllTransactionsResponseDto
 import com.woleapp.netpos.contactless.network.ContactlessQrPaymentRepository
 import com.woleapp.netpos.contactless.network.NetPosTransactionsService
 import com.woleapp.netpos.contactless.network.RrnApiService
@@ -125,9 +125,9 @@ class SalesViewModel
             MutableLiveData()
         val payThroughMPGSResponse: LiveData<Resource<PayThroughMPGSResponse>> get() = _payThroughMPGSResponse
 
-        private val _paymentTransactionsResponse: MutableLiveData<Resource<PaymentResponseDto>> =
+        private val _paymentTransactionsResponse: MutableLiveData<Resource<AllTransactionsResponseDto>> =
             MutableLiveData()
-        val paymentTransactionsResponse: LiveData<Resource<PaymentResponseDto>> get() = _paymentTransactionsResponse
+        val paymentTransactionsResponse: LiveData<Resource<AllTransactionsResponseDto>> get() = _paymentTransactionsResponse
 
         private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
         val payThroughMPGSMessage: LiveData<Event<String>>
@@ -203,9 +203,13 @@ class SalesViewModel
 
         fun getPaymentTransactions(
             username: String,
+            merchantId: String,
+            transactionType: String,
             page: Int,
         ) = netposTransactionApiService.getPaymentTransactions(
             username,
+            merchantId,
+            transactionType,
             page,
         ).flatMap {
             if (it.isSuccessful) {

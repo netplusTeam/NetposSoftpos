@@ -358,7 +358,7 @@
                 app:buttonInProgress="@{viewmodel.authInProgress}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/confirm_password_field" />
+                app:layout_constraintTop_toBottomOf="@id/checkbox_layout" />
 
 
             <ProgressBar
@@ -372,6 +372,24 @@
                 app:layout_constraintBottom_toBottomOf="@id/btn_login"
                 app:layout_constraintEnd_toEndOf="@id/btn_login"
                 app:layout_constraintTop_toTopOf="@id/btn_login" />
+
+            <LinearLayout
+                android:id="@+id/checkbox_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="@+id/email_field"
+                app:layout_constraintStart_toStartOf="@+id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/confirm_password_field">
+
+                <CheckBox
+                    android:id="@+id/myCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
 
 
             <!--            <androidx.appcompat.widget.AppCompatSpinner-->

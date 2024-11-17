@@ -269,15 +269,15 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        binding.btnConfirm.setOnClickListener {
-            if (nfcAdapter != null) {
-                viewModel.validateFieldForNFC()
-            } else {
-                if (viewModel.validateFieldForBluetooth()) {
-                    initIntent()
-                }
-            }
-        }
+//        binding.btnConfirm.setOnClickListener {
+//            if (nfcAdapter != null) {
+//                viewModel.validateFieldForNFC()
+//            } else {
+//                if (viewModel.validateFieldForBluetooth()) {
+//                    initIntent()
+//                }
+//            }
+//        }
 
         // toast the error messages
         viewModel.payThroughMPGSMessage.observe(viewLifecycleOwner) {

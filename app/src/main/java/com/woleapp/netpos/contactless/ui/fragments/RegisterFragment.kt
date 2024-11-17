@@ -1,7 +1,12 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +25,9 @@ import com.woleapp.netpos.contactless.model.FBNBranch
 import com.woleapp.netpos.contactless.model.FBNState
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerName
+import com.woleapp.netpos.contactless.util.checkNfcStatus
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import com.woleapp.netpos.contactless.viewmodels.RegistrationViewModel
 import kotlinx.android.synthetic.main.item_mcc.view.*
@@ -35,10 +43,12 @@ class RegisterFragment : BaseFragment() {
     private lateinit var deviceSerialId: String
     private lateinit var listOfStates: String
     private lateinit var listOfBranches: String
+    private var cr100Checked: Boolean = false
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
     private lateinit var partnerID: String
     private lateinit var date: Calendar
+    private var nfcAdapter: NfcAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -123,6 +133,25 @@ class RegisterFragment : BaseFragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
         partnerID = initPartnerId()
+        nfcAdapter = checkNfcStatus()
+
+        if (nfcAdapter != null) {
+            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+            if (nfcAdapter?.isEnabled == false) {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+        } else {
+            binding.checkboxLayout.visibility = View.VISIBLE
+        }
+
         if (BuildConfig.FLAVOR.contains("zenith")) {
             binding.fragmentState.visibility = View.VISIBLE
             binding.fragmentState.hint = "Select D.O.B"
@@ -203,7 +232,24 @@ class RegisterFragment : BaseFragment() {
 
         register = binding.btnLogin
         register.setOnClickListener {
-            viewModel.register(requireContext(), partnerID, deviceSerialId)
+            if (nfcAdapter != null) {
+                viewModel.register(requireContext(), partnerID, deviceSerialId)
+            } else {
+                if (cr100Checked) {
+                    viewModel.register(requireContext(), partnerID, deviceSerialId)
+                } else {
+                    showToast("Please request for an NFC device")
+                }
+            }
+        }
+
+        // set checkbox message
+        binding.myCheckBox.text = "By checking this box, you confirm your request for an NFC kit from ${initPartnerName()}"
+
+        // Set a listener on the CheckBox
+        binding.myCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            cr100Checked = isChecked
+            binding.myCheckBox.buttonTintList = ColorStateList.valueOf(Color.YELLOW)
         }
     }
 

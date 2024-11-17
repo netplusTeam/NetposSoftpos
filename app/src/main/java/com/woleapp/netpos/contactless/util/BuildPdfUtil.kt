@@ -16,6 +16,12 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.itextpdf.kernel.colors.ColorConstants
+import com.itextpdf.kernel.font.PdfFontFactory
+import com.itextpdf.kernel.pdf.PdfReader
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.layout.property.TextAlignment
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.databinding.LayoutPosReceiptPdfBinding
@@ -37,12 +43,13 @@ fun initViewsForPdfLayout(
         is TransactionResponse -> {
             initViewsForPosReceipt((pdfView as LayoutPosReceiptPdfBinding), receipt)
         }
-        else -> { /* Do nothing */
+        else -> { // Do nothing
         }
     }
 }
 
 fun sharePdf(
+    receiptId: String,
     outputFile: File,
     host: LifecycleOwner,
 ) {
@@ -50,17 +57,115 @@ fun sharePdf(
 //        val uri: Uri = Uri.fromFile(outputFile)
     // For targetSdkVersion >= 24
     val context: Context = if (host is Fragment) host.requireContext() else (host as Activity)
-    val uri: Uri = FileProvider.getUriForFile(
-        context,
-        context.applicationContext?.packageName + ".provider",
-        outputFile,
-    )
-    val share = Intent().apply {
-        action = Intent.ACTION_SEND
-        type = "application/pdf"
-        putExtra(Intent.EXTRA_STREAM, uri)
+
+    // Add watermark if the PDF is regenerated
+    // Check if the receipt is regenerated
+    if (isReceiptRegenerated(receiptId, context)) {
+        addWatermarkToPdf(outputFile)
+    } else {
+        // Mark as regenerated for future references
+        markReceiptAsRegenerated(receiptId, context)
     }
+
+    val uri: Uri =
+        FileProvider.getUriForFile(
+            context,
+            context.applicationContext?.packageName + ".provider",
+            outputFile,
+        )
+    val share =
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+        }
     context.startActivity(share)
+}
+
+fun sharePdf(
+    outputFile: File,
+    host: LifecycleOwner,
+) {
+    val context: Context = if (host is Fragment) host.requireContext() else (host as Activity)
+
+    // Generate a unique identifier for the file (e.g., using file name or path)
+    val fileId = outputFile.name.hashCode().toString()
+
+    // Add watermark if the PDF is regenerated
+    if (isReceiptRegenerated(fileId, context)) {
+        addWatermarkToPdf(outputFile)
+    } else {
+        markReceiptAsRegenerated(fileId, context)
+    }
+
+    val uri: Uri =
+        FileProvider.getUriForFile(
+            context,
+            context.applicationContext?.packageName + ".provider",
+            outputFile,
+        )
+    val share =
+        Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+        }
+    context.startActivity(share)
+}
+
+private fun isReceiptRegenerated(
+    fileId: String,
+    context: Context,
+): Boolean {
+    val sharedPreferences = context.getSharedPreferences("ReceiptsPrefs", Context.MODE_PRIVATE)
+    return sharedPreferences.getBoolean(fileId, false)
+}
+
+private fun markReceiptAsRegenerated(
+    fileId: String,
+    context: Context,
+) {
+    val sharedPreferences = context.getSharedPreferences("ReceiptsPrefs", Context.MODE_PRIVATE)
+    sharedPreferences.edit().putBoolean(fileId, true).apply()
+}
+
+fun addWatermarkToPdf(file: File) {
+    try {
+        val pdfReader = PdfReader(file)
+        val outputFileName = file.path.replace(".pdf", "_watermarked.pdf")
+        val pdfWriter = PdfWriter(outputFileName)
+        val pdfDocument = com.itextpdf.kernel.pdf.PdfDocument(pdfReader, pdfWriter)
+
+        val font = PdfFontFactory.createFont(com.itextpdf.io.font.constants.StandardFonts.HELVETICA)
+
+        for (i in 1..pdfDocument.numberOfPages) { // Loop through all pages
+            val page = pdfDocument.getPage(i)
+            val canvas = PdfCanvas(page)
+            val pageSize = page.pageSize
+            val watermarkText = "REGENERATED"
+
+            // Use the Canvas class to add aligned text
+            val textCanvas = com.itextpdf.layout.Canvas(canvas, pdfDocument, pageSize)
+            textCanvas.setFont(font)
+            textCanvas.setFontSize(60f)
+            textCanvas.setFontColor(ColorConstants.GRAY)
+            textCanvas.showTextAligned(
+                watermarkText,
+                pageSize.width / 2,
+                pageSize.height / 2,
+                TextAlignment.CENTER,
+            )
+        }
+
+        pdfDocument.close()
+
+        // Replace original file with the watermarked version
+        val watermarkedFile = File(outputFileName)
+        if (file.exists()) file.delete()
+        watermarkedFile.renameTo(file)
+    } catch (e: Exception) {
+        e.printStackTrace() // Handle exceptions appropriately
+    }
 }
 
 fun createPdf(
@@ -98,15 +203,16 @@ fun createPdf(
 
     pdfView.root.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
 
-    val bitmap = pdfView.root.measuredWidth.let {
-        pdfView.root.measuredHeight.let { it1 ->
-            Bitmap.createBitmap(
-                it,
-                it1,
-                Bitmap.Config.ARGB_8888,
-            )
+    val bitmap =
+        pdfView.root.measuredWidth.let {
+            pdfView.root.measuredHeight.let { it1 ->
+                Bitmap.createBitmap(
+                    it,
+                    it1,
+                    Bitmap.Config.ARGB_8888,
+                )
+            }
         }
-    }
 
     val canvas = bitmap?.let { Canvas(it) }
     if (canvas != null) {
@@ -116,19 +222,21 @@ fun createPdf(
     if (bitmap != null) {
         Bitmap.createScaledBitmap(bitmap, 595, 842, true)
     }
-    val pdfDocument = PdfDocument()
-    val pageInfo = bitmap?.let {
-        PdfDocument.PageInfo.Builder(it.width, it.height, 1).create()
-    }
+    val pdfDocument = android.graphics.pdf.PdfDocument()
+    val pageInfo =
+        bitmap?.let {
+            android.graphics.pdf.PdfDocument.PageInfo.Builder(it.width, it.height, 1).create()
+        }
     val page = pdfDocument.startPage(pageInfo)
     if (bitmap != null) {
         page.canvas.drawBitmap(bitmap, 0F, 0F, null)
     }
     pdfDocument.finishPage(page)
-    val filePath = File(
-        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-        "NetPOS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf",
-    )
+    val filePath =
+        File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            "NetPOS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf",
+        )
 
     pdfDocument.writeTo(FileOutputStream(filePath))
     pdfDocument.close()
@@ -142,15 +250,17 @@ private fun initViewsForQrReceipt(
 ) {
     pdfView.apply {
         responseFromWebView?.let { respFromWebView: QrTransactionResponseFinalModel ->
-            merchantName.text = pdfView.root.context.getString(
-                R.string.merchant_name_place_holder,
-                Singletons.getCurrentlyLoggedInUser()?.business_name
-                    ?: "${BuildConfig.FLAVOR} POS MERCHANT",
-            )
-            cardOwner.text = pdfView.root.context.getString(
-                R.string.card_owner_place_holder,
-                respFromWebView.customerName,
-            )
+            merchantName.text =
+                pdfView.root.context.getString(
+                    R.string.merchant_name_place_holder,
+                    Singletons.getCurrentlyLoggedInUser()?.business_name
+                        ?: "${BuildConfig.FLAVOR} POS MERCHANT",
+                )
+            cardOwner.text =
+                pdfView.root.context.getString(
+                    R.string.card_owner_place_holder,
+                    respFromWebView.customerName,
+                )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
@@ -161,14 +271,16 @@ private fun initViewsForQrReceipt(
                     R.string.date_time_place_holder,
                     respFromWebView.transmissionDateTime,
                 )
-            transAmount.text = pdfView.appVersion.context.getString(
-                R.string.amount_place_holder,
-                divideLongBy100(respFromWebView.amount).formatCurrencyAmountUsingCurrentModule(),
-            )
-            orderId.text = pdfView.appVersion.context.getString(
-                R.string.order_id_place_holder,
-                respFromWebView.rrnOrderId,
-            )
+            transAmount.text =
+                pdfView.appVersion.context.getString(
+                    R.string.amount_place_holder,
+                    divideLongBy100(respFromWebView.amount).formatCurrencyAmountUsingCurrentModule(),
+                )
+            orderId.text =
+                pdfView.appVersion.context.getString(
+                    R.string.order_id_place_holder,
+                    respFromWebView.rrnOrderId,
+                )
 //            narration.text =
 //                pdfView.appVersion.context.getString(
 //                    R.string.narration_place_holder,
@@ -189,18 +301,21 @@ private fun initViewsForQrReceipt(
                     R.string.response_code_place_holder,
                     respFromWebView.responseCode,
                 )
-            message.text = pdfView.appVersion.context.getString(
-                R.string.message_place_holder,
-                respFromWebView.message,
-            )
-            maskedPan.text = pdfView.appVersion.context.getString(
-                R.string.masked_pan_place_holder,
-                respFromWebView.maskedPan,
-            )
-            appVersion.text = pdfView.appVersion.context.getString(
-                R.string.app_version_place_holder,
-                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
-            )
+            message.text =
+                pdfView.appVersion.context.getString(
+                    R.string.message_place_holder,
+                    respFromWebView.message,
+                )
+            maskedPan.text =
+                pdfView.appVersion.context.getString(
+                    R.string.masked_pan_place_holder,
+                    respFromWebView.maskedPan,
+                )
+            appVersion.text =
+                pdfView.appVersion.context.getString(
+                    R.string.app_version_place_holder,
+                    "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
+                )
         }
     }
 }
@@ -211,11 +326,12 @@ private fun initViewsForPosReceipt(
 ) {
     pdfView.apply {
         transResponse.let {
-            merchantName.text = pdfView.root.context.getString(
-                R.string.merchant_name_place_holder,
-                Singletons.getCurrentlyLoggedInUser()?.business_name
-                    ?: "${BuildConfig.FLAVOR} POS MERCHANT",
-            )
+            merchantName.text =
+                pdfView.root.context.getString(
+                    R.string.merchant_name_place_holder,
+                    Singletons.getCurrentlyLoggedInUser()?.business_name
+                        ?: "${BuildConfig.FLAVOR} POS MERCHANT",
+                )
             terminalIdPlaceHolder.text =
                 pdfView.appVersion.context.getString(
                     R.string.terminal_id_place_holder,
@@ -226,10 +342,11 @@ private fun initViewsForPosReceipt(
                     R.string.date_time_place_holder,
                     it.transactionTimeInMillis.formatDate(),
                 )
-            transAmount.text = pdfView.appVersion.context.getString(
-                R.string.amount_place_holder,
-                divideLongBy100(it.amount).formatCurrencyAmountUsingCurrentModule(),
-            )
+            transAmount.text =
+                pdfView.appVersion.context.getString(
+                    R.string.amount_place_holder,
+                    divideLongBy100(it.amount).formatCurrencyAmountUsingCurrentModule(),
+                )
 //            stan.text =
 //                pdfView.appVersion.context.getString(
 //                    R.string.stan_place_holder,
@@ -250,21 +367,24 @@ private fun initViewsForPosReceipt(
                     R.string.response_code_place_holder,
                     it.responseCode,
                 )
-            message.text = pdfView.appVersion.context.getString(
-                R.string.message_place_holder,
-                it.responseMessage,
-            )
+            message.text =
+                pdfView.appVersion.context.getString(
+                    R.string.message_place_holder,
+                    it.responseMessage,
+                )
             cardType.text =
                 pdfView.appVersion.context.getString(R.string.card_type_place_holder, it.cardLabel)
-            appVersion.text = pdfView.appVersion.context.getString(
-                R.string.app_version_place_holder,
-                "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
-            )
+            appVersion.text =
+                pdfView.appVersion.context.getString(
+                    R.string.app_version_place_holder,
+                    "${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}",
+                )
             rrn.text = pdfView.appVersion.context.getString(R.string.rrn_place_holder, it.RRN)
-            maskedPan.text = pdfView.appVersion.context.getString(
-                R.string.masked_pan_place_holder,
-                it.maskedPan,
-            )
+            maskedPan.text =
+                pdfView.appVersion.context.getString(
+                    R.string.masked_pan_place_holder,
+                    it.maskedPan,
+                )
         }
     }
 }

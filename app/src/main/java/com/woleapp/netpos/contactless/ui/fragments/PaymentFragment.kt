@@ -2,10 +2,11 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.Spinner
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,31 +30,21 @@ import javax.inject.Named
 
 @AndroidEntryPoint
 class PaymentFragment : BaseFragment() {
-    private lateinit var globalTransactions: String
-
-    companion object {
-        fun newInstance(action: String = HISTORY_ACTION_DEFAULT) =
-            TransactionHistoryFragment().apply {
-                arguments =
-                    Bundle().apply {
-                        glo = action
-                        putString(HISTORY_ACTION, action)
-                    }
-            }
-    }
-
+    private lateinit var merchantId: String
     private lateinit var binding: FragmentPaymentBinding
     private val salesViewModel by activityViewModels<SalesViewModel>()
     private val viewModel by activityViewModels<TransactionsViewModel>()
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: AllTransactionsAdapter
     private lateinit var username: String
-    private var items: MutableList<Transaction> = mutableListOf()
+    private var items: MutableList<com.woleapp.netpos.contactless.model.payment.transactions.Transaction> = mutableListOf()
     private lateinit var loader: AlertDialog
     private var currentPage = 1
     private var isLoading = false
     private var isLastPage = false
     private val PAGE_SIZE = 10
+    private var selectedTransactionType = "all" // Default value
+    private lateinit var adapterListener: TransactionClickListener // Default value
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -65,16 +56,6 @@ class PaymentFragment : BaseFragment() {
     @Inject
     @Named("main-scheduler")
     lateinit var mainThreadScheduler: Scheduler
-
-    val adapterListener =
-        object : TransactionClickListener {
-            override fun invoke(p1: TransactionResponse) {
-                viewModel.setSelectedTransaction(p1)
-                viewModel.setAction(HISTORY_ACTION_REPRINT)
-//                globalAction = HISTORY_ACTION_REPRINT
-                addFragmentWithoutRemove(TransactionDetailsFragment())
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,11 +73,40 @@ class PaymentFragment : BaseFragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        adapterListener =
+            object : TransactionClickListener {
+                override fun invoke(p1: TransactionResponse) {
+                    viewModel.setSelectedTransaction(p1)
+                    viewModel.setAction(HISTORY_ACTION_REPRINT)
+                    addFragmentWithoutRemove(TransactionDetailsFragment())
+                }
+            }
         loader = alertDialog(requireContext())
         username = Singletons.gson.fromJson(Prefs.getString(PREF_USER), User::class.java).email.toString()
+        merchantId = Singletons.gson.fromJson(Prefs.getString(PREF_USER), User::class.java).netplusPayMid.toString()
 
         // Load initial data
         recyclerView = binding.recyclerView
+
+        val transactionTypeSpinner: Spinner = binding.transactionTypeSpinner
+        transactionTypeSpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    val selectedType = parent.getItemAtPosition(position).toString()
+                    selectedTransactionType = transactionTypeMap[selectedType] ?: "all" // Default to "all" if not found
+
+                    loadMoreItems()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // Do nothing or handle as needed
+                }
+            }
 
         loadMoreItems()
 
@@ -129,7 +139,7 @@ class PaymentFragment : BaseFragment() {
     private fun loadMoreItems() {
         loader.show()
         observeServerResponse(
-            salesViewModel.getPaymentTransactions(username, currentPage),
+            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, currentPage),
             loader,
             compositeDisposable,
             ioScheduler,
@@ -145,7 +155,6 @@ class PaymentFragment : BaseFragment() {
 
             isLoading = false
             currentPage++
-            Log.d("GOTHEREEEEE", "GOTHERE, $newItems")
             // Check if we received less than the expected page size, marking it as the last page
             if (newItems != null) {
                 if (newItems.size < PAGE_SIZE) {
@@ -154,4 +163,12 @@ class PaymentFragment : BaseFragment() {
             }
         }
     }
+
+    private val transactionTypeMap =
+        mapOf(
+            "All" to "all",
+            "POS" to "pos",
+            "Transfer" to "pbt",
+            // Add other mappings as needed
+        )
 }

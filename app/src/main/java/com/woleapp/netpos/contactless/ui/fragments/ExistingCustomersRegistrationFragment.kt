@@ -1,7 +1,10 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
+import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +30,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
+import com.woleapp.netpos.contactless.util.checkNfcStatus
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.util.validatePasswordMismatch
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -60,6 +64,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var businessAddress: String
     private lateinit var email: String
     private lateinit var phone: String
+    private var nfcAdapter: NfcAdapter? = null
+    private var cr100Checked: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,9 +88,28 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ) {
         super.onViewCreated(view, savedInstanceState)
-
         partnerID = initPartnerId()
         deviceSerialID = getDeviceId(requireContext())
+
+        nfcAdapter = checkNfcStatus()
+
+        if (nfcAdapter != null) {
+            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+            if (nfcAdapter?.isEnabled == false) {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+        } else {
+            binding.checkboxLayout.visibility = View.VISIBLE
+        }
+
         viewModel.registerMessage.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
                 //   Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
@@ -206,10 +231,23 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") ||
                 BuildConfig.FLAVOR.contains("providuspos")
             ) {
-                registerForProvidus()
+                if (nfcAdapter != null) {
+                    registerForProvidus()
+                } else {
+                    if (cr100Checked) {
+                        registerForProvidus()
+                    } else {
+                        showToast("Please request for an NFC device")
+                    }
+                }
             } else {
                 register()
             }
+        }
+
+        // Set a listener on the CheckBox
+        binding.myCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            cr100Checked = isChecked
         }
     }
 

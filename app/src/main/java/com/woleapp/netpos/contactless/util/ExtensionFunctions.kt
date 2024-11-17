@@ -25,18 +25,21 @@ import okhttp3.ResponseBody
 import retrofit2.HttpException
 import timber.log.Timber
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-fun Long.formatDate(): String? =
-    SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date(this))
+fun Long.formatDate(): String? = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date(this))
 
 fun Disposable.disposeWith(compositeDisposable: CompositeDisposable) {
     compositeDisposable.add(this)
 }
 
-fun xorHex(a: String, b: String): String? {
+fun xorHex(
+    a: String,
+    b: String,
+): String? {
     // TODO: Validation
     val chars = CharArray(a.length)
     for (i in chars.indices) {
@@ -63,7 +66,11 @@ private fun toHex(nybble: Int): Char {
     return "0123456789ABCDEF"[nybble]
 }
 
-fun copyTextToClipboard(context: Context, label: String, text: String) {
+fun copyTextToClipboard(
+    context: Context,
+    label: String,
+    text: String,
+) {
     val clipboard: ClipboardManager? =
         context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
     val clip = ClipData.newPlainText(label, text)
@@ -130,22 +137,27 @@ fun Throwable.getResponseBody(): String {
 
 fun Throwable.isHttpException(): Boolean = (this is HttpException && this.code() in 400..599)
 
-fun Throwable.isHttpStatusCode(statusCode: Int): Boolean =
-    (this is HttpException && this.code() == statusCode)
+fun Throwable.isHttpStatusCode(statusCode: Int): Boolean = (this is HttpException && this.code() == statusCode)
 
-fun getPlansJson(context: Context): String = context.resources.openRawResource(R.raw.plans)
-    .bufferedReader().use { it.readText() }
+fun getPlansJson(context: Context): String =
+    context.resources.openRawResource(R.raw.plans)
+        .bufferedReader().use { it.readText() }
 
 fun getServiceProviderPlansJson(context: Context): String =
     context.resources.openRawResource(R.raw.data_plans)
         .bufferedReader().use { it.readText() }
 
-fun encodeAsBitmap(source: String, width: Int, height: Int): Bitmap? {
-    val result: BitMatrix = try {
-        MultiFormatWriter().encode(source, BarcodeFormat.QR_CODE, width, height, null)
-    } catch (e: Exception) {
-        return null
-    }
+fun encodeAsBitmap(
+    source: String,
+    width: Int,
+    height: Int,
+): Bitmap? {
+    val result: BitMatrix =
+        try {
+            MultiFormatWriter().encode(source, BarcodeFormat.QR_CODE, width, height, null)
+        } catch (e: Exception) {
+            return null
+        }
 
     val w = result.width
     val h = result.height
@@ -210,5 +222,20 @@ internal class DecimalDigitsInputFilter(digitsBeforeZero: Int = 8, digitsAfterZe
     ): CharSequence? {
         val matcher: Matcher = mPattern.matcher(dest)
         return if (!matcher.matches()) "" else null
+    }
+}
+
+fun readableStringToLocal(dateString: String): String {
+    // Handle input as an ISO 8601 date-time string
+    try {
+        val instant = java.time.Instant.parse(dateString) // Parses "2024-11-14T16:02:38.000Z"
+        val zonedDateTime = instant.atZone(java.time.ZoneId.of("UTC"))
+        val outputFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+        return outputFormatter.format(zonedDateTime) // Convert to desired format
+    } catch (e: java.time.format.DateTimeParseException) {
+        return "Invalid date format: ${e.message}"
+    } catch (e: Exception) {
+        return "Error: ${e.message}"
     }
 }

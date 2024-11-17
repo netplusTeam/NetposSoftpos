@@ -11,7 +11,7 @@
         android:id="@+id/payments"
         android:enabled="true"
         android:icon="@drawable/ic_trans"
-        android:title="Payments" />
+        android:title="Transactions" />
 
     <item
         android:id="@+id/scanQR"
@@ -23,7 +23,7 @@
         android:id="@+id/transaction"
         android:enabled="true"
         android:icon="@drawable/ic_trans"
-        android:title="Transactions" />
+        android:title="PAY" />
 
     <item
         android:id="@+id/endOfDay"

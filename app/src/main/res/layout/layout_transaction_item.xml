@@ -8,9 +8,11 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/transactionConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
+        android:layout_margin="@dimen/dimen_5dp"
+        android:background="@drawable/transaction_background_layout"
         android:clickable="true"
         android:focusable="true"
         android:paddingVertical="8dp"
@@ -18,11 +20,13 @@
 
         <TextView
             android:id="@+id/holder_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_10"
             android:textColor="@android:color/black"
+            app:layout_constraintEnd_toStartOf="@+id/transaction_status_img"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Jane Doe" />
