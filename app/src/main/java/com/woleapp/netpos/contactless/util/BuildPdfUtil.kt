@@ -5,11 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import androidx.core.content.FileProvider
 import androidx.databinding.ViewDataBinding
@@ -18,6 +18,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFontFactory
+import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfReader
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
@@ -49,84 +50,62 @@ fun initViewsForPdfLayout(
 }
 
 fun sharePdf(
-    receiptId: String,
     outputFile: File,
     host: LifecycleOwner,
 ) {
-    // This is the way to do it for targetSdkVersion < 24
-//        val uri: Uri = Uri.fromFile(outputFile)
-    // For targetSdkVersion >= 24
     val context: Context = if (host is Fragment) host.requireContext() else (host as Activity)
 
-    // Add watermark if the PDF is regenerated
-    // Check if the receipt is regenerated
+    // Extract the RRN from the file name
+    val receiptId = deriveReceiptId(outputFile)
+
+    // Check and add watermark if the receipt is regenerated
     if (isReceiptRegenerated(receiptId, context)) {
         addWatermarkToPdf(outputFile)
     } else {
-        // Mark as regenerated for future references
+        // Mark the receipt as regenerated for future checks
         markReceiptAsRegenerated(receiptId, context)
     }
 
+    // Share the PDF
     val uri: Uri =
         FileProvider.getUriForFile(
             context,
-            context.applicationContext?.packageName + ".provider",
+            context.applicationContext.packageName + ".provider",
             outputFile,
         )
-    val share =
+    val shareIntent =
         Intent().apply {
             action = Intent.ACTION_SEND
             type = "application/pdf"
             putExtra(Intent.EXTRA_STREAM, uri)
         }
-    context.startActivity(share)
+    context.startActivity(shareIntent)
 }
 
-fun sharePdf(
-    outputFile: File,
-    host: LifecycleOwner,
-) {
-    val context: Context = if (host is Fragment) host.requireContext() else (host as Activity)
-
-    // Generate a unique identifier for the file (e.g., using file name or path)
-    val fileId = outputFile.name.hashCode().toString()
-
-    // Add watermark if the PDF is regenerated
-    if (isReceiptRegenerated(fileId, context)) {
-        addWatermarkToPdf(outputFile)
-    } else {
-        markReceiptAsRegenerated(fileId, context)
-    }
-
-    val uri: Uri =
-        FileProvider.getUriForFile(
-            context,
-            context.applicationContext?.packageName + ".provider",
-            outputFile,
-        )
-    val share =
-        Intent().apply {
-            action = Intent.ACTION_SEND
-            type = "application/pdf"
-            putExtra(Intent.EXTRA_STREAM, uri)
-        }
-    context.startActivity(share)
+// Function to derive a unique receipt identifier from the filename
+private fun deriveReceiptId(file: File): String {
+    // Extract the RRN assuming the filename format contains the RRN as a part, e.g., "NetPOS_Receipt_<DATE>_<RRN>.pdf"
+    val fileName = file.nameWithoutExtension
+    val rrnPattern = Regex("NetPOS_Receipt_\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}_(\\d+)")
+    val matchResult = rrnPattern.find(fileName)
+    Log.d("SHOW_RESULTS", "${matchResult?.groups?.get(1)?.value}")
+    return matchResult?.groups?.get(1)?.value ?: "UNKNOWN"
 }
 
 private fun isReceiptRegenerated(
-    fileId: String,
+    receiptId: String,
     context: Context,
 ): Boolean {
     val sharedPreferences = context.getSharedPreferences("ReceiptsPrefs", Context.MODE_PRIVATE)
-    return sharedPreferences.getBoolean(fileId, false)
+    return sharedPreferences.getBoolean(receiptId, false)
 }
 
 private fun markReceiptAsRegenerated(
-    fileId: String,
+    receiptId: String,
     context: Context,
 ) {
     val sharedPreferences = context.getSharedPreferences("ReceiptsPrefs", Context.MODE_PRIVATE)
-    sharedPreferences.edit().putBoolean(fileId, true).apply()
+    sharedPreferences.edit().putBoolean(receiptId, true).apply()
 }
 
 fun addWatermarkToPdf(file: File) {
@@ -166,6 +145,64 @@ fun addWatermarkToPdf(file: File) {
     } catch (e: Exception) {
         e.printStackTrace() // Handle exceptions appropriately
     }
+}
+
+fun createPdfWithRRN(
+    pdfView: ViewDataBinding,
+    host: LifecycleOwner,
+    receiptContent: String, // Assuming receipt content is provided as StringBuilder
+): File {
+    // Extract RRN using a regular expression
+    val rrnPattern = Regex("RRN:\\s*(\\d+)")
+    val rrnMatch = rrnPattern.find(receiptContent)
+    val rrn = rrnMatch?.groups?.get(1)?.value ?: "UNKNOWN"
+
+    // Create filename with RRN included
+    val fileName = "NetPOS_Receipt_${getCurrentDateTimeAsFormattedString()}_$rrn.pdf"
+
+    // Existing logic to create a PDF
+    val displayMetrics = DisplayMetrics()
+    if (host is Fragment) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            host.context?.display?.getRealMetrics(displayMetrics)
+        } else {
+            host.activity?.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        }
+    } else {
+        host as Activity
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            host.display?.getRealMetrics(displayMetrics)
+        } else {
+            host.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
+        }
+    }
+
+    pdfView.root.measure(
+        View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels, View.MeasureSpec.EXACTLY),
+    )
+
+    pdfView.root.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+    val bitmap = Bitmap.createBitmap(pdfView.root.measuredWidth, pdfView.root.measuredHeight, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    pdfView.root.draw(canvas)
+
+    val pdfDocument = android.graphics.pdf.PdfDocument()
+    val pageInfo = android.graphics.pdf.PdfDocument.PageInfo.Builder(bitmap.width, bitmap.height, 1).create()
+    val page = pdfDocument.startPage(pageInfo)
+    page.canvas.drawBitmap(bitmap, 0f, 0f, null)
+    pdfDocument.finishPage(page)
+
+    // Create file in Downloads directory
+    val filePath =
+        File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            fileName,
+        )
+    pdfDocument.writeTo(FileOutputStream(filePath))
+    pdfDocument.close()
+
+    return filePath
 }
 
 fun createPdf(

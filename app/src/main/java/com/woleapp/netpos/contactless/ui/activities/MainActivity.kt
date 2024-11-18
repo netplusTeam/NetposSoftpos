@@ -1104,13 +1104,13 @@ class MainActivity :
                                 getString(R.string.download_share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                             receiptDialogBinding.transactionContent.text = it.replace("Card Owner: CUSTOMER", "")
-                            // Log.d("DIALOG_DATA", it)
+                            Log.d("DIALOG_DATA", it)
                             show()
-                            receiptDialogBinding.sendButton.setOnClickListener {
+                            receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
-                                receiptPdf = createPdf(pdfView, this@MainActivity)
+                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, it)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
