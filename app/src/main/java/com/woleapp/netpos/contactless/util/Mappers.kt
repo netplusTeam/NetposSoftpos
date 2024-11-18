@@ -108,7 +108,7 @@ object Mappers {
                 if (this@toTransactionResponse.amount == 0) {
                     0L
                 } else {
-                    this@toTransactionResponse.amount.toDouble().toLong()
+                    this@toTransactionResponse.amount.times(100).toDouble().toLong()
                 }
             transmissionDateTime = currentDateTime
             STAN = ""

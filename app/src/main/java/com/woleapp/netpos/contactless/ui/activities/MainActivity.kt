@@ -435,8 +435,8 @@ class MainActivity :
                         R.id.homeFragment -> {
                             showFragment(DashboardFragment(), "Dashboard")
                         }
-                        R.id.payments -> {
-                            showFragment(PaymentFragment(), "Payments")
+                        R.id.pay -> {
+                            showFragment(TransactionsFragment(), "Transactions")
                         }
                         R.id.scanQR -> {
                             val dialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.dialog_layout, null)
@@ -465,8 +465,8 @@ class MainActivity :
 
                             dialog.show()
                         }
-                        R.id.transaction -> {
-                            showFragment(TransactionsFragment(), "Transactions")
+                        R.id.payment -> {
+                            showFragment(PaymentFragment(), "Payments")
                         }
 //                        R.id.endOfDay -> {
 //                            showCalendarDialog()

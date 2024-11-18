@@ -8,10 +8,10 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/payments"
+        android:id="@+id/pay"
         android:enabled="true"
-        android:icon="@drawable/ic_trans"
-        android:title="Payments" />
+        android:icon="@drawable/pay"
+        android:title="Pay" />
 
     <item
         android:id="@+id/scanQR"
@@ -20,7 +20,7 @@
         android:title="QR" />
 
     <item
-        android:id="@+id/transaction"
+        android:id="@+id/payment"
         android:enabled="true"
         android:icon="@drawable/ic_trans"
         android:title="Transactions" />

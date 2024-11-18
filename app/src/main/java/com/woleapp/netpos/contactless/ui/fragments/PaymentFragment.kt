@@ -100,17 +100,20 @@ class PaymentFragment : BaseFragment() {
                     val selectedType = parent.getItemAtPosition(position).toString()
                     selectedTransactionType = transactionTypeMap[selectedType] ?: "all" // Default to "all" if not found
 
-                    loadMoreItems()
+                    // Clear current data and reset pagination
+                    currentPage = 1
+                    isLastPage = false
+                    loadMoreTransactionTypeItems()
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>) {
-                    // Do nothing or handle as needed
+                    // Handle as needed
                 }
             }
 
         loadMoreItems()
 
-        // Add scroll listener
+        // Add scroll listener to load more data when reaching the end of the list
         recyclerView.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(
@@ -162,6 +165,66 @@ class PaymentFragment : BaseFragment() {
                 }
             }
         }
+    }
+
+    private fun loadMoreTransactionTypeItems() {
+        isLoading = true
+        loader.show()
+        observeServerResponse(
+            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, currentPage),
+            loader,
+            compositeDisposable,
+            ioScheduler,
+            mainThreadScheduler,
+        ) {
+            adapter = AllTransactionsAdapter(items, adapterListener)
+            adapter.clearData()
+            recyclerView.layoutManager = LinearLayoutManager(requireContext())
+            recyclerView.adapter = adapter
+            val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
+            if (newItems != null) {
+                adapter.addData(newItems)
+            }
+
+            isLoading = false
+            currentPage++
+            // Check if we received less than the expected page size, marking it as the last page
+            if (newItems != null) {
+                if (newItems.size < PAGE_SIZE) {
+                    isLastPage = true
+                }
+            }
+        }
+
+        // {
+        //     val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
+//
+//            if (selectedTransactionType != "all") {
+//                adapter = AllTransactionsAdapter(items, adapterListener)
+//                recyclerView.layoutManager = LinearLayoutManager(requireContext())
+//                recyclerView.adapter = adapter
+//                adapter.clearData()
+//
+//                isLoading = false
+//                currentPage++
+//                if (newItems == null || newItems.size < PAGE_SIZE) {
+//                    isLastPage = true
+//                }
+//            } else {
+//                adapter = AllTransactionsAdapter(items, adapterListener)
+//                recyclerView.layoutManager = LinearLayoutManager(requireContext())
+//                recyclerView.adapter = adapter
+//                if (newItems != null && newItems.isNotEmpty()) {
+//                    adapter.addData(newItems)
+//                }
+//
+//                isLoading = false
+//                currentPage++
+//                if (newItems == null || newItems.size < PAGE_SIZE) {
+//                    isLastPage = true
+//                }
+//            }
+//        }
     }
 
     private val transactionTypeMap =

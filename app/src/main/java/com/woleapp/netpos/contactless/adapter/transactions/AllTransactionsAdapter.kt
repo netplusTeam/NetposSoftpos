@@ -43,13 +43,34 @@ class AllTransactionsAdapter(
         position: Int,
     ) {
         val item = items[position]
+        if (item.payer_account_number.isNullOrEmpty()) {
+            holder.customerName.text = "Payer"
+        } else {
+            holder.customerName.text = item.payer_account_name
+        }
+
         if (item.transactionType == "pos") {
             holder.rrn.text = item.rrn
-            val cardDetails =
-                "${item.cardLabel} ending with ${item.maskedPan.takeLast(4)}"
-            holder.maskedPan.text = cardDetails
-        } else {
+            if ((item.cardLabel != "" || item.cardLabel.isNotEmpty()) && item.maskedPan.isNotEmpty()) {
+                val cardDetails =
+                    "${item.cardLabel} ending with ${item.maskedPan.takeLast(4)}"
+                holder.maskedPan.text = cardDetails
+            } else if (item.maskedPan.isNotEmpty()) {
+                val cardDetails =
+                    "Payer ending with ${item.maskedPan.takeLast(4)}"
+                holder.maskedPan.text = cardDetails
+            }
+        } else if ((item.transactionType == "pos")) {
             holder.rrn.text = item.transaction_reference
+            if ((item.cardLabel.isNotEmpty()) && item.maskedPan.isNotEmpty()) {
+                val cardDetails =
+                    "${item.cardLabel} ending with ${item.maskedPan.takeLast(4)}"
+                holder.maskedPan.text = cardDetails
+            } else if (item.maskedPan.isNotEmpty()) {
+                val cardDetails =
+                    "Payer ending with ${item.maskedPan.takeLast(4)}"
+                holder.maskedPan.text = cardDetails
+            }
         }
         if (item.responseCode == "00") {
             holder.status.text =
@@ -62,7 +83,6 @@ class AllTransactionsAdapter(
             holder.status.setBackgroundResource(R.drawable.failed)
             holder.statusImg.setBackgroundResource(R.drawable.declined)
         }
-        holder.customerName.text = item.payer_account_name
         holder.amount.text = item.amount.toLong().formatCurrencyAmount()
         if (item.dateCreated.isNullOrEmpty()) {
             //
@@ -79,7 +99,11 @@ class AllTransactionsAdapter(
 
     override fun getItemCount(): Int = items.size
 
-    // Add new data
+    fun clearData() {
+        items.clear()
+        notifyDataSetChanged()
+    }
+
     fun addData(newItems: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>) {
         val startPosition = items.size
         items.addAll(newItems)
