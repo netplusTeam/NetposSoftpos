@@ -43,12 +43,11 @@ class AllTransactionsAdapter(
         position: Int,
     ) {
         val item = items[position]
-        if (item.payer_account_number.isNullOrEmpty()) {
+        if (item.payer_account_name.isNullOrEmpty()) {
             holder.customerName.text = "Payer"
         } else {
             holder.customerName.text = item.payer_account_name
         }
-
         if (item.transactionType == "pos") {
             holder.rrn.text = item.rrn
             if ((item.cardLabel != "" || item.cardLabel.isNotEmpty()) && item.maskedPan.isNotEmpty()) {
@@ -57,20 +56,21 @@ class AllTransactionsAdapter(
                 holder.maskedPan.text = cardDetails
             } else if (item.maskedPan.isNotEmpty()) {
                 val cardDetails =
-                    "Payer ending with ${item.maskedPan.takeLast(4)}"
+                    "Card ending with ${item.maskedPan.takeLast(4)}"
                 holder.maskedPan.text = cardDetails
             }
-        } else if ((item.transactionType == "pos")) {
+        } else if ((item.transactionType == "pbt")) {
+            if (item.payer_account_name.isNullOrEmpty()) {
+                holder.customerName.text = "Payer"
+            } else {
+                holder.customerName.text = item.payer_account_name
+            }
+            if (item.payer_account_number.isNullOrEmpty()) {
+                holder.customerName.text = "Payer"
+            } else {
+                holder.maskedPan.text = item.payer_account_number
+            }
             holder.rrn.text = item.transaction_reference
-            if ((item.cardLabel.isNotEmpty()) && item.maskedPan.isNotEmpty()) {
-                val cardDetails =
-                    "${item.cardLabel} ending with ${item.maskedPan.takeLast(4)}"
-                holder.maskedPan.text = cardDetails
-            } else if (item.maskedPan.isNotEmpty()) {
-                val cardDetails =
-                    "Payer ending with ${item.maskedPan.takeLast(4)}"
-                holder.maskedPan.text = cardDetails
-            }
         }
         if (item.responseCode == "00") {
             holder.status.text =
