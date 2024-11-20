@@ -138,7 +138,7 @@ class RegisterFragment : BaseFragment() {
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                AlertDialog.Builder(requireContext()).setTitle("NFC Message")
                     .setMessage("NFC is not enabled, goto device settings to enable")
                     .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
                         dialog.dismiss()

@@ -427,16 +427,17 @@ object RandomPurposeUtil {
         var partnerName = ""
         val bankList =
             mapOf(
-                "firstbank" to "FirstPOS",
-                "easypay" to "FCMBEasyPay",
-                "fcmbeasypay" to "FCMBEasyPay",
-                "easypayfcmb" to "FCMBEasyPay",
+                "netpos" to "NetPOS",
+                "firstbank" to "FirstBank",
+                "easypay" to "FCMB",
+                "fcmbeasypay" to "FCMB",
+                "easypayfcmb" to "FCMB",
                 "providuspos" to "Providus Bank",
                 "stanbic" to "Stanbic",
                 "providus" to "Providus Bank",
                 "providussoftpos" to "Providus Bank",
                 "wemabank" to "WEMA",
-                "zenith" to "ZPOS",
+                "zenith" to "Zenith Bank",
                 "tingo" to "Tingo",
                 "lumina" to "Lumina",
             )

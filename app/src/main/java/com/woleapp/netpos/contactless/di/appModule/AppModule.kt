@@ -126,12 +126,12 @@ object AppModule {
     @Singleton
     @Named("otpOkHttp")
     fun providesOKHTTPClientForGetVerveOtp(
-        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+//        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
     ): OkHttpClient =
         OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
             .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true)
-            .addInterceptor(loggingInterceptor).build()
+            .retryOnConnectionFailure(true).build()
+//            .addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
