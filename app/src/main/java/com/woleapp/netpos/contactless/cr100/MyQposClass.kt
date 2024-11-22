@@ -47,7 +47,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
     override fun onDoTradeResult(result: QPOSService.DoTradeResult?, decodeData: Hashtable<String, String>?) {
-        Log.d("BLUETOOTH_DEVICE", "Trade Detected: ${Singletons.gson.toJson(decodeData)}")
 
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
 
@@ -149,7 +148,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
     override fun onRequestQposConnected() {
-        Log.d("BLUETOOTH_DEVICE", "Bluetooth Connected")
         hideBluetoothDialog()
         BluetoothDialog.loadingDialog?.dismiss()
         blueTitle?.let {
@@ -160,7 +158,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
     override fun onRequestNoQposDetected() {
-        Log.d("BLUETOOTH_DEVICE", "No Bluetooth Detected")
     }
 
     @SuppressLint("MissingPermission")
@@ -175,7 +172,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 bluetoothAdapter.setData(itm)
             }
         } ?: run {
-            Log.d("BLUETOOTH_DEVICE", "Device not found")
         }
     }
 
@@ -324,12 +320,10 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onReturnAnalyseDigEnvelop(result: String?) {}
 
     override fun onRequestWaitingUser() {
-        Log.d("BLUETOOTH_DEVICE", "Waiting for User")
         context.showBluetoothDialog(bluetoothAdapter, true)
     }
 
     override fun onRequestSetAmount() {
-        Log.d("BLUETOOTH_DEVICE", "Set Amount Called")
         cr100Pos?.setAmount("10", null, "566", QPOSService.TransactionType.SERVICES)
     }
 

@@ -36,8 +36,8 @@ object DUKPK2009CBC {
         ipek = if (clearIpek == null || clearIpek.length == 0) {
 
             val cr100BdkValue = decryptOpenSslFile(context!!, "netpos_light_bdk_key.txt.enc")
-            val byte_bdk = parseHexStr2Byte(cr100BdkValue.toString(Charsets.UTF_8))
-            generateIPEK(byte_ksn, byte_bdk)
+            val byteBdk = parseHexStr2Byte(cr100BdkValue.toString(Charsets.UTF_8))
+            generateIPEK(byte_ksn, byteBdk)
         } else {
             parseHexStr2Byte(clearIpek)
         }

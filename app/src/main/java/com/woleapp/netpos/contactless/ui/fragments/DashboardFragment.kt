@@ -59,6 +59,8 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
@@ -237,7 +239,7 @@ class DashboardFragment : BaseFragment() {
             if (nfcAdapter != null) {
                 viewModel.validateFieldForNFC()
             } else {
-                if(viewModel.validateFieldForBluetooth()) {
+                if (viewModel.validateFieldForBluetooth()) {
                     initCr100Intent()
                 }
 
@@ -591,7 +593,6 @@ class DashboardFragment : BaseFragment() {
 
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
 
-
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
                 nfcCardReaderViewModel.doCr100Transaction(cardInfo)
@@ -630,28 +631,6 @@ class DashboardFragment : BaseFragment() {
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
         if (cr100Pos!!.bluetoothState) {
-//            BluetoothDialog.manualExitDialog(requireActivity(),
-//                "Do you want to continue with the previous connection?",
-//                object : BluetoothDialog.OnMyClickListener {
-//                    override fun onCancel() {
-//                        cr100Pos?.disconnectBT()
-//                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
-//                        deviceType(BLUETOOTH)
-//                        refreshAdapter()
-//                        bluetoothAdapter.notifyDataSetChanged()
-//                        BluetoothDialog.manualExitDialog.dismiss()
-//                    }
-//
-//                    override fun onConfirm() {
-//                        if (BluetoothToolsBean.getBlueToothName() != null) {
-//                            showToast(BluetoothToolsBean.getBlueToothName())
-//                        }
-//
-//                        val keyIndex: Int = getBluetoothKeyIndex()
-//                        cr100Pos?.doTrade(keyIndex, 60)
-//                        BluetoothDialog.manualExitDialog.dismiss()
-//                    }
-//                })
             if (BluetoothToolsBean.getBlueToothName() != null) {
                 showToast(BluetoothToolsBean.getBlueToothName())
             }
@@ -659,11 +638,17 @@ class DashboardFragment : BaseFragment() {
             val keyIndex: Int = getBluetoothKeyIndex()
             cr100Pos?.doTrade(keyIndex, 60)
         } else {
-            lvIndicatorBTPOS?.adapter = bluetoothAdapter
-            deviceType(BLUETOOTH)
-            refreshAdapter()
-            bluetoothAdapter.notifyDataSetChanged()
-
+            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
+                listener.setBlueTitle(it)
+            }
+            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
+                cr100Pos?.connectBluetoothDevice(true, 60, it)
+            } ?: run {
+                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                deviceType(BLUETOOTH)
+                refreshAdapter()
+                bluetoothAdapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -686,9 +671,14 @@ class DashboardFragment : BaseFragment() {
         blueToothAddress = itemData["ADDRESS"]!! as String
         blueTitle = itemData["TITLE"] as String?
         blueTitle =
-            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()?.get(0)
+            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+                ?.get(0)
         cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
-        blueTitle?.let { listener.setBlueTitle(it) }
+        Prefs.putString(BLUETOOTH_ADDRESS, blueToothAddress)
+        blueTitle?.let {
+            listener.setBlueTitle(it)
+            Prefs.putString(BLUETOOTH_TITLE, blueTitle)
+        }
     }
 
 
@@ -708,7 +698,7 @@ class DashboardFragment : BaseFragment() {
     override fun onDestroy() {
         super.onDestroy()
 
-        if(cr100Pos != null) {
+        if (cr100Pos != null) {
             listener.cleanup()
             cr100Pos!!.cancelTrade()
             cr100Pos!!.disconnectBT()
