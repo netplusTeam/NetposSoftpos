@@ -24,8 +24,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <EditText
-                android:id="@+id/etPin"
+                android:id="@+id/etPinn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/dimen_16dp"
@@ -90,6 +91,19 @@
 
                 <EditText
                     android:id="@+id/price_textbox"
+                    style="@style/ServicesInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:visibility="gone"
+                    android:autofillHints="@string/hint_amount"
+                    android:hint="@string/hint_amount"
+                    android:inputType="numberDecimal"
+                    android:text="@={viewmodel.amount}"
+                    android:textSize="@dimen/dimen_16sp"
+                    android:textStyle="italic" />
+                <EditText
+                    android:id="@+id/etPin"
                     style="@style/ServicesInputLayout"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

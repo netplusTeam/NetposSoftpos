@@ -270,7 +270,7 @@ class MainActivity :
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 //        // First check if there is an update
 //        checkForAppUpdate()
-//        window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
+        window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         val netPlusPayMid = Singletons.getNetPlusPayMid()
         if (BuildConfig.FLAVOR.contains("zenith")) {
             scanQrViewModel.getMerchantDetails(netPlusPayMid)
