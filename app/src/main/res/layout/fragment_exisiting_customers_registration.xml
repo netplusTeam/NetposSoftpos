@@ -318,11 +318,11 @@
                     android:paddingHorizontal="48dp"
                     android:text="@string/submit"
                     android:textAllCaps="true"
-                    android:layout_marginTop="@dimen/margin_20"
+                    android:layout_marginTop="@dimen/dimen_16dp"
                     android:textColor="@android:color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/confirm_password_field" />
+                    app:layout_constraintTop_toBottomOf="@+id/checkbox_layout" />
 
 
                 <ProgressBar
@@ -336,17 +336,23 @@
                     app:layout_constraintEnd_toEndOf="@id/btn_submit"
                     app:layout_constraintTop_toTopOf="@id/btn_submit" />
 
+                <LinearLayout
+                    android:id="@+id/checkbox_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="@+id/email_field"
+                    app:layout_constraintStart_toStartOf="@+id/email_field"
+                    app:layout_constraintTop_toBottomOf="@+id/confirm_password_field">
 
-                <!--                <androidx.appcompat.widget.AppCompatSpinner-->
-                <!--                    android:id="@+id/spnBank"-->
-                <!--                    android:layout_width="match_parent"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:prompt="@string/hint_choose_bank_caps"-->
-                <!--                    android:spinnerMode="dropdown"-->
-                <!--                    android:textColorHint="@android:color/black"-->
-                <!--                    android:textSize="15sp"-->
-                <!--                    app:layout_constraintTop_toBottomOf="@+id/password_field"-->
-                <!--                    tools:layout_editor_absoluteX="16dp" />-->
+                    <CheckBox
+                        android:id="@+id/myCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white" />
+
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,6 +1,8 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -37,7 +39,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class ExistingCustomersRegistrationFragment : BaseFragment() {
-
     private lateinit var binding: FragmentExisitingCustomersRegistrationBinding
     private val viewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var loader: AlertDialog
@@ -58,6 +59,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var deviceSerialID: String
     private lateinit var listOfStates: String
     private lateinit var listOfBranches: String
+    private var termsAndConditionsCheckBox: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -65,16 +67,20 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_exisiting_customers_registration,
-            container,
-            false,
-        )
+        binding =
+            DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_exisiting_customers_registration,
+                container,
+                false,
+            )
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
         partnerID = initPartnerId()
@@ -124,49 +130,77 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         loader = alertDialog(requireContext())
 
         viewModel.getStatesResponse.observe(viewLifecycleOwner) {
-            val stateAdapter = StatesAdapter(
-                viewModel.listOfStates,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
+            val stateAdapter =
+                StatesAdapter(
+                    viewModel.listOfStates,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
             firstBankStates.setAdapter(stateAdapter)
         }
 
-        firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val statesList = adapterView?.getItemAtPosition(p2) as FBNState
-                listOfStates = statesList.state
-                viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
+        firstBankStates.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val statesList = adapterView?.getItemAtPosition(p2) as FBNState
+                    listOfStates = statesList.state
+                    viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
+                }
             }
-        }
 
         viewModel.getBranchResponse.observe(viewLifecycleOwner) {
-            val branchAdapter = BranchAdapter(
-                viewModel.listOfBranches,
-                requireContext(),
-                android.R.layout.simple_expandable_list_item_1,
-            )
+            val branchAdapter =
+                BranchAdapter(
+                    viewModel.listOfBranches,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
             firstBankBranches.setAdapter(branchAdapter)
         }
 
-        firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
-            override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                val branchList = adapterView?.getItemAtPosition(p2) as FBNBranch
-                listOfBranches = branchList.branch_name
+        firstBankBranches.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val branchList = adapterView?.getItemAtPosition(p2) as FBNBranch
+                    listOfBranches = branchList.branch_name
+                }
             }
-        }
 
         submitBtn.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("firstbank")) {
-                registerForFBN()
-            } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") || BuildConfig.FLAVOR.contains(
-                    "providuspos"
+                if (termsAndConditionsCheckBox) {
+                    registerForFBN()
+                } else {
+                    showToast("Please accept the terms and conditions to proceed")
+                }
+            } else if (BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains("providussoftpos") ||
+                BuildConfig.FLAVOR.contains(
+                    "providuspos",
                 )
             ) {
                 registerForProvidus()
             } else {
                 register()
             }
+        }
+
+        // set checkbox message
+        binding.myCheckBox.text = "By checking this box, you agree to the terms and conditions"
+
+        // Set a listener on the CheckBox
+        binding.myCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            termsAndConditionsCheckBox = isChecked
+            binding.myCheckBox.buttonTintList = ColorStateList.valueOf(Color.YELLOW)
         }
     }
 
@@ -216,20 +250,23 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains(
+                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") ||
+                        BuildConfig.FLAVOR.contains(
                             "providussoftpos",
                         )
                     ) {
                         activity?.getFragmentManager()?.popBackStack()
-                        val dialogView: View = LayoutInflater.from(requireContext())
-                            .inflate(R.layout.dialog_terms_and_conditions, null)
+                        val dialogView: View =
+                            LayoutInflater.from(requireContext())
+                                .inflate(R.layout.dialog_terms_and_conditions, null)
                         val dialogBuilder: AlertDialog.Builder =
                             AlertDialog.Builder(requireContext())
                         dialogBuilder.setView(dialogView)
 
                         val alertDialog: AlertDialog = dialogBuilder.create()
                         alertDialog.show()
-                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                        if (BuildConfig.FLAVOR.contains("providuspos") ||
+                            BuildConfig.FLAVOR.contains(
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
@@ -292,8 +329,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
                     activity?.getFragmentManager()?.popBackStack()
-                    val dialogView: View = LayoutInflater.from(requireContext())
-                        .inflate(R.layout.dialog_terms_and_conditions, null)
+                    val dialogView: View =
+                        LayoutInflater.from(requireContext())
+                            .inflate(R.layout.dialog_terms_and_conditions, null)
                     val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
                     dialogBuilder.setView(dialogView)
 
@@ -341,20 +379,23 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             else -> {
                 if (validateSignUpFieldsOnTextChange()) {
-                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") || BuildConfig.FLAVOR.contains(
+                    if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains("providus") ||
+                        BuildConfig.FLAVOR.contains(
                             "providussoftpos",
                         )
                     ) {
                         activity?.getFragmentManager()?.popBackStack()
-                        val dialogView: View = LayoutInflater.from(requireContext())
-                            .inflate(R.layout.dialog_terms_and_conditions, null)
+                        val dialogView: View =
+                            LayoutInflater.from(requireContext())
+                                .inflate(R.layout.dialog_terms_and_conditions, null)
                         val dialogBuilder: AlertDialog.Builder =
                             AlertDialog.Builder(requireContext())
                         dialogBuilder.setView(dialogView)
 
                         val alertDialog: AlertDialog = dialogBuilder.create()
                         alertDialog.show()
-                        if (BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                        if (BuildConfig.FLAVOR.contains("providuspos") ||
+                            BuildConfig.FLAVOR.contains(
                                 "providus",
                             ) || BuildConfig.FLAVOR.contains("providussoftpos")
                         ) {
@@ -495,19 +536,22 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
     private fun registerExistingCustomer() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
-            val existingAccountRegReq = RegistrationForExistingFBNUsersRequest(
-                accountNumber = actNumber,
-                businessAddress = addressView.text.toString().trim(),
-                businessName = businessNameView.text.toString().trim(),
-                contactInformation = contactName.text.toString().trim(),
-                username = emailView.text.toString().trim(),
-                password = passwordView.text.toString().trim(),
-                state = listOfStates,
-                branch_name = listOfBranches,
-                phoneNumber = phoneNumber.text.toString().trim(),
-            )
+            val existingAccountRegReq =
+                RegistrationForExistingFBNUsersRequest(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    state = listOfStates,
+                    branch_name = listOfBranches,
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                )
             if (!passwordValidation(passwordView.text.toString().trim())) {
-                showToast("The password's length must be more than 7 digits and must contain small letters, capital letters and special characters")
+                showToast(
+                    "The password's length must be more than 7 digits and must contain small letters, capital letters and special characters",
+                )
                 return
             }
             viewModel.registerExistingAccountForFBN(
@@ -516,15 +560,16 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 deviceSerialId = deviceSerialID,
             )
         } else {
-            val existingAccountRegReq = ExistingAccountRegisterRequest(
-                accountNumber = actNumber,
-                businessAddress = addressView.text.toString().trim(),
-                businessName = businessNameView.text.toString().trim(),
-                contactInformation = contactName.text.toString().trim(),
-                username = emailView.text.toString().trim(),
-                password = passwordView.text.toString().trim(),
-                phoneNumber = phoneNumber.text.toString().trim(),
-            )
+            val existingAccountRegReq =
+                ExistingAccountRegisterRequest(
+                    accountNumber = actNumber,
+                    businessAddress = addressView.text.toString().trim(),
+                    businessName = businessNameView.text.toString().trim(),
+                    contactInformation = contactName.text.toString().trim(),
+                    username = emailView.text.toString().trim(),
+                    password = passwordView.text.toString().trim(),
+                    phoneNumber = phoneNumber.text.toString().trim(),
+                )
             viewModel.registerExistingAccount(
                 existingAccountRegReq,
                 partnerId = partnerID,
