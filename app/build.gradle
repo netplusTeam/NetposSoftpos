@@ -214,7 +214,7 @@ dependencies {
     implementation 'net.sf.j8583:j8583:1.12.0'
 //    implementation project(path: ':epmslib-release')
 //    implementation 'com.github.netplusTeam:netplus-epms:1.0.23'
-    implementation 'com.netpluspay.netpluspaypaymentclient:epmsLibrary:1.0.8'
+    implementation 'com.netpluspay.netpluspaypaymentclient:epmsLibrary:1.0.10'
 
     //Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
