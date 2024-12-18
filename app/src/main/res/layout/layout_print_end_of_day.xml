@@ -123,7 +123,7 @@
             app:layout_constraintEnd_toEndOf="@id/declined_text"
             app:layout_constraintStart_toStartOf="@id/declined_text"
             app:layout_constraintTop_toBottomOf="@+id/declined_count"
-            android:text="Total Approved Amount" />
+            android:text="Total Declined Amount" />
 
         <TextView
             android:id="@+id/total_declined_amount"
