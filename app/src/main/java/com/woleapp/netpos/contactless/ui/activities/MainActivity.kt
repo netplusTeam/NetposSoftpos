@@ -11,11 +11,12 @@ import android.content.*
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.media.MediaPlayer
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
-import android.os.Build
-import android.os.Bundle
+import android.os.*
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -35,13 +36,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
-import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.payneteasy.tlv.BerTag
+import com.payneteasy.tlv.BerTlvParser
+import com.payneteasy.tlv.BerTlvs
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
@@ -74,7 +77,6 @@ import com.woleapp.netpos.contactless.util.AppConstants.TAG_NOTIFICATION_RECEIVE
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
@@ -84,6 +86,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 @Suppress("DEPRECATION")
@@ -91,7 +95,8 @@ import java.util.*
 class MainActivity :
     AppCompatActivity(),
     EasyPermissions.PermissionCallbacks,
-    NfcAdapter.ReaderCallback {
+    NfcAdapter.ReaderCallback,
+    DialogDismissListener {
 //    private lateinit var appUpdateManager: AppUpdateManager
 //    private val updateType = AppUpdateType.IMMEDIATE
 
@@ -119,6 +124,7 @@ class MainActivity :
     private lateinit var requestNarration: String
     private lateinit var qrAmoutDialogBinding: QrAmoutDialogBinding
     private lateinit var verveCardQrAmountDialogBinding: LayoutVerveCardQrAmountDialogBinding
+    private lateinit var cardTypeBinding: DialogSelectCardschemeBinding
     private lateinit var qrAmountDialog: AlertDialog
     private lateinit var qrAmountDialogForVerveCard: AlertDialog
     private val scanQrViewModel by viewModels<ScanQrViewModel>()
@@ -128,11 +134,25 @@ class MainActivity :
     private val notificationModel: NotificationViewModel by viewModels()
     private lateinit var firebaseInstance: FirebaseMessaging
     private lateinit var deviceNotSupportedAlertDialog: AlertDialog
+    private lateinit var selectCardDialog: AlertDialog
     private lateinit var copyAccountNumber: String
 
     private lateinit var mVerveTransactionViewModel: VerveTransactionViewModel
     private var verveNfcListener: NFCListener? = null
     private val salesViewModel by viewModels<SalesViewModel>()
+    private val nfcCardReaderViewModel by viewModels<NfcCardReaderViewModel>()
+
+    private var mNfcAdapter: NfcAdapter? = null
+    var context: Context? = null
+    private var isVisa: Boolean = false
+    private lateinit var aid: String
+
+    // Add a flag to control processing
+    private var isProcessing = false
+
+    // Track the last processed time for each AID
+    private val lastProcessedAidTime = mutableMapOf<String, Long>()
+    private val aidDelayMillis = 5000L // 5 seconds delay
 
     override fun onStart() {
         super.onStart()
@@ -222,10 +242,28 @@ class MainActivity :
     private fun handleProvider(tag: Tag) {
         val mTagCom = IsoDep.get(tag)
         try {
-            mTagCom.connect()
-            val logger = StringBuilder()
-            val nfcTransReceiver = LiveNfcTransReceiver(logger, mTagCom)
-            viewModel.doVisaTransaction(nfcTransReceiver, contactlessKernel)
+            if (isVisa) {
+                // Check if another technology is connected
+                if (mTagCom.isConnected) {
+                    mTagCom.close() // Close the currently connected technology
+                }
+
+                // Connect to the tag
+//                mTagCom.connect()
+
+                val logger = StringBuilder()
+                val nfcTransReceiver = LiveNfcTransReceiver(logger, mTagCom)
+
+                // Start Visa transaction
+                viewModel.doVisaTransaction(nfcTransReceiver, contactlessKernel)
+                isVisa = false // Reset Visa processing flag
+                // Once the transaction completes, disconnect the Visa tag
+                if (mTagCom.isConnected) {
+                    mTagCom.close()
+                    isVisa = false // Reset Visa processing flag
+                }
+                isVisa = false // Reset Visa processing flag
+            }
         } catch (e: Exception) {
             Timber.e(e)
         }
@@ -272,6 +310,9 @@ class MainActivity :
 //        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 //        // First check if there is an update
 //        checkForAppUpdate()
+        context = applicationContext
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
         window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         val netPlusPayMid = Singletons.getNetPlusPayMid()
         if (BuildConfig.FLAVOR.contains("zenith")) {
@@ -289,6 +330,13 @@ class MainActivity :
         NetPosApp.INSTANCE.initMposLibrary(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         initViews()
+
+        cardTypeBinding = DialogSelectCardschemeBinding.inflate(LayoutInflater.from(context))
+        selectCardDialog =
+            AlertDialog.Builder(this).apply {
+                setView(cardTypeBinding.root)
+            }.create()
+
         dialogContactlessReaderBinding =
             DialogContatclessReaderBinding.inflate(layoutInflater).apply {
                 executePendingBindings()
@@ -496,6 +544,7 @@ class MainActivity :
         viewModel.enableNfcForegroundDispatcher.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 if (it.enable && (it.cardType == NfcPaymentType.VISA || it.cardType == NfcPaymentType.VERVE || it.cardType == NfcPaymentType.MASTERCARD)) {
+                    stopNfcPayment()
                     startNfcPayment(it)
                 } else if (!it.enable && it.cardType == null) {
                     stopNfcPayment()
@@ -514,6 +563,9 @@ class MainActivity :
                 Timber.e("show pin dialog")
                 showPinDialog(it)
             }
+        }
+        dialogContactlessReaderBinding.cancel.setOnClickListener {
+            waitingDialog.dismiss()
         }
         viewModel.showWaitingDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
@@ -556,8 +608,10 @@ class MainActivity :
                     closeBtn.setOnClickListener {
                         receiptDialogBinding.telephone.text?.clear()
                         receiptAlertDialog.dismiss()
+                        enableNFCReader()
                     }
                     sendButton.setOnClickListener {
+                        enableNFCReader()
                         if (receiptDialogBinding.telephone.text.toString().length != 11) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -585,6 +639,7 @@ class MainActivity :
 
         waitingDialog.setOnDismissListener {
             viewModel.stopNfcReader()
+            waitingDialog.dismiss()
         }
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener(
@@ -650,7 +705,49 @@ class MainActivity :
                 }
             }
         }
+
+        salesViewModel.getCardData.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { shouldGetCardData ->
+                if (shouldGetCardData) {
+                    Log.d("OK_AH", "YEPP")
+                    enableNFCReader()
+                    showCardDialog(
+                        this,
+                        this,
+                        this,
+                        selectCardDialog,
+                        cardTypeBinding,
+                    ).observe(this) { event ->
+                        event.getContentIfNotHandled()?.let {
+                            Timber.e(it.toString())
+                            nfcCardReaderViewModel.initiateNfcPayment(
+                                salesViewModel.amountLong,
+                                salesViewModel.cashbackLong,
+                                it,
+                            )
+                        }
+                    }
+                    showCardDialog(
+                        this,
+                        this,
+                        this,
+                        selectCardDialog,
+                        cardTypeBinding,
+                    ).removeObservers(this)
+                }
+            }
+        }
     }
+
+//    override fun onResume() {
+//        super.onResume()
+//        getIntentDataSentInFromFirebaseService()
+//        handlePdfReceiptPrinting()
+//        fetchUnreadNotifications()
+//        notificationsLayout.setOnClickListener {
+//            showFragment(NotificationFragment(), getString(R.string.notification))
+//        }
+//    }
 
     override fun onResume() {
         super.onResume()
@@ -660,6 +757,7 @@ class MainActivity :
         notificationsLayout.setOnClickListener {
             showFragment(NotificationFragment(), getString(R.string.notification))
         }
+        enableNFCReader()
     }
 
     override fun onRequestPermissionsResult(
@@ -788,6 +886,7 @@ class MainActivity :
                 this.accountType = accountType
             }
             viewModel.finishNfcReading()
+            viewModel.enableNfcForegroundDispatcher.removeObservers(this)
         }
         dialogSelectAccountTypeBinding.cancelButton.setOnClickListener {
             dialog.dismiss()
@@ -796,14 +895,238 @@ class MainActivity :
         dialog.show()
     }
 
-    override fun onTagDiscovered(tag: Tag?) {
+//    override fun onTagDiscovered(tag: Tag?) {
+//        tag?.let {
+//            if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
+//                runOnUiThread {
+//                    handleProvider(tag)
+//                    nfcAdapter?.disableReaderMode(this)
+//                }
+//            }
+//        }
+//    }
+
+    fun onTagDiscoveredd(tag: Tag) {
         tag?.let {
             if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
                 runOnUiThread {
-                    handleProvider(tag)
-                    nfcAdapter?.disableReaderMode(this)
+//                    playSinglePing() // play sound to signal the discovery of NFC tags
+                    val tagId = tag.id
+                    val techList = tag.techList
+                    var isoDepInTechList = false
+                    for (s in techList) {
+                        if (s == "android.nfc.tech.IsoDep") isoDepInTechList = true
+                    }
+                    // proceed only if tag has IsoDep in the techList
+                    if (isoDepInTechList) {
+                        val nfc: IsoDep?
+                        nfc = IsoDep.get(tag)
+                        if (nfc != null) {
+                            try {
+                                nfc.connect()
+                                val ppse = "2PAY.SYS.DDF01".toByteArray(StandardCharsets.UTF_8) // PPSE
+                                val selectPpseCommand: ByteArray = selectApdu(ppse)
+                                val selectPpseResponse = nfc.transceive(selectPpseCommand)
+                                val selectPpseResponseOk: ByteArray? = checkResponse(selectPpseResponse)
+
+                                // proceed only when te do have a positive read result = 0x'9000' at the end of response data
+                                if (selectPpseResponseOk != null) {
+                                    val parser = BerTlvParser()
+                                    val tlv4Fs: BerTlvs = parser.parse(selectPpseResponseOk)
+
+                                    // find all entries for tag 0x4f
+                                    val tag4fList = tlv4Fs.findAll(BerTag(0x4F))
+                                    val appLabel = tlv4Fs.findAll(BerTag(0x50))
+//                                    if (tag4fList.isEmpty()) {
+//                                        startEndSequence(nfc)
+//                                    }
+//                                    if (appLabel.isEmpty()) {
+//                                        startEndSequence(nfc)
+//                                    }
+                                    val aidList = ArrayList<ByteArray>()
+                                    for (i4f in tag4fList.indices) {
+                                        val tlv4f = tag4fList[i4f]
+                                        val tlv4fBytes = tlv4f.bytesValue
+                                        aidList.add(tlv4fBytes)
+                                        val caid = bytesToHexNpe(tlv4fBytes)
+                                        Log.d("CARD_TYPE", caid.toString())
+                                        aid = caid.toString()
+                                    }
+                                    for (lbl in appLabel.indices) {
+                                        val aplbl = appLabel[lbl]
+                                        val aplblBytes = aplbl.bytesValue
+                                        val labl = bytesToHexNpe(aplblBytes)
+                                        Log.d("CARD_SCHEME", labl.toString())
+                                    }
+                                    for (aidNumber in tag4fList.indices) {
+                                        val aidSelected = aidList[aidNumber]
+                                        val selectAidCommand: ByteArray = selectApdu(aidSelected)
+                                        val selectAidResponse = nfc.transceive(selectAidCommand)
+                                    }
+                                } else {
+                                    Log.d("TAG", "The discovered NFC tag does not have an IsoDep interface.")
+                                }
+                                vibrate()
+                            } catch (e: IOException) {
+                                startEndSequence(nfc)
+                                return@runOnUiThread
+                            }
+                        }
+                    }
+                    // Re-enable processing after 5 seconds
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        isProcessing = false
+                        returnAid(aid)
+                    }, 5000) // Adjust delay time as needed
                 }
             }
+        }
+    }
+
+    override fun onTagDiscovered(tag: Tag) {
+        tag?.let {
+            if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
+                runOnUiThread {
+                    val techList = tag.techList
+                    var isoDepInTechList = false
+                    for (s in techList) {
+                        if (s == "android.nfc.tech.IsoDep") isoDepInTechList = true
+                    }
+
+                    if (isoDepInTechList) {
+                        val nfc: IsoDep? = IsoDep.get(tag)
+                        if (nfc != null) {
+                            try {
+                                nfc.connect()
+                                val ppse = "2PAY.SYS.DDF01".toByteArray(StandardCharsets.UTF_8)
+                                val selectPpseCommand: ByteArray = selectApdu(ppse)
+                                val selectPpseResponse = nfc.transceive(selectPpseCommand)
+                                val selectPpseResponseOk: ByteArray? = checkResponse(selectPpseResponse)
+
+                                if (selectPpseResponseOk != null) {
+                                    val parser = BerTlvParser()
+                                    val tlv4Fs: BerTlvs = parser.parse(selectPpseResponseOk)
+
+                                    val tag4fList = tlv4Fs.findAll(BerTag(0x4F))
+                                    if (tag4fList.isNotEmpty()) {
+                                        for (i4f in tag4fList.indices) {
+                                            val tlv4f = tag4fList[i4f]
+                                            val tlv4fBytes = tlv4f.bytesValue
+                                            val caid = bytesToHexNpe(tlv4fBytes)
+                                            returnAid(caid.toString())
+                                            if (caid.toString() == "a0000000031010") {
+                                                // Detected Visa tag
+                                                isVisa = true
+                                                handleProvider(tag) // Enable Visa SDK
+                                            } else {
+                                                // Disconnect non-Visa tag immediately
+                                                isVisa = false
+                                                startEndSequence(nfc)
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (e: IOException) {
+                                startEndSequence(nfc) // Disconnect on error
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun selectApdu(data: ByteArray): ByteArray {
+        val commandApdu = ByteArray(6 + data.size)
+        commandApdu[0] = 0x00.toByte() // CLA
+        commandApdu[1] = 0xA4.toByte() // INS
+        commandApdu[2] = 0x04.toByte() // P1
+        commandApdu[3] = 0x00.toByte() // P2
+        commandApdu[4] = (data.size and 0x0FF).toByte() // Lc
+        System.arraycopy(data, 0, commandApdu, 5, data.size)
+        commandApdu[commandApdu.size - 1] = 0x00.toByte() // Le
+        return commandApdu
+    }
+
+    private fun checkResponse(data: ByteArray): ByteArray? {
+        // simple sanity check
+        if (data.size < 5) {
+            return null
+        } // not ok
+        val status =
+            0xff and data[data.size - 2].toInt() shl 8 or (0xff and data[data.size - 1].toInt())
+        return if (status != 0x9000) {
+            null
+        } else {
+            Arrays.copyOfRange(data, 0, data.size - 2)
+        }
+    }
+
+    // section for conversion utils
+    fun bytesToHexNpe(bytes: ByteArray?): String? {
+        return if (bytes != null) {
+            val result = java.lang.StringBuilder()
+            for (b in bytes) result.append(
+                Integer.toString((b.toInt() and 0xff) + 0x100, 16).substring(1),
+            )
+            result.toString()
+        } else {
+            ""
+        }
+    }
+
+    private fun showWirelessSettings() {
+        Toast.makeText(this, "You need to enable NFC", Toast.LENGTH_SHORT).show()
+        val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
+        startActivity(intent)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (mNfcAdapter != null) mNfcAdapter?.disableReaderMode(this)
+    }
+
+    private fun vibrate() {
+        // Initialize the Vibrator
+        val v = getSystemService(VIBRATOR_SERVICE) as Vibrator
+        if (v != null && v.hasVibrator()) { // Check if the device has a vibrator
+            // Create a vibration pattern with timings and amplitude
+            val timings = longArrayOf(0, 200) // 200 ms vibration
+            val amplitudes = intArrayOf(0, VibrationEffect.DEFAULT_AMPLITUDE) // Default amplitude
+            // Vibrate with the pattern once (-1 to not repeat)
+            val effect = VibrationEffect.createWaveform(timings, amplitudes, -1)
+            v.vibrate(effect)
+        }
+    }
+
+    private fun playSinglePing() {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.notification_decorative_01)
+        mediaPlayer.setOnCompletionListener {
+            mediaPlayer.release() // Release the MediaPlayer when done
+        }
+        mediaPlayer.start()
+    }
+
+    private fun playDoublePing() {
+        val mediaPlayer = MediaPlayer.create(context, R.raw.notification_decorative_02)
+        mediaPlayer.setOnCompletionListener {
+            mediaPlayer.release() // Release the MediaPlayer when done
+        }
+        mediaPlayer.start()
+    }
+
+    private fun startEndSequence(nfc: IsoDep?) {
+        try {
+            // Close the NFC connection if it exists
+            nfc?.close()
+        } catch (e: IOException) {
+            Timber.e(e, "Failed to close NFC connection")
+        } finally {
+            // Reset processing state and other flags
+            isVisa = false
+            isProcessing = false
+            // Optional: Provide feedback to the user
+            Log.d("NFC", "NFC tag processing sequence ended.")
         }
     }
 
@@ -844,9 +1167,6 @@ class MainActivity :
                             getString(R.string.fileDownloaded),
                         )
                     }
-                    receiptDialogBinding.shareButton.setOnClickListener {
-                        sharePdf(receiptPdf, this@MainActivity)
-                    }
                 }
             }
             PREF_VALUE_PRINT_SHARE -> {
@@ -859,8 +1179,6 @@ class MainActivity :
                     show()
                     receiptDialogBinding.sendButton.setOnClickListener {
                         downloadPflImplForQrTransaction(qrTransaction)
-                    }
-                    receiptDialogBinding.shareButton.setOnClickListener {
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -887,15 +1205,12 @@ class MainActivity :
                         receiptDialogBinding.progress.visibility = View.VISIBLE
                         receiptDialogBinding.sendButton.isEnabled = false
                     }
-                    receiptDialogBinding.shareButton.setOnClickListener {
-                        sharePdf(receiptPdf, this@MainActivity)
-                    }
                 }
             }
             else -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = getString(R.string.download)
+                    receiptDialogBinding.sendButton.text = getString(R.string.download_share)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -906,9 +1221,6 @@ class MainActivity :
                             binding.root,
                             getString(R.string.fileDownloaded),
                         )
-                    }
-                    receiptDialogBinding.shareButton.setOnClickListener {
-                        downloadPflImplForQrTransaction(qrTransaction)
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -1069,14 +1381,14 @@ class MainActivity :
 
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
-            event.getContentIfNotHandled()?.let { result ->
+            event.getContentIfNotHandled()?.let {
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = result
+                            receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
@@ -1085,15 +1397,12 @@ class MainActivity :
                                     getString(R.string.fileDownloaded),
                                 )
                             }
-                            receiptDialogBinding.shareButton.setOnClickListener {
-                                sharePdf(receiptPdf, this@MainActivity)
-                            }
                         }
                     }
                     PREF_VALUE_PRINT_SMS -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.transactionContent.text = result
+                            receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 if (receiptDialogBinding.telephone.text.toString().length != 11) {
@@ -1111,9 +1420,6 @@ class MainActivity :
                                 receiptDialogBinding.progress.visibility = View.VISIBLE
                                 receiptDialogBinding.sendButton.isEnabled = false
                             }
-                            receiptDialogBinding.shareButton.setOnClickListener {
-                                sharePdf(receiptPdf, this@MainActivity)
-                            }
                         }
                     }
                     PREF_VALUE_PRINT_SHARE -> {
@@ -1121,12 +1427,10 @@ class MainActivity :
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = result
+                            receiptDialogBinding.transactionContent.text = it
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
-                            }
-                            receiptDialogBinding.shareButton.setOnClickListener {
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
@@ -1134,25 +1438,20 @@ class MainActivity :
                     else -> {
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
-                                getString(R.string.download)
+                                getString(R.string.download_share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "")
-                            Log.d("DIALOG_DATA", result)
+                            receiptDialogBinding.transactionContent.text = it.replace("Card Owner: CUSTOMER", "")
+                            Log.d("DIALOG_DATA", it)
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
+                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, it)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
                                 )
-                            }
-                            receiptDialogBinding.shareButton.setOnClickListener {
-                                cancel()
-                                dismiss()
-                                downloadPdfImpl()
-                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, result)
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
@@ -1359,4 +1658,31 @@ class MainActivity :
                 viewModel.doVerveCardTransaction(transactionFullDataDto)
             }
     }
+
+    override fun onDialogDismissed() {
+        selectCardDialog.dismiss()
+    }
+
+    private fun enableNFCReader() {
+        if (mNfcAdapter != null) {
+            if (!mNfcAdapter!!.isEnabled) showWirelessSettings()
+            Log.d("NFC_ENABLEDOKK", mNfcAdapter!!.isEnabled.toString())
+            val options = Bundle()
+            // Work around for some broken Nfc firmware implementations that poll the card too fast
+            options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)
+            // Enable ReaderMode for all types of card and disable platform sounds
+            // the option NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK is NOT set
+            // to get the data of the tag after reading
+            mNfcAdapter!!.enableReaderMode(
+                this@MainActivity,
+                this@MainActivity,
+                NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B,
+                null,
+            )
+        }
+    }
+}
+
+interface DialogDismissListener {
+    fun onDialogDismissed()
 }
