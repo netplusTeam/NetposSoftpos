@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Providus</string>
+    <string name="terminal_id_place_holder">   %1$s</string>
+    <string name="merchant_name_place_holder">   %1$s</string>
+    <string name="date_time_place_holder"> %1$s</string>
+    <string name="amount_place_holder">   %1$S</string>
+    <string name="masked_pan_place_holder">  %1$s</string>
+    <string name="response_code_place_holder">  %1$s</string>
+    <string name="message_place_holder">   %1$s</string>
+    <string name="card_type_place_holder">   %1$s</string>
+    <string name="rrn_place_holder">  %1$s</string>
+    <string name="card_masked_pan">%1$s</string>
+
+
+<!--    txt-->
+    <string name="card_masked_pan_txt">Masked Pan:</string>
+    <string name="message_place_holder_txt">Message: </string>
+    <string name="terminal_id_place_holder_txt">Terminal Id: </string>
+    <string name="merchant_name_place_holder_txt"> Merchant: </string>
+    <string name="response_code_place_holder_txt">Response Code: </string>
+    <string name="rrn_place_holder_txt">RRN:</string>
+    <string name="date_time_place_holder_txt"> DATE/TIME:</string>
+    <string name="card_type_place_holder_txt">Card Type:</string>
+
 </resources>

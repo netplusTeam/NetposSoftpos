@@ -85,6 +85,7 @@
     <string name="email_address">Email Address</string>
     <string name="phone_number">Phone Number</string>
     <string name="send_receipt">Send Receipt</string>
+    <string name="share_receipt">Share Receipt</string>
     <string name="use_terminal_id_from_logged_in_account">Use Terminal ID from logged in account</string>
     <string name="remark">Remark</string>
     <string name="remark_optional">Remark (Optional)</string>
@@ -172,6 +173,7 @@
     <string name="password">Password</string>
     <string name="are_you_an_existing_customer">Are you an existing customer?</string>
     <string name="otp_resent">A fresh OTP has been sent to you…</string>
+    <string name="terminal_id_place_holder_txt">Terminal Id: </string>
     <string name="terminal_id_place_holder">Terminal Id:   %1$s</string>
     <string name="stan_place_holder">STAN:   %1$s</string>
     <string name="date_time_place_holder">DATE/TIME: %1$s</string>
@@ -183,6 +185,7 @@
     <string name="card_holder_place_holder">Card Holder:   %1$s</string>
     <string name="expiry_date">EXPIRY DATE: **/**</string>
     <string name="response_code_place_holder">Response Code:   %1$s</string>
+    <string name="message_place_holder_txt">Message: </string>
     <string name="message_place_holder">Message:   %1$s</string>
     <string name="rrn_place_holder">RRN:   %1$s</string>
     <string name="powered_by_netplus">Powered by NetPlus</string>
@@ -199,6 +202,7 @@
     <string name="order_id_place_holder">Order Id: %1$s</string>
     <string name="narration_place_holder">Narration: %1$s</string>
     <string name="card_owner_place_holder">Card Owner: %1$s</string>
+    <string name="card_masked_pan_txt">Masked Pan: %1$s</string>
     <string name="card_masked_pan">Masked Pan: %1$s</string>
     <string name="customerCopy">CUSTOMER COPY</string>
     <string name="merchantCopy">MERCHANT COPY</string>

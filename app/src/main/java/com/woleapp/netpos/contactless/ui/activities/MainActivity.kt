@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -73,6 +74,7 @@ import com.woleapp.netpos.contactless.util.AppConstants.TAG_NOTIFICATION_RECEIVE
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
@@ -842,6 +844,9 @@ class MainActivity :
                             getString(R.string.fileDownloaded),
                         )
                     }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        sharePdf(receiptPdf, this@MainActivity)
+                    }
                 }
             }
             PREF_VALUE_PRINT_SHARE -> {
@@ -854,6 +859,8 @@ class MainActivity :
                     show()
                     receiptDialogBinding.sendButton.setOnClickListener {
                         downloadPflImplForQrTransaction(qrTransaction)
+                    }
+                    receiptDialogBinding.shareButton.setOnClickListener {
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -880,12 +887,15 @@ class MainActivity :
                         receiptDialogBinding.progress.visibility = View.VISIBLE
                         receiptDialogBinding.sendButton.isEnabled = false
                     }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        sharePdf(receiptPdf, this@MainActivity)
+                    }
                 }
             }
             else -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = getString(R.string.download_share)
+                    receiptDialogBinding.sendButton.text = getString(R.string.download)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -896,6 +906,9 @@ class MainActivity :
                             binding.root,
                             getString(R.string.fileDownloaded),
                         )
+                    }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        downloadPflImplForQrTransaction(qrTransaction)
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -944,10 +957,22 @@ class MainActivity :
     private fun showEndOfDayBottomSheetDialog(transactions: List<TransactionResponse>) {
         val approvedList = transactions.filter { it.responseCode == "00" }
         val declinedList = transactions.filter { it.responseCode != "00" }
+
+        // Calculate total amounts
+        val approvedAmt = approvedList.sumOf { it.amount }
+        val declinedAmt = declinedList.sumOf { it.amount }
+
+        // Calculate total amounts
+        val totalApprovedAmt = "${(divideLongBy100(approvedAmt)).formatCurrencyAmount("\u20A6")}\n"
+        val totalDeclinedAmt = "${(divideLongBy100(declinedAmt)).formatCurrencyAmount("\u20A6")}\n"
+
+        Log.d("CHECKING_H", "$declinedAmt====$totalDeclinedAmt")
         val endOfDay = LayoutPrintEndOfDayBinding.inflate(LayoutInflater.from(this), null, false)
         endOfDay.apply {
             approvedCount.text = approvedList.size.toString()
             declinedCount.text = declinedList.size.toString()
+            totalApprovedAmount.text = totalApprovedAmt.toString()
+            totalDeclinedAmount.text = totalDeclinedAmt.toString()
             totalTransactions.text =
                 getString(R.string.total_transaction_count, transactions.size.toString())
             print.setOnClickListener {
@@ -1044,14 +1069,14 @@ class MainActivity :
 
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
-            event.getContentIfNotHandled()?.let {
+            event.getContentIfNotHandled()?.let { result ->
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
@@ -1060,12 +1085,15 @@ class MainActivity :
                                     getString(R.string.fileDownloaded),
                                 )
                             }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                sharePdf(receiptPdf, this@MainActivity)
+                            }
                         }
                     }
                     PREF_VALUE_PRINT_SMS -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 if (receiptDialogBinding.telephone.text.toString().length != 11) {
@@ -1083,6 +1111,9 @@ class MainActivity :
                                 receiptDialogBinding.progress.visibility = View.VISIBLE
                                 receiptDialogBinding.sendButton.isEnabled = false
                             }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                sharePdf(receiptPdf, this@MainActivity)
+                            }
                         }
                     }
                     PREF_VALUE_PRINT_SHARE -> {
@@ -1090,10 +1121,12 @@ class MainActivity :
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
+                            }
+                            receiptDialogBinding.shareButton.setOnClickListener {
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
@@ -1101,20 +1134,25 @@ class MainActivity :
                     else -> {
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
-                                getString(R.string.download_share)
+                                getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it.replace("Card Owner: CUSTOMER", "")
-                            Log.d("DIALOG_DATA", it)
+                            receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "")
+                            Log.d("DIALOG_DATA", result)
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
-                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, it)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
                                 )
+                            }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                cancel()
+                                dismiss()
+                                downloadPdfImpl()
+                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, result)
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }

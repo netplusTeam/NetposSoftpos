@@ -77,6 +77,26 @@
             tools:text="20" />
 
         <TextView
+            android:id="@+id/total_approved_amount_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/approved_text"
+            app:layout_constraintStart_toStartOf="@id/approved_text"
+            app:layout_constraintTop_toBottomOf="@+id/approved_count"
+            android:text="Total Approved Amount" />
+
+        <TextView
+            android:id="@+id/total_approved_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/approved_text"
+            app:layout_constraintStart_toStartOf="@id/approved_text"
+            app:layout_constraintTop_toBottomOf="@+id/total_approved_amount_tv"
+            tools:text="20" />
+
+        <TextView
             android:id="@+id/declined_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,6 +116,26 @@
             tools:text="20" />
 
         <TextView
+            android:id="@+id/total_declined_amount_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/declined_text"
+            app:layout_constraintStart_toStartOf="@id/declined_text"
+            app:layout_constraintTop_toBottomOf="@+id/declined_count"
+            android:text="Total Approved Amount" />
+
+        <TextView
+            android:id="@+id/total_declined_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="@id/declined_text"
+            app:layout_constraintStart_toStartOf="@id/declined_text"
+            app:layout_constraintTop_toBottomOf="@+id/total_declined_amount_tv"
+            tools:text="20" />
+
+        <TextView
             android:id="@+id/total_transactions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -104,7 +144,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/declined_count"
+            app:layout_constraintTop_toBottomOf="@id/total_declined_amount"
             tools:text="Total Transactions: 40" />
 
         <TextView

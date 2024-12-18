@@ -89,12 +89,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:paddingHorizontal="36dp"
-                android:layout_marginBottom="@dimen/dimen_20dp"
                 android:text="@string/send_receipt"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/telephone_wrapper" />
+
+            <Button
+                android:id="@+id/share_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/dimen_20dp"
+                android:paddingHorizontal="36dp"
+                android:text="@string/share_receipt"
+                android:drawableEnd="@drawable/ic_share_white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/telephone_wrapper"
+                app:layout_constraintTop_toBottomOf="@+id/send_button"
                 app:layout_constraintVertical_bias="0.0" />
 
             <ProgressBar
