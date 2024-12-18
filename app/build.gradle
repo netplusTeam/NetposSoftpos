@@ -357,4 +357,8 @@ dependencies {
 
     // debugImplementation because LeakCanary should only run in debug builds.
     //   debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.11'
+
+
+    implementation 'com.payneteasy:ber-tlv:1.0-11'
+    implementation 'com.github.devnied.emvnfccard:library:3.0.1'
 }

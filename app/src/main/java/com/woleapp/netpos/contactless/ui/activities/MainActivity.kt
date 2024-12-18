@@ -1167,6 +1167,9 @@ class MainActivity :
                             getString(R.string.fileDownloaded),
                         )
                     }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        sharePdf(receiptPdf, this@MainActivity)
+                    }
                 }
             }
             PREF_VALUE_PRINT_SHARE -> {
@@ -1179,6 +1182,8 @@ class MainActivity :
                     show()
                     receiptDialogBinding.sendButton.setOnClickListener {
                         downloadPflImplForQrTransaction(qrTransaction)
+                    }
+                    receiptDialogBinding.shareButton.setOnClickListener {
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -1205,12 +1210,15 @@ class MainActivity :
                         receiptDialogBinding.progress.visibility = View.VISIBLE
                         receiptDialogBinding.sendButton.isEnabled = false
                     }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        sharePdf(receiptPdf, this@MainActivity)
+                    }
                 }
             }
             else -> {
                 receiptPdf = createPdf(binding, this)
                 receiptAlertDialog.apply {
-                    receiptDialogBinding.sendButton.text = getString(R.string.download_share)
+                    receiptDialogBinding.sendButton.text = getString(R.string.download)
                     receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                     receiptDialogBinding.transactionContent.text =
                         qrTransaction.buildSMSTextForQrTransaction()
@@ -1221,6 +1229,9 @@ class MainActivity :
                             binding.root,
                             getString(R.string.fileDownloaded),
                         )
+                    }
+                    receiptDialogBinding.shareButton.setOnClickListener {
+                        downloadPflImplForQrTransaction(qrTransaction)
                         sharePdf(receiptPdf, this@MainActivity)
                     }
                 }
@@ -1381,14 +1392,14 @@ class MainActivity :
 
     private fun handlePdfReceiptPrinting() {
         viewModel.showPrintDialog.observe(this) { event ->
-            event.getContentIfNotHandled()?.let {
+            event.getContentIfNotHandled()?.let { result ->
                 when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
@@ -1397,12 +1408,15 @@ class MainActivity :
                                     getString(R.string.fileDownloaded),
                                 )
                             }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                sharePdf(receiptPdf, this@MainActivity)
+                            }
                         }
                     }
                     PREF_VALUE_PRINT_SMS -> {
                         receiptPdf = createPdf(binding, this)
                         receiptAlertDialog.apply {
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 if (receiptDialogBinding.telephone.text.toString().length != 11) {
@@ -1420,6 +1434,9 @@ class MainActivity :
                                 receiptDialogBinding.progress.visibility = View.VISIBLE
                                 receiptDialogBinding.sendButton.isEnabled = false
                             }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                sharePdf(receiptPdf, this@MainActivity)
+                            }
                         }
                     }
                     PREF_VALUE_PRINT_SHARE -> {
@@ -1427,10 +1444,12 @@ class MainActivity :
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it
+                            receiptDialogBinding.transactionContent.text = result
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener {
                                 downloadPdfImpl()
+                            }
+                            receiptDialogBinding.shareButton.setOnClickListener {
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
@@ -1438,20 +1457,25 @@ class MainActivity :
                     else -> {
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
-                                getString(R.string.download_share)
+                                getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = it.replace("Card Owner: CUSTOMER", "")
-                            Log.d("DIALOG_DATA", it)
+                            receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "")
+                            Log.d("DIALOG_DATA", result)
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
-                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, it)
                                 showSnackBar(
                                     binding.root,
                                     getString(R.string.fileDownloaded),
                                 )
+                            }
+                            receiptDialogBinding.shareButton.setOnClickListener {
+                                cancel()
+                                dismiss()
+                                downloadPdfImpl()
+                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, result)
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
