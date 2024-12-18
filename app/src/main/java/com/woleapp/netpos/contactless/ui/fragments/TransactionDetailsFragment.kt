@@ -18,7 +18,6 @@ import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.HISTORY_ACTION_DEFAULT
 import com.woleapp.netpos.contactless.util.HISTORY_ACTION_PREAUTH
 import com.woleapp.netpos.contactless.util.builder
-import com.woleapp.netpos.contactless.util.showCardDialog
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel
 import timber.log.Timber
@@ -196,14 +195,14 @@ class TransactionDetailsFragment : BaseFragment() {
 
     private fun gotoAction(action: () -> Unit) {
         actionAfterCardRead = action
-        showCardDialog(
-            requireActivity(),
-            viewLifecycleOwner,
-        ).observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let {
-                nfcCardReaderViewModel.initiateNfcPayment(10, 0, it)
-            }
-        }
+//        showCardDialog(
+//            requireActivity(),
+//            viewLifecycleOwner,
+//        ).observe(viewLifecycleOwner) { event ->
+//            event.getContentIfNotHandled()?.let {
+//                nfcCardReaderViewModel.initiateNfcPayment(10, 0, it)
+//            }
+//        }
     }
 
     private fun showSnackBar(message: String) {

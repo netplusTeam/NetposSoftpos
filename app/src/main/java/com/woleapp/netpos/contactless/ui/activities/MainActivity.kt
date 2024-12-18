@@ -11,7 +11,6 @@ import android.content.*
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.media.MediaPlayer
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
@@ -36,6 +35,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -77,6 +77,7 @@ import com.woleapp.netpos.contactless.util.AppConstants.TAG_NOTIFICATION_RECEIVE
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
@@ -1099,22 +1100,6 @@ class MainActivity :
         }
     }
 
-    private fun playSinglePing() {
-        val mediaPlayer = MediaPlayer.create(context, R.raw.notification_decorative_01)
-        mediaPlayer.setOnCompletionListener {
-            mediaPlayer.release() // Release the MediaPlayer when done
-        }
-        mediaPlayer.start()
-    }
-
-    private fun playDoublePing() {
-        val mediaPlayer = MediaPlayer.create(context, R.raw.notification_decorative_02)
-        mediaPlayer.setOnCompletionListener {
-            mediaPlayer.release() // Release the MediaPlayer when done
-        }
-        mediaPlayer.start()
-    }
-
     private fun startEndSequence(nfc: IsoDep?) {
         try {
             // Close the NFC connection if it exists
@@ -1289,7 +1274,6 @@ class MainActivity :
         val totalApprovedAmt = "${(divideLongBy100(approvedAmt)).formatCurrencyAmount("\u20A6")}\n"
         val totalDeclinedAmt = "${(divideLongBy100(declinedAmt)).formatCurrencyAmount("\u20A6")}\n"
 
-        Log.d("CHECKING_H", "$declinedAmt====$totalDeclinedAmt")
         val endOfDay = LayoutPrintEndOfDayBinding.inflate(LayoutInflater.from(this), null, false)
         endOfDay.apply {
             approvedCount.text = approvedList.size.toString()

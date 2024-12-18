@@ -156,25 +156,25 @@ class DashboardFragment : BaseFragment() {
                 showSnackBar(s)
             }
         }
-        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { shouldGetCardData ->
-                if (shouldGetCardData) {
-                    showCardDialog(
-                        requireActivity(),
-                        viewLifecycleOwner,
-                    ).observe(viewLifecycleOwner) { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
-                            nfcCardReaderViewModel.initiateNfcPayment(
-                                viewModel.amountLong,
-                                viewModel.cashbackLong,
-                                it,
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
+//            event.getContentIfNotHandled()?.let { shouldGetCardData ->
+//                if (shouldGetCardData) {
+//                    showCardDialog(
+//                        requireActivity(),
+//                        viewLifecycleOwner,
+//                    ).observe(viewLifecycleOwner) { event ->
+//                        event.getContentIfNotHandled()?.let {
+//                            Timber.e(it.toString())
+//                            nfcCardReaderViewModel.initiateNfcPayment(
+//                                viewModel.amountLong,
+//                                viewModel.cashbackLong,
+//                                it,
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
         viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 printTypeDialog.show()
