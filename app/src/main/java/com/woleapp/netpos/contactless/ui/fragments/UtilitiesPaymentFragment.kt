@@ -31,7 +31,6 @@ import com.woleapp.netpos.contactless.viewmodels.UtilitiesViewModel
 import timber.log.Timber
 
 class UtilitiesPaymentFragment : BaseFragment() {
-
     private lateinit var binding: LayoutPowerOrElectricityBinding
     private lateinit var cableBinding: LayoutCableTvBinding
     private lateinit var internetSubscriptionBinding: LayoutInternetSubscriptionBinding
@@ -61,30 +60,35 @@ class UtilitiesPaymentFragment : BaseFragment() {
         savedInstanceState: Bundle?,
     ): View {
         if (checkBillsPaymentToken().not()) getBillsToken(StormApiClient.getInstance())
-        val dialogUtilitiesBinding = DialogBinding.inflate(inflater, null, false)
-            .apply {
-                tvYes.text = getString(R.string.lbl_continue)
-                responseIcon.visibility = View.VISIBLE
-                tvNo.visibility = View.GONE
-            }
-        val alertDialogBuilder = AlertDialog.Builder(requireContext())
-            .apply {
-                setView(dialogUtilitiesBinding.root)
+        val dialogUtilitiesBinding =
+            DialogBinding.inflate(inflater, null, false)
+                .apply {
+                    tvYes.text = getString(R.string.lbl_continue)
+                    responseIcon.visibility = View.VISIBLE
+                    tvNo.visibility = View.GONE
+                }
+        val alertDialogBuilder =
+            AlertDialog.Builder(requireContext())
+                .apply {
+                    setView(dialogUtilitiesBinding.root)
+                    setCancelable(false)
+                }
+        progressDialog =
+            ProgressDialog(requireContext()).apply {
                 setCancelable(false)
+                this.setMessage("Please Wait")
             }
-        progressDialog = ProgressDialog(requireContext()).apply {
-            setCancelable(false)
-            this.setMessage("Please Wait")
-        }
-        receiptDialogBinding = DialogTransactionResultBinding.inflate(inflater, null, false)
-            .apply { executePendingBindings() }
+        receiptDialogBinding =
+            DialogTransactionResultBinding.inflate(inflater, null, false)
+                .apply { executePendingBindings() }
 
         val layoutVerifyUtilityPaymentBinding =
             LayoutVerifyUtilityPaymentBinding.inflate(inflater, null, false)
         layoutVerifyUtilityPaymentBinding.lifecycleOwner = viewLifecycleOwner
         layoutVerifyUtilityPaymentBinding.executePendingBindings()
-        verifyBillDialog = BottomSheetDialog(requireContext(), R.style.SheetDialog)
-            .apply { setContentView(layoutVerifyUtilityPaymentBinding.root) }
+        verifyBillDialog =
+            BottomSheetDialog(requireContext(), R.style.SheetDialog)
+                .apply { setContentView(layoutVerifyUtilityPaymentBinding.root) }
         layoutVerifyUtilityPaymentBinding.proceed.setOnClickListener {
             verifyBillDialog!!.dismiss()
             if (checkBillsPaymentToken().not()) {
@@ -119,14 +123,14 @@ class UtilitiesPaymentFragment : BaseFragment() {
 
         viewModel.initiateBillsPayment.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
-                showCardDialog(
-                    requireActivity(),
-                    viewLifecycleOwner,
-                ).observe(viewLifecycleOwner) { event ->
-                    event.getContentIfNotHandled()?.let {
-                        nfcCardReaderViewModel.initiateNfcPayment(10, 0, it)
-                    }
-                }
+//                showCardDialog(
+//                    requireActivity(),
+//                    viewLifecycleOwner,
+//                ).observe(viewLifecycleOwner) { event ->
+//                    event.getContentIfNotHandled()?.let {
+//                        nfcCardReaderViewModel.initiateNfcPayment(10, 0, it)
+//                    }
+//                }
             }
         }
 
@@ -151,30 +155,31 @@ class UtilitiesPaymentFragment : BaseFragment() {
             }
         }
 
-        receiptDialog = AlertDialog.Builder(requireContext()).setCancelable(false).apply {
-            setView(receiptDialogBinding.root)
-            receiptDialogBinding.apply {
-                closeBtn.setOnClickListener {
-                    receiptDialog.dismiss()
-                    // requireActivity().onBackPressed()
-                }
-                sendButton.setOnClickListener {
-                    if (receiptDialogBinding.telephone.text.toString().length != 11) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Please enter a valid phone number",
-                            Toast.LENGTH_LONG,
-                        ).show()
-                        return@setOnClickListener
+        receiptDialog =
+            AlertDialog.Builder(requireContext()).setCancelable(false).apply {
+                setView(receiptDialogBinding.root)
+                receiptDialogBinding.apply {
+                    closeBtn.setOnClickListener {
+                        receiptDialog.dismiss()
+                        // requireActivity().onBackPressed()
                     }
-                    viewModel.sendSmS(
-                        receiptDialogBinding.telephone.text.toString(),
-                    )
-                    progress.visibility = View.VISIBLE
-                    sendButton.isEnabled = false
+                    sendButton.setOnClickListener {
+                        if (receiptDialogBinding.telephone.text.toString().length != 11) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Please enter a valid phone number",
+                                Toast.LENGTH_LONG,
+                            ).show()
+                            return@setOnClickListener
+                        }
+                        viewModel.sendSmS(
+                            receiptDialogBinding.telephone.text.toString(),
+                        )
+                        progress.visibility = View.VISIBLE
+                        sendButton.isEnabled = false
+                    }
                 }
-            }
-        }.create()
+            }.create()
         receiptDialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         viewModel.showPrintDialog.observe(viewLifecycleOwner) { event ->
             Toast.makeText(requireContext(), "Show print dialog", Toast.LENGTH_SHORT).show()
@@ -320,7 +325,10 @@ class UtilitiesPaymentFragment : BaseFragment() {
         }
     }
 
-    private fun getElectricityPageView(inflater: LayoutInflater, container: ViewGroup?): View {
+    private fun getElectricityPageView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+    ): View {
         viewModel.setUtilityService("pay_bill")
         viewModel.setUtilityBillType("POWER")
         viewModel.setUtilityServiceType("electricity")
@@ -359,32 +367,36 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     viewModel.setUtilityProvider(electricityBillers[selected].prepaidCode)
                 }
             }
-        binding.meterType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-            }
+        binding.meterType.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
+                }
 
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long,
-            ) {
-                when (position) {
-                    0 -> {
-                        viewModel.setUtilityProvider(electricityBillers[selected].prepaidCode)
-                        viewModel.setUtilityPackage("Prepaid")
-                    }
-                    1 -> {
-                        viewModel.setUtilityProvider(electricityBillers[selected].postpaidCode)
-                        viewModel.setUtilityPackage("Postpaid")
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    when (position) {
+                        0 -> {
+                            viewModel.setUtilityProvider(electricityBillers[selected].prepaidCode)
+                            viewModel.setUtilityPackage("Prepaid")
+                        }
+                        1 -> {
+                            viewModel.setUtilityProvider(electricityBillers[selected].postpaidCode)
+                            viewModel.setUtilityPackage("Postpaid")
+                        }
                     }
                 }
             }
-        }
         return binding.root
     }
 
-    private fun getAirtimePageView(inflater: LayoutInflater, container: ViewGroup?): View {
+    private fun getAirtimePageView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+    ): View {
         viewModel.setUtilityService("vtu")
         viewModel.setUtilityPackage("Airtime")
         viewModel.setUtilityBillType("Airtime")
@@ -393,14 +405,16 @@ class UtilitiesPaymentFragment : BaseFragment() {
         airtimeOrDataBinding.lifecycleOwner = viewLifecycleOwner
         val dataOrAirtimeSpinnerAdapter =
             ServicesSpinnerAdapter(requireContext(), listOf("Airtime", "Mobile Data"))
-        val mobileOperatorsBillers = DataGenerator.generateBillers().filter {
-            it.service_type == "Airtime"
-        }
-        val selectNetworkSpinnerAdapter = ServicesSpinnerAdapter(
-            requireContext(),
-            mobileOperatorsBillers.map { it.biller_code },
-            mobileOperatorsBillers.map { it.imageUrl },
-        )
+        val mobileOperatorsBillers =
+            DataGenerator.generateBillers().filter {
+                it.service_type == "Airtime"
+            }
+        val selectNetworkSpinnerAdapter =
+            ServicesSpinnerAdapter(
+                requireContext(),
+                mobileOperatorsBillers.map { it.biller_code },
+                mobileOperatorsBillers.map { it.imageUrl },
+            )
         val dataPlanList = DataGenerator.getServiceProviderPlans(context)
 
         airtimeOrDataBinding.dataOrAirtimeSpinner.adapter = dataOrAirtimeSpinnerAdapter
@@ -417,7 +431,9 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     position: Int,
                     id: Long,
                 ) {
-                    viewModel.setUtilityPackage("${dataPlanList[selectedNetwork][position].data} - ${dataPlanList[selectedNetwork][position].duration}")
+                    viewModel.setUtilityPackage(
+                        "${dataPlanList[selectedNetwork][position].data} - ${dataPlanList[selectedNetwork][position].duration}",
+                    )
                     airtimeOrDataBinding.priceTextbox.setText(dataPlanList[selectedNetwork][position].price)
                 }
             }
@@ -432,23 +448,24 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     position: Int,
                     id: Long,
                 ) {
-                    val visibility = when (position) {
-                        0 -> {
-                            viewModel.setUtilityPackage("Airtime")
-                            viewModel.setUtilityBillType("Airtime")
-                            airtimeOrDataBinding.priceTextbox.isEnabled = true
-                            airtimeOrDataBinding.currencyTextbox.setBackgroundResource(R.drawable.services_edittext_background)
-                            airtimeOrDataBinding.priceTextbox.setBackgroundResource(R.drawable.services_edittext_background)
-                            View.GONE
+                    val visibility =
+                        when (position) {
+                            0 -> {
+                                viewModel.setUtilityPackage("Airtime")
+                                viewModel.setUtilityBillType("Airtime")
+                                airtimeOrDataBinding.priceTextbox.isEnabled = true
+                                airtimeOrDataBinding.currencyTextbox.setBackgroundResource(R.drawable.services_edittext_background)
+                                airtimeOrDataBinding.priceTextbox.setBackgroundResource(R.drawable.services_edittext_background)
+                                View.GONE
+                            }
+                            1 -> {
+                                airtimeOrDataBinding.priceTextbox.isEnabled = false
+                                airtimeOrDataBinding.currencyTextbox.setBackgroundResource(R.drawable.services_edittext_background_disabled)
+                                airtimeOrDataBinding.priceTextbox.setBackgroundResource(R.drawable.services_edittext_background_disabled)
+                                View.VISIBLE
+                            }
+                            else -> View.GONE
                         }
-                        1 -> {
-                            airtimeOrDataBinding.priceTextbox.isEnabled = false
-                            airtimeOrDataBinding.currencyTextbox.setBackgroundResource(R.drawable.services_edittext_background_disabled)
-                            airtimeOrDataBinding.priceTextbox.setBackgroundResource(R.drawable.services_edittext_background_disabled)
-                            View.VISIBLE
-                        }
-                        else -> View.GONE
-                    }
                     airtimeOrDataBinding.selectDataBundleSpinner.visibility = visibility
                     airtimeOrDataBinding.selectDataBundleSpinnerIcon.visibility = visibility
                 }
@@ -479,7 +496,10 @@ class UtilitiesPaymentFragment : BaseFragment() {
         return airtimeOrDataBinding.root
     }
 
-    private fun getInternetPageView(inflater: LayoutInflater, container: ViewGroup?): View {
+    private fun getInternetPageView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+    ): View {
         viewModel.setUtilityService("pay_bill")
         viewModel.setUtilityBillType("Internet")
         internetSubscriptionBinding =
@@ -487,9 +507,10 @@ class UtilitiesPaymentFragment : BaseFragment() {
         internetSubscriptionBinding.viewmodel = viewModel
         internetSubscriptionBinding.lifecycleOwner = viewLifecycleOwner
         internetSubscriptionBinding.priceTextbox.isEnabled = false
-        val internetBiller = DataGenerator.generateBillers().filter {
-            it.service_type == "Internet" && it.status == "active"
-        }
+        val internetBiller =
+            DataGenerator.generateBillers().filter {
+                it.service_type == "Internet" && it.status == "active"
+            }
         val internetProviderSpinnerAdapter =
             ServicesSpinnerAdapter(
                 requireContext(),
@@ -547,33 +568,38 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     position: Int,
                     id: Long,
                 ) {
-                    val priceToPay = when (selected) {
-                        0 -> {
-                            viewModel.setUtilityPackage(smileInternetList[position].bundleName)
-                            smileInternetList[position].price.replace("N", "")
-                                .replace(",", "")
+                    val priceToPay =
+                        when (selected) {
+                            0 -> {
+                                viewModel.setUtilityPackage(smileInternetList[position].bundleName)
+                                smileInternetList[position].price.replace("N", "")
+                                    .replace(",", "")
+                            }
+                            1 -> {
+                                viewModel.setUtilityPackage(spectranetInternetList[position].planName)
+                                spectranetInternetList[position].price.replace(",", "")
+                            }
+                            else -> "0"
                         }
-                        1 -> {
-                            viewModel.setUtilityPackage(spectranetInternetList[position].planName)
-                            spectranetInternetList[position].price.replace(",", "")
-                        }
-                        else -> "0"
-                    }
                     internetSubscriptionBinding.priceTextbox.setText(priceToPay)
                 }
             }
         return internetSubscriptionBinding.root
     }
 
-    private fun getCableTvView(inflater: LayoutInflater, container: ViewGroup?): View {
+    private fun getCableTvView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+    ): View {
         viewModel.setUtilityService("pay_bill")
         viewModel.setUtilityBillType("TV")
         viewModel.setUtilityServiceType("cable_tv")
         cableBinding = LayoutCableTvBinding.inflate(inflater, container, false)
         cableBinding.viewmodel = viewModel
         cableBinding.lifecycleOwner = viewLifecycleOwner
-        val cableTvBiller = DataGenerator.generateBillers()
-            .filter { it.service_type == "TV" && it.status == "active" }
+        val cableTvBiller =
+            DataGenerator.generateBillers()
+                .filter { it.service_type == "TV" && it.status == "active" }
         val cableTvCategorySpinnerAdapter =
             ServicesSpinnerAdapter(
                 requireContext(),
@@ -599,21 +625,22 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     id: Long,
                 ) {
                     selectedCategory = position
-                    val tvPackageAdapter = when (position) {
-                        0 -> {
-                            viewModel.setUtilityProvider("DSTV")
-                            ServicesSpinnerAdapter(context!!, dstvPlans.map { it.product })
+                    val tvPackageAdapter =
+                        when (position) {
+                            0 -> {
+                                viewModel.setUtilityProvider("DSTV")
+                                ServicesSpinnerAdapter(context!!, dstvPlans.map { it.product })
+                            }
+                            1 -> {
+                                viewModel.setUtilityProvider("GOTV")
+                                ServicesSpinnerAdapter(context!!, gotvPlans.map { it.product })
+                            }
+                            2 -> {
+                                viewModel.setUtilityProvider("STARTIMES")
+                                ServicesSpinnerAdapter(context!!, starTimesPlan.map { it.plan })
+                            }
+                            else -> ServicesSpinnerAdapter(context!!, ArrayList())
                         }
-                        1 -> {
-                            viewModel.setUtilityProvider("GOTV")
-                            ServicesSpinnerAdapter(context!!, gotvPlans.map { it.product })
-                        }
-                        2 -> {
-                            viewModel.setUtilityProvider("STARTIMES")
-                            ServicesSpinnerAdapter(context!!, starTimesPlan.map { it.plan })
-                        }
-                        else -> ServicesSpinnerAdapter(context!!, ArrayList())
-                    }
                     cableBinding.selectCableTvPackage.adapter = tvPackageAdapter
                 }
             }
@@ -628,40 +655,42 @@ class UtilitiesPaymentFragment : BaseFragment() {
                     position: Int,
                     id: Long,
                 ) {
-                    var feeToPay = when (selectedCategory) {
-                        0 -> {
-                            viewModel.setUtilityPackage(dstvPlans[position].product)
-                            cableBinding.planValidityOptions.visibility = View.GONE
-                            dstvPlans[position].newPrice
-                        }
-                        1 -> {
-                            viewModel.setUtilityPackage(gotvPlans[position].product)
-                            cableBinding.planValidityOptions.visibility = View.GONE
-                            gotvPlans[position].newPrice
-                        }
-                        2 -> {
-                            cableBinding.planValidityOptions.visibility = View.VISIBLE
-                            cableBinding.planValidityOptions.check(-1)
-                            0
-                        }
-                        else -> 0
-                    }
-                    cableBinding.planValidityOptions.setOnCheckedChangeListener { _, checked ->
-                        val starTimesPrice = when (checked) {
-                            R.id.daily -> {
-                                viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Daily")
-                                starTimesPlan[position].dailyFee
+                    var feeToPay =
+                        when (selectedCategory) {
+                            0 -> {
+                                viewModel.setUtilityPackage(dstvPlans[position].product)
+                                cableBinding.planValidityOptions.visibility = View.GONE
+                                dstvPlans[position].newPrice
                             }
-                            R.id.weekly -> {
-                                viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Weekly")
-                                starTimesPlan[position].weeklyFee
+                            1 -> {
+                                viewModel.setUtilityPackage(gotvPlans[position].product)
+                                cableBinding.planValidityOptions.visibility = View.GONE
+                                gotvPlans[position].newPrice
                             }
-                            R.id.monthly -> {
-                                viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Monthly")
-                                starTimesPlan[position].monthlyFee
+                            2 -> {
+                                cableBinding.planValidityOptions.visibility = View.VISIBLE
+                                cableBinding.planValidityOptions.check(-1)
+                                0
                             }
                             else -> 0
                         }
+                    cableBinding.planValidityOptions.setOnCheckedChangeListener { _, checked ->
+                        val starTimesPrice =
+                            when (checked) {
+                                R.id.daily -> {
+                                    viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Daily")
+                                    starTimesPlan[position].dailyFee
+                                }
+                                R.id.weekly -> {
+                                    viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Weekly")
+                                    starTimesPlan[position].weeklyFee
+                                }
+                                R.id.monthly -> {
+                                    viewModel.setUtilityPackage("${starTimesPlan[position].plan} - Monthly")
+                                    starTimesPlan[position].monthlyFee
+                                }
+                                else -> 0
+                            }
 
                         feeToPay = starTimesPrice
                         cableBinding.priceTextbox.setText(feeToPay.toString())
