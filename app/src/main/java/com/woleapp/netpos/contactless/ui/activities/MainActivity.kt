@@ -1439,6 +1439,7 @@ class MainActivity :
                         }
                     }
                     else -> {
+                        receiptPdf = createPdfWithRRN(pdfView, this, result)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download)
@@ -1459,7 +1460,6 @@ class MainActivity :
                                 cancel()
                                 dismiss()
                                 downloadPdfImpl()
-                                receiptPdf = createPdfWithRRN(pdfView, this@MainActivity, result)
                                 sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
