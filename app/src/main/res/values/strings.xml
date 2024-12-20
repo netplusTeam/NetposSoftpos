@@ -226,10 +226,12 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="all_please_enter_location">Please Enter Your Location</string>
     <string name="all_please_enter_phone_number">Please Enter your Phone Number</string>
     <string name="all_please_enter_email_address">Please Enter your Email address</string>
-    <string name="all_please_enter_reference">Please Enter your Reference</string>
-    <string name="all_please_enter_bvn">Please Enter your BVN</string>
-    <string name="all_please_enter_password">Please Enter Password</string>
+    <string name="all_please_enter_no_of_tids">Please Enter your Number of TIDs</string>
+    <string name="all_please_enter_rc_no">Please Enter RC Number</string>
     <string name="all_please_enter_confirm_password">Please re-enter your password</string>
+    <string name="rc_number">RC number</string>
+    <string name="no_Of_TID">Number of TIDs</string>
+    <string name="contact_person">Contact Person\'s Number</string>
     <!--    <string name="invalid_phone_number">Invalid Phone number</string>-->
     <!--    <string name="all_phone_number_is_required">Phone Number is required</string>-->
     <string name="all_password_mismatch">Password Mismatch</string>
