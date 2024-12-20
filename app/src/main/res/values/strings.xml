@@ -228,6 +228,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="all_please_enter_email_address">Please Enter your Email address</string>
     <string name="all_please_enter_no_of_tids">Please Enter your Number of TIDs</string>
     <string name="all_please_enter_rc_no">Please Enter RC Number</string>
+    <string name="all_please_enter_contact_person">Please Enter your Contact Person</string>
     <string name="all_please_enter_confirm_password">Please re-enter your password</string>
     <string name="rc_number">RC number</string>
     <string name="no_Of_TID">Number of TIDs</string>
