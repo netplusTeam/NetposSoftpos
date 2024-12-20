@@ -2,8 +2,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.nfc.NfcManager
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -40,6 +38,7 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidation
 import com.woleapp.netpos.contactless.util.UtilityParam
+import com.woleapp.netpos.contactless.util.checkNfcStatus
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.AuthViewModel
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
@@ -47,6 +46,7 @@ import java.nio.charset.Charset
 import java.text.ParseException
 
 class LoginFragment : BaseFragment() {
+
     private val viewModel by viewModels<AuthViewModel>()
     private val contactlessViewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var binding: FragmentLoginBinding
@@ -61,51 +61,48 @@ class LoginFragment : BaseFragment() {
     private lateinit var partnerID: String
     private lateinit var savedAcctNumber: String
     private lateinit var dialog: AlertDialog
+    private var  nfcAdapter: NfcAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        binding =
-            FragmentLoginBinding.inflate(inflater, container, false).apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-                viewmodel = viewModel
-            }
-        resetPasswordBinding =
-            DialogPasswordResetBinding.inflate(inflater, null, false).apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-                viewmodel = viewModel
-            }
-        passwordResetDialog =
-            AlertDialog.Builder(requireContext()).apply {
-                setView(resetPasswordBinding.root)
-                setCancelable(false)
-            }.create()
+        binding = FragmentLoginBinding.inflate(inflater, container, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+            viewmodel = viewModel
+        }
 
-        confirmOTPBinding =
-            DialogSetNewPasswordBinding.inflate(inflater, null, false).apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-            }
-        confirmOTPDialog =
-            AlertDialog.Builder(requireContext()).apply {
-                setView(confirmOTPBinding.root)
-                setCancelable(false)
-            }.create()
+        nfcAdapter = checkNfcStatus()
 
-        setPasswordBinding =
-            LayoutSetPasswordBinding.inflate(inflater, null, false).apply {
-                lifecycleOwner = viewLifecycleOwner
-                executePendingBindings()
-            }
-        setPasswordDialog =
-            AlertDialog.Builder(requireContext()).apply {
-                setView(setPasswordBinding.root)
-                setCancelable(false)
-            }.create()
+        resetPasswordBinding = DialogPasswordResetBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+            viewmodel = viewModel
+        }
+        passwordResetDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(resetPasswordBinding.root)
+            setCancelable(false)
+        }.create()
+
+        confirmOTPBinding = DialogSetNewPasswordBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+        }
+        confirmOTPDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(confirmOTPBinding.root)
+            setCancelable(false)
+        }.create()
+
+        setPasswordBinding = LayoutSetPasswordBinding.inflate(inflater, null, false).apply {
+            lifecycleOwner = viewLifecycleOwner
+            executePendingBindings()
+        }
+        setPasswordDialog = AlertDialog.Builder(requireContext()).apply {
+            setView(setPasswordBinding.root)
+            setCancelable(false)
+        }.create()
 
         confirmOTPBinding.closeDialog.setOnClickListener {
             confirmOTPDialog.dismiss()
@@ -135,22 +132,18 @@ class LoginFragment : BaseFragment() {
                 viewModel.login(deviceId)
             }
         }
-        dialog =
-            AlertDialog.Builder(requireContext()).setTitle("Password changed successfully")
-                .setCancelable(false).setPositiveButton("Continue") { _, _ ->
-                    setPasswordDialog.dismiss()
-                }.setMessage("Please login to continue").create()
+        dialog = AlertDialog.Builder(requireContext()).setTitle("Password changed successfully")
+            .setCancelable(false).setPositiveButton("Continue") { _, _ ->
+                setPasswordDialog.dismiss()
+            }.setMessage("Please login to continue").create()
 
         binding.register.setOnClickListener {
-            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") ||
-                BuildConfig.FLAVOR.contains(
-                    "providus",
-                ) || BuildConfig.FLAVOR.contains("providussoftpos") || BuildConfig.FLAVOR.contains("wemabank") ||
-                BuildConfig.FLAVOR.contains(
-                    "easypay",
-                ) || BuildConfig.FLAVOR.contains("fcmbeasypay") || BuildConfig.FLAVOR.contains("easypayfcmb") ||
-                BuildConfig.FLAVOR.contains(
-                    "stanbic",
+            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                    "providus"
+                ) || BuildConfig.FLAVOR.contains("providussoftpos") || BuildConfig.FLAVOR.contains("wemabank") || BuildConfig.FLAVOR.contains(
+                    "easypay"
+                ) || BuildConfig.FLAVOR.contains("fcmbeasypay") || BuildConfig.FLAVOR.contains("easypayfcmb") || BuildConfig.FLAVOR.contains(
+                    "stanbic"
                 ) || BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains("netpos")
             ) {
                 showFragment(
@@ -181,12 +174,9 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun testNfcSupport() {
-        val nfcManager: NfcManager =
-            requireActivity().getSystemService(AppCompatActivity.NFC_SERVICE) as NfcManager
-        val nfcAdapter = nfcManager.defaultAdapter
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
-            if (nfcAdapter.isEnabled) {
+            if (nfcAdapter!!.isEnabled) {
                 Toast.makeText(requireContext(), "NFC enabled", Toast.LENGTH_SHORT).show()
                 android.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
                     .setMessage("Device has NFC support and is enabled")
@@ -206,7 +196,7 @@ class LoginFragment : BaseFragment() {
             }
         } else {
             android.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
-                .setMessage("Device does not have NFC support")
+                .setMessage(getString(R.string.device_doesnt_have_nfc))
                 .setPositiveButton("Close") { dialog, _ ->
                     dialog.dismiss()
                     // finish()
@@ -214,14 +204,11 @@ class LoginFragment : BaseFragment() {
         }
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?,
-    ) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 //        val pinkKey = context?.let { processISOBitStreamWithJ8583(it, "0810023800000280080001290105050469380105050129002ISWK4199BAEECE251C7E9926A62981F7C5FE53C9BA3350000000000000000000000000000000000000000000000000000000000") }
 //        Log.d("CHECKING_PINKEY", pinkKey.toString())
-
         loader = alertDialog(requireContext())
         viewModel.message.observe(viewLifecycleOwner) {
             it.getContentIfNotHandled()?.let { message ->
@@ -237,21 +224,12 @@ class LoginFragment : BaseFragment() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message.contains("Password")) {
                     showToast(message)
-                } else if (message.contains("REJECTED")) {
-                    showToast(message)
                 }
             }
         }
-        contactlessViewModel.otpBankPMessage.observe(viewLifecycleOwner) { message ->
-            if (message.contains("You are only allowed")) {
-                showToast(message)
-                confirmOTPDialog.dismiss()
-            }
-        }
         binding.forgotPassword.setOnClickListener {
-            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") ||
-                BuildConfig.FLAVOR.contains(
-                    "zenith",
+            if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("providuspos") || BuildConfig.FLAVOR.contains(
+                    "zenith"
                 )
             ) {
                 confirmOTPDialog.show()
@@ -276,19 +254,17 @@ class LoginFragment : BaseFragment() {
                             },
                         )
                         NetPosTerminalConfig.init(applicationContext)
-                        val event =
-                            MqttEvent<AuthenticationEventData>().apply {
-                                this.event = MqttEvents.AUTHENTICATION.event
-                                this.code = "00"
-                                this.timestamp = System.currentTimeMillis()
-                                this.data =
-                                    AuthenticationEventData(
-                                        this.business_name!!,
-                                        this.storm_id!!,
-                                        this.deviceSerial!!,
-                                    )
-                                this.status = "SUCCESS"
-                            }
+                        val event = MqttEvent<AuthenticationEventData>().apply {
+                            this.event = MqttEvents.AUTHENTICATION.event
+                            this.code = "00"
+                            this.timestamp = System.currentTimeMillis()
+                            this.data = AuthenticationEventData(
+                                this.business_name!!,
+                                this.storm_id!!,
+                                this.deviceSerial!!,
+                            )
+                            this.status = "SUCCESS"
+                        }
                         finish()
                     }
                 }
@@ -318,20 +294,8 @@ class LoginFragment : BaseFragment() {
                 confirmOTPForProvidus()
             }
         }
-
-        if (BuildConfig.FLAVOR.contains("providuspos")) {
-            binding.privacyPolicy.setOnClickListener {
-                val url = "https://www.providusbank.com/privacy-policy"
-                // Create an intent to open the URL
-                val intent =
-                    Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse(url)
-                    }
-                // Start the activity
-                startActivity(intent)
-            }
-        }
     }
+
 
     private fun confirmOTPForProvidus() {
         activity?.getFragmentManager()?.popBackStack()
@@ -346,7 +310,7 @@ class LoginFragment : BaseFragment() {
             observeServerResponse(
                 contactlessViewModel.confirmOTPResponse,
                 loader,
-                requireActivity().supportFragmentManager,
+                requireActivity().supportFragmentManager
             ) {
                 setPasswordBinding.email.setText(email)
                 confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
@@ -359,16 +323,15 @@ class LoginFragment : BaseFragment() {
                 showToast("Email is required")
                 return
             }
-            val payload =
-                JsonObject().apply {
-                    addProperty("email", email)
-                }
+            val payload = JsonObject().apply {
+                addProperty("email", email)
+            }
             // closeSoftKeyboard(requireContext(), this.requireActivity())
             contactlessViewModel.resetPasswordForProvidus(payload, initPartnerId(), deviceId)
             observeServerResponse(
                 contactlessViewModel.resetPasswordForProvidusResponse,
                 loader,
-                requireActivity().supportFragmentManager,
+                requireActivity().supportFragmentManager
             ) {
                 val acctNumber = Prefs.getString(AppConstants.ACCOUNT_NUMBER_FOR_PROVIDUS, "")
                 savedAcctNumber = acctNumber.substring(1, acctNumber.length - 1)
@@ -388,16 +351,15 @@ class LoginFragment : BaseFragment() {
                 showToast("All fields are required required")
                 return
             }
-            val payload =
-                JsonObject().apply {
-                    addProperty("email", email)
-                    addProperty("otp", otp)
-                }
+            val payload = JsonObject().apply {
+                addProperty("email", email)
+                addProperty("otp", otp)
+            }
             contactlessViewModel.confirmOTPToSetPassword(payload, initPartnerId(), deviceId)
             observeServerResponse(
                 contactlessViewModel.confirmOtpToResetPasswordResponse,
                 loader,
-                requireActivity().supportFragmentManager,
+                requireActivity().supportFragmentManager
             ) {
                 setPasswordBinding.email.setText(email)
                 confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
@@ -410,16 +372,15 @@ class LoginFragment : BaseFragment() {
                 showToast("Email is required")
                 return
             }
-            val payload =
-                JsonObject().apply {
-                    addProperty("email", email)
-                }
+            val payload = JsonObject().apply {
+                addProperty("email", email)
+            }
             // closeSoftKeyboard(requireContext(), this.requireActivity())
             contactlessViewModel.resetPassword(payload, initPartnerId(), deviceId)
             observeServerResponse(
                 contactlessViewModel.resetPasswordResponse,
                 loader,
-                requireActivity().supportFragmentManager,
+                requireActivity().supportFragmentManager
             ) {
                 confirmOTPBinding.etEmail.setText(email)
                 confirmOTPBinding.fragmentOtp.visibility = View.VISIBLE
@@ -441,22 +402,19 @@ class LoginFragment : BaseFragment() {
             return
         }
         if (!passwordValidation(password)) {
-            showToast(
-                "The password's length must be more than 7 digits and must contain small letters, capital letters and special characters",
-            )
+            showToast("The password's length must be more than 7 digits and must contain small letters, capital letters and special characters")
             return
         }
-        val payload =
-            JsonObject().apply {
-                addProperty("email", email)
-                addProperty("newPassword", password)
-            }
+        val payload = JsonObject().apply {
+            addProperty("email", email)
+            addProperty("newPassword", password)
+        }
         setPasswordBinding.authProgress.visibility = View.VISIBLE
         contactlessViewModel.setNewPassword(payload, initPartnerId(), deviceId)
         observeServerResponse(
             contactlessViewModel.newPasswordResponse,
             loader,
-            requireActivity().supportFragmentManager,
+            requireActivity().supportFragmentManager
         ) {
             setPasswordDialog.dismiss()
         }
@@ -478,59 +436,28 @@ class LoginFragment : BaseFragment() {
             showToast("Enter your new password")
             return
         }
-        val payload =
-            JsonObject().apply {
-                addProperty("email", email)
-                addProperty("newPassword", password)
-            }
+        val payload = JsonObject().apply {
+            addProperty("email", email)
+            addProperty("newPassword", password)
+        }
         setPasswordBinding.authProgress.visibility = View.VISIBLE
         contactlessViewModel.setNewPassword(payload, initPartnerId(), deviceId)
         observeServerResponse(
             contactlessViewModel.newPasswordResponse,
             loader,
-            requireActivity().supportFragmentManager,
+            requireActivity().supportFragmentManager
         ) {
             dialog.show()
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        // Clear sensitive data
-        clearSensitiveData()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        // Clear sensitive data
-        clearSensitiveData()
-    }
-
-    private fun clearSensitiveData() {
-        // Example: clearing EditText fields
-        binding.etEmail.text?.clear()
-        binding.etPwd.text?.clear()
-        confirmOTPBinding.etEmail.text?.clear()
-        confirmOTPBinding.otp.text?.clear()
-        resetPasswordBinding.etEmail.text?.clear()
-        setPasswordBinding.email.text?.clear()
-        setPasswordBinding.passwordEdittext.text?.clear()
-        setPasswordBinding.confirmPasswordEdittext.text?.clear()
-    }
-
-    fun processISOBitStreamWithJ8583(
-        context: Context,
-        data: String,
-    ): IsoMessage {
+    fun processISOBitStreamWithJ8583(context: Context, data: String): IsoMessage {
         val outputData = data.substring(data.indexOf("0"))
 
         return unpackWith8583(context, outputData)
     }
 
-    private fun unpackWith8583(
-        context: Context,
-        data: String,
-    ): IsoMessage {
+    private fun unpackWith8583(context: Context, data: String): IsoMessage {
         val dataByteArray = data.toByteArray(Charset.forName("UTF-8"))
         val msgFactory = MessageFactory<IsoMessage>()
         msgFactory.ignoreLastMissingField = true
@@ -540,9 +467,8 @@ class LoginFragment : BaseFragment() {
         }
 
         try {
-            val xmlReader =
-                context.resources.openRawResource(com.danbamitale.epmslib.R.raw.config)
-                    .bufferedReader()
+            val xmlReader = context.resources.openRawResource(com.danbamitale.epmslib.R.raw.config)
+                .bufferedReader()
             xmlReader.use {
                 ConfigParser.configureFromReader(msgFactory, it)
                 val isoMessage = msgFactory.parseMessage(dataByteArray, 0)
@@ -561,7 +487,5 @@ class LoginFragment : BaseFragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }
+

@@ -25,3 +25,4 @@ app/libs
 /staging-env.properties
 /signdebug.sh
 /netpos.jks
+/app/src/main/jni

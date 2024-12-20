@@ -32,3 +32,4 @@ const val PREF_VALUE_PRINT_SMS = "send_sms"
 const val TRANSACTION_BY_TID_LAST_LOADED_PAGE = "transaction_by_tid_last_loaded_page"
 const val LAST_POS_CONFIGURATION_TIME = "last_pos_configuration_time"
 const val STRING_PIN_BLOCK_DIALOG_TAG = "STRING_PIN_BLOCK_DIALOG_TAG"
+const val BLUETOOTH = 1

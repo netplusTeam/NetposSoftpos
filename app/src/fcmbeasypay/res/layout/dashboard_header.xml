@@ -29,8 +29,8 @@
 
         <ImageView
             android:id="@+id/netpos_logo"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
             android:layout_margin="8dp"
             android:contentDescription="@string/netpos_logo"
             android:src="@drawable/ic_netpos_white"

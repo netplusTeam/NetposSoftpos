@@ -98,6 +98,7 @@
     <string name="account_name">Account Name</string>
     <string name="lbl_convinience_fee">Convinence Fee</string>
     <string name="proceed">Proceed</string>
+    <string name="verve_card_icon">Verve card icon</string>
     <string name="enter_mobile_number">Mobile Number</string>
     <string name="confirm_mobile_number">Confirm Mobile Number</string>
     <string name="lbl_pay">Pay</string>
@@ -106,9 +107,6 @@
     <string name="monthly">Monthly</string>
     <string name="enter_smart_card_number">SmartCard Number</string>
     <string name="enter_meter_number">Meter Number</string>
-    <string name="rc_number">RC number</string>
-    <string name="no_Of_TID">Number of TIDs</string>
-    <string name="contact_person">Contact Person\'s Number</string>
     <string name="enter_email_address">Email Address (username)</string>
     <string name="reference">Reference</string>
     <string name="bvn">Bank Verification Number</string>
@@ -227,10 +225,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="all_please_enter_last_name">Please Enter Last Name</string>
     <string name="all_please_enter_location">Please Enter Your Location</string>
     <string name="all_please_enter_phone_number">Please Enter your Phone Number</string>
-    <string name="all_please_enter_contact_person">Please Enter your Contact Person</string>
     <string name="all_please_enter_email_address">Please Enter your Email address</string>
-    <string name="all_please_enter_no_of_tids">Please Enter your Number of TIDs</string>
-    <string name="all_please_enter_rc_no">Please Enter RC Number</string>
     <string name="all_please_enter_reference">Please Enter your Reference</string>
     <string name="all_please_enter_bvn">Please Enter your BVN</string>
     <string name="all_please_enter_password">Please Enter Password</string>
@@ -262,7 +257,6 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="logout_confirmation_dialog_message">Do you want to logout?</string>
     <string name="app_uploaded_successfully">App uploaded successfully! Restarting the app in 5 seconds!</string>
     <string name="notification">Notification</string>
-    <string name="account_deletion">Account Deletion</string>
     <string name="pay_by_transfer">Pay By Transfer</string>
     <string name="your_account_is_active">YOUR ACCOUNT IS ACTIVE</string>
     <string name="kindly_login">Kindly login to proceed!</string>
@@ -275,14 +269,12 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="no_transactions">No transactions to print</string>
     <string name="please_wait">Please wait</string>
     <string name="nfc_message_title">NFC Message</string>
-    <string name="device_doesnt_have_nfc">Device does not have NFC support</string>
+    <string name="device_doesnt_have_nfc">Device does not have NFC support. Please connect to the NetPOS Lite bluetooth device to continue</string>
     <string name="cvv_cannot_be_empty">"CVV can't be empty"</string>
     <string name="cvv_too_short">"CVV is not complete"</string>
     <string name="enter_cvv_number">Enter Card CVV</string>
-    <string name="verve_card_icon">Verve card icon</string>
-    <string name="password_requires_minimum_of_1_uppercase_lowercase_number_special_character"><![CDATA[Password should be at least 10 characters with a minimum of 1 uppercase, lowercase, number & special character]]></string>
-    <string name="enter_a_valid_amount">Please enter a valid amount</string>
+    <string name="str_connecting">connecting to </string>
+    <string name="prompt_message">message prompt:</string>
+    <string name="please_tap_your_card_on_the_netpos_lite_device">Please tap your card on the NetPOS Lite device</string>
+    <string name="no_bluetooth_device_found_message">No Bluetooth devices found. Please switch on bluetooth on your device and power on the NetPOS Lite device. Pair and connect to continue.</string>
 </resources>
-
-
-

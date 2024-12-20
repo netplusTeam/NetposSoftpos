@@ -5,36 +5,45 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.InputFilter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.core.os.bundleOf
+import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.HostConfig
 import com.danbamitale.epmslib.entities.TransactionRequestData
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.entities.accountBalances
-import com.danbamitale.epmslib.entities.clearPinKey
 import com.danbamitale.epmslib.entities.isApproved
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
-import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
+import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
+import com.woleapp.netpos.contactless.cr100.MyQposClass
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
+import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
+import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.AuthenticationEventData
@@ -50,23 +59,33 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
-import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
+import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
+import com.woleapp.netpos.contactless.util.Event
+import com.woleapp.netpos.contactless.util.ICCCardHelper
+import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
+import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
+import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.Singletons.getKeyHolder
+import com.woleapp.netpos.contactless.util.Singletons
+import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
+import com.woleapp.netpos.contactless.util.buildSMSText
+import com.woleapp.netpos.contactless.util.checkNfcStatus
+import com.woleapp.netpos.contactless.util.disposeWith
+import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
+import com.woleapp.netpos.contactless.util.showCardDialog
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import kotlinx.android.synthetic.main.item_mcc.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -75,8 +94,8 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.TimeUnit
 
-class DashboardFragment : BaseFragment() {
 
+class DashboardFragment : BaseFragment() {
     private lateinit var progressDialog: ProgressDialog
     private lateinit var binding: FragmentDashboardBinding
     private lateinit var amountEditText: EditText
@@ -91,23 +110,17 @@ class DashboardFragment : BaseFragment() {
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
     private lateinit var loader: AlertDialog
+    private lateinit var cardCvv: String
     private lateinit var user: User
-    private lateinit var tvMessageTv: TextView
-    private lateinit var etPinEt: EditText
-    private lateinit var btnConfirmBtn: Button
-    private lateinit var btnClearIv: ImageView
-    private lateinit var btnEscIv: TextView
-    private lateinit var btn0Tv: TextView
-    private lateinit var btn1Tv: TextView
-    private lateinit var btn2Tv: TextView
-    private lateinit var btn3Tv: TextView
-    private lateinit var btn4Tv: TextView
-    private lateinit var btn5Tv: TextView
-    private lateinit var btn6Tv: TextView
-    private lateinit var btn7Tv: TextView
-    private lateinit var btn8Tv: TextView
-    private lateinit var btn9Tv: TextView
 
+    private lateinit var listener: MyQposClass
+    private var nfcAdapter: NfcAdapter? = null
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var lvIndicatorBTPOS: RecyclerView? = null
+    private var blueToothAddress = ""
+    private var blueTitle: String? = null
+    private var startTime = 0L
+    private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -119,6 +132,9 @@ class DashboardFragment : BaseFragment() {
             filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(8, 2))
         }
         transactionType = TransactionType.PURCHASE
+
+        nfcAdapter = checkNfcStatus()
+
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
@@ -219,46 +235,16 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         }
-
-        initViews()
-
-        val integerList = listOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
-        integerList.shuffled()
-        setNumberOnTextViews(integerList)
-
-        val builder = StringBuilder()
-        val buttons =
-            arrayOf(btn0Tv, btn1Tv, btn2Tv, btn3Tv, btn4Tv, btn5Tv, btn6Tv, btn7Tv, btn8Tv, btn9Tv)
-        for (i in buttons.indices) {
-            buttons[i].setOnClickListener { v: View ->
-                builder.append((v as TextView).text.toString())
-                etPinEt.setText(builder.toString())
-            }
-        }
-        btnEscIv.setOnClickListener {
-            etPinEt.setText("")
-        }
-        btnClearIv.setOnClickListener {
-            if (builder.isNotEmpty()) {
-                builder.deleteCharAt(builder.length - 1)
-                etPinEt.setText(builder.toString())
-            }
-        }
-        btnConfirmBtn.setOnClickListener {
-            if (etPinEt.text.toString().isEmpty()) {
-                Toast.makeText(context, getString(R.string.enter_a_valid_amount), Toast.LENGTH_SHORT)
-                    .show()
-                return@setOnClickListener
-            }else{
-                binding.priceTextbox.text = etPinEt.text
-                viewModel.validateField()
-            }
-        }
-
-
-
         binding.process.setOnClickListener {
-            viewModel.validateField()
+            if (nfcAdapter != null) {
+                viewModel.validateFieldForNFC()
+            } else {
+                if (viewModel.validateFieldForBluetooth()) {
+                    initCr100Intent()
+                }
+
+            }
+
         }
 
         // toast the error messages
@@ -351,6 +337,9 @@ class DashboardFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setServices()
         vend()
+        lvIndicatorBTPOS = view.findViewById(R.id.lv_indicator_BTPOS)
+        bluetoothAdapter = BluetoothAdapter(requireActivity(), null)
+
         observer = { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
@@ -566,23 +555,19 @@ class DashboardFragment : BaseFragment() {
 
     private fun showTransactionMethodDialog(onMethodSelected: (TransactionMethod) -> Unit) {
         val methods = arrayOf("Contactless", "Contact")
-        AlertDialog.Builder(requireActivity())
-            .setTitle("Choose Transaction Method")
+        AlertDialog.Builder(requireActivity()).setTitle("Choose Transaction Method")
             .setSingleChoiceItems(methods, -1) { dialog, which ->
                 dialog.dismiss()
                 when (which) {
                     0 -> onMethodSelected(TransactionMethod.CONTACTLESS)
                     1 -> onMethodSelected(TransactionMethod.CONTACT)
                 }
-            }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .show()
+            }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.show()
     }
 
     private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {
         val accountTypes = arrayOf("Savings", "Current", "Default")
-        AlertDialog.Builder(requireActivity())
-            .setTitle("Choose Account Type")
+        AlertDialog.Builder(requireActivity()).setTitle("Choose Account Type")
             .setSingleChoiceItems(accountTypes, -1) { dialog, which ->
                 dialog.dismiss()
                 when (which) {
@@ -590,43 +575,134 @@ class DashboardFragment : BaseFragment() {
                     1 -> onAccountTypeSelected(IsoAccountType.CURRENT)
                     2 -> onAccountTypeSelected(IsoAccountType.DEFAULT_UNSPECIFIED)
                 }
-            }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .show()
+            }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.show()
     }
 
+    private fun openCr100(mode: QPOSService.CommunicationMode) {
+        listener = MyQposClass(bluetoothAdapter, requireActivity())
+        cr100Pos = QPOSService.getInstance(mode)
 
-    private fun initViews() {
-        with(binding) {
-            tvMessageTv = tvMessage
-            etPinEt = etPin
-            btnConfirmBtn = btnConfirm
-            btnClearIv = btnClear
-            btnEscIv = btnEsc
-            btn0Tv = btn0
-            btn1Tv = btn1
-            btn2Tv = btn2
-            btn3Tv = btn3
-            btn4Tv = btn4
-            btn5Tv = btn5
-            btn6Tv = btn6
-            btn7Tv = btn7
-            btn8Tv = btn8
-            btn9Tv = btn9
+        if (cr100Pos == null) {
+            showToast("Unknown communication mode")
+            return
+        }
+
+        cr100Pos!!.setConext(requireActivity())
+        val handler = Looper.myLooper()?.let { Handler(it) }
+        cr100Pos!!.initListener(handler, listener)
+
+        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+
+        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+            if (cardInfo.isValid()) {
+                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+                listener.resetCardInfoFlow()
+            }
         }
     }
 
-    private fun setNumberOnTextViews(integerList: List<String>) {
-        btn0Tv.text = integerList[0]
-        btn1Tv.text = integerList[1]
-        btn2Tv.text = integerList[2]
-        btn3Tv.text = integerList[3]
-        btn4Tv.text = integerList[4]
-        btn5Tv.text = integerList[5]
-        btn6Tv.text = integerList[6]
-        btn7Tv.text = integerList[7]
-        btn8Tv.text = integerList[8]
-        btn9Tv.text = integerList[9]
+    private fun deviceType(type: Int) {
+        if (BluetoothDialog.manualExitDialog != null) {
+            BluetoothDialog.manualExitDialog.dismiss()
+        }
+
+        requireActivity().showBluetoothDialog(bluetoothAdapter)
+
+        if (type == BLUETOOTH) {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+            }
+            posType = POS_TYPE.BLUETOOTH
+            cr100Pos?.scanQPos2Mode(requireActivity(), 10)
+        } else {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH_BLE)
+            }
+            posType = POS_TYPE.BLUETOOTH_BLE
+            cr100Pos?.startScanQposBLE(10)
+        }
+
+        refreshAdapter()
+        bluetoothAdapter.notifyDataSetChanged()
+    }
+
+    private fun initCr100Intent() {
+        scanBlue()
+        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+
+        if (cr100Pos!!.bluetoothState) {
+            if (BluetoothToolsBean.getBlueToothName() != null) {
+                showToast(BluetoothToolsBean.getBlueToothName())
+            }
+
+            val keyIndex: Int = getBluetoothKeyIndex()
+            cr100Pos?.doTrade(keyIndex, 60)
+        } else {
+            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
+                listener.setBlueTitle(it)
+            }
+            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
+                cr100Pos?.connectBluetoothDevice(true, 60, it)
+            } ?: run {
+                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                deviceType(BLUETOOTH)
+                refreshAdapter()
+                bluetoothAdapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+
+    private fun scanBlue() {
+        lvIndicatorBTPOS?.layoutManager = LinearLayoutManager(
+            requireActivity(), LinearLayoutManager.VERTICAL, false
+        )
+
+        bluetoothAdapter.setOnBluetoothItemClickListener { position, itemData ->
+            onBTPosSelected(itemData)
+            BluetoothDialog.loading(requireActivity(), getString(R.string.str_connecting))
+            BluetoothToolsBean.setConectedState("CONNECTED")
+        }
+    }
+
+    private fun onBTPosSelected(itemData: Map<String?, *>) {
+        cr100Pos?.stopScanQPos2Mode()
+        startTime = System.currentTimeMillis()
+        blueToothAddress = itemData["ADDRESS"]!! as String
+        blueTitle = itemData["TITLE"] as String?
+        blueTitle =
+            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+                ?.get(0)
+        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
+        Prefs.putString(BLUETOOTH_ADDRESS, blueToothAddress)
+        blueTitle?.let {
+            listener.setBlueTitle(it)
+            Prefs.putString(BLUETOOTH_TITLE, blueTitle)
+        }
+    }
+
+
+    private fun refreshAdapter() {
+        bluetoothAdapter.clearData()
+        val data = java.util.ArrayList<Map<String, *>>()
+        bluetoothAdapter.setListData(data)
+    }
+
+    private fun BtCardInfo.isValid(): Boolean {
+        return realPan.isNotEmpty() &&
+                track2.isNotEmpty() &&
+                decryptedIcc.isNotEmpty() &&
+                cardType != null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (cr100Pos != null) {
+            listener.cleanup()
+            cr100Pos!!.cancelTrade()
+            cr100Pos!!.disconnectBT()
+        }
     }
 
 

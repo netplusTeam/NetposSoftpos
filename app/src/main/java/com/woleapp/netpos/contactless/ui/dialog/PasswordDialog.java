@@ -143,7 +143,13 @@ public class PasswordDialog {
             }
             // Use DPrefs to save Pin key
             DPrefs.INSTANCE.putString(UtilityParam.INSTANCE.getPIN_KEY(), etPin.getText().toString().trim());
-            pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+
+            if(Singletons.INSTANCE.getKeyHolder() != null) {
+                pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+            } else {
+                Toast.makeText(context, "Terminal not configured", Toast.LENGTH_SHORT).show();
+            }
+
             dialog.cancel();
         });
 
@@ -173,11 +179,7 @@ public class PasswordDialog {
             cardNum = "0000" + pan.substring(3, 15);
         }
 
-        // System.out.println(Util.BytesToString(HexDump.hexStringToByteArray("0425A8EF8B7A6E66")));
         String pinblock = ExtensionFunctionsKt.xorHex(pinP, cardNum);
-        //System.out.println(ExtensionFunctionsKt.xorHex(pin, cardNum));
-        System.out.println(pinblock);
-        //System.out.println(TripleDES.encrypt(pinblock, pinKey));
         KeyHolder keyHolder = Singletons.INSTANCE.getKeyHolder();
         return TripleDES.encrypt(pinblock, KeyHolderKt.getClearPinKey(keyHolder));
     }

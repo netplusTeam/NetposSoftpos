@@ -264,7 +264,6 @@ class VerveTransactionViewModel(
         //here we try and catch if the list is empty
         try {
             while (kernelListIndex <= myKernels.size - 1) {
-                println("Index of the kernel list : $kernelListIndex")
                 displayPaymentSchemeLogo(
                     myKernels[kernelListIndex].kernel.getName(),
                     kernelListIndex

@@ -182,7 +182,7 @@ class SalesFragment : BaseFragment() {
             }
         }
         binding.process.setOnClickListener {
-            viewModel.validateField()
+            viewModel.validateFieldForNFC()
         }
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->

@@ -51,6 +51,6 @@ object AppConstants {
     const val RESET_USERNAME = "RESET_USERNAME"
     const val ACCOUNT_NUMBER_FOR_PROVIDUS = "ACCOUNT_NUMBER_FOR_PROVIDUS"
     const val STRING_CVV_DIALOG_TAG = "string_cvv_dialog_tag"
-    const val DELETE_ACCOUNT = "delete_account"
-
+    const val BLUETOOTH_ADDRESS = "BLUETOOTH_ADDRESS"
+    const val BLUETOOTH_TITLE = "BLUETOOTH_TITLE"
 }
