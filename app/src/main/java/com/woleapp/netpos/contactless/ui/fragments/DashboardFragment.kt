@@ -701,40 +701,66 @@ class DashboardFragment : BaseFragment() {
         bluetoothAdapter.notifyDataSetChanged()
     }
 
+//    private fun initIntent() {
+//        scanBlue()
+//        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+//
+//        if (cr100Pos!!.bluetoothState) {
+//            BluetoothDialog.manualExitDialog(
+//                requireActivity(),
+//                "Do you want to continue with the previous connection?",
+//                object : BluetoothDialog.OnMyClickListener {
+//                    override fun onCancel() {
+//                        cr100Pos?.disconnectBT()
+//                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
+//                        deviceType(BLUETOOTH)
+//                        refreshAdapter()
+//                        bluetoothAdapter.notifyDataSetChanged()
+//                        BluetoothDialog.manualExitDialog.dismiss()
+//                    }
+//
+//                    override fun onConfirm() {
+//                        if (BluetoothToolsBean.getBlueToothName() != null) {
+//                            showToast(BluetoothToolsBean.getBlueToothName())
+//                        }
+//
+//                        val keyIndex: Int = getBluetoothKeyIndex()
+//                        cr100Pos?.doTrade(keyIndex, 60)
+//                        BluetoothDialog.manualExitDialog.dismiss()
+//                    }
+//                },
+//            )
+//        } else {
+//            lvIndicatorBTPOS?.adapter = bluetoothAdapter
+//            deviceType(BLUETOOTH)
+//            refreshAdapter()
+//            bluetoothAdapter.notifyDataSetChanged()
+//        }
+//    }
+
     private fun initIntent() {
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
         if (cr100Pos!!.bluetoothState) {
-            BluetoothDialog.manualExitDialog(
-                requireActivity(),
-                "Do you want to continue with the previous connection?",
-                object : BluetoothDialog.OnMyClickListener {
-                    override fun onCancel() {
-                        cr100Pos?.disconnectBT()
-                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
-                        deviceType(BLUETOOTH)
-                        refreshAdapter()
-                        bluetoothAdapter.notifyDataSetChanged()
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
+            if (BluetoothToolsBean.getBlueToothName() != null) {
+                showToast(BluetoothToolsBean.getBlueToothName())
+            }
 
-                    override fun onConfirm() {
-                        if (BluetoothToolsBean.getBlueToothName() != null) {
-                            showToast(BluetoothToolsBean.getBlueToothName())
-                        }
-
-                        val keyIndex: Int = getBluetoothKeyIndex()
-                        cr100Pos?.doTrade(keyIndex, 60)
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
-                },
-            )
+            val keyIndex: Int = getBluetoothKeyIndex()
+            cr100Pos?.doTrade(keyIndex, 60)
         } else {
-            lvIndicatorBTPOS?.adapter = bluetoothAdapter
-            deviceType(BLUETOOTH)
-            refreshAdapter()
-            bluetoothAdapter.notifyDataSetChanged()
+            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
+                listener.setBlueTitle(it)
+            }
+            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
+                cr100Pos?.connectBluetoothDevice(true, 60, it)
+            } ?: run {
+                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                deviceType(BLUETOOTH)
+                refreshAdapter()
+                bluetoothAdapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -753,6 +779,18 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
+//    private fun onBTPosSelected(itemData: Map<String?, *>) {
+//        cr100Pos?.stopScanQPos2Mode()
+//        startTime = System.currentTimeMillis()
+//        blueToothAddress = itemData["ADDRESS"]!! as String
+//        blueTitle = itemData["TITLE"] as String?
+//        blueTitle =
+//            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+//                ?.get(0)
+//        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
+//        blueTitle?.let { listener.setBlueTitle(it) }
+//    }
+
     private fun onBTPosSelected(itemData: Map<String?, *>) {
         cr100Pos?.stopScanQPos2Mode()
         startTime = System.currentTimeMillis()
@@ -762,7 +800,11 @@ class DashboardFragment : BaseFragment() {
             blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
                 ?.get(0)
         cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
-        blueTitle?.let { listener.setBlueTitle(it) }
+        Prefs.putString(BLUETOOTH_ADDRESS, blueToothAddress)
+        blueTitle?.let {
+            listener.setBlueTitle(it)
+            Prefs.putString(BLUETOOTH_TITLE, blueTitle)
+        }
     }
 
     private fun refreshAdapter() {
