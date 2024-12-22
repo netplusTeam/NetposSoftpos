@@ -4,6 +4,7 @@ import java.util.*
 
 object AppConstants {
     fun getGUID() = UUID.randomUUID().toString().replace("-", "")
+
     const val APP_UPDATE_REQUEST_CODE = 911
     const val APP_UPDATE_TAG = "APP_UPDATE_TAG"
     const val PERMISSION_REQUEST_CODE = 200
@@ -52,5 +53,6 @@ object AppConstants {
     const val ACCOUNT_NUMBER_FOR_PROVIDUS = "ACCOUNT_NUMBER_FOR_PROVIDUS"
     const val STRING_CVV_DIALOG_TAG = "string_cvv_dialog_tag"
     const val DELETE_ACCOUNT = "delete_account"
-
+    const val BLUETOOTH_ADDRESS = "BLUETOOTH_ADDRESS"
+    const val BLUETOOTH_TITLE = "BLUETOOTH_TITLE"
 }

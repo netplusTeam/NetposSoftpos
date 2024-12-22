@@ -49,6 +49,8 @@ import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
 import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
 import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
