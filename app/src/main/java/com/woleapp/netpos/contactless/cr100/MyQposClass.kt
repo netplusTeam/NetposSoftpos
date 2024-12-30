@@ -34,7 +34,6 @@ import java.util.Calendar
 import java.util.Hashtable
 
 class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val context: FragmentActivity) : CQPOSService() {
-
     private var blueTitle: String? = null
     private val job = Job()
     private val customScope = CoroutineScope(Dispatchers.Main + job)
@@ -42,24 +41,30 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     private var _cardInfoFlow = MutableStateFlow(BtCardInfo())
     val cardInfoFlow: StateFlow<BtCardInfo> = _cardInfoFlow
 
+    private var _cr100BatteryPercentageFlow = MutableStateFlow(String())
+    val cr100BatteryPercentageFlow: StateFlow<String> = _cr100BatteryPercentageFlow
+
     fun setBlueTitle(blueTitle: String) {
         this.blueTitle = blueTitle
     }
 
-    override fun onDoTradeResult(result: QPOSService.DoTradeResult?, decodeData: Hashtable<String, String>?) {
+    override fun onDoTradeResult(
+        result: QPOSService.DoTradeResult?,
+        decodeData: Hashtable<String, String>?,
+    ) {
         Log.d("BLUETOOTH_DEVICE", "Trade Detected: ${Singletons.gson.toJson(decodeData)}")
 
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
-
             val encTrack2 = decodeData!!["encTrack2"]
             val trackKsn = decodeData["trackksn"]
 
-            val clearPan: String = DUKPK2009CBC.getData(
-                trackKsn,
-                encTrack2,
-                DUKPK2009CBC.Enum_key.DATA,
-                DUKPK2009CBC.Enum_mode.CBC
-            )
+            val clearPan: String =
+                DUKPK2009CBC.getData(
+                    trackKsn,
+                    encTrack2,
+                    DUKPK2009CBC.Enum_key.DATA,
+                    DUKPK2009CBC.Enum_mode.CBC,
+                )
 
             val panTrack2Pair = extractTrack2AndPanValues(clearPan)
             val (realPan, track2) = panTrack2Pair
@@ -72,27 +77,35 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
                     val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
 
-                    val decryptedIcc = DUKPK2009CBC.getData(tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
-                        DUKPK2009CBC.Enum_mode.CBC)
+                    val decryptedIcc =
+                        DUKPK2009CBC.getData(
+                            tagC0!!.value,
+                            tagC2!!.value,
+                            DUKPK2009CBC.Enum_key.DATA,
+                            DUKPK2009CBC.Enum_mode.CBC,
+                        )
 
                     val cardTypeAid = findTagValue(decryptedIcc)
 
                     val cardType = getCardSchemeFromAid(cardTypeAid)
 
                     // Update the decryptedIcc and cardType in the StateFlow
-                    _cardInfoFlow.value = _cardInfoFlow.value.copy(
-                        decryptedIcc = decryptedIcc,
-                        cardType = cardType
-                    )
+                    _cardInfoFlow.value =
+                        _cardInfoFlow.value.copy(
+                            decryptedIcc = decryptedIcc,
+                            cardType = cardType,
+                        )
 
-                    Log.d("BLUETOOTH_DEVICE", "C0: ${tagC0.value}, C2: ${tagC2.value}, icc: $decryptedIcc, cardType: ${cardTypeAid}, cardType: ${cardType?.cardScheme}")
+                    Log.d(
+                        "BLUETOOTH_DEVICE",
+                        "C0: ${tagC0.value}, C2: ${tagC2.value}, icc: $decryptedIcc, cardType: $cardTypeAid, cardType: ${cardType?.cardScheme}",
+                    )
                 }
             }
         } else {
             hideDialogAndShowToast(result)
         }
     }
-
 
     override fun onQposInfoResult(posInfoData: Hashtable<String, String>?) {
         val isSupportedTrack1 = posInfoData?.get("isSupportedTrack1") ?: ""
@@ -109,6 +122,10 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         val pciFirmwareVersion = posInfoData?.get("PCI_firmwareVersion") ?: ""
         val pciHardwareVersion = posInfoData?.get("PCI_hardwareVersion") ?: ""
         val compileTime = posInfoData?.get("compileTime") ?: ""
+
+        _cr100BatteryPercentageFlow.value = batteryPercentage
+
+        Log.d("CR100_BATTERY_LEVEL", "$batteryPercentage===$batteryLevel")
     }
 
     override fun onRequestTransactionResult(transactionResult: QPOSService.TransactionResult?) {
@@ -118,7 +135,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
             QPOSService.TransactionResult.TERMINATED -> hideDialogAndShowToast(transactionResult)
             QPOSService.TransactionResult.DECLINED -> hideDialogAndShowToast(transactionResult)
             QPOSService.TransactionResult.CANCEL -> {
-
             }
             QPOSService.TransactionResult.CAPK_FAIL -> hideDialogAndShowToast(transactionResult)
             QPOSService.TransactionResult.NOT_ICC -> hideDialogAndShowToast(transactionResult)
@@ -167,11 +183,12 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onDeviceFound(device: BluetoothDevice?) {
         device?.let {
             if (device.name != null) {
-                val itm = hashMapOf<String, Any>(
-                    "ICON" to if (device.bondState == BluetoothDevice.BOND_BONDED) R.drawable.bluetooth_blue else R.drawable.bluetooth_blue_unbond,
-                    "TITLE" to "${device.name} (${device.address})",
-                    "ADDRESS" to device.address
-                )
+                val itm =
+                    hashMapOf<String, Any>(
+                        "ICON" to if (device.bondState == BluetoothDevice.BOND_BONDED) R.drawable.bluetooth_blue else R.drawable.bluetooth_blue_unbond,
+                        "TITLE" to "${device.name} (${device.address})",
+                        "ADDRESS" to device.address,
+                    )
                 bluetoothAdapter.setData(itm)
             }
         } ?: run {
@@ -184,17 +201,17 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onRequestTransactionLog(tlv: String?) {}
 
     override fun onRequestIsServerConnected() {
-        cr100Pos?.isServerConnected(true);
+        cr100Pos?.isServerConnected(true)
     }
 
     override fun onRequestOnlineProcess(tlv: String?) {}
 
     override fun onRequestTime() {
-        val terminalTime = SimpleDateFormat("yyyyMMddHHmmss").format(
-            Calendar.getInstance().time
-        )
+        val terminalTime =
+            SimpleDateFormat("yyyyMMddHHmmss").format(
+                Calendar.getInstance().time,
+            )
         cr100Pos?.sendTime(terminalTime)
-
     }
 
     override fun onRequestFinalConfirm() {}
@@ -207,15 +224,27 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onReturnReversalData(tlv: String?) {}
 
-    override fun onReturnServerCertResult(serverSignCert: String?, serverEncryptCert: String?) {}
+    override fun onReturnServerCertResult(
+        serverSignCert: String?,
+        serverEncryptCert: String?,
+    ) {}
 
     override fun onReturnGetPinResult(result: Hashtable<String, String>?) {}
 
-    override fun onReturnApduResult(arg0: Boolean, arg1: String?, arg2: Int) {}
+    override fun onReturnApduResult(
+        arg0: Boolean,
+        arg1: String?,
+        arg2: Int,
+    ) {}
 
     override fun onReturnPowerOffIccResult(arg0: Boolean) {}
 
-    override fun onReturnPowerOnIccResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {}
+    override fun onReturnPowerOnIccResult(
+        arg0: Boolean,
+        arg1: String?,
+        arg2: String?,
+        arg3: Int,
+    ) {}
 
     override fun onReturnSetSleepTimeResult(isSuccess: Boolean) {}
 
@@ -227,7 +256,10 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onRequestUpdateWorkKeyResult(result: QPOSService.UpdateInformationResult?) {}
 
-    override fun onReturnCustomConfigResult(isSuccess: Boolean, result: String?) {}
+    override fun onReturnCustomConfigResult(
+        isSuccess: Boolean,
+        result: String?,
+    ) {}
 
     override fun onRequestSetPin() {}
 
@@ -251,27 +283,52 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onReturnDownloadRsaPublicKey(map: HashMap<String, String>?) {}
 
-    override fun onGetPosComm(mod: Int, amount: String?, posid: String?) {}
+    override fun onGetPosComm(
+        mod: Int,
+        amount: String?,
+        posid: String?,
+    ) {}
 
     override fun onPinKey_TDES_Result(arg0: String?) {}
 
-    override fun onUpdateMasterKeyResult(arg0: Boolean, arg1: Hashtable<String, String>?) {}
+    override fun onUpdateMasterKeyResult(
+        arg0: Boolean,
+        arg1: Hashtable<String, String>?,
+    ) {}
 
     override fun onEmvICCExceptionData(arg0: String?) {}
 
-    override fun onSetParamsResult(arg0: Boolean, arg1: Hashtable<String, Any>?) {}
+    override fun onSetParamsResult(
+        arg0: Boolean,
+        arg1: Hashtable<String, Any>?,
+    ) {}
 
-    override fun onGetInputAmountResult(arg0: Boolean, arg1: String?) {}
+    override fun onGetInputAmountResult(
+        arg0: Boolean,
+        arg1: String?,
+    ) {}
 
-    override fun onReturnNFCApduResult(arg0: Boolean, arg1: String?, arg2: Int) {}
+    override fun onReturnNFCApduResult(
+        arg0: Boolean,
+        arg1: String?,
+        arg2: Int,
+    ) {}
 
     override fun onReturnPowerOffNFCResult(arg0: Boolean) {}
 
-    override fun onReturnPowerOnNFCResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {}
+    override fun onReturnPowerOnNFCResult(
+        arg0: Boolean,
+        arg1: String?,
+        arg2: String?,
+        arg3: Int,
+    ) {}
 
     override fun onCbcMacResult(result: String?) {}
 
-    override fun onReadBusinessCardResult(arg0: Boolean, arg1: String?) {}
+    override fun onReadBusinessCardResult(
+        arg0: Boolean,
+        arg1: String?,
+    ) {}
 
     override fun onWriteBusinessCardResult(arg0: Boolean) {}
 
@@ -281,9 +338,15 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onSearchMifareCardResult(arg0: Hashtable<String, String>?) {}
 
-    override fun onBatchReadMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {}
+    override fun onBatchReadMifareCardResult(
+        msg: String?,
+        cardData: Hashtable<String, List<String>>?,
+    ) {}
 
-    override fun onBatchWriteMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {}
+    override fun onBatchWriteMifareCardResult(
+        msg: String?,
+        cardData: Hashtable<String, List<String>>?,
+    ) {}
 
     override fun onSetBuzzerResult(arg0: Boolean) {}
 
@@ -333,11 +396,13 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         cr100Pos?.setAmount("10", null, "566", QPOSService.TransactionType.SERVICES)
     }
 
-
     fun resetCardInfoFlow() {
         _cardInfoFlow.value = BtCardInfo()
         cr100Pos!!.cancelTrade()
+    }
 
+    fun getBatteryPercentage() {
+        _cr100BatteryPercentageFlow.value =
     }
 
     private fun <T> hideDialogAndShowToast(errorState: T?) {
