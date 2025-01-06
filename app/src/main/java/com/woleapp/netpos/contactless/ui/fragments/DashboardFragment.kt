@@ -13,7 +13,6 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.InputFilter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -678,14 +677,14 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
-        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
-            if (batteryLevel.isNotEmpty())
-                {
-                    Log.d("BATTERY_LEVEL1", "$batteryPercentage")
-                }
-        }
-        Log.d("BATTERY_LEVEL", "$batteryPercentage")
+//        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
+//        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+//            if (batteryLevel.isNotEmpty())
+//                {
+//                    Log.d("BATTERY_LEVEL1", "$batteryPercentage")
+//                }
+//        }
+//        Log.d("BATTERY_LEVEL", "$batteryPercentage")
     }
 
     private fun deviceType(type: Int) {
