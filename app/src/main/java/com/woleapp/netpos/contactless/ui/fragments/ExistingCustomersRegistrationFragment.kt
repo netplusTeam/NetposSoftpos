@@ -343,6 +343,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                         alertDialog.dismiss()
                         registerExistingCustomer()
                     }
+                    dialogView.findViewById<Button>(R.id.reject_button).setOnClickListener {
+                        alertDialog.dismiss()
+                    }
                 }
             }
         }
