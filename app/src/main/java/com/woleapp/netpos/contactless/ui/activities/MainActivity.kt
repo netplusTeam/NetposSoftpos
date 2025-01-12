@@ -1475,6 +1475,7 @@ class MainActivity :
 
     private fun downloadPdfImpl() {
         viewModel.lastPosTransactionResponse.value?.let {
+            Log.d("SIT_HEREE", "$it")
             if (it.TVR.contains(IS_QR_TRANSACTION)) {
                 val qrTransaction =
                     it.copy(TVR = it.TVR.replace(IS_QR_TRANSACTION, ""))
