@@ -1228,16 +1228,61 @@ class MainActivity :
         }
     }
 
+//    private fun showCalendarDialog() {
+//        val calendar = Calendar.getInstance()
+//        DatePickerDialog(
+//            this,
+//            { _, i, i2, i3 ->
+//                getEndOfDayTransactions(
+//                    Calendar.getInstance().apply { set(i, i2, i3) }.timeInMillis,
+//                ) {
+//                    showEndOfDayBottomSheetDialog(it)
+//                }
+//            },
+//            calendar.get(Calendar.YEAR),
+//            calendar.get(Calendar.MONTH),
+//            calendar.get(Calendar.DAY_OF_MONTH),
+//        ).show()
+//    }
+//
+//    private fun getEndOfDayTransactions(
+//        timestamp: Long? = null,
+//        actionToTake: (transactions: List<TransactionResponse>) -> Unit,
+//    ) {
+//        Toast.makeText(this, getString(R.string.please_wait), Toast.LENGTH_LONG).show()
+//    val livedata =
+//        AppDatabase.getDatabaseInstance(this).transactionResponseDao().getEndOfDayTransaction(
+//            getBeginningOfDay(timestamp),
+//            getEndOfDayTimeStamp(timestamp),
+//            NetPosTerminalConfig.getTerminalId(),
+//        )
+//        livedata.observe(this) {
+//            actionToTake.invoke(it)
+//            livedata.removeObservers(this)
+//        }
+//    }
+
     private fun showCalendarDialog() {
         val calendar = Calendar.getInstance()
         DatePickerDialog(
             this,
-            { _, i, i2, i3 ->
-                getEndOfDayTransactions(
-                    Calendar.getInstance().apply { set(i, i2, i3) }.timeInMillis,
-                ) {
-                    showEndOfDayBottomSheetDialog(it)
-                }
+            { _, startYear, startMonth, startDay ->
+                val startCalendar = Calendar.getInstance().apply { set(startYear, startMonth, startDay) }
+                DatePickerDialog(
+                    this,
+                    { _, endYear, endMonth, endDay ->
+                        val endCalendar = Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
+                        getEndOfDayTransactions(
+                            startCalendar.timeInMillis,
+                            endCalendar.timeInMillis,
+                        ) {
+                            showEndOfDayBottomSheetDialog(it)
+                        }
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                ).show()
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
@@ -1246,16 +1291,19 @@ class MainActivity :
     }
 
     private fun getEndOfDayTransactions(
-        timestamp: Long? = null,
+        startTimestamp: Long,
+        endTimestamp: Long,
         actionToTake: (transactions: List<TransactionResponse>) -> Unit,
     ) {
         Toast.makeText(this, getString(R.string.please_wait), Toast.LENGTH_LONG).show()
         val livedata =
-            AppDatabase.getDatabaseInstance(this).transactionResponseDao().getEndOfDayTransaction(
-                getBeginningOfDay(timestamp),
-                getEndOfDayTimeStamp(timestamp),
-                NetPosTerminalConfig.getTerminalId(),
-            )
+            AppDatabase.getDatabaseInstance(this)
+                .transactionResponseDao()
+                .getTransactionsBetweenDates(
+                    getBeginningOfDay(startTimestamp),
+                    getEndOfDayTimeStamp(endTimestamp),
+                    NetPosTerminalConfig.getTerminalId(),
+                )
         livedata.observe(this) {
             actionToTake.invoke(it)
             livedata.removeObservers(this)
@@ -1607,6 +1655,10 @@ class MainActivity :
                             }
                             val currentDateTime = getCurrentDateTime()
                             getEndOfDayTransactions(
+                                dateStr2Long(
+                                    currentDateTime,
+                                    "yyyy-MM-dd hh:mm a",
+                                ),
                                 dateStr2Long(
                                     currentDateTime,
                                     "yyyy-MM-dd hh:mm a",

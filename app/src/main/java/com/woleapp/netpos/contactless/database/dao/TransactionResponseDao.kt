@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
-import com.woleapp.netpos.contactless.model.AppCampaignModel
 import io.reactivex.Single
 
 @Dao
@@ -21,7 +20,9 @@ interface TransactionResponseDao {
     @Query("SELECT * FROM transactionresponse WHERE terminalId=:terminalId ORDER BY id DESC")
     fun getTransactions(terminalId: String): LiveData<List<TransactionResponse>>
 
-    @Query("SELECT * FROM transactionresponse WHERE transactionTimeInMillis >= :beginningOfDay and transactionTimeInMillis <= :endOfDay and terminalId=:terminalId ORDER BY transactionTimeInMillis DESC")
+    @Query(
+        "SELECT * FROM transactionresponse WHERE transactionTimeInMillis >= :beginningOfDay and transactionTimeInMillis <= :endOfDay and terminalId=:terminalId ORDER BY transactionTimeInMillis DESC",
+    )
     fun getEndOfDayTransaction(
         beginningOfDay: Long,
         endOfDay: Long,
@@ -33,4 +34,14 @@ interface TransactionResponseDao {
 
     @Query("SELECT * FROM transactionresponse WHERE transactionType LIKE '%PURCHASE%' AND responseCode='00' ORDER BY id DESC")
     fun getRefundableTransactions(): LiveData<List<TransactionResponse>>
+
+    // DAO query should be updated to:
+    @Query(
+        "SELECT * FROM transactionresponse WHERE transactionTimeInMillis BETWEEN :startTimestamp AND :endTimestamp AND terminalId = :terminalId ORDER BY transactionTimeInMillis DESC",
+    )
+    fun getTransactionsBetweenDates(
+        startTimestamp: Long,
+        endTimestamp: Long,
+        terminalId: String,
+    ): LiveData<List<TransactionResponse>>
 }
