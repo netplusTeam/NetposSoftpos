@@ -219,7 +219,7 @@ object Mappers {
                 } else {
                     this@toTransactionResponse.amount.times(100).toDouble().toLong()
                 }
-            transmissionDateTime = currentDateTime
+//            transmissionDateTime = currentDateTime
             STAN = ""
             RRN =
                 if (this@toTransactionResponse.rrn.isNullOrEmpty()) {
@@ -240,7 +240,7 @@ object Mappers {
 //                } else {
 //                    "CUSTOMER"
 //                }
-            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+//            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@toTransactionResponse.terminalId
             merchantId = this@toTransactionResponse.merchantId

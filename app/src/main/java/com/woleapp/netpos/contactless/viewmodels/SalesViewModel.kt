@@ -213,7 +213,7 @@ class SalesViewModel
             page,
         ).flatMap {
             if (it.isSuccessful) {
-                Log.d("SECCESSSSS", "OKAYY")
+                Log.d("SECCESSSSS", "${it.body()}")
                 _paymentTransactionsResponse.postValue(Resource.success(it.body()))
                 Single.just(Resource.success(it.body()))
             } else {
