@@ -907,83 +907,6 @@ class MainActivity :
 //        }
 //    }
 
-    fun onTagDiscoveredd(tag: Tag) {
-        tag?.let {
-            if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
-                runOnUiThread {
-//                    playSinglePing() // play sound to signal the discovery of NFC tags
-                    val tagId = tag.id
-                    val techList = tag.techList
-                    var isoDepInTechList = false
-                    for (s in techList) {
-                        if (s == "android.nfc.tech.IsoDep") isoDepInTechList = true
-                    }
-                    // proceed only if tag has IsoDep in the techList
-                    if (isoDepInTechList) {
-                        val nfc: IsoDep?
-                        nfc = IsoDep.get(tag)
-                        if (nfc != null) {
-                            try {
-                                nfc.connect()
-                                val ppse = "2PAY.SYS.DDF01".toByteArray(StandardCharsets.UTF_8) // PPSE
-                                val selectPpseCommand: ByteArray = selectApdu(ppse)
-                                val selectPpseResponse = nfc.transceive(selectPpseCommand)
-                                val selectPpseResponseOk: ByteArray? = checkResponse(selectPpseResponse)
-
-                                // proceed only when te do have a positive read result = 0x'9000' at the end of response data
-                                if (selectPpseResponseOk != null) {
-                                    val parser = BerTlvParser()
-                                    val tlv4Fs: BerTlvs = parser.parse(selectPpseResponseOk)
-
-                                    // find all entries for tag 0x4f
-                                    val tag4fList = tlv4Fs.findAll(BerTag(0x4F))
-                                    val appLabel = tlv4Fs.findAll(BerTag(0x50))
-//                                    if (tag4fList.isEmpty()) {
-//                                        startEndSequence(nfc)
-//                                    }
-//                                    if (appLabel.isEmpty()) {
-//                                        startEndSequence(nfc)
-//                                    }
-                                    val aidList = ArrayList<ByteArray>()
-                                    for (i4f in tag4fList.indices) {
-                                        val tlv4f = tag4fList[i4f]
-                                        val tlv4fBytes = tlv4f.bytesValue
-                                        aidList.add(tlv4fBytes)
-                                        val caid = bytesToHexNpe(tlv4fBytes)
-                                        Log.d("CARD_TYPE", caid.toString())
-                                        aid = caid.toString()
-                                    }
-                                    for (lbl in appLabel.indices) {
-                                        val aplbl = appLabel[lbl]
-                                        val aplblBytes = aplbl.bytesValue
-                                        val labl = bytesToHexNpe(aplblBytes)
-                                        Log.d("CARD_SCHEME", labl.toString())
-                                    }
-                                    for (aidNumber in tag4fList.indices) {
-                                        val aidSelected = aidList[aidNumber]
-                                        val selectAidCommand: ByteArray = selectApdu(aidSelected)
-                                        val selectAidResponse = nfc.transceive(selectAidCommand)
-                                    }
-                                } else {
-                                    Log.d("TAG", "The discovered NFC tag does not have an IsoDep interface.")
-                                }
-                                vibrate()
-                            } catch (e: IOException) {
-                                startEndSequence(nfc)
-                                return@runOnUiThread
-                            }
-                        }
-                    }
-                    // Re-enable processing after 5 seconds
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        isProcessing = false
-                        returnAid(aid)
-                    }, 5000) // Adjust delay time as needed
-                }
-            }
-        }
-    }
-
     override fun onTagDiscovered(tag: Tag) {
         tag?.let {
             if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
@@ -1324,10 +1247,14 @@ class MainActivity :
 
     private fun showCalendarDialog() {
         val calendar = Calendar.getInstance()
+
+        // Show a message or dialog title for the start date selection
         DatePickerDialog(
             this,
             { _, startYear, startMonth, startDay ->
                 val startCalendar = Calendar.getInstance().apply { set(startYear, startMonth, startDay) }
+
+                // Show a message or dialog title for the end date selection
                 DatePickerDialog(
                     this,
                     { _, endYear, endMonth, endDay ->
@@ -1342,12 +1269,16 @@ class MainActivity :
                     calendar.get(Calendar.YEAR),
                     calendar.get(Calendar.MONTH),
                     calendar.get(Calendar.DAY_OF_MONTH),
-                ).show()
+                ).apply {
+                    setTitle("Select End Date") // Setting a title for end date selection
+                }.show()
             },
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH),
-        ).show()
+        ).apply {
+            setTitle("Select Start Date") // Setting a title for start date selection
+        }.show()
     }
 
     private fun getEndOfDayTransactions(
