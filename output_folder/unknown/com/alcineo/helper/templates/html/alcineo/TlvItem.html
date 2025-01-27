@@ -1,0 +1,26 @@
+{% set config = getTagConfig(item.tag, event.kernelId) %}
+<li>
+    <span class="tlv-tag-label">{{ item.tag.toHexString() }}
+    {% if config.tagLabel is not empty %}- {{ config.tagLabel }}{% endif %}
+    </span>
+    {% if item.tag.constructed %}
+        <ul class="tlv">
+        {% for item in item.children %}
+            {% include "./TlvItem.html" %}
+        {% endfor %}
+        </ul>
+    {% else %}
+        <ul class="converters">
+            {% for converter in config.converters %}
+            <li class="tlv-converted-values">
+                {% if converter.label is not empty %}
+                <span class="tlv-converted-label">{{ converter.label }}</span>
+                {% endif %}
+                {% for value in converter.getConvertedValues(item.value) %}
+                <span class="tlv-converted-value">{{ value.value }}</span>
+                {% endfor %}
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

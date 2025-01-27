@@ -1,0 +1,3996 @@
+.class public final Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+.super Ljava/lang/Object;
+.source "TransactionResponse22.kt"
+
+# interfaces
+.implements Landroid/os/Parcelable;
+
+
+# annotations
+.annotation runtime Lkotlin/Metadata;
+    d1 = {
+        "\u0000R\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0008\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000e\n\u0000\n\u0002\u0010\t\n\u0002\u0008\u0015\n\u0002\u0018\u0002\n\u0002\u0008\u0006\n\u0002\u0018\u0002\n\u0002\u0008n\n\u0002\u0010\u0008\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0010\u0000\n\u0002\u0008\u0003\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\u0008\u0002\u0008\u0087\u0008\u0018\u00002\u00020\u0001B\u0007\u0008\u0016\u00a2\u0006\u0002\u0010\u0002B\u00af\u0002\u0012\u0006\u0010\u0003\u001a\u00020\u0004\u0012\u0006\u0010\u0005\u001a\u00020\u0006\u0012\u0006\u0010\u0007\u001a\u00020\u0008\u0012\u0006\u0010\t\u001a\u00020\u0006\u0012\u0006\u0010\n\u001a\u00020\u0006\u0012\u0006\u0010\u000b\u001a\u00020\u0006\u0012\u0006\u0010\u000c\u001a\u00020\u0006\u0012\u0006\u0010\r\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u000e\u001a\u00020\u0008\u0012\u0008\u0008\u0002\u0010\u000f\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0010\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0011\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0012\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0013\u001a\u00020\u0006\u0012\n\u0008\u0002\u0010\u0014\u001a\u0004\u0018\u00010\u0006\u0012\u0008\u0008\u0002\u0010\u0015\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0016\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0017\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0018\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u0019\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u001a\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u001b\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\u001c\u001a\u00020\u0008\u0012\u0008\u0008\u0002\u0010\u001d\u001a\u00020\u001e\u0012\u0008\u0008\u0002\u0010\u001f\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010 \u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010!\u001a\u00020\u0006\u0012\u0008\u0008\u0002\u0010\"\u001a\u00020\u0008\u0012\n\u0008\u0002\u0010#\u001a\u0004\u0018\u00010\u0006\u0012\u0008\u0008\u0002\u0010$\u001a\u00020%\u0012\u0008\u0008\u0002\u0010&\u001a\u00020\u0008\u00a2\u0006\u0002\u0010\'J\t\u0010s\u001a\u00020\u0004H\u00c6\u0003J\t\u0010t\u001a\u00020\u0006H\u00c6\u0003J\t\u0010u\u001a\u00020\u0006H\u00c6\u0003J\t\u0010v\u001a\u00020\u0006H\u00c6\u0003J\t\u0010w\u001a\u00020\u0006H\u00c6\u0003J\t\u0010x\u001a\u00020\u0006H\u00c6\u0003J\u000b\u0010y\u001a\u0004\u0018\u00010\u0006H\u00c6\u0003J\t\u0010z\u001a\u00020\u0006H\u00c6\u0003J\t\u0010{\u001a\u00020\u0006H\u00c6\u0003J\t\u0010|\u001a\u00020\u0006H\u00c6\u0003J\t\u0010}\u001a\u00020\u0006H\u00c6\u0003J\t\u0010~\u001a\u00020\u0006H\u00c6\u0003J\t\u0010\u007f\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0080\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0081\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0082\u0001\u001a\u00020\u0008H\u00c6\u0003J\n\u0010\u0083\u0001\u001a\u00020\u001eH\u00c6\u0003J\n\u0010\u0084\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0085\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0086\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0087\u0001\u001a\u00020\u0008H\u00c6\u0003J\u000c\u0010\u0088\u0001\u001a\u0004\u0018\u00010\u0006H\u00c6\u0003J\n\u0010\u0089\u0001\u001a\u00020\u0008H\u00c6\u0003J\n\u0010\u008a\u0001\u001a\u00020%H\u00c6\u0003J\n\u0010\u008b\u0001\u001a\u00020\u0008H\u00c6\u0003J\n\u0010\u008c\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u008d\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u008e\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u008f\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0090\u0001\u001a\u00020\u0006H\u00c6\u0003J\n\u0010\u0091\u0001\u001a\u00020\u0008H\u00c6\u0003J\u00c4\u0002\u0010\u0092\u0001\u001a\u00020\u00002\u0008\u0008\u0002\u0010\u0003\u001a\u00020\u00042\u0008\u0008\u0002\u0010\u0005\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0007\u001a\u00020\u00082\u0008\u0008\u0002\u0010\t\u001a\u00020\u00062\u0008\u0008\u0002\u0010\n\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u000b\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u000c\u001a\u00020\u00062\u0008\u0008\u0002\u0010\r\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u000e\u001a\u00020\u00082\u0008\u0008\u0002\u0010\u000f\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0010\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0011\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0012\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0013\u001a\u00020\u00062\n\u0008\u0002\u0010\u0014\u001a\u0004\u0018\u00010\u00062\u0008\u0008\u0002\u0010\u0015\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0016\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0017\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0018\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u0019\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u001a\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u001b\u001a\u00020\u00062\u0008\u0008\u0002\u0010\u001c\u001a\u00020\u00082\u0008\u0008\u0002\u0010\u001d\u001a\u00020\u001e2\u0008\u0008\u0002\u0010\u001f\u001a\u00020\u00062\u0008\u0008\u0002\u0010 \u001a\u00020\u00062\u0008\u0008\u0002\u0010!\u001a\u00020\u00062\u0008\u0008\u0002\u0010\"\u001a\u00020\u00082\n\u0008\u0002\u0010#\u001a\u0004\u0018\u00010\u00062\u0008\u0008\u0002\u0010$\u001a\u00020%2\u0008\u0008\u0002\u0010&\u001a\u00020\u0008H\u00c6\u0001J\u000b\u0010\u0093\u0001\u001a\u00030\u0094\u0001H\u00d6\u0001J\u0017\u0010\u0095\u0001\u001a\u00030\u0096\u00012\n\u0010\u0097\u0001\u001a\u0005\u0018\u00010\u0098\u0001H\u00d6\u0003J\u000b\u0010\u0099\u0001\u001a\u00030\u0094\u0001H\u00d6\u0001J\n\u0010\u009a\u0001\u001a\u00020\u0006H\u00d6\u0001J\u001f\u0010\u009b\u0001\u001a\u00030\u009c\u00012\u0008\u0010\u009d\u0001\u001a\u00030\u009e\u00012\u0008\u0010\u009f\u0001\u001a\u00030\u0094\u0001H\u00d6\u0001R\u001a\u0010\u001a\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008(\u0010)\"\u0004\u0008*\u0010+R\u001e\u0010\u000b\u001a\u00020\u00068\u0006@\u0006X\u0087\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008,\u0010)\"\u0004\u0008-\u0010+R\u001a\u0010\n\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008.\u0010)\"\u0004\u0008/\u0010+R\u001a\u0010\u0019\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u00080\u0010)\"\u0004\u00081\u0010+R\u001a\u0010\u0018\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u00082\u0010)\"\u0004\u00083\u0010+R\u001a\u0010\u001d\u001a\u00020\u001eX\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u00084\u00105\"\u0004\u00086\u00107R\u001a\u0010\u000f\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u00088\u0010)\"\u0004\u00089\u0010+R\u001a\u0010\u0013\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008:\u0010)\"\u0004\u0008;\u0010+R\u001a\u0010\u0007\u001a\u00020\u0008X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008<\u0010=\"\u0004\u0008>\u0010?R\u001a\u0010\u001b\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008@\u0010)\"\u0004\u0008A\u0010+R\u001a\u0010\u0011\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008B\u0010)\"\u0004\u0008C\u0010+R\u001a\u0010\u0016\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008D\u0010)\"\u0004\u0008E\u0010+R\u001a\u0010\u0017\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008F\u0010)\"\u0004\u0008G\u0010+R\u001a\u0010\u0015\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008H\u0010)\"\u0004\u0008I\u0010+R\u001c\u0010\u0014\u001a\u0004\u0018\u00010\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008J\u0010)\"\u0004\u0008K\u0010+R\u001c\u0010L\u001a\u0004\u0018\u00010\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008M\u0010)\"\u0004\u0008N\u0010+R\u001a\u0010\"\u001a\u00020\u0008X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008O\u0010=\"\u0004\u0008P\u0010?R\u001a\u0010&\u001a\u00020\u0008X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008Q\u0010=\"\u0004\u0008R\u0010?R\u001a\u0010\r\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008S\u0010)\"\u0004\u0008T\u0010+R\u001a\u0010\u000c\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008U\u0010)\"\u0004\u0008V\u0010+R\u001a\u0010\u0005\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008W\u0010)\"\u0004\u0008X\u0010+R\u001a\u0010 \u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008Y\u0010)\"\u0004\u0008Z\u0010+R\u001a\u0010\u0010\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008[\u0010)\"\u0004\u0008\\\u0010+R\u001a\u0010\u000e\u001a\u00020\u0008X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008]\u0010=\"\u0004\u0008^\u0010?R\u001a\u0010!\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008_\u0010)\"\u0004\u0008`\u0010+R\u001a\u0010\u0012\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008a\u0010)\"\u0004\u0008b\u0010+R \u0010#\u001a\u0004\u0018\u00010\u00068\u0006@\u0006X\u0087\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008c\u0010)\"\u0004\u0008d\u0010+R\u001a\u0010$\u001a\u00020%X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008e\u0010f\"\u0004\u0008g\u0010hR\u001a\u0010\u001f\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008i\u0010)\"\u0004\u0008j\u0010+R\u001a\u0010\u001c\u001a\u00020\u0008X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008k\u0010=\"\u0004\u0008l\u0010?R\u001a\u0010\u0003\u001a\u00020\u0004X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008m\u0010n\"\u0004\u0008o\u0010pR\u001a\u0010\t\u001a\u00020\u0006X\u0086\u000e\u00a2\u0006\u000e\n\u0000\u001a\u0004\u0008q\u0010)\"\u0004\u0008r\u0010+\u00a8\u0006\u00a0\u0001"
+    }
+    d2 = {
+        "Lcom/woleapp/netpos/contactless/model/TransactionResponse;",
+        "Landroid/os/Parcelable;",
+        "()V",
+        "transactionType",
+        "Lcom/danbamitale/epmslib/entities/TransactionType;",
+        "maskedPan",
+        "",
+        "amount",
+        "",
+        "transmissionDateTime",
+        "STAN",
+        "RRN",
+        "localTime_12",
+        "localDate_13",
+        "otherAmount",
+        "acquiringInstCode",
+        "originalForwardingInstCode",
+        "authCode",
+        "responseCode",
+        "additionalAmount_54",
+        "echoData",
+        "cardLabel",
+        "cardExpiry",
+        "cardHolder",
+        "TVR",
+        "TSI",
+        "AID",
+        "appCryptogram",
+        "transactionTimeInMillis",
+        "accountType",
+        "Lcom/danbamitale/epmslib/utils/IsoAccountType;",
+        "terminalId",
+        "merchantId",
+        "otherId",
+        "id",
+        "responseDE55",
+        "source",
+        "Lcom/danbamitale/epmslib/entities/PosMode;",
+        "interSwitchThreshold",
+        "(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)V",
+        "getAID",
+        "()Ljava/lang/String;",
+        "setAID",
+        "(Ljava/lang/String;)V",
+        "getRRN",
+        "setRRN",
+        "getSTAN",
+        "setSTAN",
+        "getTSI",
+        "setTSI",
+        "getTVR",
+        "setTVR",
+        "getAccountType",
+        "()Lcom/danbamitale/epmslib/utils/IsoAccountType;",
+        "setAccountType",
+        "(Lcom/danbamitale/epmslib/utils/IsoAccountType;)V",
+        "getAcquiringInstCode",
+        "setAcquiringInstCode",
+        "getAdditionalAmount_54",
+        "setAdditionalAmount_54",
+        "getAmount",
+        "()J",
+        "setAmount",
+        "(J)V",
+        "getAppCryptogram",
+        "setAppCryptogram",
+        "getAuthCode",
+        "setAuthCode",
+        "getCardExpiry",
+        "setCardExpiry",
+        "getCardHolder",
+        "setCardHolder",
+        "getCardLabel",
+        "setCardLabel",
+        "getEchoData",
+        "setEchoData",
+        "errorMessage",
+        "getErrorMessage",
+        "setErrorMessage",
+        "getId",
+        "setId",
+        "getInterSwitchThreshold",
+        "setInterSwitchThreshold",
+        "getLocalDate_13",
+        "setLocalDate_13",
+        "getLocalTime_12",
+        "setLocalTime_12",
+        "getMaskedPan",
+        "setMaskedPan",
+        "getMerchantId",
+        "setMerchantId",
+        "getOriginalForwardingInstCode",
+        "setOriginalForwardingInstCode",
+        "getOtherAmount",
+        "setOtherAmount",
+        "getOtherId",
+        "setOtherId",
+        "getResponseCode",
+        "setResponseCode",
+        "getResponseDE55",
+        "setResponseDE55",
+        "getSource",
+        "()Lcom/danbamitale/epmslib/entities/PosMode;",
+        "setSource",
+        "(Lcom/danbamitale/epmslib/entities/PosMode;)V",
+        "getTerminalId",
+        "setTerminalId",
+        "getTransactionTimeInMillis",
+        "setTransactionTimeInMillis",
+        "getTransactionType",
+        "()Lcom/danbamitale/epmslib/entities/TransactionType;",
+        "setTransactionType",
+        "(Lcom/danbamitale/epmslib/entities/TransactionType;)V",
+        "getTransmissionDateTime",
+        "setTransmissionDateTime",
+        "component1",
+        "component10",
+        "component11",
+        "component12",
+        "component13",
+        "component14",
+        "component15",
+        "component16",
+        "component17",
+        "component18",
+        "component19",
+        "component2",
+        "component20",
+        "component21",
+        "component22",
+        "component23",
+        "component24",
+        "component25",
+        "component26",
+        "component27",
+        "component28",
+        "component29",
+        "component3",
+        "component30",
+        "component31",
+        "component4",
+        "component5",
+        "component6",
+        "component7",
+        "component8",
+        "component9",
+        "copy",
+        "describeContents",
+        "",
+        "equals",
+        "",
+        "other",
+        "",
+        "hashCode",
+        "toString",
+        "writeToParcel",
+        "",
+        "parcel",
+        "Landroid/os/Parcel;",
+        "flags",
+        "app_fcmbeasypayDebug"
+    }
+    k = 0x1
+    mv = {
+        0x1,
+        0x7,
+        0x1
+    }
+    xi = 0x30
+.end annotation
+
+
+# static fields
+.field public static final CREATOR:Landroid/os/Parcelable$Creator;
+    .annotation system Ldalvik/annotation/Signature;
+        value = {
+            "Landroid/os/Parcelable$Creator<",
+            "Lcom/woleapp/netpos/contactless/model/TransactionResponse;",
+            ">;"
+        }
+    .end annotation
+.end field
+
+
+# instance fields
+.field private AID:Ljava/lang/String;
+
+.field private RRN:Ljava/lang/String;
+
+.field private STAN:Ljava/lang/String;
+
+.field private TSI:Ljava/lang/String;
+
+.field private TVR:Ljava/lang/String;
+
+.field private accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+.field private acquiringInstCode:Ljava/lang/String;
+
+.field private additionalAmount_54:Ljava/lang/String;
+
+.field private amount:J
+
+.field private appCryptogram:Ljava/lang/String;
+
+.field private authCode:Ljava/lang/String;
+
+.field private cardExpiry:Ljava/lang/String;
+
+.field private cardHolder:Ljava/lang/String;
+
+.field private cardLabel:Ljava/lang/String;
+
+.field private echoData:Ljava/lang/String;
+
+.field private errorMessage:Ljava/lang/String;
+
+.field private id:J
+
+.field private interSwitchThreshold:J
+
+.field private localDate_13:Ljava/lang/String;
+
+.field private localTime_12:Ljava/lang/String;
+
+.field private maskedPan:Ljava/lang/String;
+
+.field private merchantId:Ljava/lang/String;
+
+.field private originalForwardingInstCode:Ljava/lang/String;
+
+.field private otherAmount:J
+
+.field private otherId:Ljava/lang/String;
+
+.field private responseCode:Ljava/lang/String;
+
+.field private responseDE55:Ljava/lang/String;
+
+.field private source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+.field private terminalId:Ljava/lang/String;
+
+.field private transactionTimeInMillis:J
+
+.field private transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+.field private transmissionDateTime:Ljava/lang/String;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    new-instance v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse$Creator;
+
+    invoke-direct {v0}, Lcom/woleapp/netpos/contactless/model/TransactionResponse$Creator;-><init>()V
+
+    check-cast v0, Landroid/os/Parcelable$Creator;
+
+    sput-object v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->CREATOR:Landroid/os/Parcelable$Creator;
+
+    return-void
+.end method
+
+.method public constructor <init>()V
+    .locals 39
+
+    move-object/from16 v0, p0
+
+    .line 56
+    sget-object v1, Lcom/danbamitale/epmslib/entities/TransactionType;->PURCHASE:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    const-string v2, ""
+
+    const-wide/16 v3, 0x0
+
+    const-string v5, ""
+
+    const-string v6, ""
+
+    const-string v7, ""
+
+    const-string v8, ""
+
+    const-string v9, ""
+
+    const-wide/16 v10, 0x0
+
+    const/4 v12, 0x0
+
+    const/4 v13, 0x0
+
+    const/4 v14, 0x0
+
+    const/4 v15, 0x0
+
+    const/16 v16, 0x0
+
+    const/16 v17, 0x0
+
+    const/16 v18, 0x0
+
+    const/16 v19, 0x0
+
+    const/16 v20, 0x0
+
+    const/16 v21, 0x0
+
+    const/16 v22, 0x0
+
+    const/16 v23, 0x0
+
+    const/16 v24, 0x0
+
+    const-wide/16 v25, 0x0
+
+    const/16 v27, 0x0
+
+    const/16 v28, 0x0
+
+    const/16 v29, 0x0
+
+    const/16 v30, 0x0
+
+    const-wide/16 v31, 0x0
+
+    const/16 v33, 0x0
+
+    const/16 v34, 0x0
+
+    const-wide/16 v35, 0x0
+
+    const v37, 0x7fffff00
+
+    const/16 v38, 0x0
+
+    invoke-direct/range {v0 .. v38}, Lcom/woleapp/netpos/contactless/model/TransactionResponse;-><init>(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+
+    return-void
+.end method
+
+.method public constructor <init>(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)V
+    .locals 16
+    .param p1, "transactionType"    # Lcom/danbamitale/epmslib/entities/TransactionType;
+    .param p2, "maskedPan"    # Ljava/lang/String;
+    .param p3, "amount"    # J
+    .param p5, "transmissionDateTime"    # Ljava/lang/String;
+    .param p6, "STAN"    # Ljava/lang/String;
+    .param p7, "RRN"    # Ljava/lang/String;
+    .param p8, "localTime_12"    # Ljava/lang/String;
+    .param p9, "localDate_13"    # Ljava/lang/String;
+    .param p10, "otherAmount"    # J
+    .param p12, "acquiringInstCode"    # Ljava/lang/String;
+    .param p13, "originalForwardingInstCode"    # Ljava/lang/String;
+    .param p14, "authCode"    # Ljava/lang/String;
+    .param p15, "responseCode"    # Ljava/lang/String;
+    .param p16, "additionalAmount_54"    # Ljava/lang/String;
+    .param p17, "echoData"    # Ljava/lang/String;
+    .param p18, "cardLabel"    # Ljava/lang/String;
+    .param p19, "cardExpiry"    # Ljava/lang/String;
+    .param p20, "cardHolder"    # Ljava/lang/String;
+    .param p21, "TVR"    # Ljava/lang/String;
+    .param p22, "TSI"    # Ljava/lang/String;
+    .param p23, "AID"    # Ljava/lang/String;
+    .param p24, "appCryptogram"    # Ljava/lang/String;
+    .param p25, "transactionTimeInMillis"    # J
+    .param p27, "accountType"    # Lcom/danbamitale/epmslib/utils/IsoAccountType;
+    .param p28, "terminalId"    # Ljava/lang/String;
+    .param p29, "merchantId"    # Ljava/lang/String;
+    .param p30, "otherId"    # Ljava/lang/String;
+    .param p31, "id"    # J
+    .param p33, "responseDE55"    # Ljava/lang/String;
+    .param p34, "source"    # Lcom/danbamitale/epmslib/entities/PosMode;
+    .param p35, "interSwitchThreshold"    # J
+
+    move-object/from16 v0, p0
+
+    move-object/from16 v1, p1
+
+    move-object/from16 v2, p2
+
+    move-object/from16 v3, p5
+
+    move-object/from16 v4, p6
+
+    move-object/from16 v5, p7
+
+    move-object/from16 v6, p8
+
+    move-object/from16 v7, p9
+
+    move-object/from16 v8, p12
+
+    move-object/from16 v9, p13
+
+    move-object/from16 v10, p14
+
+    move-object/from16 v11, p15
+
+    move-object/from16 v12, p16
+
+    move-object/from16 v13, p18
+
+    move-object/from16 v14, p19
+
+    move-object/from16 v15, p20
+
+    move-object/from16 v0, p21
+
+    const-string v0, "transactionType"
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "maskedPan"
+
+    invoke-static {v2, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "transmissionDateTime"
+
+    invoke-static {v3, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "STAN"
+
+    invoke-static {v4, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "RRN"
+
+    invoke-static {v5, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "localTime_12"
+
+    invoke-static {v6, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "localDate_13"
+
+    invoke-static {v7, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "acquiringInstCode"
+
+    invoke-static {v8, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "originalForwardingInstCode"
+
+    invoke-static {v9, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "authCode"
+
+    invoke-static {v10, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "responseCode"
+
+    invoke-static {v11, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "additionalAmount_54"
+
+    invoke-static {v12, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardLabel"
+
+    invoke-static {v13, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardExpiry"
+
+    invoke-static {v14, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardHolder"
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "TVR"
+
+    move-object/from16 v15, p21
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "TSI"
+
+    move-object/from16 v15, p22
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "AID"
+
+    move-object/from16 v15, p23
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "appCryptogram"
+
+    move-object/from16 v15, p24
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "accountType"
+
+    move-object/from16 v15, p27
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "terminalId"
+
+    move-object/from16 v15, p28
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "merchantId"
+
+    move-object/from16 v15, p29
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "otherId"
+
+    move-object/from16 v15, p30
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "source"
+
+    move-object/from16 v15, p34
+
+    invoke-static {v15, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 14
+    invoke-direct/range {p0 .. p0}, Ljava/lang/Object;-><init>()V
+
+    .line 17
+    move-object/from16 v0, p0
+
+    move-object/from16 v15, p21
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    .line 18
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    .line 19
+    move-wide/from16 v1, p3
+
+    iput-wide v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    .line 21
+    iput-object v3, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    .line 22
+    iput-object v4, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    .line 23
+    iput-object v5, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    .line 25
+    iput-object v6, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    .line 26
+    iput-object v7, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    .line 27
+    move-wide/from16 v1, p10
+
+    iput-wide v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    .line 28
+    iput-object v8, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    .line 29
+    iput-object v9, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    .line 30
+    iput-object v10, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    .line 31
+    iput-object v11, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    .line 32
+    iput-object v12, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    .line 33
+    move-object/from16 v1, p17
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    .line 35
+    iput-object v13, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    .line 36
+    iput-object v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    .line 37
+    move-object/from16 v2, p20
+
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    .line 38
+    iput-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    .line 39
+    move-object/from16 v1, p22
+
+    move-object/from16 v2, p23
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    .line 40
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    .line 41
+    move-object/from16 v1, p24
+
+    move-object/from16 v2, p27
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    .line 42
+    move-wide/from16 v3, p25
+
+    iput-wide v3, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    .line 43
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    .line 45
+    move-object/from16 v1, p28
+
+    move-object/from16 v2, p29
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    .line 46
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    .line 47
+    move-object/from16 v1, p30
+
+    move-object/from16 v2, p34
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    .line 49
+    move-wide/from16 v3, p31
+
+    iput-wide v3, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    .line 50
+    move-object/from16 v1, p33
+
+    iput-object v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    .line 51
+    iput-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    .line 52
+    move-wide/from16 v1, p35
+
+    iput-wide v1, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    .line 16
+    return-void
+.end method
+
+.method public synthetic constructor <init>(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+    .locals 41
+
+    .line 16
+    move/from16 v0, p37
+
+    and-int/lit16 v1, v0, 0x100
+
+    const-wide/16 v2, 0x0
+
+    if-eqz v1, :cond_0
+
+    .line 27
+    move-wide v14, v2
+
+    goto :goto_0
+
+    .line 16
+    :cond_0
+    move-wide/from16 v14, p10
+
+    :goto_0
+    and-int/lit16 v1, v0, 0x200
+
+    const-string v4, ""
+
+    if-eqz v1, :cond_1
+
+    .line 28
+    move-object/from16 v16, v4
+
+    goto :goto_1
+
+    .line 16
+    :cond_1
+    move-object/from16 v16, p12
+
+    :goto_1
+    and-int/lit16 v1, v0, 0x400
+
+    if-eqz v1, :cond_2
+
+    .line 29
+    move-object/from16 v17, v4
+
+    goto :goto_2
+
+    .line 16
+    :cond_2
+    move-object/from16 v17, p13
+
+    :goto_2
+    and-int/lit16 v1, v0, 0x800
+
+    if-eqz v1, :cond_3
+
+    .line 30
+    move-object/from16 v18, v4
+
+    goto :goto_3
+
+    .line 16
+    :cond_3
+    move-object/from16 v18, p14
+
+    :goto_3
+    and-int/lit16 v1, v0, 0x1000
+
+    if-eqz v1, :cond_4
+
+    .line 31
+    move-object/from16 v19, v4
+
+    goto :goto_4
+
+    .line 16
+    :cond_4
+    move-object/from16 v19, p15
+
+    :goto_4
+    and-int/lit16 v1, v0, 0x2000
+
+    if-eqz v1, :cond_5
+
+    .line 32
+    move-object/from16 v20, v4
+
+    goto :goto_5
+
+    .line 16
+    :cond_5
+    move-object/from16 v20, p16
+
+    :goto_5
+    and-int/lit16 v1, v0, 0x4000
+
+    const/4 v5, 0x0
+
+    if-eqz v1, :cond_6
+
+    .line 33
+    move-object/from16 v21, v5
+
+    goto :goto_6
+
+    .line 16
+    :cond_6
+    move-object/from16 v21, p17
+
+    :goto_6
+    const v1, 0x8000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_7
+
+    .line 35
+    move-object/from16 v22, v4
+
+    goto :goto_7
+
+    .line 16
+    :cond_7
+    move-object/from16 v22, p18
+
+    :goto_7
+    const/high16 v1, 0x10000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_8
+
+    .line 36
+    move-object/from16 v23, v4
+
+    goto :goto_8
+
+    .line 16
+    :cond_8
+    move-object/from16 v23, p19
+
+    :goto_8
+    const/high16 v1, 0x20000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_9
+
+    .line 37
+    move-object/from16 v24, v4
+
+    goto :goto_9
+
+    .line 16
+    :cond_9
+    move-object/from16 v24, p20
+
+    :goto_9
+    const/high16 v1, 0x40000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_a
+
+    .line 38
+    move-object/from16 v25, v4
+
+    goto :goto_a
+
+    .line 16
+    :cond_a
+    move-object/from16 v25, p21
+
+    :goto_a
+    const/high16 v1, 0x80000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_b
+
+    .line 39
+    move-object/from16 v26, v4
+
+    goto :goto_b
+
+    .line 16
+    :cond_b
+    move-object/from16 v26, p22
+
+    :goto_b
+    const/high16 v1, 0x100000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_c
+
+    .line 40
+    move-object/from16 v27, v4
+
+    goto :goto_c
+
+    .line 16
+    :cond_c
+    move-object/from16 v27, p23
+
+    :goto_c
+    const/high16 v1, 0x200000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_d
+
+    .line 41
+    move-object/from16 v28, v4
+
+    goto :goto_d
+
+    .line 16
+    :cond_d
+    move-object/from16 v28, p24
+
+    :goto_d
+    const/high16 v1, 0x400000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_e
+
+    .line 42
+    move-wide/from16 v29, v2
+
+    goto :goto_e
+
+    .line 16
+    :cond_e
+    move-wide/from16 v29, p25
+
+    :goto_e
+    const/high16 v1, 0x800000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_f
+
+    .line 43
+    sget-object v1, Lcom/danbamitale/epmslib/utils/IsoAccountType;->DEFAULT_UNSPECIFIED:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    move-object/from16 v31, v1
+
+    goto :goto_f
+
+    .line 16
+    :cond_f
+    move-object/from16 v31, p27
+
+    :goto_f
+    const/high16 v1, 0x1000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_10
+
+    .line 45
+    move-object/from16 v32, v4
+
+    goto :goto_10
+
+    .line 16
+    :cond_10
+    move-object/from16 v32, p28
+
+    :goto_10
+    const/high16 v1, 0x2000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_11
+
+    .line 46
+    move-object/from16 v33, v4
+
+    goto :goto_11
+
+    .line 16
+    :cond_11
+    move-object/from16 v33, p29
+
+    :goto_11
+    const/high16 v1, 0x4000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_12
+
+    .line 47
+    move-object/from16 v34, v4
+
+    goto :goto_12
+
+    .line 16
+    :cond_12
+    move-object/from16 v34, p30
+
+    :goto_12
+    const/high16 v1, 0x8000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_13
+
+    .line 49
+    move-wide/from16 v35, v2
+
+    goto :goto_13
+
+    .line 16
+    :cond_13
+    move-wide/from16 v35, p31
+
+    :goto_13
+    const/high16 v1, 0x10000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_14
+
+    .line 50
+    move-object/from16 v37, v5
+
+    goto :goto_14
+
+    .line 16
+    :cond_14
+    move-object/from16 v37, p33
+
+    :goto_14
+    const/high16 v1, 0x20000000
+
+    and-int/2addr v1, v0
+
+    if-eqz v1, :cond_15
+
+    .line 51
+    sget-object v1, Lcom/danbamitale/epmslib/entities/PosMode;->EPMS:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    move-object/from16 v38, v1
+
+    goto :goto_15
+
+    .line 16
+    :cond_15
+    move-object/from16 v38, p34
+
+    :goto_15
+    const/high16 v1, 0x40000000    # 2.0f
+
+    and-int/2addr v0, v1
+
+    if-eqz v0, :cond_16
+
+    .line 52
+    move-wide/from16 v39, v2
+
+    goto :goto_16
+
+    .line 16
+    :cond_16
+    move-wide/from16 v39, p35
+
+    :goto_16
+    move-object/from16 v4, p0
+
+    move-object/from16 v5, p1
+
+    move-object/from16 v6, p2
+
+    move-wide/from16 v7, p3
+
+    move-object/from16 v9, p5
+
+    move-object/from16 v10, p6
+
+    move-object/from16 v11, p7
+
+    move-object/from16 v12, p8
+
+    move-object/from16 v13, p9
+
+    invoke-direct/range {v4 .. v40}, Lcom/woleapp/netpos/contactless/model/TransactionResponse;-><init>(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)V
+
+    .line 57
+    return-void
+.end method
+
+.method public static synthetic copy$default(Lcom/woleapp/netpos/contactless/model/TransactionResponse;Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;JILjava/lang/Object;)Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+    .locals 17
+
+    move-object/from16 v0, p0
+
+    move/from16 v1, p37
+
+    and-int/lit8 v2, v1, 0x1
+
+    if-eqz v2, :cond_0
+
+    iget-object v2, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    goto :goto_0
+
+    :cond_0
+    move-object/from16 v2, p1
+
+    :goto_0
+    and-int/lit8 v3, v1, 0x2
+
+    if-eqz v3, :cond_1
+
+    iget-object v3, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    goto :goto_1
+
+    :cond_1
+    move-object/from16 v3, p2
+
+    :goto_1
+    and-int/lit8 v4, v1, 0x4
+
+    if-eqz v4, :cond_2
+
+    iget-wide v4, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    goto :goto_2
+
+    :cond_2
+    move-wide/from16 v4, p3
+
+    :goto_2
+    and-int/lit8 v6, v1, 0x8
+
+    if-eqz v6, :cond_3
+
+    iget-object v6, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    goto :goto_3
+
+    :cond_3
+    move-object/from16 v6, p5
+
+    :goto_3
+    and-int/lit8 v7, v1, 0x10
+
+    if-eqz v7, :cond_4
+
+    iget-object v7, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    goto :goto_4
+
+    :cond_4
+    move-object/from16 v7, p6
+
+    :goto_4
+    and-int/lit8 v8, v1, 0x20
+
+    if-eqz v8, :cond_5
+
+    iget-object v8, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    goto :goto_5
+
+    :cond_5
+    move-object/from16 v8, p7
+
+    :goto_5
+    and-int/lit8 v9, v1, 0x40
+
+    if-eqz v9, :cond_6
+
+    iget-object v9, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    goto :goto_6
+
+    :cond_6
+    move-object/from16 v9, p8
+
+    :goto_6
+    and-int/lit16 v10, v1, 0x80
+
+    if-eqz v10, :cond_7
+
+    iget-object v10, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    goto :goto_7
+
+    :cond_7
+    move-object/from16 v10, p9
+
+    :goto_7
+    and-int/lit16 v11, v1, 0x100
+
+    if-eqz v11, :cond_8
+
+    iget-wide v11, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    goto :goto_8
+
+    :cond_8
+    move-wide/from16 v11, p10
+
+    :goto_8
+    and-int/lit16 v13, v1, 0x200
+
+    if-eqz v13, :cond_9
+
+    iget-object v13, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    goto :goto_9
+
+    :cond_9
+    move-object/from16 v13, p12
+
+    :goto_9
+    and-int/lit16 v14, v1, 0x400
+
+    if-eqz v14, :cond_a
+
+    iget-object v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    goto :goto_a
+
+    :cond_a
+    move-object/from16 v14, p13
+
+    :goto_a
+    and-int/lit16 v15, v1, 0x800
+
+    if-eqz v15, :cond_b
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    goto :goto_b
+
+    :cond_b
+    move-object/from16 v15, p14
+
+    :goto_b
+    move-object/from16 p14, v15
+
+    and-int/lit16 v15, v1, 0x1000
+
+    if-eqz v15, :cond_c
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    goto :goto_c
+
+    :cond_c
+    move-object/from16 v15, p15
+
+    :goto_c
+    move-object/from16 p15, v15
+
+    and-int/lit16 v15, v1, 0x2000
+
+    if-eqz v15, :cond_d
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    goto :goto_d
+
+    :cond_d
+    move-object/from16 v15, p16
+
+    :goto_d
+    move-object/from16 p16, v15
+
+    and-int/lit16 v15, v1, 0x4000
+
+    if-eqz v15, :cond_e
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    goto :goto_e
+
+    :cond_e
+    move-object/from16 v15, p17
+
+    :goto_e
+    const v16, 0x8000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p17, v15
+
+    if-eqz v16, :cond_f
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    goto :goto_f
+
+    :cond_f
+    move-object/from16 v15, p18
+
+    :goto_f
+    const/high16 v16, 0x10000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p18, v15
+
+    if-eqz v16, :cond_10
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    goto :goto_10
+
+    :cond_10
+    move-object/from16 v15, p19
+
+    :goto_10
+    const/high16 v16, 0x20000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p19, v15
+
+    if-eqz v16, :cond_11
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    goto :goto_11
+
+    :cond_11
+    move-object/from16 v15, p20
+
+    :goto_11
+    const/high16 v16, 0x40000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p20, v15
+
+    if-eqz v16, :cond_12
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    goto :goto_12
+
+    :cond_12
+    move-object/from16 v15, p21
+
+    :goto_12
+    const/high16 v16, 0x80000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p21, v15
+
+    if-eqz v16, :cond_13
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    goto :goto_13
+
+    :cond_13
+    move-object/from16 v15, p22
+
+    :goto_13
+    const/high16 v16, 0x100000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p22, v15
+
+    if-eqz v16, :cond_14
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    goto :goto_14
+
+    :cond_14
+    move-object/from16 v15, p23
+
+    :goto_14
+    const/high16 v16, 0x200000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p23, v15
+
+    if-eqz v16, :cond_15
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    goto :goto_15
+
+    :cond_15
+    move-object/from16 v15, p24
+
+    :goto_15
+    const/high16 v16, 0x400000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p13, v14
+
+    move-object/from16 p24, v15
+
+    if-eqz v16, :cond_16
+
+    iget-wide v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    goto :goto_16
+
+    :cond_16
+    move-wide/from16 v14, p25
+
+    :goto_16
+    const/high16 v16, 0x800000
+
+    and-int v16, v1, v16
+
+    move-wide/from16 p25, v14
+
+    if-eqz v16, :cond_17
+
+    iget-object v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    goto :goto_17
+
+    :cond_17
+    move-object/from16 v14, p27
+
+    :goto_17
+    const/high16 v15, 0x1000000
+
+    and-int/2addr v15, v1
+
+    if-eqz v15, :cond_18
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    goto :goto_18
+
+    :cond_18
+    move-object/from16 v15, p28
+
+    :goto_18
+    const/high16 v16, 0x2000000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p28, v15
+
+    if-eqz v16, :cond_19
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    goto :goto_19
+
+    :cond_19
+    move-object/from16 v15, p29
+
+    :goto_19
+    const/high16 v16, 0x4000000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p29, v15
+
+    if-eqz v16, :cond_1a
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    goto :goto_1a
+
+    :cond_1a
+    move-object/from16 v15, p30
+
+    :goto_1a
+    const/high16 v16, 0x8000000
+
+    and-int v16, v1, v16
+
+    move-object/from16 p27, v14
+
+    move-object/from16 p30, v15
+
+    if-eqz v16, :cond_1b
+
+    iget-wide v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    goto :goto_1b
+
+    :cond_1b
+    move-wide/from16 v14, p31
+
+    :goto_1b
+    const/high16 v16, 0x10000000
+
+    and-int v16, v1, v16
+
+    move-wide/from16 p31, v14
+
+    if-eqz v16, :cond_1c
+
+    iget-object v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    goto :goto_1c
+
+    :cond_1c
+    move-object/from16 v14, p33
+
+    :goto_1c
+    const/high16 v15, 0x20000000
+
+    and-int/2addr v15, v1
+
+    if-eqz v15, :cond_1d
+
+    iget-object v15, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    goto :goto_1d
+
+    :cond_1d
+    move-object/from16 v15, p34
+
+    :goto_1d
+    const/high16 v16, 0x40000000    # 2.0f
+
+    and-int v1, v1, v16
+
+    move-object/from16 p33, v14
+
+    move-object/from16 p34, v15
+
+    if-eqz v1, :cond_1e
+
+    iget-wide v14, v0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    goto :goto_1e
+
+    :cond_1e
+    move-wide/from16 v14, p35
+
+    :goto_1e
+    move-object/from16 p1, v2
+
+    move-object/from16 p2, v3
+
+    move-wide/from16 p3, v4
+
+    move-object/from16 p5, v6
+
+    move-object/from16 p6, v7
+
+    move-object/from16 p7, v8
+
+    move-object/from16 p8, v9
+
+    move-object/from16 p9, v10
+
+    move-wide/from16 p10, v11
+
+    move-object/from16 p12, v13
+
+    move-wide/from16 p35, v14
+
+    invoke-virtual/range {p0 .. p36}, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->copy(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+
+    move-result-object v0
+
+    return-object v0
+.end method
+
+
+# virtual methods
+.method public final component1()Lcom/danbamitale/epmslib/entities/TransactionType;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    return-object v0
+.end method
+
+.method public final component10()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component11()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component12()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component13()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component14()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component15()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component16()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component17()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component18()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component19()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component2()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component20()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component21()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component22()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component23()J
+    .locals 2
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    return-wide v0
+.end method
+
+.method public final component24()Lcom/danbamitale/epmslib/utils/IsoAccountType;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    return-object v0
+.end method
+
+.method public final component25()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component26()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component27()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component28()J
+    .locals 2
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    return-wide v0
+.end method
+
+.method public final component29()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component3()J
+    .locals 2
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    return-wide v0
+.end method
+
+.method public final component30()Lcom/danbamitale/epmslib/entities/PosMode;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    return-object v0
+.end method
+
+.method public final component31()J
+    .locals 2
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    return-wide v0
+.end method
+
+.method public final component4()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component5()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component6()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component7()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component8()Ljava/lang/String;
+    .locals 1
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final component9()J
+    .locals 2
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    return-wide v0
+.end method
+
+.method public final copy(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+    .locals 39
+
+    move-object/from16 v1, p1
+
+    move-object/from16 v2, p2
+
+    move-wide/from16 v3, p3
+
+    move-object/from16 v5, p5
+
+    move-object/from16 v6, p6
+
+    move-object/from16 v7, p7
+
+    move-object/from16 v8, p8
+
+    move-object/from16 v9, p9
+
+    move-wide/from16 v10, p10
+
+    move-object/from16 v12, p12
+
+    move-object/from16 v13, p13
+
+    move-object/from16 v14, p14
+
+    move-object/from16 v15, p15
+
+    move-object/from16 v16, p16
+
+    move-object/from16 v17, p17
+
+    move-object/from16 v18, p18
+
+    move-object/from16 v19, p19
+
+    move-object/from16 v20, p20
+
+    move-object/from16 v21, p21
+
+    move-object/from16 v22, p22
+
+    move-object/from16 v23, p23
+
+    move-object/from16 v24, p24
+
+    move-wide/from16 v25, p25
+
+    move-object/from16 v27, p27
+
+    move-object/from16 v28, p28
+
+    move-object/from16 v29, p29
+
+    move-object/from16 v30, p30
+
+    move-wide/from16 v31, p31
+
+    move-object/from16 v33, p33
+
+    move-object/from16 v34, p34
+
+    move-wide/from16 v35, p35
+
+    const-string v0, "transactionType"
+
+    move-object/from16 v37, v1
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "maskedPan"
+
+    move-object/from16 v1, p2
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "transmissionDateTime"
+
+    move-object/from16 v1, p5
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "STAN"
+
+    move-object/from16 v1, p6
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "RRN"
+
+    move-object/from16 v1, p7
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "localTime_12"
+
+    move-object/from16 v1, p8
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "localDate_13"
+
+    move-object/from16 v1, p9
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "acquiringInstCode"
+
+    move-object/from16 v1, p12
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "originalForwardingInstCode"
+
+    move-object/from16 v1, p13
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "authCode"
+
+    move-object/from16 v1, p14
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "responseCode"
+
+    move-object/from16 v1, p15
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "additionalAmount_54"
+
+    move-object/from16 v1, p16
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardLabel"
+
+    move-object/from16 v1, p18
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardExpiry"
+
+    move-object/from16 v1, p19
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "cardHolder"
+
+    move-object/from16 v1, p20
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "TVR"
+
+    move-object/from16 v1, p21
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "TSI"
+
+    move-object/from16 v1, p22
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "AID"
+
+    move-object/from16 v1, p23
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "appCryptogram"
+
+    move-object/from16 v1, p24
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "accountType"
+
+    move-object/from16 v1, p27
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "terminalId"
+
+    move-object/from16 v1, p28
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "merchantId"
+
+    move-object/from16 v1, p29
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "otherId"
+
+    move-object/from16 v1, p30
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    const-string v0, "source"
+
+    move-object/from16 v1, p34
+
+    invoke-static {v1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    new-instance v38, Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+
+    move-object/from16 v0, v38
+
+    move-object/from16 v1, v37
+
+    invoke-direct/range {v0 .. v36}, Lcom/woleapp/netpos/contactless/model/TransactionResponse;-><init>(Lcom/danbamitale/epmslib/entities/TransactionType;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLcom/danbamitale/epmslib/utils/IsoAccountType;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Lcom/danbamitale/epmslib/entities/PosMode;J)V
+
+    return-object v38
+.end method
+
+.method public describeContents()I
+    .locals 1
+
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public equals(Ljava/lang/Object;)Z
+    .locals 7
+
+    const/4 v0, 0x1
+
+    if-ne p0, p1, :cond_0
+
+    return v0
+
+    :cond_0
+    instance-of v1, p1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+
+    const/4 v2, 0x0
+
+    if-nez v1, :cond_1
+
+    return v2
+
+    :cond_1
+    move-object v1, p1
+
+    check-cast v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;
+
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    if-eq v3, v4, :cond_2
+
+    return v2
+
+    :cond_2
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_3
+
+    return v2
+
+    :cond_3
+    iget-wide v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    iget-wide v5, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    cmp-long v3, v3, v5
+
+    if-eqz v3, :cond_4
+
+    return v2
+
+    :cond_4
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_5
+
+    return v2
+
+    :cond_5
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_6
+
+    return v2
+
+    :cond_6
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_7
+
+    return v2
+
+    :cond_7
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_8
+
+    return v2
+
+    :cond_8
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_9
+
+    return v2
+
+    :cond_9
+    iget-wide v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    iget-wide v5, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    cmp-long v3, v3, v5
+
+    if-eqz v3, :cond_a
+
+    return v2
+
+    :cond_a
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_b
+
+    return v2
+
+    :cond_b
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_c
+
+    return v2
+
+    :cond_c
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_d
+
+    return v2
+
+    :cond_d
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_e
+
+    return v2
+
+    :cond_e
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_f
+
+    return v2
+
+    :cond_f
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_10
+
+    return v2
+
+    :cond_10
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_11
+
+    return v2
+
+    :cond_11
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_12
+
+    return v2
+
+    :cond_12
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_13
+
+    return v2
+
+    :cond_13
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_14
+
+    return v2
+
+    :cond_14
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_15
+
+    return v2
+
+    :cond_15
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_16
+
+    return v2
+
+    :cond_16
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_17
+
+    return v2
+
+    :cond_17
+    iget-wide v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    iget-wide v5, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    cmp-long v3, v3, v5
+
+    if-eqz v3, :cond_18
+
+    return v2
+
+    :cond_18
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    if-eq v3, v4, :cond_19
+
+    return v2
+
+    :cond_19
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_1a
+
+    return v2
+
+    :cond_1a
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_1b
+
+    return v2
+
+    :cond_1b
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_1c
+
+    return v2
+
+    :cond_1c
+    iget-wide v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    iget-wide v5, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    cmp-long v3, v3, v5
+
+    if-eqz v3, :cond_1d
+
+    return v2
+
+    :cond_1d
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    invoke-static {v3, v4}, Lkotlin/jvm/internal/Intrinsics;->areEqual(Ljava/lang/Object;Ljava/lang/Object;)Z
+
+    move-result v3
+
+    if-nez v3, :cond_1e
+
+    return v2
+
+    :cond_1e
+    iget-object v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    iget-object v4, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    if-eq v3, v4, :cond_1f
+
+    return v2
+
+    :cond_1f
+    iget-wide v3, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    iget-wide v5, v1, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    cmp-long v1, v3, v5
+
+    if-eqz v1, :cond_20
+
+    return v2
+
+    :cond_20
+    return v0
+.end method
+
+.method public final getAID()Ljava/lang/String;
+    .locals 1
+
+    .line 40
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getAccountType()Lcom/danbamitale/epmslib/utils/IsoAccountType;
+    .locals 1
+
+    .line 43
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    return-object v0
+.end method
+
+.method public final getAcquiringInstCode()Ljava/lang/String;
+    .locals 1
+
+    .line 28
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getAdditionalAmount_54()Ljava/lang/String;
+    .locals 1
+
+    .line 32
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getAmount()J
+    .locals 2
+
+    .line 19
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    return-wide v0
+.end method
+
+.method public final getAppCryptogram()Ljava/lang/String;
+    .locals 1
+
+    .line 41
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getAuthCode()Ljava/lang/String;
+    .locals 1
+
+    .line 30
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getCardExpiry()Ljava/lang/String;
+    .locals 1
+
+    .line 36
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getCardHolder()Ljava/lang/String;
+    .locals 1
+
+    .line 37
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getCardLabel()Ljava/lang/String;
+    .locals 1
+
+    .line 35
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getEchoData()Ljava/lang/String;
+    .locals 1
+
+    .line 33
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getErrorMessage()Ljava/lang/String;
+    .locals 1
+
+    .line 54
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->errorMessage:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getId()J
+    .locals 2
+
+    .line 49
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    return-wide v0
+.end method
+
+.method public final getInterSwitchThreshold()J
+    .locals 2
+
+    .line 52
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    return-wide v0
+.end method
+
+.method public final getLocalDate_13()Ljava/lang/String;
+    .locals 1
+
+    .line 26
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getLocalTime_12()Ljava/lang/String;
+    .locals 1
+
+    .line 25
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getMaskedPan()Ljava/lang/String;
+    .locals 1
+
+    .line 18
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getMerchantId()Ljava/lang/String;
+    .locals 1
+
+    .line 46
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getOriginalForwardingInstCode()Ljava/lang/String;
+    .locals 1
+
+    .line 29
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getOtherAmount()J
+    .locals 2
+
+    .line 27
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    return-wide v0
+.end method
+
+.method public final getOtherId()Ljava/lang/String;
+    .locals 1
+
+    .line 47
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getRRN()Ljava/lang/String;
+    .locals 1
+
+    .line 24
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getResponseCode()Ljava/lang/String;
+    .locals 1
+
+    .line 31
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getResponseDE55()Ljava/lang/String;
+    .locals 1
+
+    .line 50
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getSTAN()Ljava/lang/String;
+    .locals 1
+
+    .line 22
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getSource()Lcom/danbamitale/epmslib/entities/PosMode;
+    .locals 1
+
+    .line 51
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    return-object v0
+.end method
+
+.method public final getTSI()Ljava/lang/String;
+    .locals 1
+
+    .line 39
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getTVR()Ljava/lang/String;
+    .locals 1
+
+    .line 38
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getTerminalId()Ljava/lang/String;
+    .locals 1
+
+    .line 45
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public final getTransactionTimeInMillis()J
+    .locals 2
+
+    .line 42
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    return-wide v0
+.end method
+
+.method public final getTransactionType()Lcom/danbamitale/epmslib/entities/TransactionType;
+    .locals 1
+
+    .line 17
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    return-object v0
+.end method
+
+.method public final getTransmissionDateTime()Ljava/lang/String;
+    .locals 1
+
+    .line 21
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    return-object v0
+.end method
+
+.method public hashCode()I
+    .locals 6
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    invoke-virtual {v0}, Lcom/danbamitale/epmslib/entities/TransactionType;->hashCode()I
+
+    move-result v0
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    invoke-static {v2, v3}, Ljava/lang/Long;->hashCode(J)I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    invoke-static {v2, v3}, Ljava/lang/Long;->hashCode(J)I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    const/4 v3, 0x0
+
+    if-nez v2, :cond_0
+
+    move v2, v3
+
+    goto :goto_0
+
+    :cond_0
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    :goto_0
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-wide v4, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    invoke-static {v4, v5}, Ljava/lang/Long;->hashCode(J)I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    invoke-virtual {v2}, Lcom/danbamitale/epmslib/utils/IsoAccountType;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-wide v4, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    invoke-static {v4, v5}, Ljava/lang/Long;->hashCode(J)I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    if-nez v2, :cond_1
+
+    goto :goto_1
+
+    :cond_1
+    invoke-virtual {v2}, Ljava/lang/String;->hashCode()I
+
+    move-result v3
+
+    :goto_1
+    add-int/2addr v0, v3
+
+    mul-int/lit8 v1, v0, 0x1f
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    invoke-virtual {v2}, Lcom/danbamitale/epmslib/entities/PosMode;->hashCode()I
+
+    move-result v2
+
+    add-int/2addr v1, v2
+
+    mul-int/lit8 v0, v1, 0x1f
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    invoke-static {v2, v3}, Ljava/lang/Long;->hashCode(J)I
+
+    move-result v2
+
+    add-int/2addr v0, v2
+
+    return v0
+.end method
+
+.method public final setAID(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 40
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setAccountType(Lcom/danbamitale/epmslib/utils/IsoAccountType;)V
+    .locals 1
+    .param p1, "<set-?>"    # Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 43
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    return-void
+.end method
+
+.method public final setAcquiringInstCode(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 28
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setAdditionalAmount_54(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 32
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setAmount(J)V
+    .locals 0
+    .param p1, "<set-?>"    # J
+
+    .line 19
+    iput-wide p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    return-void
+.end method
+
+.method public final setAppCryptogram(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 41
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setAuthCode(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 30
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setCardExpiry(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 36
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setCardHolder(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 37
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setCardLabel(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 35
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setEchoData(Ljava/lang/String;)V
+    .locals 0
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    .line 33
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setErrorMessage(Ljava/lang/String;)V
+    .locals 0
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    .line 54
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->errorMessage:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setId(J)V
+    .locals 0
+    .param p1, "<set-?>"    # J
+
+    .line 49
+    iput-wide p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    return-void
+.end method
+
+.method public final setInterSwitchThreshold(J)V
+    .locals 0
+    .param p1, "<set-?>"    # J
+
+    .line 52
+    iput-wide p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    return-void
+.end method
+
+.method public final setLocalDate_13(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 26
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setLocalTime_12(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 25
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setMaskedPan(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 18
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setMerchantId(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 46
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setOriginalForwardingInstCode(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 29
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setOtherAmount(J)V
+    .locals 0
+    .param p1, "<set-?>"    # J
+
+    .line 27
+    iput-wide p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    return-void
+.end method
+
+.method public final setOtherId(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 47
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setRRN(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 24
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setResponseCode(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 31
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setResponseDE55(Ljava/lang/String;)V
+    .locals 0
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    .line 50
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setSTAN(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 22
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setSource(Lcom/danbamitale/epmslib/entities/PosMode;)V
+    .locals 1
+    .param p1, "<set-?>"    # Lcom/danbamitale/epmslib/entities/PosMode;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 51
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    return-void
+.end method
+
+.method public final setTSI(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 39
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setTVR(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 38
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setTerminalId(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 45
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public final setTransactionTimeInMillis(J)V
+    .locals 0
+    .param p1, "<set-?>"    # J
+
+    .line 42
+    iput-wide p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    return-void
+.end method
+
+.method public final setTransactionType(Lcom/danbamitale/epmslib/entities/TransactionType;)V
+    .locals 1
+    .param p1, "<set-?>"    # Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 17
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    return-void
+.end method
+
+.method public final setTransmissionDateTime(Ljava/lang/String;)V
+    .locals 1
+    .param p1, "<set-?>"    # Ljava/lang/String;
+
+    const-string v0, "<set-?>"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    .line 21
+    iput-object p1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public toString()Ljava/lang/String;
+    .locals 4
+
+    new-instance v0, Ljava/lang/StringBuilder;
+
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v1, "TransactionResponse(transactionType="
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", maskedPan="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", amount="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", transmissionDateTime="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", STAN="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", RRN="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", localTime_12="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", localDate_13="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", otherAmount="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", acquiringInstCode="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", originalForwardingInstCode="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", authCode="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    iget-object v1, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", responseCode="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", additionalAmount_54="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", echoData="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", cardLabel="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", cardExpiry="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", cardHolder="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", TVR="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", TSI="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", AID="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", appCryptogram="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", transactionTimeInMillis="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    const-string v1, ", accountType="
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", terminalId="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", merchantId="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", otherId="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", id="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", responseDE55="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", source="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, ", interSwitchThreshold="
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget-wide v2, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    invoke-virtual {v1, v2, v3}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const/16 v2, 0x29
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    return-object v0
+.end method
+
+.method public writeToParcel(Landroid/os/Parcel;I)V
+    .locals 2
+
+    const-string v0, "out"
+
+    invoke-static {p1, v0}, Lkotlin/jvm/internal/Intrinsics;->checkNotNullParameter(Ljava/lang/Object;Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionType:Lcom/danbamitale/epmslib/entities/TransactionType;
+
+    invoke-virtual {v0}, Lcom/danbamitale/epmslib/entities/TransactionType;->name()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->maskedPan:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->amount:J
+
+    invoke-virtual {p1, v0, v1}, Landroid/os/Parcel;->writeLong(J)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transmissionDateTime:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->STAN:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->RRN:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localTime_12:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->localDate_13:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherAmount:J
+
+    invoke-virtual {p1, v0, v1}, Landroid/os/Parcel;->writeLong(J)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->acquiringInstCode:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->originalForwardingInstCode:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->authCode:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseCode:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->additionalAmount_54:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->echoData:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardLabel:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardExpiry:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->cardHolder:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TVR:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->TSI:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->AID:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->appCryptogram:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->transactionTimeInMillis:J
+
+    invoke-virtual {p1, v0, v1}, Landroid/os/Parcel;->writeLong(J)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->accountType:Lcom/danbamitale/epmslib/utils/IsoAccountType;
+
+    invoke-virtual {v0}, Lcom/danbamitale/epmslib/utils/IsoAccountType;->name()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->terminalId:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->merchantId:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->otherId:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->id:J
+
+    invoke-virtual {p1, v0, v1}, Landroid/os/Parcel;->writeLong(J)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->responseDE55:Ljava/lang/String;
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-object v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->source:Lcom/danbamitale/epmslib/entities/PosMode;
+
+    invoke-virtual {v0}, Lcom/danbamitale/epmslib/entities/PosMode;->name()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {p1, v0}, Landroid/os/Parcel;->writeString(Ljava/lang/String;)V
+
+    iget-wide v0, p0, Lcom/woleapp/netpos/contactless/model/TransactionResponse;->interSwitchThreshold:J
+
+    invoke-virtual {p1, v0, v1}, Landroid/os/Parcel;->writeLong(J)V
+
+    return-void
+.end method

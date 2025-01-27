@@ -1,0 +1,9 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+    {% for item in event.outcomeTlv %}
+    <p>Outcome Type: {{ event.outcomeType }}</p>
+    <ul class="tlv">
+        {% include "../TlvItem.html" %}
+    </ul>
+    {% endfor %}
+{% endblock %}

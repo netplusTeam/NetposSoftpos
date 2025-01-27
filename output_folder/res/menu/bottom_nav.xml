@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:icon="@drawable/ic_home_icon" android:enabled="true" android:id="@id/homeFragment" android:title="Home" />
+    <item android:icon="@drawable/ic_trans" android:enabled="true" android:id="@id/transaction" android:title="Transactions" />
+    <item android:icon="@drawable/ic_qr_code" android:enabled="true" android:id="@id/scanQR" android:title="Scan QR" />
+    <item android:icon="@drawable/ic_end_of_day" android:enabled="true" android:id="@id/endOfDay" android:title="End Of Day" />
+    <item android:icon="@drawable/ic_qr_code" android:enabled="true" android:id="@id/displayQR" android:title="Display QR" />
+</menu>

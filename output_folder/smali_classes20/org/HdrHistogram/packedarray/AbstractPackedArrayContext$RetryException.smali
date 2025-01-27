@@ -1,0 +1,35 @@
+.class Lorg/HdrHistogram/packedarray/AbstractPackedArrayContext$RetryException;
+.super Ljava/lang/Exception;
+.source "AbstractPackedArrayContext.java"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lorg/HdrHistogram/packedarray/AbstractPackedArrayContext;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0xa
+    name = "RetryException"
+.end annotation
+
+
+# direct methods
+.method private constructor <init>()V
+    .locals 0
+
+    .line 1092
+    invoke-direct {p0}, Ljava/lang/Exception;-><init>()V
+
+    return-void
+.end method
+
+.method synthetic constructor <init>(Lorg/HdrHistogram/packedarray/AbstractPackedArrayContext$1;)V
+    .locals 0
+    .param p1, "x0"    # Lorg/HdrHistogram/packedarray/AbstractPackedArrayContext$1;
+
+    .line 1092
+    invoke-direct {p0}, Lorg/HdrHistogram/packedarray/AbstractPackedArrayContext$RetryException;-><init>()V
+
+    return-void
+.end method

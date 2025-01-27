@@ -1,0 +1,12 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+    {% for item in event.tlvItems %}
+    <ul class="tlv">
+        {% include "../TlvItem.html" %}
+    </ul>
+    {% endfor %}
+    <p>
+        <em>Response :</em>
+        <span class="code">{{ event.response | hex(' ') }}</span>
+    </p>
+{% endblock %}

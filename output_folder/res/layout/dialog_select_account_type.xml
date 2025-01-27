@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/dialog_select_account_type_0" android:paddingTop="16.0dip" android:paddingBottom="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textSize="18.0sp" android:textColor="@color/colorPrimary" android:gravity="center_horizontal" android:id="@id/header" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/select_account_type" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <RadioGroup android:id="@id/account_types" android:padding="0.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" app:layout_constraintTop_toBottomOf="@id/header">
+        <RadioButton android:id="@id/savings_account" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/savings" android:textAllCaps="true" />
+        <RadioButton android:id="@id/current_account" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/current" android:textAllCaps="true" />
+        <RadioButton android:id="@id/credit_account" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/credit" android:textAllCaps="true" />
+        <RadioButton android:id="@id/bonus_account" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/bonus_account" android:textAllCaps="true" />
+        <RadioButton android:id="@id/investment_account" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/investment_account" android:textAllCaps="true" />
+        <RadioButton android:id="@id/universal_account" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/universal_account" android:textAllCaps="true" />
+    </RadioGroup>
+    <Button android:id="@id/cancel_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" android:text="@string/cancel" android:layout_marginEnd="16.0dip" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toBottomOf="@id/account_types" />
+</androidx.constraintlayout.widget.ConstraintLayout>

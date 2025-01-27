@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:orientation="vertical" android:background="@color/grayf9" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_alignParentBottom="true">
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="45.0dip">
+            <ImageView android:id="@id/iv_close" android:layout_width="30.0dip" android:layout_height="30.0dip" android:layout_marginLeft="10.0dip" android:src="@mipmap/ic_pay_close" android:scaleType="centerInside" android:layout_centerVertical="true" />
+            <TextView android:textSize="@dimen/sp_18" android:textColor="@color/black" android:id="@id/tv_passText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="请输入支付密码" android:layout_centerInParent="true" />
+            <View android:background="@color/gray_gb" android:layout_width="fill_parent" android:layout_height="@dimen/dp_line_top" android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+        <LinearLayout android:gravity="center" android:layout_gravity="center" android:orientation="horizontal" android:background="@drawable/payview_stroke_gray_shape" android:layout_width="fill_parent" android:layout_height="50.0dip" android:layout_marginLeft="15.0dip" android:layout_marginTop="30.0dip" android:layout_marginRight="15.0dip">
+            <TextView android:textSize="@dimen/sp_42" android:textColor="@color/black" android:gravity="center" android:layout_gravity="center" android:id="@id/tv_pass1" android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_marginBottom="5.0dip" android:inputType="numberPassword" />
+        </LinearLayout>
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip" android:layout_marginRight="15.0dip">
+            <TextView android:textSize="@dimen/sp_14" android:textColor="@color/alipay" android:id="@id/tv_forget" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="忘记支付密码?" android:layout_alignParentRight="true" android:layout_centerVertical="true" />
+        </RelativeLayout>
+        <RelativeLayout android:background="@color/graye3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="15.0dip">
+            <GridView android:id="@id/gv_pass" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/dp_line" android:listSelector="@color/graye3" android:horizontalSpacing="@dimen/dp_line" android:verticalSpacing="@dimen/dp_line" android:numColumns="3" />
+        </RelativeLayout>
+    </LinearLayout>
+</RelativeLayout>

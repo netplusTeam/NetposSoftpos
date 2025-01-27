@@ -1,0 +1,8 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+    {% for item in event.tlvItems %}
+    <ul class="tlv">
+        {% include "../TlvItem.html" %}
+    </ul>
+    {% endfor %}
+{% endblock %}

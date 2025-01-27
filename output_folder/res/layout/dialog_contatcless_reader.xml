@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/dialog_contatcless_reader_0" android:padding="@dimen/dimen_32dp" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:gravity="center_horizontal" android:id="@id/contactless_header" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_constraintBottom_toTopOf="@id/contactless_anim" app:layout_constraintTop_toTopOf="parent" app:layout_constraintVertical_chainStyle="packed" />
+    <com.airbnb.lottie.LottieAnimationView android:id="@id/contactless_anim" android:layout_width="wrap_content" android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/contactless_header" app:lottie_autoPlay="true" app:lottie_loop="true" app:lottie_rawRes="@raw/nfc_reading" />
+    <androidx.appcompat.widget.AppCompatImageView android:id="@id/cardScheme" android:layout_width="30.0dip" android:layout_height="30.0dip" app:layout_constraintBottom_toBottomOf="@id/contactless_anim" app:layout_constraintEnd_toEndOf="@id/contactless_anim" app:layout_constraintStart_toStartOf="@id/contactless_anim" app:layout_constraintTop_toTopOf="@id/contactless_anim" />
+</androidx.constraintlayout.widget.ConstraintLayout>

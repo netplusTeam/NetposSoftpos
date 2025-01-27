@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView android:id="@id/account_number_cardview" android:paddingTop="@dimen/margin_20" android:layout_width="fill_parent" android:layout_height="wrap_content" android:elevation="8.0dip" app:cardBackgroundColor="@android:color/white" app:cardElevation="8.0dip" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout android:orientation="vertical" android:background="@drawable/bg_white_background_rounded" android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/confirmation_Options" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/margin_15" android:weightSum="1.0" android:layout_centerHorizontal="true">
+                    <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:id="@id/confirmation_tvTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Please, enter your account number" />
+                </LinearLayout>
+                <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/linearOptions2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/margin_10" android:layout_marginTop="@dimen/margin_20" android:layout_marginRight="@dimen/margin_10" android:layout_marginBottom="@dimen/margin_20" android:weightSum="1.0" android:layout_below="@id/confirmation_Options" android:layout_centerHorizontal="true">
+                    <EditText android:textSize="16.0sp" android:textColor="@android:color/black" android:gravity="center_horizontal" android:layout_gravity="center_horizontal" android:id="@id/dialog_account_number_editText" android:layout_width="wrap_content" android:layout_height="wrap_content" android:hint="Account number" android:inputType="number" />
+                </LinearLayout>
+                <RelativeLayout android:gravity="center" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip" android:layout_marginBottom="10.0dip" android:layout_below="@id/linearOptions2">
+                    <Button android:textSize="16.0sp" android:textStyle="bold" android:textColor="@android:color/white" android:id="@id/dialog_account_number_proceed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="25.0dip" android:layout_marginRight="@dimen/margin_15" android:text="Proceed" />
+                </RelativeLayout>
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

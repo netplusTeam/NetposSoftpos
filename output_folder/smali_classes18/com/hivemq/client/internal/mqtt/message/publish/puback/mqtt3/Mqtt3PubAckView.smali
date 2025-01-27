@@ -1,0 +1,94 @@
+.class public Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;
+.super Ljava/lang/Object;
+.source "Mqtt3PubAckView.java"
+
+# interfaces
+.implements Lcom/hivemq/client/mqtt/mqtt3/message/publish/puback/Mqtt3PubAck;
+
+
+# static fields
+.field public static final INSTANCE:Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 1
+
+    .line 34
+    new-instance v0, Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;
+
+    invoke-direct {v0}, Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;-><init>()V
+
+    sput-object v0, Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;->INSTANCE:Lcom/hivemq/client/internal/mqtt/message/publish/puback/mqtt3/Mqtt3PubAckView;
+
+    return-void
+.end method
+
+.method private constructor <init>()V
+    .locals 0
+
+    .line 41
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    return-void
+.end method
+
+.method public static delegate(I)Lcom/hivemq/client/internal/mqtt/message/publish/puback/MqttPubAck;
+    .locals 4
+    .param p0, "packetIdentifier"    # I
+
+    .line 37
+    new-instance v0, Lcom/hivemq/client/internal/mqtt/message/publish/puback/MqttPubAck;
+
+    sget-object v1, Lcom/hivemq/client/mqtt/mqtt5/message/publish/puback/Mqtt5PubAckReasonCode;->SUCCESS:Lcom/hivemq/client/mqtt/mqtt5/message/publish/puback/Mqtt5PubAckReasonCode;
+
+    sget-object v2, Lcom/hivemq/client/internal/mqtt/datatypes/MqttUserPropertiesImpl;->NO_USER_PROPERTIES:Lcom/hivemq/client/internal/mqtt/datatypes/MqttUserPropertiesImpl;
+
+    const/4 v3, 0x0
+
+    invoke-direct {v0, p0, v1, v3, v2}, Lcom/hivemq/client/internal/mqtt/message/publish/puback/MqttPubAck;-><init>(ILcom/hivemq/client/mqtt/mqtt5/message/publish/puback/Mqtt5PubAckReasonCode;Lcom/hivemq/client/internal/mqtt/datatypes/MqttUtf8StringImpl;Lcom/hivemq/client/internal/mqtt/datatypes/MqttUserPropertiesImpl;)V
+
+    return-object v0
+.end method
+
+
+# virtual methods
+.method public equals(Ljava/lang/Object;)Z
+    .locals 1
+    .param p1, "o"    # Ljava/lang/Object;
+
+    .line 50
+    if-ne p0, p1, :cond_0
+
+    const/4 v0, 0x1
+
+    goto :goto_0
+
+    :cond_0
+    const/4 v0, 0x0
+
+    :goto_0
+    return v0
+.end method
+
+.method public hashCode()I
+    .locals 1
+
+    .line 55
+    sget-object v0, Lcom/hivemq/client/mqtt/mqtt3/message/Mqtt3MessageType;->PUBACK:Lcom/hivemq/client/mqtt/mqtt3/message/Mqtt3MessageType;
+
+    invoke-virtual {v0}, Lcom/hivemq/client/mqtt/mqtt3/message/Mqtt3MessageType;->ordinal()I
+
+    move-result v0
+
+    return v0
+.end method
+
+.method public toString()Ljava/lang/String;
+    .locals 1
+
+    .line 45
+    const-string v0, "MqttPubAck{}"
+
+    return-object v0
+.end method

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView android:tag="layout/fragment_display_qr_0" android:background="@android:color/white" android:focusable="true" android:clickable="true" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_margin="@dimen/dimen_20dp">
+        <androidx.constraintlayout.widget.ConstraintLayout android:id="@id/constraint_layout" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/dimen_30dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+            <com.google.android.material.textfield.TextInputLayout android:orientation="horizontal" android:id="@id/price_input_layout" android:layout_width="fill_parent" android:layout_height="80.0dip" android:layout_marginTop="@dimen/dimen_30dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+                <com.google.android.material.textfield.TextInputEditText android:textSize="@dimen/dimen_16sp" android:textStyle="italic" android:id="@id/price_text_box" android:layout_width="fill_parent" android:layout_height="fill_parent" android:hint="@string/hint_amount" android:layout_weight="1.0" android:inputType="numberDecimal" android:autofillHints="@string/hint_amount" style="@style/ServicesInputLayout" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <Button android:textColor="@android:color/white" android:id="@id/process" android:layout_width="fill_parent" android:layout_height="@dimen/dimen_60dp" android:text="@string/pay_now" android:textAllCaps="true" android:paddingHorizontal="48.0dip" app:layout_constraintEnd_toEndOf="@id/price_input_layout" app:layout_constraintStart_toStartOf="@id/price_input_layout" app:layout_constraintTop_toBottomOf="@id/price_input_layout" />
+            <ProgressBar android:visibility="gone" android:layout_width="wrap_content" android:layout_height="0.0dip" android:elevation="2.0dip" android:paddingVertical="12.0dip" app:layout_constraintBottom_toBottomOf="@id/process" app:layout_constraintEnd_toEndOf="@id/process" app:layout_constraintTop_toTopOf="@id/process" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

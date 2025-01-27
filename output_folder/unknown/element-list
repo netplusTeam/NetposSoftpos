@@ -1,0 +1,8 @@
+com.alcineo.softpos
+com.alcineo.softpos.payment
+com.alcineo.softpos.payment.api
+com.alcineo.softpos.payment.api.interfaces
+com.alcineo.softpos.payment.error
+com.alcineo.softpos.payment.model
+com.alcineo.softpos.payment.model.beep
+com.alcineo.softpos.payment.model.transaction

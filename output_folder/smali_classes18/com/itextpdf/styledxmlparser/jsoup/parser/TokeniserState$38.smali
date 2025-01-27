@@ -1,0 +1,167 @@
+.class final Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState$38;
+.super Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;
+.source "TokeniserState.java"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x8
+    name = null
+.end annotation
+
+
+# direct methods
+.method constructor <init>()V
+    .locals 0
+
+    .line 1028
+    invoke-direct {p0}, Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;-><init>()V
+
+    return-void
+.end method
+
+
+# virtual methods
+.method getName()Ljava/lang/String;
+    .locals 1
+
+    .line 1032
+    const-string v0, "AttributeValue_doubleQuoted"
+
+    return-object v0
+.end method
+
+.method read(Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;Lcom/itextpdf/styledxmlparser/jsoup/parser/CharacterReader;)V
+    .locals 5
+    .param p1, "t"    # Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;
+    .param p2, "r"    # Lcom/itextpdf/styledxmlparser/jsoup/parser/CharacterReader;
+
+    .line 1036
+    invoke-static {}, Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;->access$700()[C
+
+    move-result-object v0
+
+    invoke-virtual {p2, v0}, Lcom/itextpdf/styledxmlparser/jsoup/parser/CharacterReader;->consumeToAny([C)Ljava/lang/String;
+
+    move-result-object v0
+
+    .line 1037
+    .local v0, "value":Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/String;->length()I
+
+    move-result v1
+
+    if-lez v1, :cond_0
+
+    .line 1038
+    iget-object v1, p1, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->tagPending:Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;
+
+    invoke-virtual {v1, v0}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;->appendAttributeValue(Ljava/lang/String;)V
+
+    goto :goto_0
+
+    .line 1040
+    :cond_0
+    iget-object v1, p1, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->tagPending:Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;
+
+    invoke-virtual {v1}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;->setEmptyAttributeValue()V
+
+    .line 1042
+    :goto_0
+    invoke-virtual {p2}, Lcom/itextpdf/styledxmlparser/jsoup/parser/CharacterReader;->consume()C
+
+    move-result v1
+
+    .line 1043
+    .local v1, "c":C
+    sparse-switch v1, :sswitch_data_0
+
+    goto :goto_1
+
+    .line 1059
+    :sswitch_0
+    invoke-virtual {p1, p0}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->eofError(Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;)V
+
+    .line 1060
+    sget-object v2, Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState$38;->Data:Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;
+
+    invoke-virtual {p1, v2}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->transition(Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;)V
+
+    goto :goto_1
+
+    .line 1048
+    :sswitch_1
+    const/16 v2, 0x22
+
+    invoke-static {v2}, Ljava/lang/Character;->valueOf(C)Ljava/lang/Character;
+
+    move-result-object v2
+
+    const/4 v3, 0x1
+
+    invoke-virtual {p1, v2, v3}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->consumeCharacterReference(Ljava/lang/Character;Z)[C
+
+    move-result-object v2
+
+    .line 1049
+    .local v2, "ref":[C
+    if-eqz v2, :cond_1
+
+    .line 1050
+    iget-object v3, p1, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->tagPending:Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;
+
+    invoke-virtual {v3, v2}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;->appendAttributeValue([C)V
+
+    goto :goto_1
+
+    .line 1052
+    :cond_1
+    iget-object v3, p1, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->tagPending:Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;
+
+    const/16 v4, 0x26
+
+    invoke-virtual {v3, v4}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;->appendAttributeValue(C)V
+
+    .line 1053
+    goto :goto_1
+
+    .line 1045
+    .end local v2    # "ref":[C
+    :sswitch_2
+    sget-object v2, Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState$38;->AfterAttributeValue_quoted:Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;
+
+    invoke-virtual {p1, v2}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->transition(Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;)V
+
+    .line 1046
+    goto :goto_1
+
+    .line 1055
+    :sswitch_3
+    invoke-virtual {p1, p0}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->error(Lcom/itextpdf/styledxmlparser/jsoup/parser/TokeniserState;)V
+
+    .line 1056
+    iget-object v2, p1, Lcom/itextpdf/styledxmlparser/jsoup/parser/Tokeniser;->tagPending:Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;
+
+    const v3, 0xfffd
+
+    invoke-virtual {v2, v3}, Lcom/itextpdf/styledxmlparser/jsoup/parser/Token$Tag;->appendAttributeValue(C)V
+
+    .line 1057
+    nop
+
+    .line 1064
+    :goto_1
+    return-void
+
+    :sswitch_data_0
+    .sparse-switch
+        0x0 -> :sswitch_3
+        0x22 -> :sswitch_2
+        0x26 -> :sswitch_1
+        0xffff -> :sswitch_0
+    .end sparse-switch
+.end method

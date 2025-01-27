@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment</title>
+    </head>
+    <body>
+        <div id="redirect" style="height: 100vh; width:100vw; !important;"></div>
+        <script type="text/javascript">
+            let winEvent = 1;
+            function replace(redirectHtmlValue) {
+                document.getElementById('redirect').innerHTML = redirectHtmlValue.trim();
+                setTimeout(() => {
+                    const threeDF = document.getElementById('threedsChallengeRedirectForm') ?? document.getElementById('threedsFrictionLessRedirectForm');
+                    threeDF.submit();
+                }, 1000);
+            }
+            const dataFromAndroid = Android.sendValueToWebView().split("<======>");
+            const redirectHtmlVal = dataFromAndroid[0].trim();
+            const transIdVal = dataFromAndroid[1].trim();
+            const reQueryUrl = dataFromAndroid[2].trim();
+
+            <!-- automatically set value to the above form -->
+            replace(redirectHtmlVal);
+
+            const myheaders = {"Content-Type": "application/json", "Accept": "application/json"};
+
+            window.onmessage = (event) => {
+                if (winEvent > 1) {
+                   fetch(reQueryUrl+transIdVal,{headers: myheaders, method: "GET"})
+                    .then(async(response) => {
+                        const data = await response.text();
+                        Android.webViewCallback(data);
+                    })
+                    .catch(err => {
+                        Android.webViewCallback(JSON.stringify(err));
+                    });
+                }
+                winEvent += 1;
+            }
+        </script>
+    </body>
+</html>

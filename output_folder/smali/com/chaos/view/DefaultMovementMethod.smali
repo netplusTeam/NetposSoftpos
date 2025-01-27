@@ -1,0 +1,153 @@
+.class Lcom/chaos/view/DefaultMovementMethod;
+.super Ljava/lang/Object;
+.source "DefaultMovementMethod.java"
+
+# interfaces
+.implements Landroid/text/method/MovementMethod;
+
+
+# static fields
+.field private static sInstance:Lcom/chaos/view/DefaultMovementMethod;
+
+
+# direct methods
+.method private constructor <init>()V
+    .locals 0
+
+    .line 44
+    invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    .line 45
+    return-void
+.end method
+
+.method public static getInstance()Landroid/text/method/MovementMethod;
+    .locals 1
+
+    .line 37
+    sget-object v0, Lcom/chaos/view/DefaultMovementMethod;->sInstance:Lcom/chaos/view/DefaultMovementMethod;
+
+    if-nez v0, :cond_0
+
+    .line 38
+    new-instance v0, Lcom/chaos/view/DefaultMovementMethod;
+
+    invoke-direct {v0}, Lcom/chaos/view/DefaultMovementMethod;-><init>()V
+
+    sput-object v0, Lcom/chaos/view/DefaultMovementMethod;->sInstance:Lcom/chaos/view/DefaultMovementMethod;
+
+    .line 41
+    :cond_0
+    sget-object v0, Lcom/chaos/view/DefaultMovementMethod;->sInstance:Lcom/chaos/view/DefaultMovementMethod;
+
+    return-object v0
+.end method
+
+
+# virtual methods
+.method public canSelectArbitrarily()Z
+    .locals 1
+
+    .line 90
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public initialize(Landroid/widget/TextView;Landroid/text/Spannable;)V
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+
+    .line 50
+    const/4 v0, 0x0
+
+    invoke-static {p2, v0}, Landroid/text/Selection;->setSelection(Landroid/text/Spannable;I)V
+
+    .line 51
+    return-void
+.end method
+
+.method public onGenericMotionEvent(Landroid/widget/TextView;Landroid/text/Spannable;Landroid/view/MotionEvent;)Z
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "event"    # Landroid/view/MotionEvent;
+
+    .line 85
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onKeyDown(Landroid/widget/TextView;Landroid/text/Spannable;ILandroid/view/KeyEvent;)Z
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "keyCode"    # I
+    .param p4, "event"    # Landroid/view/KeyEvent;
+
+    .line 55
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onKeyOther(Landroid/widget/TextView;Landroid/text/Spannable;Landroid/view/KeyEvent;)Z
+    .locals 1
+    .param p1, "view"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "event"    # Landroid/view/KeyEvent;
+
+    .line 65
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onKeyUp(Landroid/widget/TextView;Landroid/text/Spannable;ILandroid/view/KeyEvent;)Z
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "keyCode"    # I
+    .param p4, "event"    # Landroid/view/KeyEvent;
+
+    .line 60
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onTakeFocus(Landroid/widget/TextView;Landroid/text/Spannable;I)V
+    .locals 0
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "direction"    # I
+
+    .line 71
+    return-void
+.end method
+
+.method public onTouchEvent(Landroid/widget/TextView;Landroid/text/Spannable;Landroid/view/MotionEvent;)Z
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "event"    # Landroid/view/MotionEvent;
+
+    .line 80
+    const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onTrackballEvent(Landroid/widget/TextView;Landroid/text/Spannable;Landroid/view/MotionEvent;)Z
+    .locals 1
+    .param p1, "widget"    # Landroid/widget/TextView;
+    .param p2, "text"    # Landroid/text/Spannable;
+    .param p3, "event"    # Landroid/view/MotionEvent;
+
+    .line 75
+    const/4 v0, 0x0
+
+    return v0
+.end method

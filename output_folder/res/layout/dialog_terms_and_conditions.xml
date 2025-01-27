@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:padding="@dimen/margin_10" android:fitsSystemWindows="true" android:layout_width="fill_parent" android:layout_height="fill_parent" android:fillViewport="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <com.github.barteksc.pdfviewer.PDFView android:id="@id/pdf" android:layout_width="fill_parent" android:layout_height="600.0dip" app:layout_constraintBottom_toTopOf="@id/accept_button" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+        <Button android:textStyle="bold" android:id="@id/accept_button" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ACCEPT" android:layout_below="@id/pdf" android:layout_alignStart="@id/pdf" android:layout_alignEnd="@id/pdf" android:paddingVertical="@dimen/dimen_18sp" />
+    </RelativeLayout>
+</ScrollView>

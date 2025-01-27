@@ -1,0 +1,45 @@
+<div id="transaction-details">
+    <h2>Transaction Details</h2>
+    <table>
+        <tr>
+            <td class="td-label">Transaction Type :</td>
+            <td class="td-value">{{ tm.type | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Amount :</td>
+            <td class="td-value">{{ tm.amount | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Amount Other :</td>
+            <td class="td-value">{{ tm.amountOther | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Balance Before :</td>
+            <td class="td-value">{{ tm.balanceBefore | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Balance After :</td>
+            <td class="td-value">{{ tm.balanceAfer | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Currency Code :</td>
+            <td class="td-value">{{ tm.currencyCode | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Category Code :</td>
+            <td class="td-value">{{ tm.categoryCode | default("-") }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Simulate Offline Server :</td>
+            <td class="td-value">{{ tm.simulateOfflineServer ? "Yes" : "No" }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Force Online :</td>
+            <td class="td-value">{{ tm.forceOnline ? "Yes" : "No" }}</td>
+        </tr>
+        <tr>
+            <td class="td-label">Enable Entry Point :</td>
+            <td class="td-value">{{ tm.enableEntryPoint ? "Yes" : "No" }}</td>
+        </tr>
+    </table>
+</div>

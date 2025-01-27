@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/activity_authentication_0" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/netpos_logo" android:layout_width="70.0dip" android:layout_height="70.0dip" android:layout_marginTop="8.0dip" android:contentDescription="@string/netpos_logo" android:layout_marginStart="8.0dip" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" app:srcCompat="@drawable/ic_netpos_logo" />
+    <FrameLayout android:id="@id/auth_container" android:layout_width="fill_parent" android:layout_height="0.0dip" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toBottomOf="@id/netpos_logo" />
+</androidx.constraintlayout.widget.ConstraintLayout>

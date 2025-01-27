@@ -1,0 +1,12 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+    <p>{{ event.title }}</p>
+    <ul>
+        {% for choice in event.choices %}
+        <li>{{ choice }}{% if loop.index == event.selectedIndex %} <b>(SELECTED)</b>{% endif %}</li>
+        {% endfor %}
+    </ul>
+    {% if event.selectedIndex == -1 %}
+    <p><b>User Cancelled, no answer</b></p>
+    {% endif %}
+{% endblock %}

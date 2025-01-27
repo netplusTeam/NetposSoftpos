@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/qr_amout_dialog_0" android:padding="16.0dip" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.google.android.material.textfield.TextInputLayout android:id="@id/amount_wrapper" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/amount" app:layout_constraintTop_toTopOf="parent" style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <com.google.android.material.textfield.TextInputEditText android:id="@id/amount" android:layout_width="fill_parent" android:layout_height="fill_parent" android:inputType="numberDecimal" />
+    </com.google.android.material.textfield.TextInputLayout>
+    <Button android:id="@id/proceed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/proceed" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/amount_wrapper" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,7 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+<p>Ask Amount: <em>{{ event.mustAskAmount }}</em></p>
+<p>Ask Amount Other: <em>{{ event.mustAskAmountOther }}</em></p>
+<p>Answer: Amount=<span class="code">{{event.sentAmount}}</span>,
+           AmountOther=<span class="code">{{event.sentAmountOther}}</span></p>
+{% endblock %}

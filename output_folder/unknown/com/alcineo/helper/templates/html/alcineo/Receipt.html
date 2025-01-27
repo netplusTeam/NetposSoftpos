@@ -1,0 +1,15 @@
+<div id="receipt">
+<h2>Receipt</h2>
+{% set hasTicket = "NO" %}
+<pre class="ticket">
+{% for event in tm.events %}
+{% if event.type == "ReceiptData" %}
+{% set hasTicket = "YES" %}
+{{ event.receiptLine }}
+{% endif %}
+{% endfor %}
+</pre>
+{% if hasTicket == "NO" %}
+<em>No receipt</em>
+{% endif %}
+</div>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView android:tag="layout/dialog_0" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginStart="@dimen/margin_20" android:layout_marginEnd="@dimen/margin_20" android:elevation="8.0dip" app:cardBackgroundColor="@android:color/white" app:cardCornerRadius="20.0dip" app:cardElevation="8.0dip"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout android:orientation="vertical" android:background="@drawable/bg_white_background_rounded" android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+            <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/linearOptions" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/margin_15" android:weightSum="1.0" android:layout_centerHorizontal="true">
+                <TextView android:textSize="18.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:id="@id/tvTitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Confirmation" />
+                <ImageView android:id="@id/response_icon" android:visibility="gone" android:layout_width="50.0dip" android:layout_height="50.0dip" app:srcCompat="@drawable/animated_check" />
+            </LinearLayout>
+            <LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/linearOptions2" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/margin_10" android:layout_marginTop="@dimen/margin_20" android:layout_marginRight="@dimen/margin_10" android:layout_marginBottom="@dimen/margin_20" android:weightSum="1.0" android:layout_below="@id/linearOptions" android:layout_centerHorizontal="true">
+                <TextView android:textSize="16.0sp" android:textColor="@android:color/black" android:gravity="center_horizontal" android:layout_gravity="center_horizontal" android:id="@id/tvMessage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Are you sure you want to logout ? dasdasdasd" />
+                <ImageButton android:id="@id/copy" android:background="?selectableItemBackground" android:padding="8.0dip" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" app:srcCompat="@drawable/ic_content_copy" />
+            </LinearLayout>
+            <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="10.0dip" android:layout_marginBottom="10.0dip" android:layout_below="@id/linearOptions2">
+                <TextView android:textSize="16.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:id="@id/tvNo" android:background="?selectableItemBackgroundBorderless" android:clickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No" android:layout_toLeftOf="@id/tvYes" />
+                <TextView android:textSize="16.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:id="@id/tvYes" android:background="?selectableItemBackgroundBorderless" android:clickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="@dimen/margin_15" android:layout_marginRight="@dimen/margin_15" android:text="Yes" android:layout_alignParentRight="true" />
+            </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

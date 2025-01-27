@@ -1,0 +1,14 @@
+{% extends "../Event.html" %}
+{% block eventContent %}
+<p>
+        Batch Data:
+        {% for item in event.tlvItems %}
+        <ul class="tlv">
+            {% include "../TlvItem.html" %}
+        </ul>
+        {% endfor %}
+    </p>
+    <p><em>Scheme ID :</em> <span class="code">{{ event.schemeId }}</span></p>
+    <p><em>Response Code:</em> <span class="code">{{ event.status }}</span></p>
+    <p><em>Date :</em> <span class="code">{{ event.transactionDate }}</span></p>
+{% endblock %}

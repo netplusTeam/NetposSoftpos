@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/dialog_fragment_zenith_mcc_0" android:padding="@dimen/dimen_16dp" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.appcompat.widget.SearchView android:id="@id/search" android:background="@drawable/services_edittext_background" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layout_constraintTop_toTopOf="parent" />
+    <ProgressBar android:id="@id/progress_horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="@dimen/dimen_8dp" android:indeterminate="true" app:layout_constraintTop_toBottomOf="@id/search" style="@style/Widget.AppCompat.ProgressBar.Horizontal" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/mcc_list" android:layout_width="fill_parent" android:layout_height="wrap_content" app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" app:layout_constraintTop_toBottomOf="@id/progress_horizontal" />
+    <ProgressBar android:id="@id/loading_more" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

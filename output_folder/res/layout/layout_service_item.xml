@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/layout_service_item_0" android:paddingBottom="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="@dimen/dimen_8dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView android:id="@id/service_icon_card" android:paddingBottom="16.0dip" android:focusable="true" android:clickable="true" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_margin="@dimen/dimen_8dp" android:foreground="?selectableItemBackground" app:cardCornerRadius="4.0dip" app:cardElevation="@dimen/dimen_5dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <ImageView android:layout_gravity="center" android:id="@id/service_icon" android:layout_width="50.0dip" android:layout_height="100.0dip" android:layout_margin="16.0dip" android:src="@drawable/ic_loop" android:contentDescription="@string/service_item" />
+    </androidx.cardview.widget.CardView>
+    <TextView android:textSize="12.0sp" android:textStyle="bold" android:textColor="@android:color/black" android:gravity="center_horizontal" android:id="@id/service" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:textAllCaps="true" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/service_icon_card" />
+</androidx.constraintlayout.widget.ConstraintLayout>

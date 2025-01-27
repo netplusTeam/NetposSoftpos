@@ -47,6 +47,7 @@ android {
         def environmentPath
         if (appModeProd == "true") environmentPath = appProperties["env.path.production"] else environmentPath = appProperties["env.path.staging"]
         buildConfigField "Boolean", "APPMODE_PROD", appModeProd
+
     }
 
     dataBinding {
@@ -185,6 +186,8 @@ android {
         exclude 'META-INF/INDEX.LIST'
         exclude 'META-INF/io.netty.versions.properties'
         exclude 'META-INF/DEPENDENCIES'
+        exclude '**/google-services/**/values.xml'
+        exclude 'google-services.json'
     }
     kotlinOptions {
         jvmTarget = "1.8"

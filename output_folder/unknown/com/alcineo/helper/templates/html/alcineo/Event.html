@@ -1,0 +1,7 @@
+<div class="event-row">
+    <div class="event-content">
+        <h2><div class="event-date">{{ event.date | date("HH:mm:ss.SS") }}</div>{{ event.type }}</h2>
+        {% block eventContent %}
+        {% endblock %}
+    </div>
+</div>

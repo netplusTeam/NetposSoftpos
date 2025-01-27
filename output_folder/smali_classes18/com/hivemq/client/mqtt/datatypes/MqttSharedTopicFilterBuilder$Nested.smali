@@ -1,0 +1,40 @@
+.class public interface abstract Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested;
+.super Ljava/lang/Object;
+.source "MqttSharedTopicFilterBuilder.java"
+
+# interfaces
+.implements Lcom/hivemq/client/mqtt/datatypes/MqttTopicFilterBuilderBase$SharedBase;
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x609
+    name = "Nested"
+.end annotation
+
+.annotation system Ldalvik/annotation/MemberClasses;
+    value = {
+        Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested$End;,
+        Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested$Complete;
+    }
+.end annotation
+
+.annotation system Ldalvik/annotation/Signature;
+    value = {
+        "<P:",
+        "Ljava/lang/Object;",
+        ">",
+        "Ljava/lang/Object;",
+        "Lcom/hivemq/client/mqtt/datatypes/MqttTopicFilterBuilderBase$SharedBase<",
+        "Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested<",
+        "TP;>;",
+        "Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested$Complete<",
+        "TP;>;",
+        "Lcom/hivemq/client/mqtt/datatypes/MqttSharedTopicFilterBuilder$Nested$End<",
+        "TP;>;>;"
+    }
+.end annotation

@@ -109,3 +109,8 @@
 
 # These classes are duplicated between android.jar and core-lambda-stubs.jar.
 -dontnote java.lang.invoke.**
+
+# Obfuscate Firebase-related classes
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
