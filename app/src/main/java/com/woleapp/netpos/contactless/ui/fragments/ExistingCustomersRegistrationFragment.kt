@@ -107,7 +107,10 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                     }.show()
             }
         } else {
-            binding.checkboxLayout.visibility = View.VISIBLE
+            if (BuildConfig.FLAVOR.contains("providuspos"))
+                {
+                    binding.checkboxLayout.visibility = View.VISIBLE
+                }
         }
 
         viewModel.registerMessage.observe(viewLifecycleOwner) {
