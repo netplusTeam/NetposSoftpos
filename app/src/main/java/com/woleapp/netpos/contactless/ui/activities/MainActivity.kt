@@ -146,14 +146,11 @@ class MainActivity :
     private var mNfcAdapter: NfcAdapter? = null
     var context: Context? = null
     private var isVisa: Boolean = false
-    private lateinit var aid: String
 
     // Add a flag to control processing
     private var isProcessing = false
 
-    // Track the last processed time for each AID
-    private val lastProcessedAidTime = mutableMapOf<String, Long>()
-    private val aidDelayMillis = 5000L // 5 seconds delay
+    private var nfcEnabled = false
 
     override fun onStart() {
         super.onStart()
@@ -173,15 +170,9 @@ class MainActivity :
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                AlertDialog.Builder(this).setTitle("NFC Message")
-                    .setMessage("NFC is not enabled, goto device settings to enable")
-                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
-                        dialog.dismiss()
-                        startActivityForResult(
-                            Intent(android.provider.Settings.ACTION_NFC_SETTINGS),
-                            0,
-                        )
-                    }.show()
+                nfcNotEnabledDialog()
+            } else {
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
             }
         } else {
             deviceNotSupportedAlertDialog.show()
@@ -313,6 +304,7 @@ class MainActivity :
 //        checkForAppUpdate()
         context = applicationContext
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        nfcEnabled = Prefs.getBoolean(PREF_NFC_ENABLED, false)
 
         window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE)
         val netPlusPayMid = Singletons.getNetPlusPayMid()
@@ -609,10 +601,14 @@ class MainActivity :
                     closeBtn.setOnClickListener {
                         receiptDialogBinding.telephone.text?.clear()
                         receiptAlertDialog.dismiss()
-                        enableNFCReader()
+                        if (nfcEnabled) {
+                            enableNFCReader()
+                        }
                     }
                     sendButton.setOnClickListener {
-                        enableNFCReader()
+                        if (nfcEnabled) {
+                            enableNFCReader()
+                        }
                         if (receiptDialogBinding.telephone.text.toString().length != 11) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -711,7 +707,9 @@ class MainActivity :
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
                     Log.d("OK_AH", "YEPP")
-                    enableNFCReader()
+                    if (nfcEnabled) {
+                        enableNFCReader()
+                    }
                     showCardDialog(
                         this,
                         this,
@@ -758,7 +756,9 @@ class MainActivity :
         notificationsLayout.setOnClickListener {
             showFragment(NotificationFragment(), getString(R.string.notification))
         }
-        enableNFCReader()
+        if (nfcEnabled) {
+            enableNFCReader()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -1003,6 +1003,27 @@ class MainActivity :
         Toast.makeText(this, "You need to enable NFC", Toast.LENGTH_SHORT).show()
         val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
         startActivity(intent)
+    }
+
+    private fun nfcNotEnabledDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                Prefs.putBoolean(PREF_NFC_ENABLED, false)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                AlertDialog.Builder(this).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        showWirelessSettings()
+                    }.show()
+            }
+            .show()
     }
 
     override fun onPause() {
@@ -1762,7 +1783,11 @@ class MainActivity :
 
     private fun enableNFCReader() {
         if (mNfcAdapter != null) {
-            if (!mNfcAdapter!!.isEnabled) showWirelessSettings()
+            if (!mNfcAdapter!!.isEnabled) {
+                nfcNotEnabledDialog()
+            } else {
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
+            }
             Log.d("NFC_ENABLEDOKK", mNfcAdapter!!.isEnabled.toString())
             val options = Bundle()
             // Work around for some broken Nfc firmware implementations that poll the card too fast

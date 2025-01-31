@@ -9,6 +9,7 @@ import android.nfc.NfcAdapter
 import android.nfc.NfcManager
 import android.nfc.Tag
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -45,15 +46,9 @@ class AuthenticationActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                AlertDialog.Builder(this).setTitle("NFC Message")
-                    .setMessage("NFC is not enabled, goto device settings to enable")
-                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
-                        dialog.dismiss()
-                        startActivityForResult(
-                            Intent(android.provider.Settings.ACTION_NFC_SETTINGS),
-                            0,
-                        )
-                    }.show()
+                nfcNotEnabledDialog()
+            } else {
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
             }
         }
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
@@ -100,6 +95,30 @@ class AuthenticationActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
                 .replace(R.id.auth_container, NewOrExistingFragment())
                 .commit()
         }
+    }
+
+    private fun nfcNotEnabledDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                Prefs.putBoolean(PREF_NFC_ENABLED, false)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                androidx.appcompat.app.AlertDialog.Builder(this).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+            .show()
     }
 
     private fun tokenValid(): Boolean {

@@ -110,6 +110,7 @@ class DashboardFragment : BaseFragment() {
     private var blueTitle: String? = null
     private var startTime = 0L
     private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
+    private var nfcEnabled = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -133,6 +134,7 @@ class DashboardFragment : BaseFragment() {
                 executePendingBindings()
             }
         loader = alertDialog(requireContext())
+        nfcEnabled = Prefs.getBoolean(PREF_NFC_ENABLED, false)
 
         printerErrorDialog =
             AlertDialog.Builder(requireContext()).apply {
@@ -262,7 +264,13 @@ class DashboardFragment : BaseFragment() {
             } else {
                 binding.priceTextbox.text = etPinEt.text
                 if (nfcAdapter != null) {
-                    viewModel.validateFieldForNFC()
+                    if (nfcAdapter?.isEnabled == true) {
+                        viewModel.validateFieldForNFC()
+                    } else {
+                        if (viewModel.validateFieldForBluetooth()) {
+                            initIntent()
+                        }
+                    }
                 } else {
                     if (viewModel.validateFieldForBluetooth()) {
                         initIntent()
@@ -357,15 +365,9 @@ class DashboardFragment : BaseFragment() {
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
-                    .setMessage("NFC is not enabled, goto device settings to enable")
-                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
-                        dialog.dismiss()
-                        startActivityForResult(
-                            Intent(Settings.ACTION_NFC_SETTINGS),
-                            0,
-                        )
-                    }.show()
+                if (nfcEnabled) {
+                    nfcNotEnabledDialog()
+                }
             }
         } else if (showNfcRequest == "0") {
             binding.requestADevice.visibility = View.VISIBLE
@@ -381,6 +383,29 @@ class DashboardFragment : BaseFragment() {
 
         progressDialog = ProgressDialog(requireContext())
         return binding.root
+    }
+
+    private fun nfcNotEnabledDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+            .show()
     }
 
     private fun sendPayload() {
