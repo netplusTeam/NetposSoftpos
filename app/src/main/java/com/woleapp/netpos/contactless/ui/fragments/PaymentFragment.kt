@@ -154,7 +154,7 @@ class PaymentFragment : BaseFragment() {
         }
     }
 
-    fun onDateSelected(
+    private fun onDateSelected(
         newStartDate: String,
         newEndDate: String,
     ) {
@@ -213,34 +213,6 @@ class PaymentFragment : BaseFragment() {
         return date.format(formatter)
     }
 
-    private fun loadMoreItems() {
-        loader.show()
-        observeServerResponse(
-            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, startDate, endDate, currentPage),
-            loader,
-            compositeDisposable,
-            ioScheduler,
-            mainThreadScheduler,
-        ) {
-            adapter = AllTransactionsAdapter(items, adapterListener)
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.adapter = adapter
-            val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
-            if (newItems != null) {
-                adapter.addData(newItems)
-            }
-
-            isLoading = false
-            currentPage++
-            // Check if we received less than the expected page size, marking it as the last page
-            if (newItems != null) {
-                if (newItems.size < PAGE_SIZE) {
-                    isLastPage = true
-                }
-            }
-        }
-    }
-
     private fun loadMoreTransactionTypeItems(resetData: Boolean = false) {
         if (resetData) {
             currentPage = 1
@@ -253,6 +225,9 @@ class PaymentFragment : BaseFragment() {
 
         isLoading = true
         loader.show()
+
+        items.clear()
+        adapter.notifyDataSetChanged()
 
         observeServerResponse(
             salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, startDate, endDate, currentPage),
@@ -268,7 +243,10 @@ class PaymentFragment : BaseFragment() {
             }
 
             if (!newItems.isNullOrEmpty()) {
+                binding.emptyLyt.visibility = View.GONE
                 items.addAll(newItems)
+            } else {
+                binding.emptyLyt.visibility = View.VISIBLE
             }
 
             // Notify adapter after data update
