@@ -53,6 +53,10 @@ android {
         enabled = true
     }
 
+    viewBinding{
+        enabled = true
+    }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.netpos_signing_config
