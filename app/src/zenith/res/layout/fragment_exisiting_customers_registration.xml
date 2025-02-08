@@ -392,6 +392,24 @@
                         android:textSize="15sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <LinearLayout
+                    android:id="@+id/checkbox_layout"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="@+id/confirm_password_field"
+                    app:layout_constraintStart_toStartOf="@+id/confirm_password_field"
+                    app:layout_constraintTop_toBottomOf="@+id/confirm_password_field">
+
+                    <CheckBox
+                        android:id="@+id/myCheckBox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorPrimary"
+                        android:text="By checking this box, you confirm your request for an NFC kit from." />
+
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/btn_submit"

@@ -26,6 +26,8 @@ interface NetPosTransactionsService {
         @Path("username") username: String,
         @Query("merchantId") merchantId: String,
         @Query("transactionType") transactionType: String,
+        @Query("startDate") startDate: String?,
+        @Query("endDate") endDate: String?,
         @Query("page") page: Int,
     ): Single<Response<AllTransactionsResponseDto>>
 }

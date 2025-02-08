@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -25,6 +26,10 @@ import com.woleapp.netpos.contactless.viewmodels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.Scheduler
 import io.reactivex.disposables.CompositeDisposable
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -44,7 +49,10 @@ class PaymentFragment : BaseFragment() {
     private var isLastPage = false
     private val PAGE_SIZE = 10
     private var selectedTransactionType = "all" // Default value
+    private var startDate: String? = null // Default value
+    private var endDate: String? = null // Default value
     private lateinit var adapterListener: TransactionClickListener // Default value
+    private var newItems: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>? = null // Default value
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
@@ -88,6 +96,11 @@ class PaymentFragment : BaseFragment() {
         // Load initial data
         recyclerView = binding.recyclerView
 
+        adapter = AllTransactionsAdapter(items, adapterListener)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.adapter = adapter
+        loadMoreTransactionTypeItems()
+
         val transactionTypeSpinner: Spinner = binding.transactionTypeSpinner
         transactionTypeSpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -111,8 +124,6 @@ class PaymentFragment : BaseFragment() {
                 }
             }
 
-        loadMoreItems()
-
         // Add scroll listener to load more data when reaching the end of the list
         recyclerView.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
@@ -131,100 +142,123 @@ class PaymentFragment : BaseFragment() {
                         if (visibleItemCount + firstVisibleItemPosition >= totalItemCount &&
                             firstVisibleItemPosition >= 0 && totalItemCount >= PAGE_SIZE
                         ) {
-                            loadMoreItems()
+                            loadMoreTransactionTypeItems()
                         }
                     }
                 }
             },
         )
-    }
 
-    private fun loadMoreItems() {
-        loader.show()
-        observeServerResponse(
-            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, currentPage),
-            loader,
-            compositeDisposable,
-            ioScheduler,
-            mainThreadScheduler,
-        ) {
-            adapter = AllTransactionsAdapter(items, adapterListener)
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.adapter = adapter
-            val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
-            if (newItems != null) {
-                adapter.addData(newItems)
-            }
-
-            isLoading = false
-            currentPage++
-            // Check if we received less than the expected page size, marking it as the last page
-            if (newItems != null) {
-                if (newItems.size < PAGE_SIZE) {
-                    isLastPage = true
-                }
-            }
+        binding.showDate.setOnClickListener {
+            showCalendarDialog()
         }
     }
 
-    private fun loadMoreTransactionTypeItems() {
+    private fun onDateSelected(
+        newStartDate: String,
+        newEndDate: String,
+    ) {
+        startDate = newStartDate
+        endDate = newEndDate
+        loadMoreTransactionTypeItems(resetData = true)
+    }
+
+    private fun showCalendarDialog() {
+        val calendar = Calendar.getInstance()
+
+        // Show a message or dialog title for the start date selection
+        DatePickerDialog(
+            requireContext(),
+            { _, startYear, startMonth, startDay ->
+                val startCalendar = Calendar.getInstance().apply { set(startYear, startMonth, startDay) }
+
+                // Show a message or dialog title for the end date selection
+                DatePickerDialog(
+                    requireContext(),
+                    { _, endYear, endMonth, endDay ->
+                        val endCalendar = Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
+
+                        // Convert dates
+                        startDate = convertCalToDate(startCalendar.timeInMillis)
+                        endDate = convertCalToDate(endCalendar.timeInMillis)
+
+                        // Reset the transaction data before making a new request
+                        newItems = null
+                        isLastPage = false
+                        currentPage = 1
+                        adapter.clearData()
+
+                        startDate?.let { endDate?.let { it1 -> onDateSelected(it, it1) } }
+                    },
+                    calendar.get(Calendar.YEAR),
+                    calendar.get(Calendar.MONTH),
+                    calendar.get(Calendar.DAY_OF_MONTH),
+                ).apply {
+                    setTitle("Select End Date")
+                }.show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH),
+        ).apply {
+            setTitle("Select Start Date")
+        }.show()
+    }
+
+    private fun convertCalToDate(timeInMilli: Long): String? {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+        val date = Instant.ofEpochMilli(timeInMilli).atZone(ZoneId.of("UTC")).toLocalDate()
+
+        return date.format(formatter)
+    }
+
+    private fun loadMoreTransactionTypeItems(resetData: Boolean = false) {
+        if (resetData) {
+            currentPage = 1
+            isLastPage = false
+            items.clear()
+            adapter.notifyDataSetChanged()
+        }
+
+        if (isLastPage) return
+
         isLoading = true
         loader.show()
+
+        items.clear()
+        adapter.notifyDataSetChanged()
+
         observeServerResponse(
-            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, currentPage),
+            salesViewModel.getPaymentTransactions(username, merchantId, selectedTransactionType, startDate, endDate, currentPage),
             loader,
             compositeDisposable,
             ioScheduler,
             mainThreadScheduler,
         ) {
-            adapter = AllTransactionsAdapter(items, adapterListener)
-            adapter.clearData()
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
-            recyclerView.adapter = adapter
             val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
-            if (newItems != null) {
-                adapter.addData(newItems)
+
+            if (resetData) {
+                items.clear()
             }
+
+            if (!newItems.isNullOrEmpty()) {
+                binding.emptyLyt.visibility = View.GONE
+                items.addAll(newItems)
+            } else {
+                binding.emptyLyt.visibility = View.VISIBLE
+            }
+
+            // Notify adapter after data update
+            adapter.notifyDataSetChanged()
 
             isLoading = false
             currentPage++
-            // Check if we received less than the expected page size, marking it as the last page
-            if (newItems != null) {
-                if (newItems.size < PAGE_SIZE) {
-                    isLastPage = true
-                }
+
+            if (newItems.isNullOrEmpty() || newItems.size < PAGE_SIZE) {
+                isLastPage = true
             }
         }
-
-        // {
-        //     val newItems = salesViewModel.paymentTransactionsResponse.value?.data?.data?.transactions
-//
-//            if (selectedTransactionType != "all") {
-//                adapter = AllTransactionsAdapter(items, adapterListener)
-//                recyclerView.layoutManager = LinearLayoutManager(requireContext())
-//                recyclerView.adapter = adapter
-//                adapter.clearData()
-//
-//                isLoading = false
-//                currentPage++
-//                if (newItems == null || newItems.size < PAGE_SIZE) {
-//                    isLastPage = true
-//                }
-//            } else {
-//                adapter = AllTransactionsAdapter(items, adapterListener)
-//                recyclerView.layoutManager = LinearLayoutManager(requireContext())
-//                recyclerView.adapter = adapter
-//                if (newItems != null && newItems.isNotEmpty()) {
-//                    adapter.addData(newItems)
-//                }
-//
-//                isLoading = false
-//                currentPage++
-//                if (newItems == null || newItems.size < PAGE_SIZE) {
-//                    isLastPage = true
-//                }
-//            }
-//        }
     }
 
     private val transactionTypeMap =

@@ -205,11 +205,15 @@ class SalesViewModel
             username: String,
             merchantId: String,
             transactionType: String,
+            startDate: String?,
+            endDate: String?,
             page: Int,
         ) = netposTransactionApiService.getPaymentTransactions(
             username,
             merchantId,
             transactionType,
+            startDate,
+            endDate,
             page,
         ).flatMap {
             if (it.isSuccessful) {

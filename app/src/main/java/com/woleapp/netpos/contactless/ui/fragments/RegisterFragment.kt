@@ -149,7 +149,10 @@ class RegisterFragment : BaseFragment() {
                     }.show()
             }
         } else {
-            binding.checkboxLayout.visibility = View.VISIBLE
+            if (BuildConfig.FLAVOR.contains("providuspos"))
+                {
+                    binding.checkboxLayout.visibility = View.VISIBLE
+                }
         }
 
         if (BuildConfig.FLAVOR.contains("zenith")) {

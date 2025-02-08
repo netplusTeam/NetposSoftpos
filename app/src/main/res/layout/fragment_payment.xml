@@ -12,6 +12,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select date"
+            android:layout_margin="@dimen/margin_10"
+            app:layout_constraintBottom_toBottomOf="@+id/show_date"
+            app:layout_constraintEnd_toStartOf="@+id/show_date"
+            app:layout_constraintTop_toTopOf="@+id/show_date" />
+        <ImageView
+            android:id="@+id/show_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_10"
+            android:src="@drawable/baseline_calendar_month_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <Spinner
             android:id="@+id/transactionTypeSpinner"
             android:layout_width="match_parent"
@@ -20,7 +37,7 @@
             android:entries="@array/transaction_types"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/show_date" />
 
 
         <androidx.recyclerview.widget.RecyclerView
@@ -35,5 +52,21 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/transactionTypeSpinner" />
+
+        <TextView
+            android:id="@+id/empty_lyt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            android:textAlignment="center"
+            android:visibility="gone"
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/transactionTypeSpinner" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
