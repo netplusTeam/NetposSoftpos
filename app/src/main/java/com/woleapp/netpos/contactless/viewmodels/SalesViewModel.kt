@@ -96,6 +96,8 @@ class SalesViewModel
         private val _finish = MutableLiveData<Event<Boolean>>()
         private val _showPrinterError = MutableLiveData<Event<String>>()
 
+        val showProgressDialog = MutableLiveData<Boolean>()
+
         val showPrinterError: LiveData<Event<String>>
             get() = _showPrinterError
 
@@ -253,10 +255,12 @@ class SalesViewModel
 
         fun setTransactionStateToStarted() {
             transactionState.value = STATE_PAYMENT_STARTED
+            showProgressDialog.postValue(true) // Show progress dialog
         }
 
         fun setTransactionStateToStandBy() {
             transactionState.value = STATE_PAYMENT_STAND_BY
+            showProgressDialog.postValue(false)
         }
 
         fun makePayment(
@@ -264,10 +268,12 @@ class SalesViewModel
             transactionType: TransactionType = TransactionType.PURCHASE,
         ) {
             Timber.e(cardData.toString())
+            showProgressDialog.postValue(true)
             val configData =
                 NetPosTerminalConfig.getConfigData() ?: kotlin.run {
                     _message.value =
                         Event("Terminal has not been configured, restart the application to configure")
+                    showProgressDialog.postValue(false)
                     return
                 }
             val keyHolder = NetPosTerminalConfig.getKeyHolder()!!
@@ -412,6 +418,7 @@ class SalesViewModel
                     .insertNewTransaction(it)
             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).doFinally {
                 transactionState.value = STATE_PAYMENT_STAND_BY
+                showProgressDialog.postValue(false)
             }.subscribe { t1, throwable ->
                 t1?.let {}
                 throwable?.let {

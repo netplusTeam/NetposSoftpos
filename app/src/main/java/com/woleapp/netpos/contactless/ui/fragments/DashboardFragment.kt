@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -382,6 +383,16 @@ class DashboardFragment : BaseFragment() {
         }
 
         progressDialog = ProgressDialog(requireContext())
+
+        // Observe the progress dialog state
+        viewModel.showProgressDialog.observe(viewLifecycleOwner) { show ->
+            if (show) {
+                showProgressDialog()
+            } else {
+                hideProgressDialog()
+            }
+        }
+
         return binding.root
     }
 
@@ -709,7 +720,10 @@ class DashboardFragment : BaseFragment() {
 //                    Log.d("BATTERY_LEVEL1", "$batteryPercentage")
 //                }
 //        }
-//        Log.d("BATTERY_LEVEL", "$batteryPercentage")
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryPercent ->
+            Log.d("BATTERY_LEVEL", "$batteryPercent")
+        }
     }
 
     private fun deviceType(type: Int) {
@@ -894,5 +908,18 @@ class DashboardFragment : BaseFragment() {
         btn7Tv.text = integerList[7]
         btn8Tv.text = integerList[8]
         btn9Tv.text = integerList[9]
+    }
+
+    private fun showProgressDialog() {
+        progressDialog =
+            ProgressDialog(requireContext()).apply {
+                setMessage("Processing payment, please wait...")
+                setCancelable(false)
+                show()
+            }
+    }
+
+    private fun hideProgressDialog() {
+        progressDialog?.dismiss()
     }
 }
