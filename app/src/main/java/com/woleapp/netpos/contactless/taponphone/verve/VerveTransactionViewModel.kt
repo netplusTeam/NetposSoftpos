@@ -66,6 +66,8 @@ class VerveTransactionViewModel(
      */
     fun startTransaction(viewLifecycleOwner: LifecycleOwner) {
         try {
+            Log.e(TAG, "startTransaction: $transactionParameters", )
+            
             TransactionAPI.startTransaction(
                 transactionParameters,
                 nfcListener, this@VerveTransactionViewModel, viewLifecycleOwner

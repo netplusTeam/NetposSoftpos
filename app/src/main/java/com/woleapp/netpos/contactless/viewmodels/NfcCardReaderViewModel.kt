@@ -160,6 +160,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
 
     fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto) {
+        println("Do verve transaction")
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
@@ -413,6 +414,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
     }
 
     fun doCr100Transaction(data:BtCardInfo) {
+        println("Do CR 100 Transactions.......$data")
         val (pan, track2, icc, cardType) = data
 
         iccCardHelper = ICCCardHelper()
@@ -476,6 +478,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun doMasterCardTransaction() {
+        println("Do master transaction")
         NetPosApp.INSTANCE.outcomeObserver.resetObserver(object :
             TransactionListener {
             override fun onTransactionSuccessful() {

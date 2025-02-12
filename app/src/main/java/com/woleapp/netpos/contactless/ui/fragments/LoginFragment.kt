@@ -321,16 +321,16 @@ class LoginFragment : BaseFragment() {
         }
 
         if (BuildConfig.FLAVOR.contains("providuspos")) {
-            binding.privacyPolicy.setOnClickListener {
-                val url = "https://www.providusbank.com/privacy-policy"
-                // Create an intent to open the URL
-                val intent =
-                    Intent(Intent.ACTION_VIEW).apply {
-                        data = Uri.parse(url)
-                    }
-                // Start the activity
-                startActivity(intent)
-            }
+//            binding.privacyPolicy.setOnClickListener {
+//                val url = "https://www.providusbank.com/privacy-policy"
+//                // Create an intent to open the URL
+//                val intent =
+//                    Intent(Intent.ACTION_VIEW).apply {
+//                        data = Uri.parse(url)
+//                    }
+//                // Start the activity
+//                startActivity(intent)
+//            }
         }
     }
 

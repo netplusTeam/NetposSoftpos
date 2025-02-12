@@ -169,6 +169,8 @@ class SalesViewModel
             val expirationMonth = expiry.takeLast(2)
             val expirationYear = expiry.take(2)
             val formattedExpirationDate = "$expirationMonth/$expirationYear"
+
+            Log.e("Test", "payThroughMPGS: $cardNumber......$cvv........$expiry......$netpluspayMid......$cardPin", )
             contactlessQrPaymentRepository.payThroughMPGS(
                 BEARER_TOKEN_FOR_MPGS_TRANSACTION,
                 amountDbl.toString(),

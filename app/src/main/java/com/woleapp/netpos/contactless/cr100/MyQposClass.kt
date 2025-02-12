@@ -29,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Hashtable
@@ -47,6 +48,8 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
     override fun onDoTradeResult(result: QPOSService.DoTradeResult?, decodeData: Hashtable<String, String>?) {
+        Timber.tag("Transactions").e("onDoTradeResult: $result........decode.....$decodeData")
+
 
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
 
@@ -88,7 +91,14 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 }
             }
         } else {
-            hideDialogAndShowToast(result)
+            Log.e("TAG", "onDoTradeResult: $result", )
+            if (result == QPOSService.DoTradeResult.ICC){
+                cr100Pos?.doEmvApp(QPOSService.EmvOption.START)
+            }else{
+                hideDialogAndShowToast(result)
+            }
+
+
         }
     }
 
@@ -111,6 +121,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
     override fun onRequestTransactionResult(transactionResult: QPOSService.TransactionResult?) {
+        Log.e("Transaction", "onRequestTransactionResult: ${transactionResult.toString()}", )
         var msg = ""
         when (transactionResult) {
             QPOSService.TransactionResult.APPROVED -> {}
@@ -160,6 +171,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onRequestNoQposDetected() {
     }
 
+
     @SuppressLint("MissingPermission")
     override fun onDeviceFound(device: BluetoothDevice?) {
         device?.let {
@@ -175,7 +187,9 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         }
     }
 
-    override fun onRequestBatchData(tlv: String?) {}
+    override fun onRequestBatchData(tlv: String?) {
+
+    }
 
     override fun onRequestTransactionLog(tlv: String?) {}
 
@@ -198,6 +212,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onRequestQposDisconnected() {}
 
     override fun onError(errorState: QPOSService.Error?) {
+        Log.e("Transaction Error", "onError: ${errorState.toString()}")
         hideDialogAndShowToast(errorState)
     }
 
@@ -205,7 +220,9 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onReturnServerCertResult(serverSignCert: String?, serverEncryptCert: String?) {}
 
-    override fun onReturnGetPinResult(result: Hashtable<String, String>?) {}
+    override fun onReturnGetPinResult(result: Hashtable<String, String>?) {
+        Log.e("QPOS", "onReturnGetPinResult: ", )
+    }
 
     override fun onReturnApduResult(arg0: Boolean, arg1: String?, arg2: Int) {}
 
@@ -225,7 +242,15 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onReturnCustomConfigResult(isSuccess: Boolean, result: String?) {}
 
-    override fun onRequestSetPin() {}
+    override fun onRequestSetPin() {
+        try{
+            cr100Pos?.setPinpad()
+        }catch (ex:Exception){
+            hideDialogAndShowToast("Unable to read the card, contact admin")
+            ex.printStackTrace()
+        }
+
+    }
 
     override fun onReturnSetMasterKeyResult(isSuccess: Boolean) {}
 

@@ -42,7 +42,7 @@ class NetPosApp : Application() {
             INSTANCE = instance
         }
     }
-
+//
     val terminalSdk: TerminalSdk = TerminalSdk.getInstance()
 
     override fun onCreate() {
@@ -57,8 +57,8 @@ class NetPosApp : Application() {
             .setUseDefaultSharedPreference(true)
             .build()
         initVisaLib()
-
-        //initialize verve sdk
+//
+//        //initialize verve sdk
         verveSoftPosInitializationObservable = VerveSoftPosInitialization(this)
     }
 

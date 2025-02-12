@@ -105,7 +105,7 @@ class MainActivity :
     private var progressDialog: ProgressDialog? = null
     private lateinit var alertDialog: AlertDialog
     private lateinit var binding: ActivityMainBinding
-    private lateinit var notificationsLayout: ConstraintLayout
+    //private lateinit var notificationsLayout: ConstraintLayout
     private lateinit var unreadNotificationsCountTv: TextView
     private lateinit var pdfView: LayoutPosReceiptPdfBinding
     private lateinit var qrPdfView: LayoutQrReceiptPdfBinding
@@ -351,13 +351,13 @@ class MainActivity :
                 Manifest.permission.BLUETOOTH, // Required for older Android versions
                 Manifest.permission.BLUETOOTH_ADMIN, // Required for managing Bluetooth
             ) || (
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    !EasyPermissions.hasPermissions(
-                        applicationContext,
-                        Manifest.permission.BLUETOOTH_SCAN, // Required for Android 12+
-                        Manifest.permission.BLUETOOTH_CONNECT, // Required for Android 12+
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                            !EasyPermissions.hasPermissions(
+                                applicationContext,
+                                Manifest.permission.BLUETOOTH_SCAN, // Required for Android 12+
+                                Manifest.permission.BLUETOOTH_CONNECT, // Required for Android 12+
+                            )
                     )
-            )
         ) {
             EasyPermissions.requestPermissions(
                 this,
@@ -753,9 +753,12 @@ class MainActivity :
         getIntentDataSentInFromFirebaseService()
         handlePdfReceiptPrinting()
         fetchUnreadNotifications()
-        notificationsLayout.setOnClickListener {
-            showFragment(NotificationFragment(), getString(R.string.notification))
-        }
+//        binding.dashboardHeader.notification.setOnClickListener {
+//
+//        }
+//        notificationsLayout.setOnClickListener {
+//            showFragment(NotificationFragment(), getString(R.string.notification))
+//        }
         if (nfcEnabled) {
             enableNFCReader()
         }
@@ -1602,8 +1605,8 @@ class MainActivity :
 
     private fun initViews() {
         with(binding) {
-            notificationsLayout = dashboardHeader.notification
-            unreadNotificationsCountTv = dashboardHeader.unreadNotifications
+           // notificationsLayout = dashboardHeader.notification
+           // unreadNotificationsCountTv = dashboardHeader.unreadNotifications
         }
     }
 
@@ -1611,10 +1614,10 @@ class MainActivity :
         notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
             unreadMessages?.let {
                 if (it.isEmpty()) {
-                    notificationsLayout.visibility = View.INVISIBLE
+                    //notificationsLayout.visibility = View.INVISIBLE
                 } else {
                     unreadNotificationsCountTv.text = it.size.toString()
-                    notificationsLayout.visibility = View.VISIBLE
+                   // notificationsLayout.visibility = View.VISIBLE
                 }
             }
         }
@@ -1751,9 +1754,9 @@ class MainActivity :
             supportFragmentManager,
         ) {
             scanQrViewModel.payByTransfer.value?.data?.user?.let {
-                binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
-                binding.dashboardHeader.merchantDetails.text = it.acctNumber
-                binding.dashboardHeader.bankName.text = it.bank
+               // binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
+               // binding.dashboardHeader.merchantDetails.text = it.acctNumber
+               // binding.dashboardHeader.bankName.text = it.bank
                 copyAccountNumber = it.acctNumber
                 Log.d("CHECK_ACCOUNT", it.acctNumber)
                 Prefs.putString(PREF_ACCOUNT_NUMBER, gson.toJson(it))
@@ -1762,6 +1765,7 @@ class MainActivity :
     }
 
     private fun setUpViewModelForVerve() {
+        println("Setup for verse")
         val transactionParameters = salesViewModel.setupTransactionForVerveSDK()
         mVerveTransactionViewModel =
             ViewModelProvider(
@@ -1771,6 +1775,7 @@ class MainActivity :
     }
 
     private fun setUpObserversForVerveTransaction() {
+        println("Setup for verse observe")
         mVerveTransactionViewModel.onTransactionFinishedEvent
             .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
                 viewModel.doVerveCardTransaction(transactionFullDataDto)

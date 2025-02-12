@@ -13,6 +13,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -264,7 +265,7 @@ class DashboardFragment : BaseFragment() {
             } else {
                 binding.priceTextbox.text = etPinEt.text
                 if (nfcAdapter != null) {
-                    if (nfcAdapter?.isEnabled == true) {
+                    if (nfcAdapter?.isEnabled == false) {  //change back to true
                         viewModel.validateFieldForNFC()
                     } else {
                         if (viewModel.validateFieldForBluetooth()) {
@@ -300,9 +301,12 @@ class DashboardFragment : BaseFragment() {
         user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
+            Log.e("Error", "onCreateView: >>>>>>>>>>>>>>>>>>>>>>>>", )
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
                     Timber.e(error)
+                    Log.e("Error", "onCreateView: >>>>>>>>>>>>>>>>>>>>>>>> $error", )
+
                     Toast.makeText(
                         requireContext(),
                         error.message,
@@ -318,11 +322,13 @@ class DashboardFragment : BaseFragment() {
                         EnterCvvNumberDialog(
                             object : PinPadDialogListener {
                                 override fun onError(errorMessage: String) {
+                                    Log.e("Test", "onError: $errorMessage", )
                                     showToast(errorMessage)
                                     return
                                 }
 
                                 override fun onConfirm(data: String) {
+                                    println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$data")
                                     viewModel.setTransactionStateToStarted()
                                     viewModel.payThroughMPGS(
                                         card.pan,
@@ -737,6 +743,8 @@ class DashboardFragment : BaseFragment() {
         bluetoothAdapter.notifyDataSetChanged()
     }
 
+
+
 //    private fun initIntent() {
 //        scanBlue()
 //        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
@@ -784,6 +792,7 @@ class DashboardFragment : BaseFragment() {
             }
 
             val keyIndex: Int = getBluetoothKeyIndex()
+
             cr100Pos?.doTrade(keyIndex, 60)
         } else {
             Prefs.getString(BLUETOOTH_TITLE, null)?.let {
@@ -815,17 +824,6 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
-//    private fun onBTPosSelected(itemData: Map<String?, *>) {
-//        cr100Pos?.stopScanQPos2Mode()
-//        startTime = System.currentTimeMillis()
-//        blueToothAddress = itemData["ADDRESS"]!! as String
-//        blueTitle = itemData["TITLE"] as String?
-//        blueTitle =
-//            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
-//                ?.get(0)
-//        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
-//        blueTitle?.let { listener.setBlueTitle(it) }
-//    }
 
     private fun onBTPosSelected(itemData: Map<String?, *>) {
         cr100Pos?.stopScanQPos2Mode()
@@ -843,6 +841,20 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
+
+
+//    private fun onBTPosSelected(itemData: Map<String?, *>) {
+//        cr100Pos?.stopScanQPos2Mode()
+//        startTime = System.currentTimeMillis()
+//        blueToothAddress = itemData["ADDRESS"]!! as String
+//        blueTitle = itemData["TITLE"] as String?
+//        blueTitle =
+//            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+//                ?.get(0)
+//        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
+//        blueTitle?.let { listener.setBlueTitle(it) }
+//    }
+
     private fun refreshAdapter() {
         bluetoothAdapter.clearData()
         val data = java.util.ArrayList<Map<String, *>>()
@@ -857,11 +869,17 @@ class DashboardFragment : BaseFragment() {
         super.onDestroy()
 
         if (cr100Pos != null) {
-            listener.cleanup()
-            cr100Pos!!.cancelTrade()
-            cr100Pos!!.disconnectBT()
+            try {
+                listener.cleanup()
+                cr100Pos?.cancelTrade()
+                cr100Pos?.disconnectBT()
+            }catch (ex:Exception){
+                ex.printStackTrace()
+            }
+
         }
     }
+
 
     private fun initViews() {
         with(binding) {
