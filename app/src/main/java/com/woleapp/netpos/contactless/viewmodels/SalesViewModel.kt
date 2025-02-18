@@ -383,6 +383,8 @@ class SalesViewModel
             rrn: String,
             stan: String,
         ) {
+            println("RequestData......$requestData")
+
             val modifiedRequestData =
                 requestData.apply {
                     this.RRN = rrn

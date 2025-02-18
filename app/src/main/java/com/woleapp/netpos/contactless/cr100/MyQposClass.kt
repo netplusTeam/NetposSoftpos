@@ -79,9 +79,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         decodeData: Hashtable<String, String>?
     ) {
         Log.d("MyQposClass", "onDoTradeResult called with result: $result, decodeData: $decodeData")
-        println("Reading the card, to fected Data>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$result......$decodeData")
-
-
 
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
             _requestPinFlow.value = _requestPinFlow.value.copy(cardType = CardChannel.Contactless)
@@ -371,7 +368,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
 
         }
- cr100Pos?.sendOnlineProcessResult(tlv)
+ //cr100Pos?.sendOnlineProcessResult(tlv)
 
     }
 
@@ -453,11 +450,13 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     override fun onRequestSetPin() {
 
         try {
+            println("Set pin..")
             cr100Pos?.setPinpad()
         }catch (ex:Exception){
+            println("Error.......${ex.message.toString()}")
             _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = true, cardType = CardChannel.Contact)
             isDipContact = true
-            ex.printStackTrace()
+            //ex.printStackTrace()
         }
 
 

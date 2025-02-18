@@ -15,18 +15,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
-import com.danbamitale.epmslib.utils.TripleDES
 import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.Util
 import com.dspread.xpos.Util.HexStringToByteArray
 import com.dspread.xpos.utils.AESUtil
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp
-import com.woleapp.netpos.contactless.util.Singletons
 import com.woleapp.netpos.contactless.util.UtilityParam
-import timber.log.Timber
-import java.util.*
-import kotlin.collections.HashMap
+import java.util.Hashtable
+import java.util.Random
 
 class PasswordDialog3(
     context: Activity,
@@ -82,8 +79,6 @@ class PasswordDialog3(
 
     }
 
-    protected var DEFAULT_EXP_PIN_LEN_IND = "0,4,5,6,7,8,9,10,11,12"
-    protected var DEFAULT_TIMEOUT_MS = 30000
 
     private var handler: Handler? = null
     private var tpkIndex: Int = 0

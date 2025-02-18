@@ -466,15 +466,17 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             cardScheme = cardType!!.cardScheme
             customerName = "CUSTOMER"
         }
+        _showAccountTypeDialog.postValue(Event(true))
         val cardData = CardData(
             track2?:"",
-            "",
+            icc,
             pan?:"",
             "051"
         )
         iccCardHelper.cardData = cardData
-        _showAccountTypeDialog.postValue(Event(true))
+
         hideBluetoothDialog()
+        //listener.resetCardInfoFlow()
     }
 
 

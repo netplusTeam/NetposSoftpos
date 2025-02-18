@@ -344,6 +344,7 @@ class DashboardFragment : BaseFragment() {
                             },
                         ).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
                     } else {
+                        println("TransactionType.......$transactionType")
                         viewModel.makePayment(requireContext(), transactionType)
                     }
                 }
@@ -759,8 +760,15 @@ class DashboardFragment : BaseFragment() {
                 if (result.btCardInfo != null) {
                     nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                 }
-                hideBluetoothDialog()
-                listener.resetCardInfoFlow()
+                //hideBluetoothDialog()
+                //listener.resetCardInfoFlow()
+
+            }else{
+                if (result.cardType == CardChannel.Contact){
+                    if (result.btCardInfo != null) {
+                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                    }
+                }
 
             }
         }
