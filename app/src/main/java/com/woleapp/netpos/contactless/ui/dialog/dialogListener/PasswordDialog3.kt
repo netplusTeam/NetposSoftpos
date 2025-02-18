@@ -80,24 +80,6 @@ class PasswordDialog3(
             return AESUtil.encrypt(aesKey, xorResult)
         }
 
-//        private fun encodePinBlock(pin: String, pan: String): String {
-//            Timber.e(pan)
-//            val pinP = "0" + pin.length + pin + "FFFFFFFFFF"
-//            val cardNum: String = if (pan.length > 16) {
-//                // for cards with 19 pan digits n make it fit into the standard 16-digit field expected by the format 0 PIN block structure.
-//                "0000" + pan.substring(6, 18)
-//            } else {
-//                "0000" + pan.substring(3, 15)
-//            }
-//
-//            // System.out.println(Util.BytesToString(HexDump.hexStringToByteArray("0425A8EF8B7A6E66")));
-//            val pinblock = pinP xorHex cardNum
-//            // System.out.println(ExtensionFunctionsKt.xorHex(pin, cardNum));
-//            System.out.println(pinblock)
-//            // System.out.println(TripleDES.encrypt(pinblock, pinKey));
-//            val keyHolder = Singletons.INSTANCE.keyHolder
-//            return TripleDES.encrypt(pinblock, keyHolder.clearPinKey)
-//        }
     }
 
     protected var DEFAULT_EXP_PIN_LEN_IND = "0,4,5,6,7,8,9,10,11,12"
@@ -105,52 +87,33 @@ class PasswordDialog3(
 
     private var handler: Handler? = null
     private var tpkIndex: Int = 0
-    private var icSlot: Int = 0
-
-    private var isEncryptCard: Boolean = false
-    private var keyMode: Int = 0
-    private var pinCard: String? = null
-    private var pinByPass: Boolean = false
-    private var pinTryCnt: Int = 0
-    private var pinType: Int = 0
-    private var pinIccRandomData: ByteArray? = null
-    private var pinModData: ByteArray? = null
-    private var pinExpData: ByteArray? = null
-
     private var title: String? = null
     private var message: String? = null
 
     private var dialog: Dialog
-    private lateinit var tvTitle: TextView
-    private lateinit var tvMessage: TextView
-    private lateinit var etPin: EditText
-    private lateinit var btnConfirm: Button
-    private lateinit var btnClear: ImageView
-    private lateinit var btnEsc: TextView
-    private lateinit var btn0: TextView
-    private lateinit var btn1: TextView
-    private lateinit var btn2: TextView
-    private lateinit var btn3: TextView
-    private lateinit var btn4: TextView
-    private lateinit var btn5: TextView
-    private lateinit var btn6: TextView
-    private lateinit var btn7: TextView
-    private lateinit var btn8: TextView
-    private lateinit var btn9: TextView
-    private lateinit var groupKeyboard: Group
+    private var tvTitle: TextView
+    private var tvMessage: TextView
+    private var etPin: EditText
+    private var btnConfirm: Button
+    private var btnClear: ImageView
+    private var btnEsc: TextView
+    private var btn0: TextView
+    private var btn1: TextView
+    private var btn2: TextView
+    private var btn3: TextView
+    private var btn4: TextView
+    private var btn5: TextView
+    private var btn6: TextView
+    private var btn7: TextView
+    private var btn8: TextView
+    private var btn9: TextView
+    private var groupKeyboard: Group
 
-    //private var pan: String
 
     init {
-
         val qposService = NetPosApp.cr100Pos
-
         this.tpkIndex = tpkIndex
         title = "Enter PIN"
-
-        //this.pan = pan
-
-
         dialog = Dialog(context, android.R.style.Theme_Translucent_NoTitleBar)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
