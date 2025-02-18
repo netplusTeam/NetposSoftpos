@@ -396,6 +396,7 @@ class SalesViewModel
                 handleUpdateOfTransactionPayloadInBackend(it, rrn)
                 Single.just(it)
             }.flatMap {
+                println("Response......$it")
                 it.amount = amountLong
                 if (it.responseCode == "A3") {
                     Prefs.remove(PREF_CONFIG_DATA)

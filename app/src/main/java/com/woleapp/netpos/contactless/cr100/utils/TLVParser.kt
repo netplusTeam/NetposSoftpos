@@ -76,19 +76,21 @@ object TLVParser {
         return tlvList
     }
 
-    fun getTlvC0AndC2FromNfcBatch(tlvList: List<TLV>): Pair<TLV?, TLV?> {
+    fun getTlvC0AndC2FromNfcBatch(tlvList: List<TLV>): Triple<TLV?, TLV?, TLV?> {
         var tlvC0: TLV? = null
         var tlvC2: TLV? = null
+        var tlv57: TLV? = null
 
         for (tlv in tlvList) {
             println("Data.....$tlv")
             when (tlv.tag) {
                 "c0" -> tlvC0 = tlv
                 "c2" -> tlvC2 = tlv
+                "57" -> tlv57 = tlv
             }
         }
 
-        return Pair(tlvC0, tlvC2)
+        return Triple(tlvC0, tlvC2, tlv57)
     }
 
     fun extractPAN(track2Data: String): String {
@@ -136,6 +138,13 @@ object TLVParser {
         }
     }
 
+//    fun extractTrack2Data(decryptedIcc: String): String? {
+//        val track2Tag = "57"
+//        val track2Data = findTagValue(decryptedIcc, track2Tag) // Assuming findTagValue can infer the correct length
+//
+//        return track2Data.takeIf { it.isNotEmpty() }
+//    }
+//
     fun extractTrack2Data(decryptedIcc: String): String? {
         // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
         val track2Tag = "57"
@@ -143,11 +152,120 @@ object TLVParser {
         val track2Data = findTagValue(decryptedIcc, track2Tag, track2Length)
 
         if (track2Data.isNotEmpty()) {
-            return track2Data
+            val beforeD = track2Data.substringBefore("D").takeLast(16)
+            val afterD = track2Data.substringAfter("D")
+            val result = beforeD.plus("D").plus(afterD)
+           return result
         } else {
             return null
         }
     }
+
+//
+//    fun extractTrack2Data(decryptedIcc: String): String? {
+//        // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
+//        val track2Tag = "57"
+//        val track2Length = decryptedIcc.indexOf("5A", decryptedIcc.indexOf(track2Tag) + track2Tag.length) - (decryptedIcc.indexOf(track2Tag) + track2Tag.length)
+//        val track2Data = findTagValue(decryptedIcc, track2Tag, track2Length)
+//
+//        if (track2Data.isNotEmpty()) {
+//            val beforeD = track2Data.substringBefore("D")
+//            var resultBefore = ""
+//            if (beforeD.length<=18){
+//                resultBefore =  beforeD.takeLast(16)
+//            }
+//            if (beforeD.length>=19){
+//                resultBefore = beforeD.takeLast(19)
+//            }
+//
+//            val afterD = track2Data.substringAfter("D")
+//            val result = resultBefore.plus("D").plus(afterD)
+//            return result
+//        } else {
+//            return null
+//        }
+//    }
+
+//
+
+//
+//    fun extractTrack2Data(decryptedIcc: String): String? {
+//        val track2Tag = "57"
+//        val track2StartIndex = decryptedIcc.indexOf(track2Tag)
+//
+//        if (track2StartIndex == -1) return null
+//
+//        val nextTagIndex = decryptedIcc.indexOf("5A", track2StartIndex + track2Tag.length)
+//        val track2EndIndex = if (nextTagIndex != -1) nextTagIndex else decryptedIcc.length
+//
+//        val track2Data = findTagValue(decryptedIcc, track2Tag, track2EndIndex - (track2StartIndex + track2Tag.length))
+//
+//        return track2Data.takeIf { it.isNotEmpty() }?.let {
+//            it.substringBefore("D") + "D" + it.substringAfter("D")
+//        }
+//    }
+//
+
+
+
+
+
+//    fun extractTrack2Data(decryptedIcc: String): String? {
+//        val track2Tag = "57"
+//        val track2TagIndex = decryptedIcc.indexOf(track2Tag)
+//
+//        if (track2TagIndex == -1) {
+//            println("extractTrack2Data: Track 2 tag not found in ICC data.")
+//            return null
+//        }
+//
+//        val lengthStartIndex = track2TagIndex + track2Tag.length
+//        println("extractTrack2Data: lengthStartIndex = $lengthStartIndex")
+//
+//        if (lengthStartIndex >= decryptedIcc.length) {
+//            println("extractTrack2Data: No length data available after Track 2 tag.")
+//            return null
+//        }
+//
+//        // Check to prevent going beyond string length
+//        val lengthEndIndex = minOf(lengthStartIndex + 2, decryptedIcc.length)
+//        val track2LengthHex = decryptedIcc.substring(lengthStartIndex, lengthEndIndex)
+//
+//        println("extractTrack2Data: track2LengthHex = $track2LengthHex")
+//
+//        val track2Length = track2LengthHex.toIntOrNull(16)
+//        if (track2Length == null) {
+//            println("extractTrack2Data: Invalid hex value for Track 2 length: $track2LengthHex")
+//            return null
+//        }
+//        println("extractTrack2Data: track2Length = $track2Length")
+//
+//        val track2DataStartIndex = lengthStartIndex + 2
+//        println("extractTrack2Data: track2DataStartIndex = $track2DataStartIndex")
+//
+//        if (track2DataStartIndex + track2Length > decryptedIcc.length) {
+//            println("extractTrack2Data: Not enough data for Track 2 data. Declared length: $track2Length, Remaining data length: ${decryptedIcc.length - track2DataStartIndex}")
+//            return null
+//        }
+//
+//        // Check if Track2Data is null or empty
+//        val track2Data = try {
+//            decryptedIcc.substring(track2DataStartIndex, track2DataStartIndex + track2Length)
+//        } catch (e: StringIndexOutOfBoundsException) {
+//            println("Error extracting track 2 data: ${e.message}")
+//            return null
+//        }
+//
+//
+//        println("extractTrack2Data: track2Data = $track2Data")
+//
+//        if (track2Data.isNotEmpty()) {
+//            return track2Data
+//        } else {
+//            println("extractTrack2Data: Track 2 data is empty.")
+//            return null
+//        }
+//    }
 
     fun isValidLuhn(pan: String): Boolean {
         val digits = pan.reversed().filter { it.isDigit() }.map { it.toString().toInt() }
@@ -276,6 +394,21 @@ object TLVParser {
 //
 //        return null
 //    }
+//    fun extractPANFromTrack2(track2Data: String): String? {
+//        val delimiters = listOf("=", "D", ";") // Check for common delimiters
+//        var pan: String? = null
+//
+//        for (delimiter in delimiters) {
+//            if (track2Data.contains(delimiter)) {
+//                pan = track2Data.substringBefore(delimiter)
+//                break // Found a delimiter and extracted PAN
+//            }
+//        }
+//
+//        return pan?.takeIf { it.isNotEmpty() } // Return PAN or null if empty
+//    }
+
+
     fun extractPANFromTrack2(track2Data: String): String? {
         val delimiters = listOf("=", "D", ";") // Check for common delimiters
         var pan: String? = null
@@ -287,7 +420,15 @@ object TLVParser {
             }
         }
 
-        return pan?.takeIf { it.isNotEmpty() } // Return PAN or null if empty
+        // Take only the last 16 digits if the PAN is longer than 16 digits
+        return pan?.takeIf { it.isNotEmpty() }
+            ?.let {
+                if (it.length > 16) {
+                    it.takeLast(16)
+                } else {
+                    it
+                }
+            }
     }
 
 

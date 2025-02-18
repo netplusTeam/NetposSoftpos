@@ -469,7 +469,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         _showAccountTypeDialog.postValue(Event(true))
         val cardData = CardData(
             track2?:"",
-            icc,
+            "",
             pan?:"",
             "051"
         )

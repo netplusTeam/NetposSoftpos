@@ -336,7 +336,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
             customScope.launch {
                 delay(200)
-                val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
+                val (tagC0, tagC2, tagTrack) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
 
                 val decryptedIcc = getData(
                     tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
@@ -347,6 +347,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 val cardTypeAid = findTagValue(decryptedIcc)
                 println("TagValue.....${findTagValue(decryptedIcc)}")
 
+                val track2Value = tagTrack?.value
                 val track2 = extractTrack2Data(decryptedIcc) ?:""
                 val pan = extractPANFromDecryptedICC(decryptedIcc = decryptedIcc)?:""
                 val pan2 = extractPAN(track2)
@@ -355,7 +356,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
                 val cardType = getCardSchemeFromAid(cardTypeAid)
 
-                println("CardType: $cardType.. track...$track2..>>>>>$pan1..><<<<$pan2...pan..$pan...decrypted....$decryptedIcc")
+                println("CardType: $cardType.. track...$track2.********$track2Value.>>>>>$pan1..><<<<$pan2...pan..$pan...decrypted....$decryptedIcc")
 
                 _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = false, btCardInfo = BtCardInfo(
                     track2 = track2,
