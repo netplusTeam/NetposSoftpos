@@ -335,40 +335,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onRequestOnlineProcess(tlv: String?) {
         Log.d("MyQposClass", "onRequestOnlineProcess called with tlv: $tlv")
-        println("TLV......" + tlv)
-       // val decodeData: Hashtable<String, String>? = cr100Pos?.anlysEmvIccData(tlv)
-
-
-
         if (isDipContact){
-//            try {
-//
-//
-//                println("DecodedData.....$decodeData")
-//                val tlvValue = decodeData?.get("tlv")
-//                println("TLV...$tlvValue")
-//                val encTrack2 = decodeData!!["encTrack2"]
-//                val trackKsn = decodeData["trackksn"]
-//
-//                val clearPan: String = getData(
-//                    trackKsn,
-//                    encTrack2,
-//                    DUKPK2009CBC.Enum_key.DATA,
-//                    DUKPK2009CBC.Enum_mode.CBC,
-//                    context
-//                )
-//
-//                val panTrack2Pair = extractTrack2AndPanValues(clearPan)
-//                val (realPan, track2) = panTrack2Pair
-//                _requestPinFlow.value = _requestPinFlow.value.copy(btCardInfo = BtCardInfo(
-//                    realPan = realPan,
-//                    track2= track2
-//                ))
-//
-//            }catch (ex: Exception){
-//                ex.printStackTrace()
-//            }
-
 
             customScope.launch {
                 delay(200)
@@ -404,64 +371,8 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
 
         }
+ cr100Pos?.sendOnlineProcessResult(tlv)
 
-
-
-
-
-
-
-        cr100Pos?.sendOnlineProcessResult(tlv)
-
-//
-//
-//    val c2Data = getVTLDataFromData(tlvValue)
-//
-//        val clearPan: String =  DUKPK2009CBC.getData(ksnV = c2Data, datastrV = tlvValue,DUKPK2009CBC.Enum_key.DATA,
-//            DUKPK2009CBC.Enum_mode.CBC,
-//            context)
-//
-//
-//
-//        val panTrack2Pair = extractTrack2AndPanValues(clearPan)
-//        val (realPan, track2) = panTrack2Pair
-//
-//
-//        _cardInfoFlow.value = _cardInfoFlow.value.copy(realPan = realPan, track2 = track2)
-//
-
-//
-//        customScope.launch {
-//            delay(200)
-//
-//            if (!tlv.isNullOrEmpty()) {
-//
-//                val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlvValue!!)!!)
-//
-//                val decryptedIcc = getData(
-//                    tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
-//                    DUKPK2009CBC.Enum_mode.CBC, context
-//                )
-//
-//
-//                println("Decrypted Data.....$decryptedIcc")
-//                val cardTypeAid = findTagValue(decryptedIcc)
-//                val (realPan, track2) = extractPANandTrack2(tlvData = decryptedIcc)
-//
-//
-//                val cardType = getCardSchemeFromAid(cardTypeAid)
-//
-//                // Update the decryptedIcc and cardType in the StateFlow
-//                _cardInfoFlow.value = _cardInfoFlow.value.copy(
-//                    realPan = realPan?:"",
-//                    track2 = track2?:"",
-//                    decryptedIcc = decryptedIcc,
-//                    cardType = cardType,
-//                    cardChannel = CardChannel.Contact
-//                )
-//
-//            }
-//        }
     }
 
     override fun onRequestTime() {
