@@ -20,6 +20,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.*
@@ -38,9 +39,11 @@ import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.model.CardChannel
 import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
 import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
 import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
+import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
 import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
@@ -699,7 +702,48 @@ class DashboardFragment : BaseFragment() {
         val handler = Looper.myLooper()?.let { Handler(it) }
         cr100Pos!!.initListener(handler, listener)
 
+
+//
+//
+//        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+//        val requestPinLiveData = listener.requestPinFlow.asLiveData()
+//
+//// LiveData that emits only when cardInfo is invalid
+//        val invalidCardInfoLiveData = cardInfoLiveData.map { cardInfo ->
+//            cardInfo.takeIf { !it.isValid() }  // Emits only when invalid
+//        }
+//
+//// Observe cardInfoLiveData
+//        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+//            if (cardInfo.isValid()) {
+//                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+//                listener.resetCardInfoFlow()
+//            }
+//        }
+//
+//// Observe invalid card info and then handle requestPinLiveData
+//        invalidCardInfoLiveData.observe(viewLifecycleOwner) { invalidCard ->
+//            invalidCard?.let {
+//                requestPinLiveData.observe(viewLifecycleOwner) { result ->
+//                    println("Result......$result")
+//                    if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+//                        nfcCardReaderViewModel.showPin(pan = result.pan)
+//
+//                        if (result.btCardInfo != null) {
+//                            nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+//                        }
+//                        hideBluetoothDialog()
+//                        listener.resetCardInfoFlow()
+//                    }
+//                }
+//            }
+//        }
+
+
+
+
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+        val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
@@ -707,6 +751,50 @@ class DashboardFragment : BaseFragment() {
                 listener.resetCardInfoFlow()
             }
         }
+
+        requestPinLiveData.observe(viewLifecycleOwner) { result ->
+            println("Result........$result")
+            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+                nfcCardReaderViewModel.showPin(pan = result.pan)
+                if (result.btCardInfo != null) {
+                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                }
+                hideBluetoothDialog()
+                listener.resetCardInfoFlow()
+
+            }
+        }
+
+//
+
+//        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+//        val requestPinLiveData = listener.requestPinFlow.asLiveData()
+//
+//        requestPinLiveData.observe(viewLifecycleOwner){result->
+//            if (result.isPinSet == true && result.cardType == CardChannel.Contact){
+//                nfcCardReaderViewModel.showPin(pan = result.pan)
+//                hideBluetoothDialog()
+//            }
+//
+//        }
+//
+//        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+//            if (cardInfo.isValid()) {
+//                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+//                listener.resetCardInfoFlow()
+//            }else{
+//                requestPinLiveData.observe(viewLifecycleOwner){result->
+//                    if (result.isPinSet == true && result.cardType == CardChannel.Contact){
+//                        nfcCardReaderViewModel.showPin(pan = result.pan)
+//                        hideBluetoothDialog()
+//                    }
+//
+//                }
+//            }
+//        }
+//
+
+
 
 //        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
 //        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
@@ -863,6 +951,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun BtCardInfo.isValid(): Boolean {
         return realPan.isNotEmpty() && track2.isNotEmpty() && decryptedIcc.isNotEmpty() && cardType != null
+    }
+    private fun BtCardInfo.isValidDip(): Boolean {
+        return decryptedIcc.isNotEmpty() && cardType != null
     }
 
     override fun onDestroy() {

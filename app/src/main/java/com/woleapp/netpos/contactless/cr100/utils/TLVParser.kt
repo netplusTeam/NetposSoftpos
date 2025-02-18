@@ -1,6 +1,9 @@
 package com.woleapp.netpos.contactless.cr100.utils
 
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 
 object TLVParser {
@@ -78,6 +81,7 @@ object TLVParser {
         var tlvC2: TLV? = null
 
         for (tlv in tlvList) {
+            println("Data.....$tlv")
             when (tlv.tag) {
                 "c0" -> tlvC0 = tlv
                 "c2" -> tlvC2 = tlv
@@ -86,6 +90,25 @@ object TLVParser {
 
         return Pair(tlvC0, tlvC2)
     }
+
+    fun extractPAN(track2Data: String): String {
+        return track2Data.substringBefore("=") // Extract PAN before '='
+    }
+
+    fun decryptTripleDES(encryptedHex: String, keyHex: String): String {
+        val keyBytes = keyHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+        val secretKey = SecretKeySpec(keyBytes, "DESede")
+        val iv = ByteArray(8) // IV is 8 bytes of zeros for CBC mode
+
+        val cipher = Cipher.getInstance("DESede/CBC/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, IvParameterSpec(iv))
+
+        val encryptedBytes = encryptedHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+        val decryptedBytes = cipher.doFinal(encryptedBytes)
+
+        return decryptedBytes.joinToString("") { "%02X".format(it) }
+    }
+
 
     fun findTagValue(input: String, tag: String = "9F0607", lengthAfterTag: Int = 14): String {
         val tagIndex = input.indexOf(tag)
@@ -112,6 +135,174 @@ object TLVParser {
             else -> null
         }
     }
+
+    fun extractTrack2Data(decryptedIcc: String): String? {
+        // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
+        val track2Tag = "57"
+        val track2Length = decryptedIcc.indexOf("5A", decryptedIcc.indexOf(track2Tag) + track2Tag.length) - (decryptedIcc.indexOf(track2Tag) + track2Tag.length)
+        val track2Data = findTagValue(decryptedIcc, track2Tag, track2Length)
+
+        if (track2Data.isNotEmpty()) {
+            return track2Data
+        } else {
+            return null
+        }
+    }
+
+    fun isValidLuhn(pan: String): Boolean {
+        val digits = pan.reversed().filter { it.isDigit() }.map { it.toString().toInt() }
+
+        if (digits.size != pan.length) {
+            // Some non-digit characters were removed. The PAN might be invalid
+            // Log or handle this situation as appropriate
+            println("Warning: PAN contains non-digit characters. Luhn check might be unreliable.")
+        }
+
+        var sum = 0
+
+        for (i in digits.indices) {
+            var digit = digits[i]
+            if (i % 2 == 1) { // Double every second digit
+                digit *= 2
+                if (digit > 9) {
+                    digit -= 9
+                }
+            }
+            sum += digit
+        }
+
+        return sum % 10 == 0
+    }
+
+
+    fun extractPANFromDecryptedICC(decryptedIcc: String): String? {
+//        var pan:String = ""
+//        // Try Tag c4
+//        val panFromTagC4 = findTagValue(decryptedIcc, "c4", 16) // Length is 8 bytes, so 16 hex chars
+//
+//        if (panFromTagC4.isNotEmpty()) {
+//            // Remove the `ffffff` part from the PAN if exists, can be proprietary
+//            val cleanedPan = panFromTagC4.replace("f", "")
+//            // Convert from hex to ASCII
+//            val panAscii = hexToAscii(cleanedPan)
+//
+//            if (panAscii.all { it.isDigit() } && isValidLuhn(panAscii)) {
+//                pan = panAscii
+//            }
+//        }
+//        return pan
+////
+//        // If C4 fails or not found, try 5A then 57 etc. as before, adding checks for notEmpty along the way
+        val panFromTag5A = findTagValue(decryptedIcc, "5A", 40) // Max PAN Length is 19 digits (times 2 for hex chars)
+
+        if (panFromTag5A.isNotEmpty()) {
+            // Assuming PAN in Tag 5A is in Hex, convert to ASCII (if needed)
+            val panAscii = hexToAscii(panFromTag5A) // Implement hexToAscii function
+
+            if (panAscii.all { it.isDigit() } && isValidLuhn(panAscii)) {
+                return panAscii
+            } else{
+                return null
+            }
+        }
+
+        val track2Data = extractTrack2Data(decryptedIcc)
+        if (track2Data != null) {
+            return extractPANFromTrack2(track2Data) // Use your existing Track 2 parsing
+        }
+
+        return null
+    }
+//
+//    fun hexToAscii(hexString: String): String {
+//        val output = StringBuilder()
+//        var i = 0
+//        while (i < hexString.length) {
+//            val str = hexString.substring(i, i + 2)
+//            try {
+//                val decimal = str.toInt(16)
+//                output.append(decimal.toChar())
+//            } catch (e: NumberFormatException) {
+//                // Handle the case where the hex string is invalid
+//                println("Invalid hex character: $str")
+//                return "" // Or return null, or throw an exception
+//            }
+//
+//            i += 2
+//        }
+//        return output.toString()
+//    }
+//
+
+
+
+//
+//
+//    fun extractPANFromDecryptedICC(decryptedIcc: String): String? {
+//        // 1. Try Tag c4
+//        val panFromTagC4 = findTagValue(decryptedIcc, "c4", 16) // Length is 8 bytes, so 16 hex chars
+//
+//        if (panFromTagC4.isNotEmpty()) {
+//            // Remove the `ffffff` part from the PAN if exists, can be proprietary
+//            val cleanedPan = panFromTagC4.replace("f", "")
+//            // Convert from hex to ASCII
+//            val panAscii = hexToAscii(cleanedPan)
+//
+//            if (isValidLuhn(panAscii)) {
+//                return panAscii
+//            } else {
+//                return null
+//            }
+//        }
+//
+//        // If C4 fails or not found, try 5A then 57 etc. as before, adding checks for notEmpty along the way
+//        val panFromTag5A = findTagValue(decryptedIcc, "5A", 40) // Max PAN Length is 19 digits (times 2 for hex chars)
+//
+//        if (panFromTag5A.isNotEmpty()) {
+//            // Assuming PAN in Tag 5A is in Hex, convert to ASCII (if needed)
+//            val panAscii = hexToAscii(panFromTag5A) // Implement hexToAscii function
+//
+//            if (isValidLuhn(panAscii)) {
+//                return panAscii
+//            } else{
+//                return null
+//            }
+//        }
+//
+//        val track2Data = extractTrack2Data(decryptedIcc)
+//        if (track2Data != null) {
+//            return extractPANFromTrack2(track2Data) // Use your existing Track 2 parsing
+//        }
+//
+//        return null
+//    }
+    fun extractPANFromTrack2(track2Data: String): String? {
+        val delimiters = listOf("=", "D", ";") // Check for common delimiters
+        var pan: String? = null
+
+        for (delimiter in delimiters) {
+            if (track2Data.contains(delimiter)) {
+                pan = track2Data.substringBefore(delimiter)
+                break // Found a delimiter and extracted PAN
+            }
+        }
+
+        return pan?.takeIf { it.isNotEmpty() } // Return PAN or null if empty
+    }
+
+
+    fun hexToAscii(hexString: String): String {
+        val output = StringBuilder()
+        var i = 0
+        while (i < hexString.length) {
+            val str = hexString.substring(i, i + 2)
+            val decimal = str.toInt(16)
+            output.append(decimal.toChar())
+            i += 2
+        }
+        return output.toString()
+    }
+
 
     fun parseWithoutValue(tlv: String): List<TLV>? {
         return try {

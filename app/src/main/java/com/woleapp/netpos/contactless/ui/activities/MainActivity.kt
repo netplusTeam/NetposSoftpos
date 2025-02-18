@@ -37,6 +37,7 @@ import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dspread.xpos.QPOSService
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
@@ -66,7 +67,9 @@ import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
+import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog2
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
+import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PasswordDialog3
 import com.woleapp.netpos.contactless.ui.fragments.*
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
@@ -151,6 +154,20 @@ class MainActivity :
     private var isProcessing = false
 
     private var nfcEnabled = false
+
+
+
+
+    companion object {
+        lateinit var INSTANCE: NetPosApp
+
+        @JvmStatic
+        var cr100Pos: QPOSService? = null
+
+        fun assignInstance(instance: NetPosApp) {
+            INSTANCE = instance
+        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -547,7 +564,7 @@ class MainActivity :
         viewModel.showAccountTypeDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let {
                 if (it) {
-                    showSelectAccountTypeDialog()
+                    showSelectAccountTypeDialog(this)
                 }
             }
         }
@@ -557,6 +574,8 @@ class MainActivity :
                 showPinDialog(it)
             }
         }
+
+
         dialogContactlessReaderBinding.cancel.setOnClickListener {
             waitingDialog.dismiss()
         }
@@ -826,22 +845,39 @@ class MainActivity :
         locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
     }
 
-    private fun showPinDialog(pan: String) {
-        PasswordDialog(
-            this,
-            pan,
-            object : PasswordDialog.Listener {
-                override fun onConfirm(pinBlock: String?) {
-                    viewModel.setPinBlock(pinBlock)
-                }
+     private fun showPinDialog(pan: String) {
+         println("Pan of the pin......$pan")
+         if (pan.isNotEmpty()){
+             PasswordDialog(
+                 this,
+                 pan,
+                 object : PasswordDialog.Listener {
+                     override fun onConfirm(pinBlock: String?) {
+                        viewModel.setPinBlock(pinBlock)
+                     }
 
-                override fun onError(message: String?) {
-                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                    viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-                }
-            },
-        ).showDialog()
+                     override fun onError(message: String?) {
+                         Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                         viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
+                     }
+                 },
+             ).showDialog()
+         }else{
+             PasswordDialog3(this, object : PasswordDialog3.Listener {
+                 override fun onConfirm(pinBlock: String) {
+                     nfcCardReaderViewModel.setPinBlock(pinBlock)
+                 }
+                 override fun onError(message: String) {
+
+                 }
+
+             }).showDialog()
+         }
+
     }
+
+
+
 
     private fun showFragment(
         targetFragment: Fragment,
@@ -858,10 +894,12 @@ class MainActivity :
         }
     }
 
-    private fun showSelectAccountTypeDialog() {
+     fun showSelectAccountTypeDialog(context: Context) {
+
+         println("Show dialog................")
         var dialogSelectAccountTypeBinding: DialogSelectAccountTypeBinding
         val dialog =
-            AlertDialog.Builder(this).apply {
+            AlertDialog.Builder(context).apply {
                 dialogSelectAccountTypeBinding =
                     DialogSelectAccountTypeBinding.inflate(
                         LayoutInflater.from(context),
@@ -874,6 +912,7 @@ class MainActivity :
                 setCancelable(false)
             }.create()
         dialogSelectAccountTypeBinding.accountTypes.setOnCheckedChangeListener { _, checkedId ->
+
             val accountType =
                 when (checkedId) {
                     R.id.savings_account -> IsoAccountType.SAVINGS
@@ -884,6 +923,8 @@ class MainActivity :
                     R.id.universal_account -> IsoAccountType.UNIVERSAL_ACCOUNT
                     else -> IsoAccountType.DEFAULT_UNSPECIFIED
                 }
+
+            println("Account type......$accountType")
             dialog.dismiss()
             Timber.e("$checkedId")
             viewModel.iccCardHelper.apply {
@@ -1304,6 +1345,9 @@ class MainActivity :
             setTitle("Select Start Date") // Setting a title for start date selection
         }.show()
     }
+
+
+
 
     private fun getEndOfDayTransactions(
         startTimestamp: Long,
@@ -1765,7 +1809,7 @@ class MainActivity :
     }
 
     private fun setUpViewModelForVerve() {
-        println("Setup for verse")
+        println(">>>>>>>>>>>>>>>>>>>>>>>>>Setup for verse")
         val transactionParameters = salesViewModel.setupTransactionForVerveSDK()
         mVerveTransactionViewModel =
             ViewModelProvider(
@@ -1775,9 +1819,12 @@ class MainActivity :
     }
 
     private fun setUpObserversForVerveTransaction() {
-        println("Setup for verse observe")
+        println(">>>>>>>>>>>>>>>>>>>>>Setup for verse observe")
         mVerveTransactionViewModel.onTransactionFinishedEvent
             .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
+
+
+                println("Verve Data.....$transactionFullDataDto")
                 viewModel.doVerveCardTransaction(transactionFullDataDto)
             }
     }
