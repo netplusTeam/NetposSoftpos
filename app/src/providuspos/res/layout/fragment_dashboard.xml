@@ -204,10 +204,21 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+                <TextView
+                    android:id="@+id/battery_txt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/dimen_5dp"
+                    android:text="checking..."
+                    app:layout_constraintBottom_toBottomOf="@+id/battery_img"
+                    app:layout_constraintEnd_toStartOf="@+id/battery_img"
+                    app:layout_constraintTop_toTopOf="@+id/battery_img"
+                    />
+
                 <ImageView
                     android:id="@+id/battery_img"
-                    android:layout_width="@dimen/dimen_50dp"
-                    android:layout_height="@dimen/dimen_50dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/margin_10"
                     android:layout_marginEnd="@dimen/margin_10"
                     android:src="@drawable/battery"

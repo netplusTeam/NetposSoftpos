@@ -55,4 +55,5 @@ object AppConstants {
     const val DELETE_ACCOUNT = "delete_account"
     const val BLUETOOTH_ADDRESS = "BLUETOOTH_ADDRESS"
     const val BLUETOOTH_TITLE = "BLUETOOTH_TITLE"
+    const val BATTERY_PERCENTAGE = "battery_percentage"
 }
