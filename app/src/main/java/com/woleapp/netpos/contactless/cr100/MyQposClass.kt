@@ -341,11 +341,10 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 val cardTypeAid = findTagValue(decryptedIcc)
                 val cardType = getCardSchemeFromAid(cardTypeAid)
                 val track2 = extractTrack2DataFromICCResult(decryptedIcc = decryptedIcc, cardType = cardType?.name ?:"")?:""
-                val pan = track2?.split("D")?.firstOrNull()?:""
-                //val pan = extractPANFromTrack2(track2)?:""
+                val pan = extractPANFromTrack2(track2)?:""
 
 
-                println("Track.....$track2.  Pan...$pan...Decrypted....$decryptedIcc")
+                println("Track.....$track2.  Pan...$pan..Decrypted....$decryptedIcc")
 
 
                 _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = false, btCardInfo = BtCardInfo(

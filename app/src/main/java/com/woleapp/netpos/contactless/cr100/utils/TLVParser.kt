@@ -411,13 +411,6 @@ fun isContactlessCard(emvData: Map<String, String>): Boolean {
     }
 
 
-
-
-
-
-
-
-
     fun extractTrack2DataFromICCResult(decryptedIcc: String, cardType: String): String? {
         // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
         val track2Tag = "57"
@@ -466,34 +459,80 @@ fun isContactlessCard(emvData: Map<String, String>): Boolean {
         return serviceCode.startsWith("6")
     }
 
+
+//    private fun applyTrack2LengthRestriction(track2Data: String, cardType: String): String {
+//        val dIndex = track2Data.indexOf('D')
+//        if (dIndex != -1) {
+//            val beforeD = track2Data.substring(0, dIndex)
+//            val afterD = track2Data.substring(dIndex + 1)
+//            val truncatedBeforeD = when (cardType.lowercase()) {
+//                "mastercard", "visa" -> {
+//                    beforeD.takeLast(16)
+//                }
+//                "verve" ->  {
+//                    val truncatedData = beforeD.takeLast(19) + "D" + afterD
+//
+//                    println("Data>>>>$truncatedData")
+//                    val isContactLess = isVerveContactless(truncatedData)
+//                    println("IScontactless......$isContactLess")
+//                    if (isContactLess){
+//                        beforeD.takeLast(16)
+//                    }else{
+//                        beforeD.takeLast(19).removeLeading()
+//                    }
+//
+// }
+//                else -> {
+//                    beforeD
+//                }
+//            }
+//            return truncatedBeforeD + "D" + afterD
+//
+//        }
+//        return track2Data
+//    }
+
+
     private fun applyTrack2LengthRestriction(track2Data: String, cardType: String): String {
-
         val dIndex = track2Data.indexOf('D')
-        if (dIndex != -1) {
-            val beforeD = track2Data.substring(0, dIndex)
-            val afterD = track2Data.substring(dIndex + 1)
-            val truncatedBeforeD = when (cardType.lowercase()) {
-                "mastercard", "visa" -> {
-                    beforeD.takeLast(16)
-                }
-                "verve" ->  {
-                    val isContactLess = isContactlessCard(track2Data)
-                    println("IsContactless.....$isContactLess")
-                    if (isContactLess){
-                        beforeD.takeLast(16)
-                    }else{
-                        beforeD.takeLast(19)
-                    }
-                }
-                else -> {
-                    beforeD
-                }
-            }
-            return truncatedBeforeD + "D" + afterD
+        if (dIndex == -1) return track2Data // Return original if 'D' is not found
 
+        val beforeD = track2Data.substring(0, dIndex)
+        val afterD = track2Data.substring(dIndex + 1)
+
+        val truncatedBeforeD = when (cardType.lowercase()) {
+            "mastercard", "visa" -> beforeD.takeLast(16)
+
+            "verve" -> {
+                val processedTrack2 = beforeD.takeLast(19) + "D" + afterD
+                val isContactless = isVerveContactless(processedTrack2)
+
+                if (isContactless) beforeD.takeLast(16) else beforeD.takeLast(19).removeLeading()
+            }
+
+            else -> beforeD
         }
-        return track2Data
+
+        return truncatedBeforeD + "D" + afterD
     }
 
+
+    private  fun String.removeLeading():String{
+        return if(this.startsWith("10"))this.substring(2)else this
+    }
+
+
+   private fun isVerveContactless(track2Data: String): Boolean {
+        // Remove leading "711" if present
+        val cleanedTrackData = track2Data.removePrefix("711")
+
+        // Extract BIN (first 6 digits)
+        val bin = cleanedTrackData.take(6)
+
+        // Set of known Verve contactless BINs
+        val contactlessBins = setOf("507872") // Add more if needed
+
+        return contactlessBins.contains(bin)
+    }
 
 }
