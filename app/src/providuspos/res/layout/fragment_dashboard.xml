@@ -204,6 +204,17 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+                <ImageView
+                    android:id="@+id/battery_img"
+                    android:layout_width="@dimen/dimen_50dp"
+                    android:layout_height="@dimen/dimen_50dp"
+                    android:layout_marginTop="@dimen/margin_10"
+                    android:layout_marginEnd="@dimen/margin_10"
+                    android:src="@drawable/battery"
+                    android:visibility="visible"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <EditText
                     android:id="@+id/etPin"
                     android:layout_width="wrap_content"

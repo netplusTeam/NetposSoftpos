@@ -789,20 +789,36 @@ class DashboardFragment : BaseFragment() {
 //    }
 
     private fun initIntent() {
+        binding.batteryTxt.visibility = View.VISIBLE
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
         if (cr100Pos!!.bluetoothState) {
             if (BluetoothToolsBean.getBlueToothName() != null) {
                 showToast(BluetoothToolsBean.getBlueToothName())
+                Prefs.putString(BATTERY_PERCENTAGE, "posinfo")
             }
 
-            val keyIndex: Int = getBluetoothKeyIndex()
-            cr100Pos?.doTrade(keyIndex, 60)
+            val info = Prefs.getString(BATTERY_PERCENTAGE)
+
+            if ("posinfo" == info) {
+                // First, get POS info
+                cr100Pos!!.getQposInfo()
+                handleResult()
+                // Delay `doTrade()` until `getQposInfo()` finishes
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val keyIndex: Int = getBluetoothKeyIndex()
+                    cr100Pos?.doTrade(keyIndex, 60)
+                }, 2000) // Adjust delay time if needed
+            } else {
+                val keyIndex: Int = getBluetoothKeyIndex()
+                cr100Pos?.doTrade(keyIndex, 60)
+            }
         } else {
             Prefs.getString(BLUETOOTH_TITLE, null)?.let {
                 listener.setBlueTitle(it)
             }
+
             Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
                 cr100Pos?.connectBluetoothDevice(true, 60, it)
             } ?: run {
