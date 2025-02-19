@@ -2,15 +2,11 @@ package com.woleapp.netpos.contactless.cr100
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import android.provider.ContactsContract.PinnedPositions.pin
 import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.dspread.xpos.CQPOSService
 import com.dspread.xpos.QPOSService
-import com.dspread.xpos.Util
-import com.dspread.xpos.Util.HexStringToByteArray
-import com.dspread.xpos.utils.AESUtil
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
@@ -18,10 +14,8 @@ import com.woleapp.netpos.contactless.cr100.model.CardChannel
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC.extractTrack2AndPanValues
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC.getData
-import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractPAN
-import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractPANFromDecryptedICC
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractPANFromTrack2
-import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractTrack2Data
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractTrack2DataFromICCResult
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.findTagValue
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getCardSchemeFromAid
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getTlvC0AndC2FromNfcBatch
@@ -332,32 +326,31 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     override fun onRequestOnlineProcess(tlv: String?) {
         Log.d("MyQposClass", "onRequestOnlineProcess called with tlv: $tlv")
-        if (isDipContact){
 
+
+        if (isDipContact){
             customScope.launch {
                 delay(200)
-                val (tagC0, tagC2, tagTrack) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
+                val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
 
                 val decryptedIcc = getData(
                     tagC0!!.value, tagC2!!.value, DUKPK2009CBC.Enum_key.DATA,
                     DUKPK2009CBC.Enum_mode.CBC, context
                 )
 
-
                 val cardTypeAid = findTagValue(decryptedIcc)
-                println("TagValue.....${findTagValue(decryptedIcc)}")
-
-                val track2Value = tagTrack?.value
-                val track2 = extractTrack2Data(decryptedIcc) ?:""
-                val pan1 = extractPANFromTrack2(track2)?:""
-
                 val cardType = getCardSchemeFromAid(cardTypeAid)
+                val track2 = extractTrack2DataFromICCResult(decryptedIcc = decryptedIcc, cardType = cardType?.name ?:"")?:""
+                val pan = track2?.split("D")?.firstOrNull()?:""
+                //val pan = extractPANFromTrack2(track2)?:""
 
-                println("CardType: $cardType.. track...$track2.********$track2Value.>>>>>$pan1...decrypted....$decryptedIcc")
+
+                println("Track.....$track2.  Pan...$pan...Decrypted....$decryptedIcc")
+
 
                 _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = false, btCardInfo = BtCardInfo(
                     track2 = track2,
-                    realPan = pan1,
+                    realPan = pan,
                     decryptedIcc = decryptedIcc,
                     cardType = cardType
                 )
@@ -452,7 +445,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
             println("Error.......${ex.message.toString()}")
             _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = true, cardType = CardChannel.Contact)
             isDipContact = true
-            //ex.printStackTrace()
         }
 
 

@@ -76,21 +76,18 @@ object TLVParser {
         return tlvList
     }
 
-    fun getTlvC0AndC2FromNfcBatch(tlvList: List<TLV>): Triple<TLV?, TLV?, TLV?> {
+    fun getTlvC0AndC2FromNfcBatch(tlvList: List<TLV>): Pair<TLV?, TLV?> {
         var tlvC0: TLV? = null
         var tlvC2: TLV? = null
-        var tlv57: TLV? = null
 
         for (tlv in tlvList) {
-            println("Data.....$tlv")
             when (tlv.tag) {
                 "c0" -> tlvC0 = tlv
                 "c2" -> tlvC2 = tlv
-                "57" -> tlv57 = tlv
             }
         }
 
-        return Triple(tlvC0, tlvC2, tlv57)
+        return Pair(tlvC0, tlvC2)
     }
 
 
@@ -106,6 +103,119 @@ object TLVParser {
         val decryptedBytes = cipher.doFinal(encryptedBytes)
 
         return decryptedBytes.joinToString("") { "%02X".format(it) }
+    }
+
+//
+//    fun findTagValue(input: String, tag: String = "9F0607", lengthAfterTag: Int = 14): String {
+//        val tagIndex = input.indexOf(tag)
+//
+//        if (tagIndex == -1) {
+//            return ""
+//        }
+//
+//        val startIndex = tagIndex + tag.length
+//
+//        if (startIndex + lengthAfterTag > input.length) {
+//            return ""
+//        }
+//
+//        return input.substring(startIndex, startIndex + lengthAfterTag)
+//    }
+
+
+    fun getCardSchemeFromAid(aid: String): NfcPaymentType? {
+        return when (aid) {
+            "A0000000041010" -> NfcPaymentType.MASTERCARD
+            "A0000003710001" -> NfcPaymentType.VERVE
+            "A0000000031010" -> NfcPaymentType.VISA
+            else -> null
+        }
+    }
+
+
+    fun extractTrack2Data(decryptedIcc: String): String? {
+        val track2Tag = "57"
+        val track2StartIndex = decryptedIcc.indexOf(track2Tag)
+
+        if (track2StartIndex == -1) {
+            return null // Track 2 data not found
+        }
+
+        val track2LengthIndex = track2StartIndex + track2Tag.length
+        val track2LengthHex = decryptedIcc.substring(track2LengthIndex, track2LengthIndex + 2) // Length in hex
+        val track2Length = track2LengthHex.toIntOrNull(16)?.times(2) ?: return null // Convert hex to decimal and multiply by 2 for BCD
+
+        val track2Data = decryptedIcc.substring(track2LengthIndex + 2, track2LengthIndex + 2 + track2Length)
+
+        // Track 2 format: PAN (up to 19 digits) + "D" + Expiry (YYMM) + Service Code (3 digits) + Discretionary Data
+        val delimiter = track2Data.firstOrNull { it == 'D' || it == '=' } ?: return null
+        val beforeDelimiter = track2Data.substringBefore(delimiter) // PAN
+        val afterDelimiter = track2Data.substringAfter(delimiter)   // Expiry + Service Code + Discretionary data
+
+        return "$beforeDelimiter$delimiter$afterDelimiter".trim()
+    }
+
+//
+//
+//
+//
+//
+fun isContactlessCard(emvData: Map<String, String>): Boolean {
+    return listOf("9F6E", "9F6C", "9F7A").any { it in emvData }
+}
+
+    val emvResponse = mapOf(
+        "9F6E" to "06",  // Contactless supported
+        "57" to "5061051800075663615D2406601019263901"
+    )
+
+   // println(isContactlessCard(emvResponse)) // Output: true ✅
+
+
+
+    fun extractTrack2Data(decryptedIcc: String, cardType: String, isContactless: Boolean = false): String? {
+        // Track 2 Equivalent Data Tag
+        val track2Tag = "57"
+
+        // Find the start index of Track 2 data
+        val track2StartIndex = decryptedIcc.indexOf(track2Tag)
+
+        if (track2StartIndex == -1) {
+            return null // Track 2 data not found
+        }
+
+        // Extract the length of Track 2 data (next 2 hex characters after the tag)
+        val track2LengthHex = decryptedIcc.substring(track2StartIndex + track2Tag.length, track2StartIndex + track2Tag.length + 2)
+        val track2Length = track2LengthHex.toInt(16) * 2 // Convert hex to decimal and multiply by 2 (since hex represents bytes)
+
+        // Extract the actual Track 2 data based on the computed length
+        val track2DataStart = track2StartIndex + track2Tag.length + 2
+        val track2Data = decryptedIcc.substring(track2DataStart, track2DataStart + track2Length)
+
+
+        println("Track2Data..... $track2Data")
+        if (track2Data.isNotEmpty()) {
+            val pan = track2Data.substringBefore("D") // Extract PAN (Primary Account Number)
+
+            // PAN length handling based on card type and contactless status
+            val beforeD = when {
+                isContactless && pan.length in 16..18 -> pan.takeLast(16) // Contactless cards take last 16 if 16-18
+                cardType.equals("mastercard", ignoreCase = true) || cardType.equals("visa", ignoreCase = true) -> pan.takeLast(16)
+                cardType.equals("verve", ignoreCase = true) -> {
+                    when {
+                        pan.length > 19 -> pan.takeLast(19) // Take last 19 if too long
+                        pan.length in 16..18 -> pan.takeLast(16) // Take last 16 if between 16-18
+                        else -> pan // Keep as is
+                    }
+                }
+                else -> pan // Default case
+            }
+
+            val afterD = track2Data.substringAfter("D")
+            return "$beforeD D $afterD".filter { !it.isWhitespace() }
+        }
+
+        return null
     }
 
 
@@ -125,52 +235,15 @@ object TLVParser {
         return input.substring(startIndex, startIndex + lengthAfterTag)
     }
 
-
-    fun getCardSchemeFromAid(aid: String): NfcPaymentType? {
-        return when (aid) {
-            "A0000000041010" -> NfcPaymentType.MASTERCARD
-            "A0000003710001" -> NfcPaymentType.VERVE
-            "A0000000031010" -> NfcPaymentType.VISA
-            else -> null
-        }
-    }
-
-    fun extractTrack2Data(decryptedIcc: String): String? {
-        // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
-        val track2Tag = "57"
-        val track2Length = decryptedIcc.indexOf("5A", decryptedIcc.indexOf(track2Tag) + track2Tag.length) - (decryptedIcc.indexOf(track2Tag) + track2Tag.length)
-        val track2Data = findTagValue(decryptedIcc, track2Tag, track2Length)
-
-        if (track2Data.isNotEmpty()) {
-            val beforeD = track2Data.substringBefore("D").takeLast(16)
-            val afterD = track2Data.substringAfter("D")
-            val result = beforeD.plus("D").plus(afterD)
-           return result
-        } else {
-            return null
-        }
-    }
-
     fun extractPANFromTrack2(track2Data: String): String? {
-        val delimiters = listOf("=", "D", ";") // Check for common delimiters
-        var pan: String? = null
-
+        val delimiters = listOf("=", "D", ";")
         for (delimiter in delimiters) {
             if (track2Data.contains(delimiter)) {
-                pan = track2Data.substringBefore(delimiter)
-                break // Found a delimiter and extracted PAN
+                val pan = track2Data.substringBefore(delimiter)
+                return pan.takeIf { it.length in 13..19 }
             }
         }
-
-        // Take only the last 16 digits if the PAN is longer than 16 digits
-        return pan?.takeIf { it.isNotEmpty() }
-            ?.let {
-                if (it.length > 16) {
-                    it.takeLast(16)
-                } else {
-                    it
-                }
-            }
+        return null
     }
 
 
@@ -336,4 +409,91 @@ object TLVParser {
         val n = getLengthInt(length)
         return if (n + index > data.size) false else true
     }
+
+
+
+
+
+
+
+
+
+    fun extractTrack2DataFromICCResult(decryptedIcc: String, cardType: String): String? {
+        // Common Track 2 Data Tag: 57 (Track 2 Equivalent Data)
+        val track2Tag = "57"
+        val track2DataWithPrefix = findTagValueBefore5A(decryptedIcc, track2Tag)
+
+        if (track2DataWithPrefix.isNotEmpty()) {
+            var accurateTrack2Data = removePrefixFromTrack2(track2DataWithPrefix)
+            accurateTrack2Data = applyTrack2LengthRestriction(accurateTrack2Data, cardType)
+            return accurateTrack2Data
+        } else {
+            return null
+        }
+    }
+
+    private fun findTagValueBefore5A(input: String, tag: String): String {
+        val tagIndex = input.indexOf(tag)
+
+        if (tagIndex == -1) {
+            return "" // Tag not found
+        }
+
+        val startIndex = tagIndex + tag.length
+        val end5AIndex = input.indexOf("5A", startIndex) // Find "5A" after the tag
+
+        if (end5AIndex == -1) {
+            return ""
+        }
+
+        return input.substring(startIndex, end5AIndex)
+    }
+
+   private fun removePrefixFromTrack2(track2DataWithPrefix: String): String {
+        for (i in track2DataWithPrefix.indices) {
+            if (track2DataWithPrefix[i].isDigit()) {
+                return track2DataWithPrefix.substring(i)
+            }
+        }
+        return track2DataWithPrefix
+    }
+
+    fun isContactlessCard(track2Data: String): Boolean {
+        // Extract service code from track2 data (after 'D' separator)
+        val serviceCode = track2Data.substringAfter('D').drop(4).take(3)
+
+        // Check if the first digit of service code is '6' (indicating contactless)
+        return serviceCode.startsWith("6")
+    }
+
+    private fun applyTrack2LengthRestriction(track2Data: String, cardType: String): String {
+
+        val dIndex = track2Data.indexOf('D')
+        if (dIndex != -1) {
+            val beforeD = track2Data.substring(0, dIndex)
+            val afterD = track2Data.substring(dIndex + 1)
+            val truncatedBeforeD = when (cardType.lowercase()) {
+                "mastercard", "visa" -> {
+                    beforeD.takeLast(16)
+                }
+                "verve" ->  {
+                    val isContactLess = isContactlessCard(track2Data)
+                    println("IsContactless.....$isContactLess")
+                    if (isContactLess){
+                        beforeD.takeLast(16)
+                    }else{
+                        beforeD.takeLast(19)
+                    }
+                }
+                else -> {
+                    beforeD
+                }
+            }
+            return truncatedBeforeD + "D" + afterD
+
+        }
+        return track2Data
+    }
+
+
 }
