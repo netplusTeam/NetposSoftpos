@@ -831,6 +831,16 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
+    private fun handleResult() {
+        val batteryPercentage = listener.batteryPercentFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+            if (batteryLevel.isNotEmpty()) {
+                binding.batteryTxt.text = batteryLevel
+                Log.d("BATTERY_LEVELPL", "$batteryLevel")
+            }
+        }
+    }
+
     private fun scanBlue() {
         lvIndicatorBTPOS?.layoutManager =
             LinearLayoutManager(
