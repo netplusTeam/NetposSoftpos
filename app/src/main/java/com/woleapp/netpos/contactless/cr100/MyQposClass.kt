@@ -57,11 +57,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     private var _requestPinFlow = MutableStateFlow(PinData())
     val requestPinFlow: StateFlow<PinData> = _requestPinFlow
 
-    var isDipContact:Boolean = false
-
-
-
-
+    private var isDipContact:Boolean = false
 
 
     fun setBlueTitle(blueTitle: String) {

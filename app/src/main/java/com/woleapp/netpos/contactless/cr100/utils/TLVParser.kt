@@ -132,93 +132,6 @@ object TLVParser {
         }
     }
 
-
-    fun extractTrack2Data(decryptedIcc: String): String? {
-        val track2Tag = "57"
-        val track2StartIndex = decryptedIcc.indexOf(track2Tag)
-
-        if (track2StartIndex == -1) {
-            return null // Track 2 data not found
-        }
-
-        val track2LengthIndex = track2StartIndex + track2Tag.length
-        val track2LengthHex = decryptedIcc.substring(track2LengthIndex, track2LengthIndex + 2) // Length in hex
-        val track2Length = track2LengthHex.toIntOrNull(16)?.times(2) ?: return null // Convert hex to decimal and multiply by 2 for BCD
-
-        val track2Data = decryptedIcc.substring(track2LengthIndex + 2, track2LengthIndex + 2 + track2Length)
-
-        // Track 2 format: PAN (up to 19 digits) + "D" + Expiry (YYMM) + Service Code (3 digits) + Discretionary Data
-        val delimiter = track2Data.firstOrNull { it == 'D' || it == '=' } ?: return null
-        val beforeDelimiter = track2Data.substringBefore(delimiter) // PAN
-        val afterDelimiter = track2Data.substringAfter(delimiter)   // Expiry + Service Code + Discretionary data
-
-        return "$beforeDelimiter$delimiter$afterDelimiter".trim()
-    }
-
-//
-//
-//
-//
-//
-fun isContactlessCard(emvData: Map<String, String>): Boolean {
-    return listOf("9F6E", "9F6C", "9F7A").any { it in emvData }
-}
-
-    val emvResponse = mapOf(
-        "9F6E" to "06",  // Contactless supported
-        "57" to "5061051800075663615D2406601019263901"
-    )
-
-   // println(isContactlessCard(emvResponse)) // Output: true ✅
-
-
-
-    fun extractTrack2Data(decryptedIcc: String, cardType: String, isContactless: Boolean = false): String? {
-        // Track 2 Equivalent Data Tag
-        val track2Tag = "57"
-
-        // Find the start index of Track 2 data
-        val track2StartIndex = decryptedIcc.indexOf(track2Tag)
-
-        if (track2StartIndex == -1) {
-            return null // Track 2 data not found
-        }
-
-        // Extract the length of Track 2 data (next 2 hex characters after the tag)
-        val track2LengthHex = decryptedIcc.substring(track2StartIndex + track2Tag.length, track2StartIndex + track2Tag.length + 2)
-        val track2Length = track2LengthHex.toInt(16) * 2 // Convert hex to decimal and multiply by 2 (since hex represents bytes)
-
-        // Extract the actual Track 2 data based on the computed length
-        val track2DataStart = track2StartIndex + track2Tag.length + 2
-        val track2Data = decryptedIcc.substring(track2DataStart, track2DataStart + track2Length)
-
-
-        println("Track2Data..... $track2Data")
-        if (track2Data.isNotEmpty()) {
-            val pan = track2Data.substringBefore("D") // Extract PAN (Primary Account Number)
-
-            // PAN length handling based on card type and contactless status
-            val beforeD = when {
-                isContactless && pan.length in 16..18 -> pan.takeLast(16) // Contactless cards take last 16 if 16-18
-                cardType.equals("mastercard", ignoreCase = true) || cardType.equals("visa", ignoreCase = true) -> pan.takeLast(16)
-                cardType.equals("verve", ignoreCase = true) -> {
-                    when {
-                        pan.length > 19 -> pan.takeLast(19) // Take last 19 if too long
-                        pan.length in 16..18 -> pan.takeLast(16) // Take last 16 if between 16-18
-                        else -> pan // Keep as is
-                    }
-                }
-                else -> pan // Default case
-            }
-
-            val afterD = track2Data.substringAfter("D")
-            return "$beforeD D $afterD".filter { !it.isWhitespace() }
-        }
-
-        return null
-    }
-
-
     fun findTagValue(input: String, tag: String = "9F0607", lengthAfterTag: Int = 14): String {
         val tagIndex = input.indexOf(tag)
 
@@ -451,48 +364,6 @@ fun isContactlessCard(emvData: Map<String, String>): Boolean {
         return track2DataWithPrefix
     }
 
-    fun isContactlessCard(track2Data: String): Boolean {
-        // Extract service code from track2 data (after 'D' separator)
-        val serviceCode = track2Data.substringAfter('D').drop(4).take(3)
-
-        // Check if the first digit of service code is '6' (indicating contactless)
-        return serviceCode.startsWith("6")
-    }
-
-
-//    private fun applyTrack2LengthRestriction(track2Data: String, cardType: String): String {
-//        val dIndex = track2Data.indexOf('D')
-//        if (dIndex != -1) {
-//            val beforeD = track2Data.substring(0, dIndex)
-//            val afterD = track2Data.substring(dIndex + 1)
-//            val truncatedBeforeD = when (cardType.lowercase()) {
-//                "mastercard", "visa" -> {
-//                    beforeD.takeLast(16)
-//                }
-//                "verve" ->  {
-//                    val truncatedData = beforeD.takeLast(19) + "D" + afterD
-//
-//                    println("Data>>>>$truncatedData")
-//                    val isContactLess = isVerveContactless(truncatedData)
-//                    println("IScontactless......$isContactLess")
-//                    if (isContactLess){
-//                        beforeD.takeLast(16)
-//                    }else{
-//                        beforeD.takeLast(19).removeLeading()
-//                    }
-//
-// }
-//                else -> {
-//                    beforeD
-//                }
-//            }
-//            return truncatedBeforeD + "D" + afterD
-//
-//        }
-//        return track2Data
-//    }
-
-
     private fun applyTrack2LengthRestriction(track2Data: String, cardType: String): String {
         val dIndex = track2Data.indexOf('D')
         if (dIndex == -1) return track2Data // Return original if 'D' is not found
@@ -523,14 +394,13 @@ fun isContactlessCard(emvData: Map<String, String>): Boolean {
 
 
    private fun isVerveContactless(track2Data: String): Boolean {
-        // Remove leading "711" if present
         val cleanedTrackData = track2Data.removePrefix("711")
 
         // Extract BIN (first 6 digits)
         val bin = cleanedTrackData.take(6)
 
         // Set of known Verve contactless BINs
-        val contactlessBins = setOf("507872") // Add more if needed
+        val contactlessBins = setOf("507872"/*,"506104","506102"*/)
 
         return contactlessBins.contains(bin)
     }

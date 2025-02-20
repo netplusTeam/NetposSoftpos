@@ -703,46 +703,6 @@ class DashboardFragment : BaseFragment() {
         val handler = Looper.myLooper()?.let { Handler(it) }
         cr100Pos!!.initListener(handler, listener)
 
-
-//
-//
-//        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
-//        val requestPinLiveData = listener.requestPinFlow.asLiveData()
-//
-//// LiveData that emits only when cardInfo is invalid
-//        val invalidCardInfoLiveData = cardInfoLiveData.map { cardInfo ->
-//            cardInfo.takeIf { !it.isValid() }  // Emits only when invalid
-//        }
-//
-//// Observe cardInfoLiveData
-//        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
-//            if (cardInfo.isValid()) {
-//                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
-//                listener.resetCardInfoFlow()
-//            }
-//        }
-//
-//// Observe invalid card info and then handle requestPinLiveData
-//        invalidCardInfoLiveData.observe(viewLifecycleOwner) { invalidCard ->
-//            invalidCard?.let {
-//                requestPinLiveData.observe(viewLifecycleOwner) { result ->
-//                    println("Result......$result")
-//                    if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
-//                        nfcCardReaderViewModel.showPin(pan = result.pan)
-//
-//                        if (result.btCardInfo != null) {
-//                            nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-//                        }
-//                        hideBluetoothDialog()
-//                        listener.resetCardInfoFlow()
-//                    }
-//                }
-//            }
-//        }
-
-
-
-
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
         val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
@@ -754,53 +714,26 @@ class DashboardFragment : BaseFragment() {
         }
 
         requestPinLiveData.observe(viewLifecycleOwner) { result ->
-            println("Result........$result")
+
             if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
                 nfcCardReaderViewModel.showPin(pan = result.pan)
                 if (result.btCardInfo != null) {
                     nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                 }
-                //hideBluetoothDialog()
-                //listener.resetCardInfoFlow()
+                hideBluetoothDialog()
+                listener.resetCardInfoFlow()
 
             }else{
                 if (result.cardType == CardChannel.Contact){
                     if (result.btCardInfo != null) {
                         nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                        hideBluetoothDialog()
+                        listener.resetCardInfoFlow()
                     }
                 }
 
             }
         }
-
-//
-
-//        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
-//        val requestPinLiveData = listener.requestPinFlow.asLiveData()
-//
-//        requestPinLiveData.observe(viewLifecycleOwner){result->
-//            if (result.isPinSet == true && result.cardType == CardChannel.Contact){
-//                nfcCardReaderViewModel.showPin(pan = result.pan)
-//                hideBluetoothDialog()
-//            }
-//
-//        }
-//
-//        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
-//            if (cardInfo.isValid()) {
-//                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
-//                listener.resetCardInfoFlow()
-//            }else{
-//                requestPinLiveData.observe(viewLifecycleOwner){result->
-//                    if (result.isPinSet == true && result.cardType == CardChannel.Contact){
-//                        nfcCardReaderViewModel.showPin(pan = result.pan)
-//                        hideBluetoothDialog()
-//                    }
-//
-//                }
-//            }
-//        }
-//
 
 
 

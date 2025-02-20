@@ -457,8 +457,6 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
 
     fun doCr100TransactionDip(data:BtCardInfo) {
-        println("Transaction: Do CR 100 Transactions")
-        println("Do CR 100 Transactions.......$data")
         val (pan, track2, icc, cardType) = data
 
         iccCardHelper = ICCCardHelper()
