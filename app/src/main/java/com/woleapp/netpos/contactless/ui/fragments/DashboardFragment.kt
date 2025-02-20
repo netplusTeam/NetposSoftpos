@@ -721,14 +721,14 @@ class DashboardFragment : BaseFragment() {
                     nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                 }
                 hideBluetoothDialog()
-                listener.resetCardInfoFlow()
+                //listener.resetCardInfoFlow()
 
             }else{
                 if (result.cardType == CardChannel.Contact){
                     if (result.btCardInfo != null) {
                         nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                         hideBluetoothDialog()
-                        listener.resetCardInfoFlow()
+                        //listener.resetCardInfoFlow()
                     }
                 }
 
