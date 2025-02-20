@@ -116,7 +116,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         val pciHardwareVersion = posInfoData?.get("PCI_hardwareVersion") ?: ""
         val compileTime = posInfoData?.get("compileTime") ?: ""
 
-        _cardBatteryFlow.value = batteryLevel
+        _cardBatteryFlow.value = batteryPercentage
     }
 
     override fun onRequestTransactionResult(transactionResult: QPOSService.TransactionResult?) {
@@ -384,6 +384,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     fun resetCardInfoFlow() {
         _cardInfoFlow.value = BtCardInfo()
+        _cardBatteryFlow.value = ""
         cr100Pos!!.cancelTrade()
     }
 

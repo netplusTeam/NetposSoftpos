@@ -832,7 +832,7 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun handleResult() {
-        val batteryPercentage = listener.batteryPercentFlow.asLiveData()
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
         batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
             if (batteryLevel.isNotEmpty()) {
                 binding.batteryTxt.text = batteryLevel
