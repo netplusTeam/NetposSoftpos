@@ -268,7 +268,7 @@ class DashboardFragment : BaseFragment() {
             } else {
                 binding.priceTextbox.text = etPinEt.text
                 if (nfcAdapter != null) {
-                    if (nfcAdapter?.isEnabled == false) {  //change back to true
+                    if (nfcAdapter?.isEnabled == true) {
                         viewModel.validateFieldForNFC()
                     } else {
                         if (viewModel.validateFieldForBluetooth()) {
@@ -706,6 +706,7 @@ class DashboardFragment : BaseFragment() {
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
         val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
+        //contactless
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
                 nfcCardReaderViewModel.doCr100Transaction(cardInfo)
@@ -713,6 +714,7 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
+        //Contact
         requestPinLiveData.observe(viewLifecycleOwner) { result ->
 
             if (result.isPinSet == true && result.cardType == CardChannel.Contact) {

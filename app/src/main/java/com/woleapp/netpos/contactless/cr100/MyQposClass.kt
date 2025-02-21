@@ -68,7 +68,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         result: QPOSService.DoTradeResult?,
         decodeData: Hashtable<String, String>?
     ) {
-        Log.d("MyQposClass", "onDoTradeResult called with result: $result, decodeData: $decodeData")
 
         if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
             _requestPinFlow.value = _requestPinFlow.value.copy(cardType = CardChannel.Contactless)
@@ -122,7 +121,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
 
     override fun onQposInfoResult(posInfoData: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onQposInfoResult called with posInfoData: $posInfoData")
+
         val isSupportedTrack1 = posInfoData?.get("isSupportedTrack1") ?: ""
         val isSupportedTrack2 = posInfoData?.get("isSupportedTrack2") ?: ""
         val isSupportedTrack3 = posInfoData?.get("isSupportedTrack3") ?: ""
@@ -137,126 +136,114 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         val pciFirmwareVersion = posInfoData?.get("PCI_firmwareVersion") ?: ""
         val pciHardwareVersion = posInfoData?.get("PCI_hardwareVersion") ?: ""
         val compileTime = posInfoData?.get("compileTime") ?: ""
-
-        println("POSINFO>>>>>>>>>$posInfoData")
     }
 
     override fun onRequestTransactionResult(transactionResult: QPOSService.TransactionResult?) {
-        Log.d("MyQposClass", "onRequestTransactionResult called with transactionResult: $transactionResult")
-
-        Log.e("Transaction", "onRequestTransactionResult: ${transactionResult.toString()}")
         var msg = ""
         when (transactionResult) {
-            QPOSService.TransactionResult.APPROVED -> {
-                Log.d("MyQposClass", "Transaction Approved")
-            }
+            QPOSService.TransactionResult.APPROVED -> {}
             QPOSService.TransactionResult.TERMINATED -> {
-                Log.d("MyQposClass", "Transaction Terminated")
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.DECLINED -> {
-                Log.d("MyQposClass", "Transaction Declined")
+
                 hideDialogAndShowToast(transactionResult)
             }
-            QPOSService.TransactionResult.CANCEL -> {
-                Log.d("MyQposClass", "Transaction Cancelled")
-            }
+            QPOSService.TransactionResult.CANCEL -> {}
 
             QPOSService.TransactionResult.CAPK_FAIL -> {
-                Log.d("MyQposClass", "Transaction CAPK Failed")
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.NOT_ICC -> {
-                Log.d("MyQposClass", "Transaction Not ICC")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.SELECT_APP_FAIL -> {
-                Log.d("MyQposClass", "Transaction Select App Failed")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.DEVICE_ERROR -> {
-                Log.d("MyQposClass", "Transaction Device Error")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.TRADE_LOG_FULL -> {
-                Log.d("MyQposClass", "Transaction Trade Log Full")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.CARD_NOT_SUPPORTED -> {
-                Log.d("MyQposClass", "Transaction Card Not Supported")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.MISSING_MANDATORY_DATA -> {
-                Log.d("MyQposClass", "Transaction Missing Mandatory Data")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.CARD_BLOCKED_OR_NO_EMV_APPS -> {
-                Log.d("MyQposClass", "Transaction Card Blocked Or No EMV Apps")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.INVALID_ICC_DATA -> {
-                Log.d("MyQposClass", "Transaction Invalid ICC Data")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.FALLBACK -> {
-                Log.d("MyQposClass", "Transaction Fallback")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.NFC_TERMINATED -> {
-                Log.d("MyQposClass", "Transaction NFC Terminated")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.CARD_REMOVED -> {
-                Log.d("MyQposClass", "Transaction Card Removed")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.CONTACTLESS_TRANSACTION_NOT_ALLOW -> {
-                Log.d("MyQposClass", "Transaction Contactless Transaction Not Allowed")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.CARD_BLOCKED -> {
-                Log.d("MyQposClass", "Transaction Card Blocked")
+
                 hideDialogAndShowToast(transactionResult)
             }
             QPOSService.TransactionResult.TRANS_TOKEN_INVALID -> {
-                Log.d("MyQposClass", "Transaction Trans Token Invalid")
+
                 hideDialogAndShowToast(
                     transactionResult
                 )
             }
 
             QPOSService.TransactionResult.APP_BLOCKED -> {
-                Log.d("MyQposClass", "Transaction App Blocked")
+
                 hideDialogAndShowToast(transactionResult)
             }
             else -> {
                 msg = transactionResult?.name.orEmpty()
-                Log.w("MyQposClass", "Unknown transaction result: $msg")
+
             }
         }
     }
 
     override fun onQposIdResult(posIdTable: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onQposIdResult called with posIdTable: $posIdTable")
-        println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>$posIdTable")
+
         val posId = posIdTable?.get("posId") ?: ""
         val csn = posIdTable?.get("csn") ?: ""
         val psamId = posIdTable?.get("psamId") ?: ""
@@ -266,7 +253,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
 
     override fun onRequestQposConnected() {
-        Log.d("MyQposClass", "onRequestQposConnected called")
+
         hideBluetoothDialog()
         BluetoothDialog.loadingDialog?.dismiss()
         blueTitle?.let {
@@ -282,13 +269,10 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         cr100Pos?.doTrade(keyIndex, 60)
     }
 
-    override fun onRequestNoQposDetected() {
-        Log.d("MyQposClass", "onRequestNoQposDetected called")
-    }
+    override fun onRequestNoQposDetected() {}
 
     @SuppressLint("MissingPermission")
     override fun onDeviceFound(device: BluetoothDevice?) {
-        Log.d("MyQposClass", "onDeviceFound called with device: $device")
         device?.let {
             if (device.name != null) {
                 val itm = hashMapOf<String, Any>(
@@ -303,26 +287,15 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         }
     }
 
-    override fun onRequestBatchData(tlv: String?) {
-        Log.d("MyQposClass", "onRequestBatchData called with tlv: $tlv")
-        println("Batch.....$tlv")
+    override fun onRequestBatchData(tlv: String?) {}
 
-    }
-
-    override fun onRequestTransactionLog(tlv: String?) {
-        Log.d("MyQposClass", "onRequestTransactionLog called with tlv: $tlv")
-        println("Transaction Log......$tlv")
-
-    }
+    override fun onRequestTransactionLog(tlv: String?) {}
 
     override fun onRequestIsServerConnected() {
-        Log.d("MyQposClass", "onRequestIsServerConnected called")
         cr100Pos?.isServerConnected(true);
     }
 
     override fun onRequestOnlineProcess(tlv: String?) {
-        Log.d("MyQposClass", "onRequestOnlineProcess called with tlv: $tlv")
-
 
         if (isDipContact){
             customScope.launch {
@@ -340,9 +313,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 val pan = extractPANFromTrack2(track2)?:""
 
 
-                println("Track.....$track2.  Pan...$pan..Decrypted....$decryptedIcc")
-
-
                 _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = false, btCardInfo = BtCardInfo(
                     track2 = track2,
                     realPan = pan,
@@ -351,13 +321,12 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 )
                 )
             }
-
         }
 
     }
 
     override fun onRequestTime() {
-        Log.d("MyQposClass", "onRequestTime called")
+
         val terminalTime = SimpleDateFormat("yyyyMMddHHmmss").format(
             Calendar.getInstance().time
         )
@@ -365,284 +334,150 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
 
     }
 
-    override fun onRequestFinalConfirm() {
-        Log.d("MyQposClass", "onRequestFinalConfirm called")
-    }
+    override fun onRequestFinalConfirm() {}
 
-    override fun onRequestQposDisconnected() {
-        Log.d("MyQposClass", "onRequestQposDisconnected called")
-    }
+    override fun onRequestQposDisconnected() {}
 
     override fun onError(errorState: QPOSService.Error?) {
-        Log.e("MyQposClass", "onError called with errorState: $errorState")
-        Log.e("Transaction Error", "onError: ${errorState.toString()}")
         hideDialogAndShowToast(errorState)
     }
 
-    override fun onReturnReversalData(tlv: String?) {
-        Log.d("MyQposClass", "onReturnReversalData called with tlv: $tlv")
-        println("Data reservla......$tlv")
-    }
+    override fun onReturnReversalData(tlv: String?) {}
 
-    override fun onReturnServerCertResult(serverSignCert: String?, serverEncryptCert: String?) {
-        Log.d("MyQposClass", "onReturnServerCertResult called with serverSignCert: $serverSignCert, serverEncryptCert: $serverEncryptCert")
-    }
+    override fun onReturnServerCertResult(serverSignCert: String?, serverEncryptCert: String?) {}
 
-    override fun onReturnGetPinResult(result: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onReturnGetPinResult called with result: $result")
-        Log.e("QPOS", "onReturnGetPinResult: ")
+    override fun onReturnGetPinResult(result: Hashtable<String, String>?) {}
 
-    }
+    override fun onReturnApduResult(arg0: Boolean, arg1: String?, arg2: Int) {}
 
-    override fun onReturnApduResult(arg0: Boolean, arg1: String?, arg2: Int) {
-        Log.d("MyQposClass", "onReturnApduResult called with arg0: $arg0, arg1: $arg1, arg2: $arg2")
-    }
+    override fun onReturnPowerOffIccResult(arg0: Boolean) {}
 
-    override fun onReturnPowerOffIccResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onReturnPowerOffIccResult called with arg0: $arg0")
-    }
+    override fun onReturnPowerOnIccResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {}
 
-    override fun onReturnPowerOnIccResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {
-        Log.d("MyQposClass", "onReturnPowerOnIccResult called with arg0: $arg0, arg1: $arg1, arg2: $arg2, arg3: $arg3")
-    }
+    override fun onReturnSetSleepTimeResult(isSuccess: Boolean) {}
 
-    override fun onReturnSetSleepTimeResult(isSuccess: Boolean) {
-        Log.d("MyQposClass", "onReturnSetSleepTimeResult called with isSuccess: $isSuccess")
-    }
+    override fun onGetCardNoResult(cardNo: String?) {}
 
-    override fun onGetCardNoResult(cardNo: String?) {
-        Log.d("MyQposClass", "onGetCardNoResult called with cardNo: $cardNo")
+    override fun onRequestCalculateMac(calMac: String?) {}
 
-    }
+    override fun onRequestSignatureResult(arg0: ByteArray?) {}
 
-    override fun onRequestCalculateMac(calMac: String?) {
-        Log.d("MyQposClass", "onRequestCalculateMac called with calMac: $calMac")
-    }
+    override fun onRequestUpdateWorkKeyResult(result: QPOSService.UpdateInformationResult?) {}
 
-    override fun onRequestSignatureResult(arg0: ByteArray?) {
-        Log.d("MyQposClass", "onRequestSignatureResult called")  //Omitted byte array logging
-    }
-
-    override fun onRequestUpdateWorkKeyResult(result: QPOSService.UpdateInformationResult?) {
-        Log.d("MyQposClass", "onRequestUpdateWorkKeyResult called with result: $result")
-    }
-
-    override fun onReturnCustomConfigResult(isSuccess: Boolean, result: String?) {
-        Log.d("MyQposClass", "onReturnCustomConfigResult called with isSuccess: $isSuccess, result: $result")
-    }
+    override fun onReturnCustomConfigResult(isSuccess: Boolean, result: String?) {}
 
     override fun onRequestSetPin() {
 
         try {
-            println("Set pin..")
             cr100Pos?.setPinpad()
         }catch (ex:Exception){
-            println("Error.......${ex.message.toString()}")
             _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = true, cardType = CardChannel.Contact)
             isDipContact = true
         }
 
-
     }
 
-    override fun onReturnSetMasterKeyResult(isSuccess: Boolean) {
-        Log.d("MyQposClass", "onReturnSetMasterKeyResult called with isSuccess: $isSuccess")
-    }
+    override fun onReturnSetMasterKeyResult(isSuccess: Boolean) {}
 
-    override fun onReturnBatchSendAPDUResult(batchAPDUResult: LinkedHashMap<Int, String>?) {
-        Log.d("MyQposClass", "onReturnBatchSendAPDUResult called with batchAPDUResult: $batchAPDUResult")
-    }
+    override fun onReturnBatchSendAPDUResult(batchAPDUResult: LinkedHashMap<Int, String>?) {}
 
-    override fun onBluetoothBondFailed() {
-        Log.d("MyQposClass", "onBluetoothBondFailed called")
-    }
+    override fun onBluetoothBondFailed() {}
 
-    override fun onBluetoothBondTimeout() {
-        Log.d("MyQposClass", "onBluetoothBondTimeout called")
-    }
+    override fun onBluetoothBondTimeout() {}
 
-    override fun onBluetoothBonded() {
-        Log.d("MyQposClass", "onBluetoothBonded called")
-    }
+    override fun onBluetoothBonded() {}
 
-    override fun onBluetoothBonding() {
-        Log.d("MyQposClass", "onBluetoothBonding called")
-    }
+    override fun onBluetoothBonding() {}
 
-    override fun onReturniccCashBack(result: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onReturniccCashBack called with result: $result")
-        println("Data cask....${result.toString()}")
-    }
+    override fun onReturniccCashBack(result: Hashtable<String, String>?) {}
 
-    override fun onLcdShowCustomDisplay(arg0: Boolean) {
-        Log.d("MyQposClass", "onLcdShowCustomDisplay called with arg0: $arg0")
-    }
+    override fun onLcdShowCustomDisplay(arg0: Boolean) {}
 
-    override fun onUpdatePosFirmwareResult(arg0: QPOSService.UpdateInformationResult?) {
-        Log.d("MyQposClass", "onUpdatePosFirmwareResult called with arg0: $arg0")
-    }
+    override fun onUpdatePosFirmwareResult(arg0: QPOSService.UpdateInformationResult?) {}
 
-    override fun onReturnDownloadRsaPublicKey(map: HashMap<String, String>?) {
-        Log.d("MyQposClass", "onReturnDownloadRsaPublicKey called with map: $map")
-    }
+    override fun onReturnDownloadRsaPublicKey(map: HashMap<String, String>?) {}
 
-    override fun onGetPosComm(mod: Int, amount: String?, posid: String?) {
-        Log.d("MyQposClass", "onGetPosComm called with mod: $mod, amount: $amount, posid: $posid")
-    }
+    override fun onGetPosComm(mod: Int, amount: String?, posid: String?) {}
 
-    override fun onPinKey_TDES_Result(arg0: String?) {
-        Log.d("MyQposClass", "onPinKey_TDES_Result called with arg0: $arg0")
-    }
+    override fun onPinKey_TDES_Result(arg0: String?) {}
 
-    override fun onUpdateMasterKeyResult(arg0: Boolean, arg1: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onUpdateMasterKeyResult called with arg0: $arg0, arg1: $arg1")
-    }
+    override fun onUpdateMasterKeyResult(arg0: Boolean, arg1: Hashtable<String, String>?) {}
 
-    override fun onEmvICCExceptionData(arg0: String?) {
-        Log.d("MyQposClass", "onEmvICCExceptionData called with arg0: $arg0")
-    }
+    override fun onEmvICCExceptionData(arg0: String?) {}
 
-    override fun onSetParamsResult(arg0: Boolean, arg1: Hashtable<String, Any>?) {
-        Log.d("MyQposClass", "onSetParamsResult called with arg0: $arg0, arg1: $arg1")
-    }
+    override fun onSetParamsResult(arg0: Boolean, arg1: Hashtable<String, Any>?) {}
 
-    override fun onGetInputAmountResult(arg0: Boolean, arg1: String?) {
-        Log.d("MyQposClass", "onGetInputAmountResult called with arg0: $arg0, arg1: $arg1")
-    }
+    override fun onGetInputAmountResult(arg0: Boolean, arg1: String?) {}
 
-    override fun onReturnNFCApduResult(arg0: Boolean, arg1: String?, arg2: Int) {
-        Log.d("MyQposClass", "onReturnNFCApduResult called with arg0: $arg0, arg1: $arg1, arg2: $arg2")
-    }
+    override fun onReturnNFCApduResult(arg0: Boolean, arg1: String?, arg2: Int) {}
 
-    override fun onReturnPowerOffNFCResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onReturnPowerOffNFCResult called with arg0: $arg0")
-    }
+    override fun onReturnPowerOffNFCResult(arg0: Boolean) {}
 
-    override fun onReturnPowerOnNFCResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {
-        Log.d("MyQposClass", "onReturnPowerOnNFCResult called with arg0: $arg0, arg1: $arg1, arg2: $arg2, arg3: $arg3")
-    }
+    override fun onReturnPowerOnNFCResult(arg0: Boolean, arg1: String?, arg2: String?, arg3: Int) {}
 
-    override fun onCbcMacResult(result: String?) {
-        Log.d("MyQposClass", "onCbcMacResult called with result: $result")
-    }
+    override fun onCbcMacResult(result: String?) {}
 
-    override fun onReadBusinessCardResult(arg0: Boolean, arg1: String?) {
-        Log.d("MyQposClass", "onReadBusinessCardResult called with arg0: $arg0, arg1: $arg1")
-    }
+    override fun onReadBusinessCardResult(arg0: Boolean, arg1: String?) {}
 
-    override fun onWriteBusinessCardResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onWriteBusinessCardResult called with arg0: $arg0")
-    }
+    override fun onWriteBusinessCardResult(arg0: Boolean) {}
 
-    override fun onConfirmAmountResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onConfirmAmountResult called with arg0: $arg0")
-    }
+    override fun onConfirmAmountResult(arg0: Boolean) {}
 
-    override fun onQposIsCardExist(cardIsExist: Boolean) {
-        Log.d("MyQposClass", "onQposIsCardExist called with cardIsExist: $cardIsExist")
-    }
+    override fun onQposIsCardExist(cardIsExist: Boolean) {}
 
-    override fun onSearchMifareCardResult(arg0: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onSearchMifareCardResult called with arg0: $arg0")
-    }
+    override fun onSearchMifareCardResult(arg0: Hashtable<String, String>?) {}
 
-    override fun onBatchReadMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {
-        Log.d("MyQposClass", "onBatchReadMifareCardResult called with msg: $msg, cardData: $cardData")
-    }
+    override fun onBatchReadMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {}
 
-    override fun onBatchWriteMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {
-        Log.d("MyQposClass", "onBatchWriteMifareCardResult called with msg: $msg, cardData: $cardData")
-    }
+    override fun onBatchWriteMifareCardResult(msg: String?, cardData: Hashtable<String, List<String>>?) {}
 
-    override fun onSetBuzzerResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onSetBuzzerResult called with arg0: $arg0")
-    }
+    override fun onSetBuzzerResult(arg0: Boolean) {}
 
-    override fun onSetBuzzerTimeResult(b: Boolean) {
-        Log.d("MyQposClass", "onSetBuzzerTimeResult called with b: $b")
-    }
+    override fun onSetBuzzerTimeResult(b: Boolean) {}
 
-    override fun onSetBuzzerStatusResult(b: Boolean) {
-        Log.d("MyQposClass", "onSetBuzzerStatusResult called with b: $b")
-    }
+    override fun onSetBuzzerStatusResult(b: Boolean) {}
 
-    override fun onGetBuzzerStatusResult(s: String?) {
-        Log.d("MyQposClass", "onGetBuzzerStatusResult called with s: $s")
-    }
+    override fun onGetBuzzerStatusResult(s: String?) {}
 
-    override fun onSetManagementKey(arg0: Boolean) {
-        Log.d("MyQposClass", "onSetManagementKey called with arg0: $arg0")
-    }
+    override fun onSetManagementKey(arg0: Boolean) {}
 
-    override fun onReturnUpdateIPEKResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onReturnUpdateIPEKResult called with arg0: $arg0")
-    }
+    override fun onReturnUpdateIPEKResult(arg0: Boolean) {}
 
-    override fun onReturnUpdateEMVRIDResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onReturnUpdateEMVRIDResult called with arg0: $arg0")
-    }
+    override fun onReturnUpdateEMVRIDResult(arg0: Boolean) {}
 
-    override fun onReturnUpdateEMVResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onReturnUpdateEMVResult called with arg0: $arg0")
-    }
+    override fun onReturnUpdateEMVResult(arg0: Boolean) {}
 
-    override fun onBluetoothBoardStateResult(arg0: Boolean) {
-        Log.d("MyQposClass", "onBluetoothBoardStateResult called with arg0: $arg0")
-    }
+    override fun onBluetoothBoardStateResult(arg0: Boolean) {}
 
-    override fun onGetSleepModeTime(arg0: String?) {
-        Log.d("MyQposClass", "onGetSleepModeTime called with arg0: $arg0")
-    }
+    override fun onGetSleepModeTime(arg0: String?) {}
 
-    override fun onGetShutDownTime(arg0: String?) {
-        Log.d("MyQposClass", "onGetShutDownTime called with arg0: $arg0")
-    }
+    override fun onGetShutDownTime(arg0: String?) {}
 
-    override fun onQposDoSetRsaPublicKey(arg0: Boolean) {
-        Log.d("MyQposClass", "onQposDoSetRsaPublicKey called with arg0: $arg0")
-    }
+    override fun onQposDoSetRsaPublicKey(arg0: Boolean) {}
 
-    override fun onQposGenerateSessionKeysResult(arg0: Hashtable<String, String>?) {
-        Log.d("MyQposClass", "onQposGenerateSessionKeysResult called with arg0: $arg0")
-    }
+    override fun onQposGenerateSessionKeysResult(arg0: Hashtable<String, String>?) {}
 
-    override fun transferMifareData(arg0: String?) {
-        Log.d("MyQposClass", "transferMifareData called with arg0: $arg0")
-    }
+    override fun transferMifareData(arg0: String?) {}
 
-    override fun onReturnRSAResult(arg0: String?) {
-        Log.d("MyQposClass", "onReturnRSAResult called with arg0: $arg0")
-    }
+    override fun onReturnRSAResult(arg0: String?) {}
 
-    override fun onRequestNoQposDetectedUnbond() {
-        Log.d("MyQposClass", "onRequestNoQposDetectedUnbond called")
-    }
+    override fun onRequestNoQposDetectedUnbond() {}
 
-    override fun onReturnDeviceCSRResult(re: String?) {
-        Log.d("MyQposClass", "onReturnDeviceCSRResult called with re: $re")
-    }
+    override fun onReturnDeviceCSRResult(re: String?) {}
 
-    override fun onReturnStoreCertificatesResult(re: Boolean) {
-        Log.d("MyQposClass", "onReturnStoreCertificatesResult called with re: $re")
-    }
+    override fun onReturnStoreCertificatesResult(re: Boolean) {}
 
-    override fun onReturnAnalyseDigEnvelop(result: String?) {
-        Log.d("MyQposClass", "onReturnAnalyseDigEnvelop called with result: $result")
-    }
+    override fun onReturnAnalyseDigEnvelop(result: String?) {}
 
     override fun onRequestWaitingUser() {
-        Log.d("MyQposClass", "onRequestWaitingUser called")
         context.showBluetoothDialog(bluetoothAdapter, true)
     }
 
     override fun onRequestSetAmount() {
-        Log.d("MyQposClass", "onRequestSetAmount called")
         cr100Pos?.setAmount("10", null, "566", QPOSService.TransactionType.SERVICES)
     }
 
-
     fun resetCardInfoFlow() {
-        Log.d("MyQposClass", "resetCardInfoFlow called")
         _cardInfoFlow.value = BtCardInfo()
         _requestPinFlow.value = PinData()
         cr100Pos!!.cancelTrade()
@@ -650,16 +485,13 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     }
 
 
-
     private fun <T> hideDialogAndShowToast(errorState: T?) {
-        Log.d("MyQposClass", "hideDialogAndShowToast called with errorState: $errorState")
         hideBluetoothDialog()
         Toast.makeText(context, "Oops, something went wrong: $errorState", Toast.LENGTH_LONG)
             .show()
     }
 
     fun cleanup() {
-        Log.d("MyQposClass", "cleanup called")
         job.cancel()
         _cardInfoFlow.value = BtCardInfo()
     }

@@ -105,24 +105,6 @@ object TLVParser {
         return decryptedBytes.joinToString("") { "%02X".format(it) }
     }
 
-//
-//    fun findTagValue(input: String, tag: String = "9F0607", lengthAfterTag: Int = 14): String {
-//        val tagIndex = input.indexOf(tag)
-//
-//        if (tagIndex == -1) {
-//            return ""
-//        }
-//
-//        val startIndex = tagIndex + tag.length
-//
-//        if (startIndex + lengthAfterTag > input.length) {
-//            return ""
-//        }
-//
-//        return input.substring(startIndex, startIndex + lengthAfterTag)
-//    }
-
-
     fun getCardSchemeFromAid(aid: String): NfcPaymentType? {
         return when (aid) {
             "A0000000041010" -> NfcPaymentType.MASTERCARD
@@ -392,9 +374,12 @@ object TLVParser {
         return if(this.startsWith("10"))this.substring(2)else this
     }
 
+    private fun isVerveContactless(track2Data: String): Boolean {
+        var cleanedTrackData = track2Data
 
-   private fun isVerveContactless(track2Data: String): Boolean {
-        val cleanedTrackData = track2Data.removePrefix("711")
+        if (track2Data.startsWith("711") && track2Data.length > 9) {
+            cleanedTrackData = track2Data.removePrefix("711")
+        }
 
         // Extract BIN (first 6 digits)
         val bin = cleanedTrackData.take(6)
@@ -404,5 +389,6 @@ object TLVParser {
 
         return contactlessBins.contains(bin)
     }
+
 
 }
