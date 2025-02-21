@@ -10,7 +10,9 @@ import android.nfc.NfcManager
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -38,6 +40,7 @@ class AuthenticationActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         super.onCreate(savedInstanceState)
         setTheme(R.style.AppTheme)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_authentication)
+        Log.e("TAG", "onCreate: Reached here", )
 
         val nfcManager: NfcManager = getSystemService(NFC_SERVICE) as NfcManager
         nfcAdapter = nfcManager.defaultAdapter
@@ -53,15 +56,15 @@ class AuthenticationActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
         }
         val debuggableModeEnabled = isDebuggableModeEnabled(applicationContext)
 
-//        if (RootUtil.isDeviceRooted) {
-//            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
-//            finish()
-//        }
-//        if (debuggableModeEnabled) {
-//            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
-//                .show()
-//            finish()
-//        }
+        if (RootUtil.isDeviceRooted) {
+            Toast.makeText(this, getString(R.string.device_is_rooted), Toast.LENGTH_SHORT).show()
+            finish()
+        }
+        if (debuggableModeEnabled) {
+            Toast.makeText(this, getString(R.string.device_is_a_debug_device), Toast.LENGTH_SHORT)
+                .show()
+            finish()
+        }
         if (Prefs.getBoolean(PREF_AUTHENTICATED, false) && tokenValid()) {
             startActivity(
                 Intent(this, MainActivity::class.java).apply {
@@ -72,6 +75,7 @@ class AuthenticationActivity : AppCompatActivity(), NfcAdapter.ReaderCallback {
             NetPosTerminalConfig.init(applicationContext)
             finish()
         }
+        Log.e("TAG", "onCreate>>: ${BuildConfig.FLAVOR}" )
         if (BuildConfig.FLAVOR.contains("providuspos")) {
             showFragment(LandingFragment())
         } else {

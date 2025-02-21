@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.cr100
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.dspread.xpos.CQPOSService
@@ -9,8 +10,12 @@ import com.dspread.xpos.QPOSService
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.model.CardChannel
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC
 import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC.extractTrack2AndPanValues
+import com.woleapp.netpos.contactless.cr100.utils.DUKPK2009CBC.getData
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractPANFromTrack2
+import com.woleapp.netpos.contactless.cr100.utils.TLVParser.extractTrack2DataFromICCResult
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.findTagValue
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getCardSchemeFromAid
 import com.woleapp.netpos.contactless.cr100.utils.TLVParser.getTlvC0AndC2FromNfcBatch
@@ -31,6 +36,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Hashtable
 
+data class PinData(
+    val isPinSet: Boolean? = false,
+    val btCardInfo: BtCardInfo? = null,
+    val pan: String = "",
+    val cardType: CardChannel = CardChannel.Contactless,
+)
+
 class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val context: FragmentActivity) : CQPOSService() {
     private var blueTitle: String? = null
     private val job = Job()
@@ -42,62 +54,13 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     private var _cardBatteryFlow = MutableStateFlow("")
     val cardBatteryFlow: StateFlow<String> = _cardBatteryFlow
 
+    private var _requestPinFlow = MutableStateFlow(PinData())
+    val requestPinFlow: StateFlow<PinData> = _requestPinFlow
+
+    private var isDipContact: Boolean = false
+
     fun setBlueTitle(blueTitle: String) {
         this.blueTitle = blueTitle
-    }
-
-    override fun onDoTradeResult(
-        result: QPOSService.DoTradeResult?,
-        decodeData: Hashtable<String, String>?,
-    ) {
-        if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
-            val encTrack2 = decodeData!!["encTrack2"]
-            val trackKsn = decodeData["trackksn"]
-
-            val clearPan: String =
-                DUKPK2009CBC.getData(
-                    trackKsn,
-                    encTrack2,
-                    DUKPK2009CBC.Enum_key.DATA,
-                    DUKPK2009CBC.Enum_mode.CBC,
-                    context,
-                )
-
-            val panTrack2Pair = extractTrack2AndPanValues(clearPan)
-            val (realPan, track2) = panTrack2Pair
-            _cardInfoFlow.value = _cardInfoFlow.value.copy(realPan = realPan, track2 = track2)
-
-            customScope.launch {
-                delay(200)
-                if (cr100Pos!!.nfcBatchData != null) {
-                    val tlv = cr100Pos!!.nfcBatchData["tlv"]
-
-                    val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
-
-                    val decryptedIcc =
-                        DUKPK2009CBC.getData(
-                            tagC0!!.value,
-                            tagC2!!.value,
-                            DUKPK2009CBC.Enum_key.DATA,
-                            DUKPK2009CBC.Enum_mode.CBC,
-                            context,
-                        )
-
-                    val cardTypeAid = findTagValue(decryptedIcc)
-
-                    val cardType = getCardSchemeFromAid(cardTypeAid)
-
-                    // Update the decryptedIcc and cardType in the StateFlow
-                    _cardInfoFlow.value =
-                        _cardInfoFlow.value.copy(
-                            decryptedIcc = decryptedIcc,
-                            cardType = cardType,
-                        )
-                }
-            }
-        } else {
-            hideDialogAndShowToast(result)
-        }
     }
 
     override fun onQposInfoResult(posInfoData: Hashtable<String, String>?) {
@@ -119,31 +82,149 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         _cardBatteryFlow.value = batteryPercentage
     }
 
+    override fun onDoTradeResult(
+        result: QPOSService.DoTradeResult?,
+        decodeData: Hashtable<String, String>?,
+    ) {
+        if (result == QPOSService.DoTradeResult.NFC_ONLINE || result == QPOSService.DoTradeResult.NFC_OFFLINE) {
+            _requestPinFlow.value = _requestPinFlow.value.copy(cardType = CardChannel.Contactless)
+            isDipContact = false
+
+            val encTrack2 = decodeData!!["encTrack2"]
+            val trackKsn = decodeData["trackksn"]
+
+            val clearPan: String =
+                getData(
+                    trackKsn,
+                    encTrack2,
+                    DUKPK2009CBC.Enum_key.DATA,
+                    DUKPK2009CBC.Enum_mode.CBC,
+                    context,
+                )
+
+            val panTrack2Pair = extractTrack2AndPanValues(clearPan)
+            val (realPan, track2) = panTrack2Pair
+            _cardInfoFlow.value = _cardInfoFlow.value.copy(realPan = realPan, track2 = track2)
+
+            customScope.launch {
+                delay(200)
+                if (cr100Pos!!.nfcBatchData != null) {
+                    val tlv = cr100Pos!!.nfcBatchData["tlv"]
+
+                    val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
+
+                    val decryptedIcc =
+                        getData(
+                            tagC0!!.value,
+                            tagC2!!.value,
+                            DUKPK2009CBC.Enum_key.DATA,
+                            DUKPK2009CBC.Enum_mode.CBC,
+                            context,
+                        )
+
+                    val cardTypeAid = findTagValue(decryptedIcc)
+
+                    val cardType = getCardSchemeFromAid(cardTypeAid)
+
+                    // Update the decryptedIcc and cardType in the StateFlow
+                    _cardInfoFlow.value =
+                        _cardInfoFlow.value.copy(
+                            decryptedIcc = decryptedIcc,
+                            cardType = cardType,
+                        )
+                }
+            }
+        } else if (result == QPOSService.DoTradeResult.ICC) {
+            cr100Pos?.doEmvApp(QPOSService.EmvOption.START)
+        } else {
+            hideDialogAndShowToast(result)
+        }
+    }
+
     override fun onRequestTransactionResult(transactionResult: QPOSService.TransactionResult?) {
         var msg = ""
         when (transactionResult) {
             QPOSService.TransactionResult.APPROVED -> {}
-            QPOSService.TransactionResult.TERMINATED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.DECLINED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CANCEL -> {
+            QPOSService.TransactionResult.TERMINATED -> {
+                hideDialogAndShowToast(transactionResult)
             }
-            QPOSService.TransactionResult.CAPK_FAIL -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.NOT_ICC -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.SELECT_APP_FAIL -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.DEVICE_ERROR -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.TRADE_LOG_FULL -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CARD_NOT_SUPPORTED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.MISSING_MANDATORY_DATA -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CARD_BLOCKED_OR_NO_EMV_APPS -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.INVALID_ICC_DATA -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.FALLBACK -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.NFC_TERMINATED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CARD_REMOVED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CONTACTLESS_TRANSACTION_NOT_ALLOW -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.CARD_BLOCKED -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.TRANS_TOKEN_INVALID -> hideDialogAndShowToast(transactionResult)
-            QPOSService.TransactionResult.APP_BLOCKED -> hideDialogAndShowToast(transactionResult)
-            else -> msg = transactionResult?.name.orEmpty()
+            QPOSService.TransactionResult.DECLINED -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.CANCEL -> {}
+
+            QPOSService.TransactionResult.CAPK_FAIL -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.NOT_ICC -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.SELECT_APP_FAIL -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.DEVICE_ERROR -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.TRADE_LOG_FULL -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.CARD_NOT_SUPPORTED -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.MISSING_MANDATORY_DATA -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.CARD_BLOCKED_OR_NO_EMV_APPS -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.INVALID_ICC_DATA -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.FALLBACK -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.NFC_TERMINATED -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.CARD_REMOVED -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.CONTACTLESS_TRANSACTION_NOT_ALLOW -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.CARD_BLOCKED -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            QPOSService.TransactionResult.TRANS_TOKEN_INVALID -> {
+                hideDialogAndShowToast(
+                    transactionResult,
+                )
+            }
+
+            QPOSService.TransactionResult.APP_BLOCKED -> {
+                hideDialogAndShowToast(transactionResult)
+            }
+            else -> {
+                msg = transactionResult?.name.orEmpty()
+            }
         }
     }
 
@@ -159,14 +240,19 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         hideBluetoothDialog()
         BluetoothDialog.loadingDialog?.dismiss()
         blueTitle?.let {
-            BluetoothToolsBean.setBulueToothName("Bluetooth (${it.substring(0, 6)}...${it.substring(it.length - 3)})")
+            BluetoothToolsBean.setBulueToothName(
+                "Bluetooth (${it.substring(0, 6)}...${
+                    it.substring(
+                        it.length - 3,
+                    )
+                })",
+            )
         }
         val keyIndex = getBluetoothKeyIndex()
         cr100Pos?.doTrade(keyIndex, 60)
     }
 
-    override fun onRequestNoQposDetected() {
-    }
+    override fun onRequestNoQposDetected() {}
 
     @SuppressLint("MissingPermission")
     override fun onDeviceFound(device: BluetoothDevice?) {
@@ -181,6 +267,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                 bluetoothAdapter.setData(itm)
             }
         } ?: run {
+            Log.w("MyQposClass", "Device found but device is null")
         }
     }
 
@@ -192,7 +279,40 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         cr100Pos?.isServerConnected(true)
     }
 
-    override fun onRequestOnlineProcess(tlv: String?) {}
+    override fun onRequestOnlineProcess(tlv: String?) {
+        if (isDipContact) {
+            customScope.launch {
+                delay(200)
+                val (tagC0, tagC2) = getTlvC0AndC2FromNfcBatch(parse(tlv!!)!!)
+
+                val decryptedIcc =
+                    getData(
+                        tagC0!!.value,
+                        tagC2!!.value,
+                        DUKPK2009CBC.Enum_key.DATA,
+                        DUKPK2009CBC.Enum_mode.CBC,
+                        context,
+                    )
+
+                val cardTypeAid = findTagValue(decryptedIcc)
+                val cardType = getCardSchemeFromAid(cardTypeAid)
+                val track2 = extractTrack2DataFromICCResult(decryptedIcc = decryptedIcc, cardType = cardType?.name ?: "") ?: ""
+                val pan = extractPANFromTrack2(track2) ?: ""
+
+                _requestPinFlow.value =
+                    _requestPinFlow.value.copy(
+                        isPinSet = false,
+                        btCardInfo =
+                            BtCardInfo(
+                                track2 = track2,
+                                realPan = pan,
+                                decryptedIcc = decryptedIcc,
+                                cardType = cardType,
+                            ),
+                    )
+            }
+        }
+    }
 
     override fun onRequestTime() {
         val terminalTime =
@@ -249,7 +369,14 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
         result: String?,
     ) {}
 
-    override fun onRequestSetPin() {}
+    override fun onRequestSetPin() {
+        try {
+            cr100Pos?.setPinpad()
+        } catch (ex: Exception) {
+            _requestPinFlow.value = _requestPinFlow.value.copy(isPinSet = true, cardType = CardChannel.Contact)
+            isDipContact = true
+        }
+    }
 
     override fun onReturnSetMasterKeyResult(isSuccess: Boolean) {}
 
@@ -385,6 +512,7 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
     fun resetCardInfoFlow() {
         _cardInfoFlow.value = BtCardInfo()
         _cardBatteryFlow.value = ""
+        _requestPinFlow.value = PinData()
         cr100Pos!!.cancelTrade()
     }
 

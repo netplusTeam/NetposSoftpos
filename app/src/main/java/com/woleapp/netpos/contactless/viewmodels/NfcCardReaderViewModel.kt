@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.alcineo.softpos.payment.model.transaction.TransactionEndStatus
 import com.danbamitale.epmslib.entities.CardData
 import com.danbamitale.epmslib.entities.TransactionResponse
+import com.dspread.xpos.QPOSService
 import com.google.gson.Gson
 import com.mastercard.terminalsdk.listeners.PaymentDataProvider
 import com.mastercard.terminalsdk.utility.ByteArrayWrapper
@@ -26,8 +27,9 @@ import com.woleapp.netpos.contactless.taponphone.tlv.BerTag
 import com.woleapp.netpos.contactless.taponphone.tlv.BerTlvParser
 import com.woleapp.netpos.contactless.taponphone.tlv.HexUtil
 import com.woleapp.netpos.contactless.taponphone.verve.model.TransactionFullDataDto
-import com.woleapp.netpos.contactless.taponphone.visa.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.taponphone.visa.*
 import com.woleapp.netpos.contactless.taponphone.visa.PPSEv21.PPSEManager
+import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.ICCCardHelper
 import com.woleapp.netpos.contactless.util.sendSMS
@@ -43,6 +45,18 @@ import javax.inject.Inject
 class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
     private val disposable = CompositeDisposable()
     private val icc = StringBuilder()
+
+
+    companion object {
+        lateinit var INSTANCE: NetPosApp
+
+        @JvmStatic
+        var cr100Pos: QPOSService? = null
+
+        fun assignInstance(instance: NetPosApp) {
+            INSTANCE = instance
+        }
+    }
 
     private var _lastPosTransactionResponse: MutableLiveData<TransactionResponse> =
         MutableLiveData()
@@ -82,6 +96,8 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
     val showPinPadDialog: LiveData<Event<String?>>
         get() = _showPinPadDialog
+
+
 
     private val _showWaitingDialog: MutableLiveData<Event<NfcPaymentType?>> by lazy {
         MutableLiveData()
@@ -160,6 +176,7 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
 
 
     fun doVerveCardTransaction(transactionFullDataDto: TransactionFullDataDto) {
+        println("Transaction: Do verve transaction")
         _enableNfcForegroundDispatcher.postValue(Event(NfcDataWrapper(false, null)))
         val transactionResult = transactionFullDataDto.transactionResult
         val transactionEndStatus = transactionResult?.transactionEndStatus
@@ -412,7 +429,13 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    fun showPin(pan:String){
+        _showPinPadDialog.postValue(Event(pan))
+    }
+
     fun doCr100Transaction(data:BtCardInfo) {
+        println("Transaction: Do CR 100 Transactions")
+        println("Do CR 100 Transactions.......$data")
         val (pan, track2, icc, cardType) = data
 
         iccCardHelper = ICCCardHelper()
@@ -421,9 +444,9 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
             customerName = "CUSTOMER"
         }
         val cardData = CardData(
-            track2,
+            track2?:"",
             "",
-            pan,
+            pan?:"",
             "051"
         )
         iccCardHelper.cardData = cardData
@@ -431,7 +454,32 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
         hideBluetoothDialog()
     }
 
+
+
+    fun doCr100TransactionDip(data:BtCardInfo) {
+        val (pan, track2, icc, cardType) = data
+
+        iccCardHelper = ICCCardHelper()
+        iccCardHelper.apply {
+            cardScheme = cardType!!.cardScheme
+            customerName = "CUSTOMER"
+        }
+        _showAccountTypeDialog.postValue(Event(true))
+        val cardData = CardData(
+            track2?:"",
+            "",
+            pan?:"",
+            "051"
+        )
+        iccCardHelper.cardData = cardData
+
+        hideBluetoothDialog()
+        //listener.resetCardInfoFlow()
+    }
+
+
     private fun createVisaCardData(icc: StringBuilder) {
+        println("Transaction: Visa")
         Timber.e("create visa card")
         icc.append("9F3303E068C8")
         icc.append("9F350122")
@@ -469,13 +517,19 @@ class NfcCardReaderViewModel @Inject constructor() : ViewModel() {
     }
 
     fun setPinBlock(encryptedPinBloc: String?) {
+        println("Pin blocked........$encryptedPinBloc")
+       // var pinBlock: String? = PasswordDialog.buildCvmPinBlock(cr100Pos?.getEncryptData(), rawData)
+        //cr100Pos?.sendCvmPin(pinBlock, true);
         iccCardHelper.cardData?.apply {
             pinBlock = encryptedPinBloc
         }
+
         _showAccountTypeDialog.value = Event(true)
+       // cr100Pos?.sendCvmPin(encryptedPinBloc,true)
     }
 
     private fun doMasterCardTransaction() {
+        println("Transaction: Do master transaction")
         NetPosApp.INSTANCE.outcomeObserver.resetObserver(object :
             TransactionListener {
             override fun onTransactionSuccessful() {

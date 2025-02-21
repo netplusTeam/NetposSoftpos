@@ -171,6 +171,8 @@ class SalesViewModel
             val expirationMonth = expiry.takeLast(2)
             val expirationYear = expiry.take(2)
             val formattedExpirationDate = "$expirationMonth/$expirationYear"
+
+            Log.e("Test", "payThroughMPGS: $cardNumber......$cvv........$expiry......$netpluspayMid......$cardPin", )
             contactlessQrPaymentRepository.payThroughMPGS(
                 BEARER_TOKEN_FOR_MPGS_TRANSACTION,
                 amountDbl.toString(),
@@ -387,6 +389,8 @@ class SalesViewModel
             rrn: String,
             stan: String,
         ) {
+            println("RequestData......$requestData")
+
             val modifiedRequestData =
                 requestData.apply {
                     this.RRN = rrn
@@ -398,6 +402,7 @@ class SalesViewModel
                 handleUpdateOfTransactionPayloadInBackend(it, rrn)
                 Single.just(it)
             }.flatMap {
+                println("Response......$it")
                 it.amount = amountLong
                 if (it.responseCode == "A3") {
                     Prefs.remove(PREF_CONFIG_DATA)

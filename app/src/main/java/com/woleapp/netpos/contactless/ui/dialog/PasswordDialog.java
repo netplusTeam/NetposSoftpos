@@ -1,5 +1,7 @@
 package com.woleapp.netpos.contactless.ui.dialog;
 
+import static com.dspread.xpos.Util.HexStringToByteArray;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Handler;
@@ -21,13 +23,19 @@ import com.danbamitale.epmslib.entities.KeyHolder;
 import com.danbamitale.epmslib.entities.KeyHolderKt;
 import com.danbamitale.epmslib.utils.TripleDES;
 import com.dsofttech.dprefs.utils.DPrefs;
+import com.dspread.xpos.QPOSService;
+import com.dspread.xpos.Util;
+import com.dspread.xpos.utils.AESUtil;
+import com.hivemq.client.internal.util.ByteArray;
 import com.woleapp.netpos.contactless.R;
+import com.woleapp.netpos.contactless.app.NetPosApp;
 import com.woleapp.netpos.contactless.util.ExtensionFunctionsKt;
 import com.woleapp.netpos.contactless.util.Singletons;
 import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
 
@@ -71,6 +79,8 @@ public class PasswordDialog {
 
 
     public PasswordDialog(Activity context, String pan, Listener pinListener) {
+
+
 
         this.keyMode = keyMode;
 
@@ -213,11 +223,57 @@ public class PasswordDialog {
         }
     }
 
+
+
+
+    public static String buildCvmPinBlock(Hashtable<String, String> value, String pin) {
+        String randomData = value.get("RandomData") == null ? "" : value.get("RandomData");
+        String pan = value.get("PAN") == null ? "" : value.get("PAN");
+        String AESKey = value.get("AESKey") == null ? "" : value.get("AESKey");
+        String isOnline = value.get("isOnlinePin") == null ? "" : value.get("isOnlinePin");
+        String pinTryLimit = value.get("pinTryLimit") == null ? "" : value.get("pinTryLimit");
+        //iso-format4 pinblock
+        int pinLen = pin.length();
+        pin = "4" + Integer.toHexString(pinLen) + pin;
+        for (int i = 0; i < 14 - pinLen; i++) {
+            pin = pin + "A";
+        }
+        pin += randomData.substring(0, 16);
+        String panBlock = "";
+        int panLen = pan.length();
+        int m = 0;
+        if (panLen < 12) {
+            panBlock = "0";
+            for (int i = 0; i < 12 - panLen; i++) {
+                panBlock += "0";
+            }
+            panBlock = panBlock + pan + "0000000000000000000";
+        } else {
+            m = pan.length() - 12;
+            panBlock = m + pan;
+            for (int i = 0; i < 31 - panLen; i++) {
+                panBlock += "0";
+            }
+        }
+        String pinBlock1 = AESUtil.encrypt(AESKey, pin);
+        pin = Util.xor16(HexStringToByteArray(pinBlock1), HexStringToByteArray(panBlock));
+        String pinBlock2 = AESUtil.encrypt(AESKey, pin);
+        return pinBlock2;
+    }
+
+
+
+
     public interface Listener {
 
         void onConfirm(String pinBlock);
 
         void onError(String message);
     }
+
+
+
+
+
 
 }

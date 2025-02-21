@@ -8,7 +8,7 @@
         android:title="Home" />
 
     <item
-        android:id="@+id/transaction"
+        android:id="@+id/payment"
         android:enabled="true"
         android:icon="@drawable/ic_trans"
         android:title="Transactions" />
