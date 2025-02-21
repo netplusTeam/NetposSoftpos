@@ -791,6 +791,7 @@ class DashboardFragment : BaseFragment() {
 
     private fun initIntent() {
         binding.batteryTxt.visibility = View.VISIBLE
+        binding.batteryImg.visibility = View.VISIBLE
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 

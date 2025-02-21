@@ -210,6 +210,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/dimen_5dp"
                     android:text="checking..."
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@+id/battery_img"
                     app:layout_constraintEnd_toStartOf="@+id/battery_img"
                     app:layout_constraintTop_toTopOf="@+id/battery_img"
@@ -222,7 +223,7 @@
                     android:layout_marginTop="@dimen/margin_10"
                     android:layout_marginEnd="@dimen/margin_10"
                     android:src="@drawable/battery"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
