@@ -4,6 +4,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -735,14 +736,13 @@ class DashboardFragment : BaseFragment() {
                 hideBluetoothDialog()
                 // listener.resetCardInfoFlow()
             } else {
-                if (result.cardType == CardChannel.Contact)
-                    {
-                        if (result.btCardInfo != null) {
-                            nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-                            hideBluetoothDialog()
-                            // listener.resetCardInfoFlow()
-                        }
+                if (result.cardType == CardChannel.Contact) {
+                    if (result.btCardInfo != null) {
+                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                        hideBluetoothDialog()
+                        // listener.resetCardInfoFlow()
                     }
+                }
             }
         }
 
@@ -869,9 +869,27 @@ class DashboardFragment : BaseFragment() {
         batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
             if (batteryLevel.isNotEmpty()) {
                 binding.batteryTxt.text = batteryLevel
-                Log.d("BATTERY_LEVELPL", "$batteryLevel")
+                updateBatteryImage(requireContext(), batteryLevel, binding.batteryImg)
             }
         }
+    }
+
+    private fun updateBatteryImage(
+        context: Context,
+        batteryLevelString: String,
+        imageView: ImageView,
+    ) {
+        // Extract numeric value and convert to Int, handling potential errors
+
+        val drawableRes =
+            when (batteryLevelString.filter { it.isDigit() }.toIntOrNull() ?: 0) {
+                in 0..20 -> R.drawable.battery // Battery is low
+                in 21..50 -> R.drawable.battery_25 // Battery is medium
+                in 51..80 -> R.drawable.battery_75 // Battery is high
+                in 81..100 -> R.drawable.battery_full // Battery is full
+                else -> R.drawable.battery // Fallback drawable
+            }
+        imageView.setImageResource(drawableRes)
     }
 
     private fun scanBlue() {

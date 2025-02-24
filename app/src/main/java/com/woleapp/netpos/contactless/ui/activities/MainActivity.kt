@@ -28,7 +28,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -67,7 +66,6 @@ import com.woleapp.netpos.contactless.taponphone.visa.LiveNfcTransReceiver
 import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
-import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog2
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PasswordDialog3
 import com.woleapp.netpos.contactless.ui.fragments.*
@@ -108,7 +106,8 @@ class MainActivity :
     private var progressDialog: ProgressDialog? = null
     private lateinit var alertDialog: AlertDialog
     private lateinit var binding: ActivityMainBinding
-    //private lateinit var notificationsLayout: ConstraintLayout
+
+    // private lateinit var notificationsLayout: ConstraintLayout
     private lateinit var unreadNotificationsCountTv: TextView
     private lateinit var pdfView: LayoutPosReceiptPdfBinding
     private lateinit var qrPdfView: LayoutQrReceiptPdfBinding
@@ -154,9 +153,6 @@ class MainActivity :
     private var isProcessing = false
 
     private var nfcEnabled = false
-
-
-
 
     companion object {
         lateinit var INSTANCE: NetPosApp
@@ -368,13 +364,13 @@ class MainActivity :
                 Manifest.permission.BLUETOOTH, // Required for older Android versions
                 Manifest.permission.BLUETOOTH_ADMIN, // Required for managing Bluetooth
             ) || (
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                            !EasyPermissions.hasPermissions(
-                                applicationContext,
-                                Manifest.permission.BLUETOOTH_SCAN, // Required for Android 12+
-                                Manifest.permission.BLUETOOTH_CONNECT, // Required for Android 12+
-                            )
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    !EasyPermissions.hasPermissions(
+                        applicationContext,
+                        Manifest.permission.BLUETOOTH_SCAN, // Required for Android 12+
+                        Manifest.permission.BLUETOOTH_CONNECT, // Required for Android 12+
                     )
+            )
         ) {
             EasyPermissions.requestPermissions(
                 this,
@@ -574,7 +570,6 @@ class MainActivity :
                 showPinDialog(it)
             }
         }
-
 
         dialogContactlessReaderBinding.cancel.setOnClickListener {
             waitingDialog.dismiss()
@@ -845,39 +840,38 @@ class MainActivity :
         locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
     }
 
-     private fun showPinDialog(pan: String) {
-         println("Pan of the pin......$pan")
-         if (pan.isNotEmpty()){
-             PasswordDialog(
-                 this,
-                 pan,
-                 object : PasswordDialog.Listener {
-                     override fun onConfirm(pinBlock: String?) {
-                        viewModel.setPinBlock(pinBlock)
-                     }
+    private fun showPinDialog(pan: String) {
+        println("Pan of the pin......$pan")
+        if (pan.isNotEmpty())
+            {
+                PasswordDialog(
+                    this,
+                    pan,
+                    object : PasswordDialog.Listener {
+                        override fun onConfirm(pinBlock: String?) {
+                            viewModel.setPinBlock(pinBlock)
+                        }
 
-                     override fun onError(message: String?) {
-                         Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                         viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-                     }
-                 },
-             ).showDialog()
-         }else{
-             PasswordDialog3(this, object : PasswordDialog3.Listener {
-                 override fun onConfirm(pinBlock: String) {
-                     nfcCardReaderViewModel.setPinBlock(pinBlock)
-                 }
-                 override fun onError(message: String) {
+                        override fun onError(message: String?) {
+                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                            viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
+                        }
+                    },
+                ).showDialog()
+            } else {
+            PasswordDialog3(
+                this,
+                object : PasswordDialog3.Listener {
+                    override fun onConfirm(pinBlock: String) {
+                        nfcCardReaderViewModel.setPinBlock(pinBlock)
+                    }
 
-                 }
-
-             }).showDialog()
-         }
-
+                    override fun onError(message: String) {
+                    }
+                },
+            ).showDialog()
+        }
     }
-
-
-
 
     private fun showFragment(
         targetFragment: Fragment,
@@ -894,9 +888,8 @@ class MainActivity :
         }
     }
 
-     fun showSelectAccountTypeDialog(context: Context) {
-
-         println("Show dialog................")
+    fun showSelectAccountTypeDialog(context: Context) {
+        println("Show dialog................")
         var dialogSelectAccountTypeBinding: DialogSelectAccountTypeBinding
         val dialog =
             AlertDialog.Builder(context).apply {
@@ -1346,9 +1339,6 @@ class MainActivity :
         }.show()
     }
 
-
-
-
     private fun getEndOfDayTransactions(
         startTimestamp: Long,
         endTimestamp: Long,
@@ -1649,8 +1639,8 @@ class MainActivity :
 
     private fun initViews() {
         with(binding) {
-           // notificationsLayout = dashboardHeader.notification
-           // unreadNotificationsCountTv = dashboardHeader.unreadNotifications
+            // notificationsLayout = dashboardHeader.notification
+            // unreadNotificationsCountTv = dashboardHeader.unreadNotifications
         }
     }
 
@@ -1658,10 +1648,10 @@ class MainActivity :
         notificationViewModel.unreadNotifications.observe(this) { unreadMessages ->
             unreadMessages?.let {
                 if (it.isEmpty()) {
-                    //notificationsLayout.visibility = View.INVISIBLE
+                    // notificationsLayout.visibility = View.INVISIBLE
                 } else {
                     unreadNotificationsCountTv.text = it.size.toString()
-                   // notificationsLayout.visibility = View.VISIBLE
+                    // notificationsLayout.visibility = View.VISIBLE
                 }
             }
         }
@@ -1798,9 +1788,9 @@ class MainActivity :
             supportFragmentManager,
         ) {
             scanQrViewModel.payByTransfer.value?.data?.user?.let {
-               // binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
-               // binding.dashboardHeader.merchantDetails.text = it.acctNumber
-               // binding.dashboardHeader.bankName.text = it.bank
+                // binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
+                // binding.dashboardHeader.merchantDetails.text = it.acctNumber
+                // binding.dashboardHeader.bankName.text = it.bank
                 copyAccountNumber = it.acctNumber
                 Log.d("CHECK_ACCOUNT", it.acctNumber)
                 Prefs.putString(PREF_ACCOUNT_NUMBER, gson.toJson(it))
@@ -1822,7 +1812,6 @@ class MainActivity :
         println(">>>>>>>>>>>>>>>>>>>>>Setup for verse observe")
         mVerveTransactionViewModel.onTransactionFinishedEvent
             .observe(this) { transactionFullDataDto: TransactionFullDataDto ->
-
 
                 println("Verve Data.....$transactionFullDataDto")
                 viewModel.doVerveCardTransaction(transactionFullDataDto)
