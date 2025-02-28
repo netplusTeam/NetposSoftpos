@@ -842,23 +842,22 @@ class MainActivity :
 
     private fun showPinDialog(pan: String) {
         println("Pan of the pin......$pan")
-        if (pan.isNotEmpty())
-            {
-                PasswordDialog(
-                    this,
-                    pan,
-                    object : PasswordDialog.Listener {
-                        override fun onConfirm(pinBlock: String?) {
-                            viewModel.setPinBlock(pinBlock)
-                        }
+        if (pan.isNotEmpty()) {
+            PasswordDialog(
+                this,
+                pan,
+                object : PasswordDialog.Listener {
+                    override fun onConfirm(pinBlock: String?) {
+                        viewModel.setPinBlock(pinBlock)
+                    }
 
-                        override fun onError(message: String?) {
-                            Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                            viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-                        }
-                    },
-                ).showDialog()
-            } else {
+                    override fun onError(message: String?) {
+                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                        viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
+                    }
+                },
+            ).showDialog()
+        } else {
             PasswordDialog3(
                 this,
                 object : PasswordDialog3.Listener {
@@ -867,6 +866,8 @@ class MainActivity :
                     }
 
                     override fun onError(message: String) {
+                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                        viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
                     }
                 },
             ).showDialog()

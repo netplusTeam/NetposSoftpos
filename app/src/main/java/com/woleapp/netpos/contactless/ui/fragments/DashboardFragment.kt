@@ -717,6 +717,7 @@ class DashboardFragment : BaseFragment() {
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
         val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
+        Log.d("JUST_CHECKING", "${requestPinLiveData.value?.btCardInfo}")
         // contactless
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
