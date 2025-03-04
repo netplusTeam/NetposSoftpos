@@ -6,5 +6,10 @@ data class BtCardInfo(
     val realPan: String = "",
     val track2: String = "",
     val decryptedIcc: String = "",
-    val cardType: NfcPaymentType? = null
+    val cardType: NfcPaymentType? = null,
+    val cardChannel:CardChannel? = CardChannel.Contactless
 )
+
+enum class CardChannel{
+    Contactless,Contact,PINREQUEST
+}

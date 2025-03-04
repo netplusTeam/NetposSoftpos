@@ -4,6 +4,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.nfc.NfcAdapter
 import android.os.Build
@@ -11,10 +12,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -40,10 +43,8 @@ import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
-import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
-import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
+import com.woleapp.netpos.contactless.cr100.model.CardChannel
+import com.woleapp.netpos.contactless.cr100.widget.*
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.AuthenticationEventData
@@ -94,7 +95,6 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.util.concurrent.TimeUnit
 
-
 class DashboardFragment : BaseFragment() {
     private lateinit var progressDialog: ProgressDialog
     private lateinit var binding: FragmentDashboardBinding
@@ -121,6 +121,7 @@ class DashboardFragment : BaseFragment() {
     private var blueTitle: String? = null
     private var startTime = 0L
     private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -138,23 +139,25 @@ class DashboardFragment : BaseFragment() {
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-        }
+        dialogPrintTypeBinding =
+            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+                executePendingBindings()
+            }
         loader = alertDialog(requireContext())
 
-        printerErrorDialog = AlertDialog.Builder(requireContext()).apply {
-            setTitle(getString(R.string.printer_error))
-            setIcon(R.drawable.ic_warning)
-            setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
-                d.cancel()
-                viewModel.showReceiptDialog()
-            }
-            setNegativeButton(getString(R.string.dismiss)) { d, _ ->
-                d.cancel()
-                viewModel.finish()
-            }
-        }.create()
+        printerErrorDialog =
+            AlertDialog.Builder(requireContext()).apply {
+                setTitle(getString(R.string.printer_error))
+                setIcon(R.drawable.ic_warning)
+                setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
+                    d.cancel()
+                    viewModel.showReceiptDialog()
+                }
+                setNegativeButton(getString(R.string.dismiss)) { d, _ ->
+                    d.cancel()
+                    viewModel.finish()
+                }
+            }.create()
         binding.apply {
             viewmodel = viewModel
             lifecycleOwner = viewLifecycleOwner
@@ -182,7 +185,6 @@ class DashboardFragment : BaseFragment() {
                             )
                         }
                     }
-
                 }
             }
         }
@@ -242,9 +244,7 @@ class DashboardFragment : BaseFragment() {
                 if (viewModel.validateFieldForBluetooth()) {
                     initCr100Intent()
                 }
-
             }
-
         }
 
         // toast the error messages
@@ -273,23 +273,25 @@ class DashboardFragment : BaseFragment() {
                     viewModel.setAccountType(it.accountType!!)
                     viewModel.cardData = it.cardData
                     if (!user.userType!!.contains("regular", true)) {
-                        EnterCvvNumberDialog(object : PinPadDialogListener {
-                            override fun onError(errorMessage: String) {
-                                showToast(errorMessage)
-                                return
-                            }
+                        EnterCvvNumberDialog(
+                            object : PinPadDialogListener {
+                                override fun onError(errorMessage: String) {
+                                    showToast(errorMessage)
+                                    return
+                                }
 
-                            override fun onConfirm(data: String) {
-                                viewModel.setTransactionStateToStarted()
-                                viewModel.payThroughMPGS(
-                                    card.pan,
-                                    data,
-                                    card.expiryDate,
-                                    user.netplusPayMid.toString(),
-                                    DPrefs.getString(PIN_KEY, ""),
-                                )
-                            }
-                        }).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
+                                override fun onConfirm(data: String) {
+                                    viewModel.setTransactionStateToStarted()
+                                    viewModel.payThroughMPGS(
+                                        card.pan,
+                                        data,
+                                        card.expiryDate,
+                                        user.netplusPayMid.toString(),
+                                        DPrefs.getString(PIN_KEY, ""),
+                                    )
+                                }
+                            },
+                        ).show(parentFragmentManager, STRING_CVV_DIALOG_TAG)
                     } else {
                         viewModel.makePayment(requireContext(), transactionType)
                     }
@@ -297,22 +299,23 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        adapter = ServiceAdapter {
-            when (it.id) {
-                0 -> showFragment(TransactionsFragment())
-                2 -> showFragment(NipNotificationFragment.newInstance())
-                3 -> showFragment(BillsFragment())
-                5 -> {
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
-                        .commit()
-                }
+        adapter =
+            ServiceAdapter {
+                when (it.id) {
+                    0 -> showFragment(TransactionsFragment())
+                    2 -> showFragment(NipNotificationFragment.newInstance())
+                    3 -> showFragment(BillsFragment())
+                    5 -> {
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.container_main, SettingsFragment()).addToBackStack(null)
+                            .commit()
+                    }
 
-                else -> {
-                    sendPayload()
+                    else -> {
+                        sendPayload()
+                    }
                 }
             }
-        }
 
         progressDialog = ProgressDialog(requireContext())
         return binding.root
@@ -333,7 +336,10 @@ class DashboardFragment : BaseFragment() {
         MqttHelper.sendPayload(MqttTopics.AUTHENTICATION, event)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         setServices()
         vend()
@@ -371,28 +377,30 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun setServices() {
-        val listOfServices = ArrayList<Service>().apply {
-            add(Service(0, "Transaction", R.drawable.ic_trans))
-            add(Service(1, "Balance Inquiry", R.drawable.ic_write))
-            add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
-            add(Service(5, "Settings", R.drawable.ic_baseline_settings))
-        }
+        val listOfServices =
+            ArrayList<Service>().apply {
+                add(Service(0, "Transaction", R.drawable.ic_trans))
+                add(Service(1, "Balance Inquiry", R.drawable.ic_write))
+                add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
+                add(Service(5, "Settings", R.drawable.ic_baseline_settings))
+            }
         adapter.submitList(listOfServices)
     }
 
     private fun vend() {
         if (isVend) {
             var count = 0
-            val progressBar = ProgressDialog(context).apply {
-                this.setCancelable(false)
-                this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
-                    dialog.cancel()
-                    compositeDisposable.clear()
-                    requireActivity().onBackPressed()
+            val progressBar =
+                ProgressDialog(context).apply {
+                    this.setCancelable(false)
+                    this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
+                        dialog.cancel()
+                        compositeDisposable.clear()
+                        requireActivity().onBackPressed()
+                    }
+                    this.setMessage("Waiting for amount.")
+                    show()
                 }
-                this.setMessage("Waiting for amount.")
-                show()
-            }
             val socket = Socket()
             var printWriter: PrintWriter? = null
             var reader: BufferedReader? = null
@@ -411,10 +419,11 @@ class DashboardFragment : BaseFragment() {
             }.flatMap {
                 Observable.interval(0, 5, TimeUnit.SECONDS)
             }.flatMap {
-                val out = JsonObject().apply {
-                    addProperty("serial_number", Build.ID)
-                    addProperty("status", "")
-                }.toString()
+                val out =
+                    JsonObject().apply {
+                        addProperty("serial_number", Build.ID)
+                        addProperty("status", "")
+                    }.toString()
                 printWriter?.println(out)
                 try {
                     val s = reader?.readLine()
@@ -426,7 +435,7 @@ class DashboardFragment : BaseFragment() {
                     Observable.just(Vend(0.0))
                 }
             }.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-                //Timber.e("vend: $it")
+                // Timber.e("vend: $it")
                 count++
                 if (it.amount > 0.0) {
                     progressBar.dismiss()
@@ -484,12 +493,13 @@ class DashboardFragment : BaseFragment() {
             return
         }
 
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!,
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
         progressDialog.setMessage("Checking Balance...")
@@ -522,15 +532,17 @@ class DashboardFragment : BaseFragment() {
 
                     val me = it.buildSMSText("Account Balance Check")
 
-                    val messageString = if (it.isApproved) {
-                        "Account Balance:\n " + it.accountBalances.joinToString("\n") { accountBalance ->
-                            "${accountBalance.accountType}, ${
-                                accountBalance.amount.div(100).formatCurrencyAmount()
-                            }"
+                    val messageString =
+                        if (it.isApproved) {
+                            "Account Balance:\n " +
+                                it.accountBalances.joinToString("\n") { accountBalance ->
+                                    "${accountBalance.accountType}, ${
+                                        accountBalance.amount.div(100).formatCurrencyAmount()
+                                    }"
+                                }
+                        } else {
+                            "${it.responseMessage}(${it.responseCode})"
                         }
-                    } else {
-                        "${it.responseMessage}(${it.responseCode})"
-                    }
 
                     showMessage(
                         if (it.isApproved) "Approved" else "Declined",
@@ -541,7 +553,10 @@ class DashboardFragment : BaseFragment() {
             }.disposeWith(compositeDisposable)
     }
 
-    private fun showMessage(s: String, vararg messageString: String) {
+    private fun showMessage(
+        s: String,
+        vararg messageString: String,
+    ) {
         AlertDialog.Builder(requireContext()).apply {
             setTitle(s)
             setMessage(messageString.first())
@@ -578,6 +593,29 @@ class DashboardFragment : BaseFragment() {
             }.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.show()
     }
 
+//    private fun openCr100(mode: QPOSService.CommunicationMode) {
+//        listener = MyQposClass(bluetoothAdapter, requireActivity())
+//        cr100Pos = QPOSService.getInstance(mode)
+//
+//        if (cr100Pos == null) {
+//            showToast("Unknown communication mode")
+//            return
+//        }
+//
+//        cr100Pos!!.setConext(requireActivity())
+//        val handler = Looper.myLooper()?.let { Handler(it) }
+//        cr100Pos!!.initListener(handler, listener)
+//
+//        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+//
+//        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+//            if (cardInfo.isValid()) {
+//                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+//                listener.resetCardInfoFlow()
+//            }
+//        }
+//    }
+
     private fun openCr100(mode: QPOSService.CommunicationMode) {
         listener = MyQposClass(bluetoothAdapter, requireActivity())
         cr100Pos = QPOSService.getInstance(mode)
@@ -592,13 +630,120 @@ class DashboardFragment : BaseFragment() {
         cr100Pos!!.initListener(handler, listener)
 
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+        val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
+        Log.d("JUST_CHECKING", "${requestPinLiveData.value?.btCardInfo}")
+        // contactless
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
                 nfcCardReaderViewModel.doCr100Transaction(cardInfo)
                 listener.resetCardInfoFlow()
             }
         }
+
+        // Contact
+        requestPinLiveData.observe(viewLifecycleOwner) { result ->
+
+            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+                nfcCardReaderViewModel.showPin(pan = result.pan)
+                if (result.btCardInfo != null) {
+                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                }
+                hideBluetoothDialog()
+                // listener.resetCardInfoFlow()
+            } else {
+                if (result.cardType == CardChannel.Contact) {
+                    if (result.btCardInfo != null) {
+                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                        hideBluetoothDialog()
+                        // listener.resetCardInfoFlow()
+                    }
+                }
+            }
+        }
+
+//        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
+//        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+//            if (batteryLevel.isNotEmpty())
+//                {
+//                    Log.d("BATTERY_LEVEL1", "$batteryPercentage")
+//                }
+//        }
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryPercent ->
+            Log.d("BATTERY_LEVEL", "$batteryPercent")
+        }
+    }
+
+    private fun initCr100Intent() {
+        binding.batteryTxt.visibility = View.VISIBLE
+        binding.batteryImg.visibility = View.VISIBLE
+        scanBlue()
+        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+
+        if (cr100Pos!!.bluetoothState) {
+            if (BluetoothToolsBean.getBlueToothName() != null) {
+                showToast(BluetoothToolsBean.getBlueToothName())
+                Prefs.putString(BATTERY_PERCENTAGE, "posinfo")
+            }
+
+            val info = Prefs.getString(BATTERY_PERCENTAGE)
+
+            if ("posinfo" == info) {
+                // First, get POS info
+                cr100Pos!!.getQposInfo()
+                handleResult()
+                // Delay `doTrade()` until `getQposInfo()` finishes
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val keyIndex: Int = getBluetoothKeyIndex()
+                    cr100Pos?.doTrade(keyIndex, 60)
+                }, 2000) // Adjust delay time if needed
+            } else {
+                val keyIndex: Int = getBluetoothKeyIndex()
+                cr100Pos?.doTrade(keyIndex, 60)
+            }
+        } else {
+            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
+                listener.setBlueTitle(it)
+            }
+
+            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
+                cr100Pos?.connectBluetoothDevice(true, 60, it)
+            } ?: run {
+                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                deviceType(BLUETOOTH)
+                refreshAdapter()
+                bluetoothAdapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+    private fun handleResult() {
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+            if (batteryLevel.isNotEmpty()) {
+                binding.batteryTxt.text = batteryLevel
+                updateBatteryImage(requireContext(), batteryLevel, binding.batteryImg)
+            }
+        }
+    }
+
+    private fun updateBatteryImage(
+        context: Context,
+        batteryLevelString: String,
+        imageView: ImageView,
+    ) {
+        // Extract numeric value and convert to Int, handling potential errors
+
+        val drawableRes =
+            when (batteryLevelString.filter { it.isDigit() }.toIntOrNull() ?: 0) {
+                in 0..20 -> R.drawable.battery // Battery is low
+                in 21..50 -> R.drawable.battery_25 // Battery is medium
+                in 51..80 -> R.drawable.battery_75 // Battery is high
+                in 81..100 -> R.drawable.battery_full // Battery is full
+                else -> R.drawable.battery // Fallback drawable
+            }
+        imageView.setImageResource(drawableRes)
     }
 
     private fun deviceType(type: Int) {
@@ -626,37 +771,39 @@ class DashboardFragment : BaseFragment() {
         bluetoothAdapter.notifyDataSetChanged()
     }
 
-    private fun initCr100Intent() {
-        scanBlue()
-        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
-
-        if (cr100Pos!!.bluetoothState) {
-            if (BluetoothToolsBean.getBlueToothName() != null) {
-                showToast(BluetoothToolsBean.getBlueToothName())
-            }
-
-            val keyIndex: Int = getBluetoothKeyIndex()
-            cr100Pos?.doTrade(keyIndex, 60)
-        } else {
-            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
-                listener.setBlueTitle(it)
-            }
-            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
-                cr100Pos?.connectBluetoothDevice(true, 60, it)
-            } ?: run {
-                lvIndicatorBTPOS?.adapter = bluetoothAdapter
-                deviceType(BLUETOOTH)
-                refreshAdapter()
-                bluetoothAdapter.notifyDataSetChanged()
-            }
-        }
-    }
-
+//    private fun initCr100Intent() {
+//        scanBlue()
+//        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+//
+//        if (cr100Pos!!.bluetoothState) {
+//            if (BluetoothToolsBean.getBlueToothName() != null) {
+//                showToast(BluetoothToolsBean.getBlueToothName())
+//            }
+//
+//            val keyIndex: Int = getBluetoothKeyIndex()
+//            cr100Pos?.doTrade(keyIndex, 60)
+//        } else {
+//            Prefs.getString(BLUETOOTH_TITLE, null)?.let {
+//                listener.setBlueTitle(it)
+//            }
+//            Prefs.getString(BLUETOOTH_ADDRESS, null)?.let {
+//                cr100Pos?.connectBluetoothDevice(true, 60, it)
+//            } ?: run {
+//                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+//                deviceType(BLUETOOTH)
+//                refreshAdapter()
+//                bluetoothAdapter.notifyDataSetChanged()
+//            }
+//        }
+//    }
 
     private fun scanBlue() {
-        lvIndicatorBTPOS?.layoutManager = LinearLayoutManager(
-            requireActivity(), LinearLayoutManager.VERTICAL, false
-        )
+        lvIndicatorBTPOS?.layoutManager =
+            LinearLayoutManager(
+                requireActivity(),
+                LinearLayoutManager.VERTICAL,
+                false,
+            )
 
         bluetoothAdapter.setOnBluetoothItemClickListener { position, itemData ->
             onBTPosSelected(itemData)
@@ -681,7 +828,6 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
-
     private fun refreshAdapter() {
         bluetoothAdapter.clearData()
         val data = java.util.ArrayList<Map<String, *>>()
@@ -690,9 +836,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun BtCardInfo.isValid(): Boolean {
         return realPan.isNotEmpty() &&
-                track2.isNotEmpty() &&
-                decryptedIcc.isNotEmpty() &&
-                cardType != null
+            track2.isNotEmpty() &&
+            decryptedIcc.isNotEmpty() &&
+            cardType != null
     }
 
     override fun onDestroy() {
@@ -704,6 +850,4 @@ class DashboardFragment : BaseFragment() {
             cr100Pos!!.disconnectBT()
         }
     }
-
-
 }

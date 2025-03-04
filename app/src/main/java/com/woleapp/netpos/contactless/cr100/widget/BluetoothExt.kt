@@ -13,16 +13,14 @@ var bluetoothDialog: AlertDialog? = null
 
 fun FragmentActivity.showBluetoothDialog(
     bluetoothAdapter: BluetoothAdapter,
-    showGifOnly: Boolean = false
+    showGifOnly: Boolean = false,
 ) {
-
     // Create AlertDialog builder
     val dialogBuilder = AlertDialog.Builder(this)
     val inflater = this.layoutInflater
     val dialogView = inflater.inflate(R.layout.dialog_select_bluetooth_device, null)
 
     dialogBuilder.setView(dialogView)
-
 
     val recyclerView = dialogView.findViewById<RecyclerView>(R.id.lv_indicator_BTPOS)
     val gifViewHolder = dialogView.findViewById<LinearLayout>(R.id.ll_gif)
@@ -38,7 +36,6 @@ fun FragmentActivity.showBluetoothDialog(
         recyclerView.visibility = View.VISIBLE
     }
 
-
     bluetoothDialog = dialogBuilder.create()
     bluetoothDialog?.setOnCancelListener {
         cr100Pos?.cancelTrade()
@@ -50,12 +47,11 @@ fun hideBluetoothDialog() {
     bluetoothDialog?.dismiss()
 }
 
-
 enum class POS_TYPE {
     BLUETOOTH,
     AUDIO,
     UART,
     USB,
     OTG,
-    BLUETOOTH_BLE
+    BLUETOOTH_BLE,
 }
