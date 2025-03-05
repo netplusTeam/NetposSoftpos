@@ -36,10 +36,17 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Hashtable
 
+// data class PinData(
+//    val isPinSet: Boolean? = false,
+//    val btCardInfo: BtCardInfo? = null,
+//    val pan: String = "",
+//    val cardType: CardChannel = CardChannel.Contactless,
+// )
 data class PinData(
     val isPinSet: Boolean? = false,
     val btCardInfo: BtCardInfo? = null,
     val pan: String = "",
+    val pin: String? = "",
     val cardType: CardChannel = CardChannel.Contactless,
 )
 

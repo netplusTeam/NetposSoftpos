@@ -16,20 +16,20 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.dspread.xpos.Util
 import com.dspread.xpos.Util.HexStringToByteArray
 import com.dspread.xpos.utils.AESUtil
 import com.woleapp.netpos.contactless.R
-import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.util.UtilityParam
 import java.util.Hashtable
 import java.util.Random
 
 class PasswordDialog3(
+    qposService: QPOSService?,
     context: Activity,
-    private val pinListener: Listener
+    private val pinListener: Listener,
 ) {
-
     companion object {
         const val OfflinePin = 11
         const val OnlineEncryptPin = 22
@@ -47,7 +47,10 @@ class PasswordDialog3(
             }
         }
 
-        fun buildCvmPinBlock(value: Hashtable<String, String>, pin: String): String {
+        fun buildCvmPinBlock(
+            value: Hashtable<String, String>,
+            pin: String,
+        ): String {
             val randomData = value["RandomData"] ?: ""
             val pan = value["PAN"] ?: ""
             val aesKey = value["AESKey"] ?: ""
@@ -64,21 +67,20 @@ class PasswordDialog3(
 
             var panBlock = ""
             val panLen = pan.length
-            panBlock = if (panLen < 12) {
-                val padding = "0".repeat(12 - panLen)
-                padding + pan + "0000000000000000000"
-            } else {
-                val m = pan.length - 12
-                m.toString() + pan + "0".repeat(31 - panLen)
-            }
+            panBlock =
+                if (panLen < 12) {
+                    val padding = "0".repeat(12 - panLen)
+                    padding + pan + "0000000000000000000"
+                } else {
+                    val m = pan.length - 12
+                    m.toString() + pan + "0".repeat(31 - panLen)
+                }
 
             val pinBlock1 = AESUtil.encrypt(aesKey, pinBlock)
             val xorResult = Util.xor16(HexStringToByteArray(pinBlock1), HexStringToByteArray(panBlock))
             return AESUtil.encrypt(aesKey, xorResult)
         }
-
     }
-
 
     private var handler: Handler? = null
     private var tpkIndex: Int = 0
@@ -104,9 +106,7 @@ class PasswordDialog3(
     private var btn9: TextView
     private var groupKeyboard: Group
 
-
     init {
-        val qposService = NetPosApp.cr100Pos
         this.tpkIndex = tpkIndex
         title = "Enter PIN"
         dialog = Dialog(context, android.R.style.Theme_Translucent_NoTitleBar)
@@ -193,16 +193,22 @@ class PasswordDialog3(
 
             // Use DPrefs to save Pin key
 //            DPrefs.INSTANCE.putString(UtilityParam.PIN_KEY, pinText.trim())
-            DPrefs.putString(UtilityParam.PIN_KEY,pinText.trim())
-
+            DPrefs.putString(UtilityParam.PIN_KEY, pinText.trim())
 
             val pinValue = pinText
-            val data = qposService?.encryptData
-            if (data != null){
-                val pinBlock = buildCvmPinBlock(qposService.encryptData, pinValue)
-                qposService?.sendCvmPin(pinBlock, true)
-            }
+//            val data = qposService?.encryptData
+//            if (data != null){
+//                val pinBlock = buildCvmPinBlock(qposService.encryptData, pinValue)
+//                qposService?.sendCvmPin(pinBlock, true)
+//            }
 
+            val data = qposService?.encryptData
+            if (data != null) {
+                val pinBlock = buildCvmPinBlock(qposService.encryptData, pinText)
+                qposService.sendPin(pinText.toByteArray())
+                qposService?.sendCvmPin(pinBlock, false)
+                if (pinText.isNotEmpty()) pinListener.onConfirm(pinBlock = pinText)
+            }
             dialog.cancel()
         }
 
@@ -217,7 +223,7 @@ class PasswordDialog3(
             (value shr 24 and 0xFF).toByte(),
             (value shr 16 and 0xFF).toByte(),
             (value shr 8 and 0xFF).toByte(),
-            (value and 0xFF).toByte()
+            (value and 0xFF).toByte(),
         )
     }
 
@@ -227,6 +233,7 @@ class PasswordDialog3(
 
     interface Listener {
         fun onConfirm(pinBlock: String)
+
         fun onError(message: String)
     }
 }

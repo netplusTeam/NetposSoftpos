@@ -122,6 +122,8 @@ class NfcCardReaderViewModel
         val smsSent: LiveData<Event<Boolean>>
             get() = _smsSent
 
+        var pin: String? = ""
+
         override fun onCleared() {
             super.onCleared()
             icc.clear()
@@ -626,10 +628,33 @@ class NfcCardReaderViewModel
             _lastPosTransactionResponse.postValue(lastPosTrans)
         }
 
+//        fun doCr100TransactionDip(data: BtCardInfo) {
+//            val (pan, track2, icc, cardType) = data
+//
+//            iccCardHelper = ICCCardHelper()
+//            iccCardHelper.apply {
+//                cardScheme = cardType!!.cardScheme
+//                customerName = "CUSTOMER"
+//            }
+//            _showAccountTypeDialog.postValue(Event(true))
+//            val cardData =
+//                CardData(
+//                    track2 ?: "",
+//                    "",
+//                    pan ?: "",
+//                    "051",
+//                )
+//            iccCardHelper.cardData = cardData
+//
+//            hideBluetoothDialog()
+//            // listener.resetCardInfoFlow()
+//        }
+
         fun doCr100TransactionDip(data: BtCardInfo) {
-            val (pan, track2, icc, cardType) = data
+            val (pan, track2, icc, cardType, encPin) = data
 
             iccCardHelper = ICCCardHelper()
+
             iccCardHelper.apply {
                 cardScheme = cardType!!.cardScheme
                 customerName = "CUSTOMER"
@@ -642,9 +667,10 @@ class NfcCardReaderViewModel
                     pan ?: "",
                     "051",
                 )
+            cardData.apply { pinBlock = encPin.toString() }
             iccCardHelper.cardData = cardData
-
             hideBluetoothDialog()
+
             // listener.resetCardInfoFlow()
         }
 
