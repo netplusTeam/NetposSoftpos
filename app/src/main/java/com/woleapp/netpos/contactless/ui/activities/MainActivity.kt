@@ -735,7 +735,8 @@ class MainActivity :
                 this,
                 object : PasswordDialog3.Listener {
                     override fun onConfirm(pinBlock: String) {
-                        viewModel.pin = pinBlock
+                        viewModel.setPinBlock(pinBlock)
+//                        viewModel.pin = pinBlock
                     }
 
                     override fun onError(message: String) {

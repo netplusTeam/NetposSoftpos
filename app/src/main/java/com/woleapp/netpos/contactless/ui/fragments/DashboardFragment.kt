@@ -60,15 +60,28 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
-import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.BATTERY_PERCENTAGE
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
+import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
+import com.woleapp.netpos.contactless.util.Event
+import com.woleapp.netpos.contactless.util.ICCCardHelper
+import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
+import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
+import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
+import com.woleapp.netpos.contactless.util.Singletons
+import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
+import com.woleapp.netpos.contactless.util.buildSMSText
+import com.woleapp.netpos.contactless.util.checkNfcStatus
+import com.woleapp.netpos.contactless.util.disposeWith
+import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
+import com.woleapp.netpos.contactless.util.showCardDialog
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -635,42 +648,47 @@ class DashboardFragment : BaseFragment() {
             if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
                 nfcCardReaderViewModel.showPin(pan = result.pan)
                 if (result.btCardInfo != null) {
-//                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-                    val cardData = result.btCardInfo
-                    if (nfcCardReaderViewModel.pin != null && DPrefs.getString(PIN_KEY, "") != null) {
-                        val encryptedPin =
-                            encodePinBlock(
-                                pin = nfcCardReaderViewModel.pin ?: "",
-                                pan = result.btCardInfo.realPan,
-                                key = DPrefs.getString(PIN_KEY, ""),
-                            )
-                        cardData.pin = encryptedPin
-                    }
-
-                    nfcCardReaderViewModel.doCr100TransactionDip(cardData)
+                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                 }
                 hideBluetoothDialog()
                 // listener.resetCardInfoFlow()
             } else {
                 if (result.cardType == CardChannel.Contact) {
                     if (result.btCardInfo != null) {
-                        if (nfcCardReaderViewModel.pin != null && DPrefs.getString(PIN_KEY, "") != null) {
-                            val cardData = result.btCardInfo
-                            val encryptedPin =
-                                encodePinBlock(
-                                    pin = nfcCardReaderViewModel.pin ?: "",
-                                    pan = result.btCardInfo.realPan,
-                                    key = DPrefs.getString(PIN_KEY, ""),
-                                )
-                            cardData.pin = encryptedPin
-                            nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-                        }
+                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
                         hideBluetoothDialog()
                         // listener.resetCardInfoFlow()
                     }
                 }
             }
         }
+
+//        requestPinFlow.observe(this) { result ->
+//            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+//                viewModel.showPin(pan = result.pan)
+//                if (result.btCardInfo != null) {
+//                    val cardData = result.btCardInfo
+//                    if (pin != null && pinKey != null) {
+//                        val encryptedPin = encodePinBlock(pin = pin ?: "", pan = result.btCardInfo.realPan, key = pinKey)
+//                        cardData.pin = encryptedPin
+//                    }
+//
+//                    viewModel.doCr100TransactionDip(cardData)
+//                }
+//                hideBluetoothDialog()
+//            }
+//
+//            if (result.cardType == CardChannel.Contact && result.btCardInfo != null) {
+//                if (pin != null && pinKey != null) {
+//                    val cardData = result.btCardInfo
+//                    val encryptedPin = encodePinBlock(pin = pin ?: "", pan = result.btCardInfo.realPan, key = pinKey)
+//                    cardData.pin = encryptedPin
+//
+//                    viewModel.doCr100TransactionDip(cardData)
+//                }
+//                hideBluetoothDialog()
+//            }
+//        }
 
 //        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
 //        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
