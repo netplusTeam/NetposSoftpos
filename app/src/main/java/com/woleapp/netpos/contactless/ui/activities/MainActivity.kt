@@ -45,7 +45,6 @@ import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.app.NetPosApp
-import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.database.AppDatabase
 import com.woleapp.netpos.contactless.databinding.*
 import com.woleapp.netpos.contactless.model.*
@@ -731,7 +730,6 @@ class MainActivity :
             ).showDialog()
         } else {
             PasswordDialog3(
-                cr100Pos,
                 this,
                 object : PasswordDialog3.Listener {
                     override fun onConfirm(pinBlock: String) {

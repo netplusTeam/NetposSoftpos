@@ -16,17 +16,16 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.Group
 import com.dsofttech.dprefs.utils.DPrefs
-import com.dspread.xpos.QPOSService
 import com.dspread.xpos.Util
 import com.dspread.xpos.Util.HexStringToByteArray
 import com.dspread.xpos.utils.AESUtil
 import com.woleapp.netpos.contactless.R
+import com.woleapp.netpos.contactless.app.NetPosApp
 import com.woleapp.netpos.contactless.util.UtilityParam
 import java.util.Hashtable
 import java.util.Random
 
 class PasswordDialog3(
-    qposService: QPOSService?,
     context: Activity,
     private val pinListener: Listener,
 ) {
@@ -107,6 +106,7 @@ class PasswordDialog3(
     private var groupKeyboard: Group
 
     init {
+        val qposService = NetPosApp.cr100Pos
         this.tpkIndex = tpkIndex
         title = "Enter PIN"
         dialog = Dialog(context, android.R.style.Theme_Translucent_NoTitleBar)
@@ -196,19 +196,13 @@ class PasswordDialog3(
             DPrefs.putString(UtilityParam.PIN_KEY, pinText.trim())
 
             val pinValue = pinText
-//            val data = qposService?.encryptData
-//            if (data != null){
-//                val pinBlock = buildCvmPinBlock(qposService.encryptData, pinValue)
-//                qposService?.sendCvmPin(pinBlock, true)
-//            }
-
             val data = qposService?.encryptData
-            if (data != null) {
-                val pinBlock = buildCvmPinBlock(qposService.encryptData, pinText)
-                qposService.sendPin(pinText.toByteArray())
-                qposService?.sendCvmPin(pinBlock, false)
-                if (pinText.isNotEmpty()) pinListener.onConfirm(pinBlock = pinText)
-            }
+            if (data != null)
+                {
+                    val pinBlock = buildCvmPinBlock(qposService.encryptData, pinValue)
+                    qposService?.sendCvmPin(pinBlock, true)
+                }
+
             dialog.cancel()
         }
 
