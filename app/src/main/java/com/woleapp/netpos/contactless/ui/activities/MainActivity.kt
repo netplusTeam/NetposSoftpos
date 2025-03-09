@@ -16,6 +16,8 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -40,6 +42,9 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.payneteasy.tlv.BerTag
+import com.payneteasy.tlv.BerTlvParser
+import com.payneteasy.tlv.BerTlvs
 import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
@@ -81,6 +86,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.io.File
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 @Suppress("DEPRECATION")
@@ -88,7 +95,8 @@ import java.util.*
 class MainActivity :
     AppCompatActivity(),
     EasyPermissions.PermissionCallbacks,
-    NfcAdapter.ReaderCallback {
+    NfcAdapter.ReaderCallback,
+    DialogDismissListener {
 //    private lateinit var appUpdateManager: AppUpdateManager
 //    private val updateType = AppUpdateType.IMMEDIATE
 
@@ -130,6 +138,13 @@ class MainActivity :
     private lateinit var mVerveTransactionViewModel: VerveTransactionViewModel
     private var verveNfcListener: NFCListener? = null
     private val salesViewModel by viewModels<SalesViewModel>()
+    private lateinit var selectCardDialog: AlertDialog
+    private var nfcEnabled = false
+    private lateinit var cardTypeBinding: DialogSelectCardschemeBinding
+    private var isVisa: Boolean = false
+
+    // Add a flag to control processing
+    private var isProcessing = false
 
     override fun onStart() {
         super.onStart()
@@ -149,15 +164,9 @@ class MainActivity :
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                AlertDialog.Builder(this).setTitle("NFC Message")
-                    .setMessage("NFC is not enabled, goto device settings to enable")
-                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
-                        dialog.dismiss()
-                        startActivityForResult(
-                            Intent(android.provider.Settings.ACTION_NFC_SETTINGS),
-                            0,
-                        )
-                    }.show()
+                nfcNotEnabledDialog()
+            } else {
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
             }
         } else {
             deviceNotSupportedAlertDialog.show()
@@ -216,13 +225,43 @@ class MainActivity :
         }
     }
 
+//    private fun handleProvider(tag: Tag) {
+//        val mTagCom = IsoDep.get(tag)
+//        try {
+//            mTagCom.connect()
+//            val logger = StringBuilder()
+//            val nfcTransReceiver = LiveNfcTransReceiver(logger, mTagCom)
+//            viewModel.doVisaTransaction(nfcTransReceiver, contactlessKernel)
+//        } catch (e: Exception) {
+//            Timber.e(e)
+//        }
+//    }
+
     private fun handleProvider(tag: Tag) {
         val mTagCom = IsoDep.get(tag)
         try {
-            mTagCom.connect()
-            val logger = StringBuilder()
-            val nfcTransReceiver = LiveNfcTransReceiver(logger, mTagCom)
-            viewModel.doVisaTransaction(nfcTransReceiver, contactlessKernel)
+            if (isVisa) {
+                // Check if another technology is connected
+                if (mTagCom.isConnected) {
+                    mTagCom.close() // Close the currently connected technology
+                }
+
+                // Connect to the tag
+//                mTagCom.connect()
+
+                val logger = StringBuilder()
+                val nfcTransReceiver = LiveNfcTransReceiver(logger, mTagCom)
+
+                // Start Visa transaction
+                viewModel.doVisaTransaction(nfcTransReceiver, contactlessKernel)
+                isVisa = false // Reset Visa processing flag
+                // Once the transaction completes, disconnect the Visa tag
+                if (mTagCom.isConnected) {
+                    mTagCom.close()
+                    isVisa = false // Reset Visa processing flag
+                }
+                isVisa = false // Reset Visa processing flag
+            }
         } catch (e: Exception) {
             Timber.e(e)
         }
@@ -270,24 +309,28 @@ class MainActivity :
 //        // First check if there is an update
 //        checkForAppUpdate()
         val netPlusPayMid = Singletons.getNetPlusPayMid()
-        if (BuildConfig.FLAVOR.contains("zenith"))
-            {
-                scanQrViewModel.getMerchantDetails(netPlusPayMid)
-                // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
-            } else if (BuildConfig.FLAVOR.contains("providuspos"))
-            {
-                scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
-                generateMerchantDetails()
-            } else if (BuildConfig.FLAVOR.contains("fcmbeasypay"))
-            {
-                scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
-                generateMerchantDetails()
-            }
+        if (BuildConfig.FLAVOR.contains("zenith")) {
+            scanQrViewModel.getMerchantDetails(netPlusPayMid)
+            // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
+        } else if (BuildConfig.FLAVOR.contains("providuspos")) {
+            scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
+            scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
+            generateMerchantDetails()
+        }
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         initViews()
+
+        cardTypeBinding = DialogSelectCardschemeBinding.inflate(LayoutInflater.from(this))
+        selectCardDialog =
+            AlertDialog.Builder(this).apply {
+                setView(cardTypeBinding.root)
+            }.create()
+
         dialogContactlessReaderBinding =
             DialogContatclessReaderBinding.inflate(layoutInflater).apply {
                 executePendingBindings()
@@ -523,6 +566,7 @@ class MainActivity :
                 }
             }
         }
+
         receiptAlertDialog =
             AlertDialog.Builder(this).setCancelable(false).apply {
                 setView(receiptDialogBinding.root)
@@ -530,8 +574,14 @@ class MainActivity :
                     closeBtn.setOnClickListener {
                         receiptDialogBinding.telephone.text?.clear()
                         receiptAlertDialog.dismiss()
+                        if (nfcEnabled) {
+                            enableNFCReader()
+                        }
                     }
                     sendButton.setOnClickListener {
+                        if (nfcEnabled) {
+                            enableNFCReader()
+                        }
                         if (receiptDialogBinding.telephone.text.toString().length != 11) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -622,6 +672,39 @@ class MainActivity :
                 }
             }
         }
+        salesViewModel.getCardData.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { shouldGetCardData ->
+                if (shouldGetCardData) {
+                    Log.d("OK_AH", "YEPP")
+                    if (nfcEnabled) {
+                        enableNFCReader()
+                    }
+                    showCardDialog(
+                        this,
+                        this,
+                        this,
+                        selectCardDialog,
+                        cardTypeBinding,
+                    ).observe(this) { event ->
+                        event.getContentIfNotHandled()?.let {
+                            Timber.e(it.toString())
+                            viewModel.initiateNfcPayment(
+                                salesViewModel.amountLong,
+                                salesViewModel.cashbackLong,
+                                it,
+                            )
+                        }
+                    }
+                    showCardDialog(
+                        this,
+                        this,
+                        this,
+                        selectCardDialog,
+                        cardTypeBinding,
+                    ).removeObservers(this)
+                }
+            }
+        }
     }
 
     override fun onResume() {
@@ -629,8 +712,11 @@ class MainActivity :
         getIntentDataSentInFromFirebaseService()
         handlePdfReceiptPrinting()
         fetchUnreadNotifications()
-        notificationsLayout.setOnClickListener {
-            showFragment(NotificationFragment(), getString(R.string.notification))
+//        notificationsLayout.setOnClickListener {
+//            showFragment(NotificationFragment(), getString(R.string.notification))
+//        }
+        if (nfcEnabled) {
+            enableNFCReader()
         }
     }
 
@@ -768,15 +854,154 @@ class MainActivity :
         dialog.show()
     }
 
-    override fun onTagDiscovered(tag: Tag?) {
+//    override fun onTagDiscovered(tag: Tag?) {
+//        tag?.let {
+//            if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
+//                runOnUiThread {
+//                    handleProvider(tag)
+//                    nfcAdapter?.disableReaderMode(this)
+//                }
+//            }
+//        }
+//    }
+
+    override fun onTagDiscovered(tag: Tag) {
         tag?.let {
             if (it.toString() == NFC_A_TAG || it.toString() == NFC_B_TAG) {
                 runOnUiThread {
-                    handleProvider(tag)
-                    nfcAdapter?.disableReaderMode(this)
+                    val techList = tag.techList
+                    var isoDepInTechList = false
+                    for (s in techList) {
+                        if (s == "android.nfc.tech.IsoDep") isoDepInTechList = true
+                    }
+
+                    if (isoDepInTechList) {
+                        val nfc: IsoDep? = IsoDep.get(tag)
+                        if (nfc != null) {
+                            try {
+                                nfc.connect()
+                                val ppse = "2PAY.SYS.DDF01".toByteArray(StandardCharsets.UTF_8)
+                                val selectPpseCommand: ByteArray = selectApdu(ppse)
+                                val selectPpseResponse = nfc.transceive(selectPpseCommand)
+                                val selectPpseResponseOk: ByteArray? = checkResponse(selectPpseResponse)
+
+                                if (selectPpseResponseOk != null) {
+                                    val parser = BerTlvParser()
+                                    val tlv4Fs: BerTlvs = parser.parse(selectPpseResponseOk)
+
+                                    val tag4fList = tlv4Fs.findAll(BerTag(0x4F))
+                                    if (tag4fList.isNotEmpty()) {
+                                        for (i4f in tag4fList.indices) {
+                                            val tlv4f = tag4fList[i4f]
+                                            val tlv4fBytes = tlv4f.bytesValue
+                                            val caid = bytesToHexNpe(tlv4fBytes)
+                                            returnAid(caid.toString())
+                                            if (caid.toString() == "a0000000031010") {
+                                                // Detected Visa tag
+                                                isVisa = true
+                                                handleProvider(tag) // Enable Visa SDK
+                                            } else {
+                                                // Disconnect non-Visa tag immediately
+                                                isVisa = false
+                                                startEndSequence(nfc)
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (e: IOException) {
+                                startEndSequence(nfc) // Disconnect on error
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private fun selectApdu(data: ByteArray): ByteArray {
+        val commandApdu = ByteArray(6 + data.size)
+        commandApdu[0] = 0x00.toByte() // CLA
+        commandApdu[1] = 0xA4.toByte() // INS
+        commandApdu[2] = 0x04.toByte() // P1
+        commandApdu[3] = 0x00.toByte() // P2
+        commandApdu[4] = (data.size and 0x0FF).toByte() // Lc
+        System.arraycopy(data, 0, commandApdu, 5, data.size)
+        commandApdu[commandApdu.size - 1] = 0x00.toByte() // Le
+        return commandApdu
+    }
+
+    private fun checkResponse(data: ByteArray): ByteArray? {
+        // simple sanity check
+        if (data.size < 5) {
+            return null
+        } // not ok
+        val status =
+            0xff and data[data.size - 2].toInt() shl 8 or (0xff and data[data.size - 1].toInt())
+        return if (status != 0x9000) {
+            null
+        } else {
+            Arrays.copyOfRange(data, 0, data.size - 2)
+        }
+    }
+
+    // section for conversion utils
+    fun bytesToHexNpe(bytes: ByteArray?): String? {
+        return if (bytes != null) {
+            val result = java.lang.StringBuilder()
+            for (b in bytes) result.append(
+                Integer.toString((b.toInt() and 0xff) + 0x100, 16).substring(1),
+            )
+            result.toString()
+        } else {
+            ""
+        }
+    }
+
+    private fun startEndSequence(nfc: IsoDep?) {
+        try {
+            // Close the NFC connection if it exists
+            nfc?.close()
+        } catch (e: IOException) {
+            Timber.e(e, "Failed to close NFC connection")
+        } finally {
+            // Reset processing state and other flags
+            isVisa = false
+            isProcessing = false
+            // Optional: Provide feedback to the user
+            Log.d("NFC", "NFC tag processing sequence ended.")
+        }
+    }
+
+    private fun nfcNotEnabledDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                Prefs.putBoolean(PREF_NFC_ENABLED, false)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                AlertDialog.Builder(this).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        showWirelessSettings()
+                    }.show()
+            }
+            .show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (nfcAdapter != null) nfcAdapter?.disableReaderMode(this)
+    }
+
+    private fun showWirelessSettings() {
+        Toast.makeText(this, "You need to enable NFC", Toast.LENGTH_SHORT).show()
+        val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
+        startActivity(intent)
     }
 
     private fun getPermissionAndCreatePdf(view: ViewDataBinding) {
@@ -1293,4 +1518,35 @@ class MainActivity :
                 viewModel.doVerveCardTransaction(transactionFullDataDto)
             }
     }
+
+    override fun onDialogDismissed() {
+        selectCardDialog.dismiss()
+    }
+
+    private fun enableNFCReader() {
+        if (nfcAdapter != null) {
+            if (!nfcAdapter!!.isEnabled) {
+                nfcNotEnabledDialog()
+            } else {
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
+            }
+            Log.d("NFC_ENABLEDOKK", nfcAdapter!!.isEnabled.toString())
+            val options = Bundle()
+            // Work around for some broken Nfc firmware implementations that poll the card too fast
+            options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)
+            // Enable ReaderMode for all types of card and disable platform sounds
+            // the option NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK is NOT set
+            // to get the data of the tag after reading
+            nfcAdapter!!.enableReaderMode(
+                this@MainActivity,
+                this@MainActivity,
+                NfcAdapter.FLAG_READER_NFC_A or NfcAdapter.FLAG_READER_NFC_B,
+                null,
+            )
+        }
+    }
+}
+
+interface DialogDismissListener {
+    fun onDialogDismissed()
 }
