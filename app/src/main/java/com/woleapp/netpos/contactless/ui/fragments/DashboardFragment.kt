@@ -80,7 +80,6 @@ import com.woleapp.netpos.contactless.util.buildSMSText
 import com.woleapp.netpos.contactless.util.checkNfcStatus
 import com.woleapp.netpos.contactless.util.disposeWith
 import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
-import com.woleapp.netpos.contactless.util.showCardDialog
 import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
@@ -170,25 +169,25 @@ class DashboardFragment : BaseFragment() {
                 showSnackBar(s)
             }
         }
-        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { shouldGetCardData ->
-                if (shouldGetCardData) {
-                    showCardDialog(
-                        requireActivity(),
-                        viewLifecycleOwner,
-                    ).observe(viewLifecycleOwner) { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
-                            nfcCardReaderViewModel.initiateNfcPayment(
-                                viewModel.amountLong,
-                                viewModel.cashbackLong,
-                                it,
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
+//            event.getContentIfNotHandled()?.let { shouldGetCardData ->
+//                if (shouldGetCardData) {
+//                    showCardDialog(
+//                        requireActivity(),
+//                        viewLifecycleOwner,
+//                    ).observe(viewLifecycleOwner) { event ->
+//                        event.getContentIfNotHandled()?.let {
+//                            Timber.e(it.toString())
+//                            nfcCardReaderViewModel.initiateNfcPayment(
+//                                viewModel.amountLong,
+//                                viewModel.cashbackLong,
+//                                it,
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
         viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 printTypeDialog.show()

@@ -1,4 +1,4 @@
-@file:Suppress("DEPRECATION")
+@file:Suppress("DEPRECATION", "ktlint:standard:no-wildcard-imports")
 
 package com.woleapp.netpos.contactless.ui.fragments
 
@@ -23,7 +23,7 @@ import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentSalesBinding
 import com.woleapp.netpos.contactless.model.Vend
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -45,10 +45,11 @@ class SalesFragment : BaseFragment() {
             isVend: Boolean = false,
         ): SalesFragment =
             SalesFragment().apply {
-                arguments = Bundle().apply {
-                    putString(TRANSACTION_TYPE, transactionType.name)
-                    putBoolean("IS_VEND", isVend)
-                }
+                arguments =
+                    Bundle().apply {
+                        putString(TRANSACTION_TYPE, transactionType.name)
+                        putBoolean("IS_VEND", isVend)
+                    }
             }
     }
 
@@ -74,34 +75,37 @@ class SalesFragment : BaseFragment() {
         amountEditText.apply {
             filters = arrayOf<InputFilter>(DecimalDigitsInputFilter(8, 2))
         }
-        transactionType = TransactionType.valueOf(
-            arguments?.getString(
-                TRANSACTION_TYPE,
-                TransactionType.PURCHASE.name,
-            )!!,
-        )
+        transactionType =
+            TransactionType.valueOf(
+                arguments?.getString(
+                    TRANSACTION_TYPE,
+                    TransactionType.PURCHASE.name,
+                )!!,
+            )
         if (transactionType == TransactionType.PURCHASE_WITH_CASH_BACK) {
             binding.cashbackInputLayout.isVisible = true
         }
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-        }
-        printerErrorDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setTitle("Printer Error")
-                setIcon(R.drawable.ic_warning)
-                setPositiveButton("Send Receipt") { d, _ ->
-                    d.cancel()
-                    viewModel.showReceiptDialog()
-                }
-                setNegativeButton("Dismiss") { d, _ ->
-                    d.cancel()
-                    viewModel.finish()
-                }
-            }.create()
+        dialogPrintTypeBinding =
+            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+                executePendingBindings()
+            }
+        printerErrorDialog =
+            AlertDialog.Builder(requireContext())
+                .apply {
+                    setTitle("Printer Error")
+                    setIcon(R.drawable.ic_warning)
+                    setPositiveButton("Send Receipt") { d, _ ->
+                        d.cancel()
+                        viewModel.showReceiptDialog()
+                    }
+                    setNegativeButton("Dismiss") { d, _ ->
+                        d.cancel()
+                        viewModel.finish()
+                    }
+                }.create()
         binding.apply {
             viewmodel = viewModel
             lifecycleOwner = viewLifecycleOwner
@@ -113,25 +117,25 @@ class SalesFragment : BaseFragment() {
                 showSnackBar(s)
             }
         }
-        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { shouldGetCardData ->
-                if (shouldGetCardData) {
-                    showCardDialog(
-                        requireActivity(),
-                        viewLifecycleOwner,
-                    ).observe(viewLifecycleOwner) { event ->
-                        event.getContentIfNotHandled()?.let {
-                            Timber.e(it.toString())
-                            nfcCardReaderViewModel.initiateNfcPayment(
-                                viewModel.amountLong,
-                                viewModel.cashbackLong,
-                                it,
-                            )
-                        }
-                    }
-                }
-            }
-        }
+//        viewModel.getCardData.observe(viewLifecycleOwner) { event ->
+//            event.getContentIfNotHandled()?.let { shouldGetCardData ->
+//                if (shouldGetCardData) {
+//                    showCardDialog(
+//                        requireActivity(),
+//                        viewLifecycleOwner,
+//                    ).observe(viewLifecycleOwner) { event ->
+//                        event.getContentIfNotHandled()?.let {
+//                            Timber.e(it.toString())
+//                            nfcCardReaderViewModel.initiateNfcPayment(
+//                                viewModel.amountLong,
+//                                viewModel.cashbackLong,
+//                                it,
+//                            )
+//                        }
+//                    }
+//                }
+//            }
+//        }
         viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 printTypeDialog.show()
@@ -228,7 +232,10 @@ class SalesFragment : BaseFragment() {
         ).show()
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         vend()
     }
@@ -236,16 +243,17 @@ class SalesFragment : BaseFragment() {
     private fun vend() {
         if (isVend) {
             var count = 0
-            val progressBar = ProgressDialog(context).apply {
-                this.setCancelable(false)
-                this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
-                    dialog.cancel()
-                    compositeDisposable.clear()
-                    requireActivity().onBackPressed()
+            val progressBar =
+                ProgressDialog(context).apply {
+                    this.setCancelable(false)
+                    this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
+                        dialog.cancel()
+                        compositeDisposable.clear()
+                        requireActivity().onBackPressed()
+                    }
+                    this.setMessage("Waiting for amount.")
+                    show()
                 }
-                this.setMessage("Waiting for amount.")
-                show()
-            }
             val socket = Socket()
             var printWriter: PrintWriter? = null
             var reader: BufferedReader? = null
@@ -259,10 +267,11 @@ class SalesFragment : BaseFragment() {
             }.flatMap {
                 Observable.interval(0, 5, TimeUnit.SECONDS)
             }.flatMap {
-                val out = JsonObject().apply {
-                    addProperty("serial_number", Build.ID)
-                    addProperty("status", "")
-                }.toString()
+                val out =
+                    JsonObject().apply {
+                        addProperty("serial_number", Build.ID)
+                        addProperty("status", "")
+                    }.toString()
                 printWriter?.println(out)
                 try {
                     val s = reader?.readLine()

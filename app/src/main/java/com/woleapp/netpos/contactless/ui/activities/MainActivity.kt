@@ -62,7 +62,6 @@ import com.woleapp.netpos.contactless.taponphone.visa.NfcPaymentType
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.ui.dialog.PasswordDialog
 import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
-import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PasswordDialog3
 import com.woleapp.netpos.contactless.ui.fragments.*
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
@@ -271,16 +270,19 @@ class MainActivity :
 //        // First check if there is an update
 //        checkForAppUpdate()
         val netPlusPayMid = Singletons.getNetPlusPayMid()
-        if (BuildConfig.FLAVOR.contains("zenith")) {
-            scanQrViewModel.getMerchantDetails(netPlusPayMid)
-            // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
-        } else if (BuildConfig.FLAVOR.contains("providuspos")) {
-            scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
-            generateMerchantDetails()
-        } else if (BuildConfig.FLAVOR.contains("fcmbeasypay")) {
-            scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
-            generateMerchantDetails()
-        }
+        if (BuildConfig.FLAVOR.contains("zenith"))
+            {
+                scanQrViewModel.getMerchantDetails(netPlusPayMid)
+                // Log.d("CHECKINGZENITH", "CHECKING_ZENITH")
+            } else if (BuildConfig.FLAVOR.contains("providuspos"))
+            {
+                scanQrViewModel.getProvidusMerchantDetails(netPlusPayMid)
+                generateMerchantDetails()
+            } else if (BuildConfig.FLAVOR.contains("fcmbeasypay"))
+            {
+                scanQrViewModel.getFcmbMerchantDetails(netPlusPayMid)
+                generateMerchantDetails()
+            }
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
         NetPosApp.INSTANCE.initMposLibrary(this)
@@ -694,56 +696,21 @@ class MainActivity :
         locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
     }
 
-//    private fun showPinDialog(pan: String) {
-//        PasswordDialog(
-//            this,
-//            pan,
-//            object : PasswordDialog.Listener {
-//                override fun onConfirm(pinBlock: String?) {
-//                    viewModel.setPinBlock(pinBlock)
-//                }
-//
-//                override fun onError(message: String?) {
-//                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-//                    viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-//                }
-//            },
-//        ).showDialog()
-//    }
-
     private fun showPinDialog(pan: String) {
-        println("Pan of the pin......$pan")
-        if (pan.isNotEmpty()) {
-            PasswordDialog(
-                this,
-                pan,
-                object : PasswordDialog.Listener {
-                    override fun onConfirm(pinBlock: String?) {
-                        viewModel.setPinBlock(pinBlock)
-                    }
+        PasswordDialog(
+            this,
+            pan,
+            object : PasswordDialog.Listener {
+                override fun onConfirm(pinBlock: String?) {
+                    viewModel.setPinBlock(pinBlock)
+                }
 
-                    override fun onError(message: String?) {
-                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                        viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-                    }
-                },
-            ).showDialog()
-        } else {
-            PasswordDialog3(
-                this,
-                object : PasswordDialog3.Listener {
-                    override fun onConfirm(pinBlock: String) {
-                        viewModel.setPinBlock(pinBlock)
-//                        viewModel.pin = pinBlock
-                    }
-
-                    override fun onError(message: String) {
-                        Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
-                        viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
-                    }
-                },
-            ).showDialog()
-        }
+                override fun onError(message: String?) {
+                    Toast.makeText(this@MainActivity, message, Toast.LENGTH_SHORT).show()
+                    viewModel.setIccCardHelperLiveData(ICCCardHelper(error = Throwable(message)))
+                }
+            },
+        ).showDialog()
     }
 
     private fun showFragment(
