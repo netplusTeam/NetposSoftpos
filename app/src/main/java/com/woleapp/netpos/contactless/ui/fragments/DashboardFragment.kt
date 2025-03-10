@@ -112,6 +112,7 @@ class DashboardFragment : BaseFragment() {
     private var startTime = 0L
     private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
     private var nfcEnabled = false
+    private var cardReadingOption: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -237,13 +238,20 @@ class DashboardFragment : BaseFragment() {
             }
         }
         binding.process.setOnClickListener {
+            cardReadingOption = Prefs.getString(NFC_KIT_OPTION, "null")
             if (nfcAdapter != null) {
-                if (nfcAdapter?.isEnabled == true) {
-                    viewModel.validateFieldForNFC()
-                } else {
-                    if (viewModel.validateFieldForBluetooth()) {
-                        initCr100Intent()
-                    }
+//                if (nfcAdapter?.isEnabled == true) {
+//                    viewModel.validateFieldForNFC()
+//                } else {
+//                    if (viewModel.validateFieldForBluetooth()) {
+//                        initCr100Intent()
+//                    }
+//                }
+                when (cardReadingOption) {
+                    "null" -> nfcNotEnabledDialog() // Show dialog if user hasn't chosen an option
+                    "true" -> if (nfcAdapter?.isEnabled == false) enableNFC() else viewModel.validateFieldForNFC()
+                    "false" -> initCr100Intent()
+                    else -> nfcNotEnabledDialog()
                 }
             } else {
                 if (viewModel.validateFieldForBluetooth()) {
@@ -867,6 +875,28 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun nfcNotEnabledDialog() {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle("NFC Check")
+            .setMessage("Which NFC do you want to use?")
+            .setCancelable(false)
+            .setPositiveButton("Phone") { dialog, _ ->
+                Prefs.putString(NFC_KIT_OPTION, "true")
+                if (nfcAdapter?.isEnabled == false) {
+                    enableNFC()
+                } else {
+                    viewModel.validateFieldForNFC()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("NFC Kit") { dialog, _ ->
+                Prefs.putString(NFC_KIT_OPTION, "false")
+                initCr100Intent()
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun enableNFC() {
         AlertDialog.Builder(requireContext())
             .setTitle("NFC Check")
             .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
