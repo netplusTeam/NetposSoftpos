@@ -6,11 +6,13 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.text.InputFilter
 import android.util.Log
 import android.view.LayoutInflater
@@ -60,27 +62,15 @@ import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.ui.dialog.EnterCvvNumberDialog
 import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PinPadDialogListener
+import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.BATTERY_PERCENTAGE
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.DecimalDigitsInputFilter
-import com.woleapp.netpos.contactless.util.Event
-import com.woleapp.netpos.contactless.util.ICCCardHelper
-import com.woleapp.netpos.contactless.util.PREF_CONFIG_DATA
-import com.woleapp.netpos.contactless.util.PREF_KEYHOLDER
-import com.woleapp.netpos.contactless.util.PREF_USER
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
-import com.woleapp.netpos.contactless.util.Singletons
-import com.woleapp.netpos.contactless.util.UtilityParam
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
-import com.woleapp.netpos.contactless.util.buildSMSText
-import com.woleapp.netpos.contactless.util.checkNfcStatus
-import com.woleapp.netpos.contactless.util.disposeWith
-import com.woleapp.netpos.contactless.util.getBluetoothKeyIndex
-import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -121,6 +111,7 @@ class DashboardFragment : BaseFragment() {
     private var blueTitle: String? = null
     private var startTime = 0L
     private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
+    private var nfcEnabled = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -135,7 +126,14 @@ class DashboardFragment : BaseFragment() {
         transactionType = TransactionType.PURCHASE
 
         nfcAdapter = checkNfcStatus()
-
+        if (nfcAdapter != null) {
+            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+            if (nfcAdapter?.isEnabled == false) {
+                if (nfcEnabled) {
+                    nfcNotEnabledDialog()
+                }
+            }
+        }
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
@@ -144,6 +142,7 @@ class DashboardFragment : BaseFragment() {
                 executePendingBindings()
             }
         loader = alertDialog(requireContext())
+        nfcEnabled = Prefs.getBoolean(PREF_NFC_ENABLED, false)
 
         printerErrorDialog =
             AlertDialog.Builder(requireContext()).apply {
@@ -865,6 +864,29 @@ class DashboardFragment : BaseFragment() {
         bluetoothAdapter.clearData()
         val data = java.util.ArrayList<Map<String, *>>()
         bluetoothAdapter.setListData(data)
+    }
+
+    private fun nfcNotEnabledDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+            .show()
     }
 
     private fun BtCardInfo.isValid(): Boolean {
