@@ -239,7 +239,13 @@ class DashboardFragment : BaseFragment() {
         }
         binding.process.setOnClickListener {
             if (nfcAdapter != null) {
-                viewModel.validateFieldForNFC()
+                if (nfcAdapter?.isEnabled == true) {
+                    viewModel.validateFieldForNFC()
+                } else {
+                    if (viewModel.validateFieldForBluetooth()) {
+                        initCr100Intent()
+                    }
+                }
             } else {
                 if (viewModel.validateFieldForBluetooth()) {
                     initCr100Intent()
