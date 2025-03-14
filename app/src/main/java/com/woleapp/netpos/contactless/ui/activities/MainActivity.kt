@@ -1587,7 +1587,7 @@ class MainActivity :
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
-                            receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "YEAHHH")
+                            receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "")
                             Log.d("DIALOG_DATA", result)
                             Log.d("DIALOG_DATA", "$receiptPdf")
                             show()
