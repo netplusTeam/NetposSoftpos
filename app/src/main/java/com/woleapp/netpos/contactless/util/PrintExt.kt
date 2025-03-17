@@ -115,7 +115,7 @@ fun TransactionResponse.builder() =
         append("Merchant Name: ").append(Singletons.getCurrentlyLoggedInUser()!!.business_name)
         append("\nTERMINAL ID: ").append(terminalId).append("\n")
         append(transactionType).append("\n")
-        append("DATE/TIME: ").append(transactionTimeInMillis.formatDate()).append("\n")
+        append("DATE/TIME: ").append(transactionTimeInMillis.formatTransactionDate()).append("\n")
         append("AMOUNT: ").append(divideLongBy100(amount).formatCurrencyAmount("\u20A6")).append("\n")
         if (maskedPan.isNotEmpty()) {
             append(cardLabel).append(" Ending with ").append(maskedPan.substring(maskedPan.length - 4))

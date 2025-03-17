@@ -32,6 +32,12 @@ import java.util.regex.Pattern
 
 fun Long.formatDate(): String? = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date(this))
 
+fun Long.formatTransactionDate(): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+    sdf.timeZone = TimeZone.getTimeZone("UTC") // Change to your desired time zone
+    return sdf.format(Date(this))
+}
+
 fun Disposable.disposeWith(compositeDisposable: CompositeDisposable) {
     compositeDisposable.add(this)
 }

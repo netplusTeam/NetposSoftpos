@@ -4,6 +4,7 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -104,6 +105,7 @@ class TransactionDetailsFragment : BaseFragment() {
             viewModel.performAction()
         }
         binding.details.text = viewModel.lastTransactionResponse.value!!.builder().toString()
+        Log.d("TRANSACT_IONS", "${viewModel.lastTransactionResponse.value}")
         viewModel.done.observe(viewLifecycleOwner) {
             if (it) {
                 // Toast.makeText(requireContext(), "Done", Toast.LENGTH_SHORT).show()
