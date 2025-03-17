@@ -36,6 +36,7 @@ import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -1311,18 +1312,27 @@ class MainActivity :
         DatePickerDialog(
             this,
             { _, startYear, startMonth, startDay ->
-                val startCalendar = Calendar.getInstance().apply { set(startYear, startMonth, startDay) }
+                val startCalendar =
+                    Calendar.getInstance().apply { set(startYear, startMonth, startDay) }
 
                 // Show a message or dialog title for the end date selection
                 DatePickerDialog(
                     this,
                     { _, endYear, endMonth, endDay ->
-                        val endCalendar = Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
-                        getEndOfDayTransactions(
-                            startCalendar.timeInMillis,
-                            endCalendar.timeInMillis,
-                        ) {
-                            showEndOfDayBottomSheetDialog(it)
+                        val endCalendar =
+                            Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
+                        val startDate = convertCalToDate(startCalendar.timeInMillis)
+                        val endDate = convertCalToDate(endCalendar.timeInMillis)
+                        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
+//                        Log.d("THE_RESULT", "$startDate====$endDate")
+
+                        if (startDate != null) {
+                            if (endDate != null) {
+                                getPaymentTransactions(
+                                    startDate,
+                                    endDate,
+                                )
+                            }
                         }
                     },
                     calendar.get(Calendar.YEAR),
@@ -1330,6 +1340,8 @@ class MainActivity :
                     calendar.get(Calendar.DAY_OF_MONTH),
                 ).apply {
                     setTitle("Select End Date") // Setting a title for end date selection
+                    datePicker.maxDate =
+                        System.currentTimeMillis() // Prevents selecting future dates
                 }.show()
             },
             calendar.get(Calendar.YEAR),
@@ -1337,6 +1349,7 @@ class MainActivity :
             calendar.get(Calendar.DAY_OF_MONTH),
         ).apply {
             setTitle("Select Start Date") // Setting a title for start date selection
+            datePicker.maxDate = System.currentTimeMillis() // Prevents selecting future dates
         }.show()
     }
 
