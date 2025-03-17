@@ -4,7 +4,6 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -117,8 +116,6 @@ class TransactionDetailsFragment : BaseFragment() {
                 viewModel.reset()
             }
         }
-
-        Log.d("TRANSACT_IONS", "${viewModel.lastTransactionResponse.value}")
 
         viewModel.showProgressDialog.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
