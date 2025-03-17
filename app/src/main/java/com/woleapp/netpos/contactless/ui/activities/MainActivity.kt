@@ -1805,11 +1805,13 @@ class MainActivity :
             supportFragmentManager,
         ) {
             scanQrViewModel.payByTransfer.value?.data?.user?.let {
-                // binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
-                // binding.dashboardHeader.merchantDetails.text = it.acctNumber
-                // binding.dashboardHeader.bankName.text = it.bank
+                if (BuildConfig.FLAVOR.contains("providuspos")) {
+                    binding.dashboardHeader.parentConstraintLayout.visibility = View.VISIBLE
+                }
+                binding.dashboardHeader.merchantDetails.text = it.acctNumber
+                binding.dashboardHeader.bankName.text = it.bank
                 copyAccountNumber = it.acctNumber
-                Log.d("CHECK_ACCOUNT", it.acctNumber)
+//                Log.d("CHECK_ACCOUNT", it.acctNumber)
                 Prefs.putString(PREF_ACCOUNT_NUMBER, gson.toJson(it))
             }
         }
