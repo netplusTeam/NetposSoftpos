@@ -1321,17 +1321,19 @@ class MainActivity :
                     { _, endYear, endMonth, endDay ->
                         val endCalendar =
                             Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
-                        val startDate = convertCalToDate(startCalendar.timeInMillis)
-                        val endDate = convertCalToDate(endCalendar.timeInMillis)
+                        val startDate = startCalendar.timeInMillis
+                        val endDate = endCalendar.timeInMillis
                         val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
 //                        Log.d("THE_RESULT", "$startDate====$endDate")
 
                         if (startDate != null) {
                             if (endDate != null) {
-                                getPaymentTransactions(
+                                getEndOfDayTransactions(
                                     startDate,
                                     endDate,
-                                )
+                                ) {
+                                    showEndOfDayBottomSheetDialog(it)
+                                }
                             }
                         }
                     },
