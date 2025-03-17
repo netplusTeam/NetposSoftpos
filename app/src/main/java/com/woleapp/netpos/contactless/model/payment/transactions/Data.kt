@@ -5,7 +5,7 @@ data class Data(
     val pageSize: Int,
     val pbt_total: Int,
     val pos_total: Int,
-    val total_pbt_amount: Int,
-    val total_pos_amount: Int,
+    val total_pbt_amount: Double,
+    val total_pos_amount: Double,
     val transactions: List<Transaction>,
 )

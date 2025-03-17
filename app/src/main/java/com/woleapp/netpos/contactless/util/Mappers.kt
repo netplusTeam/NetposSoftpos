@@ -214,7 +214,7 @@ object Mappers {
             transactionType = TransactionType.PURCHASE
             maskedPan = ""
             amount =
-                if (this@toTransactionResponse.amount == 0) {
+                if (this@toTransactionResponse.amount.toInt() == 0) {
                     0L
                 } else {
                     this@toTransactionResponse.amount.times(100).toDouble().toLong()
