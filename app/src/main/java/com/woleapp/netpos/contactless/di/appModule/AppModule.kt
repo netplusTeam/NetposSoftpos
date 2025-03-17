@@ -114,35 +114,35 @@ object AppModule {
     @Singleton
     @Named("defaultOkHttp")
     fun providesOKHTTPClient(
-//        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
         @Named("headerInterceptor") headerInterceptor: Interceptor,
     ): OkHttpClient =
         OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
             .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true).addInterceptor(headerInterceptor).build()
-//        .addInterceptor(loggingInterceptor).build()
+            .retryOnConnectionFailure(true).addInterceptor(headerInterceptor)
+            .addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
     @Named("otpOkHttp")
     fun providesOKHTTPClientForGetVerveOtp(
-//        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
     ): OkHttpClient =
         OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
             .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true).build()
-//            .addInterceptor(loggingInterceptor).build()
+            .retryOnConnectionFailure(true)
+            .addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
     @Named("payByTransferOkHttp")
     fun providesOKHTTPClientForPayByTransfer(
-//        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
+        @Named("loggingInterceptor") loggingInterceptor: Interceptor,
     ): OkHttpClient =
         OkHttpClient().newBuilder().connectTimeout(70, TimeUnit.SECONDS)
             .readTimeout(70, TimeUnit.SECONDS).writeTimeout(70, TimeUnit.SECONDS)
-            .retryOnConnectionFailure(true).build()
-//        .addInterceptor(loggingInterceptor).build()
+            .retryOnConnectionFailure(true)
+            .addInterceptor(loggingInterceptor).build()
 
     @Provides
     @Singleton
