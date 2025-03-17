@@ -25,7 +25,6 @@ import okhttp3.ResponseBody
 import retrofit2.HttpException
 import timber.log.Timber
 import java.text.SimpleDateFormat
-import java.time.ZoneId
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -231,17 +230,33 @@ internal class DecimalDigitsInputFilter(digitsBeforeZero: Int = 8, digitsAfterZe
     }
 }
 
-fun readableStringToLocal(dateString: String): String {
-    // Handle input as an ISO 8601 date-time string
-    try {
-        val instant = java.time.Instant.parse(dateString) // Parses "2024-11-14T16:02:38.000Z"
-        val zonedDateTime = instant.atZone(java.time.ZoneId.of("UTC"))
-        val outputFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+// fun readableStringToLocal(dateString: String): String {
+//    // Handle input as an ISO 8601 date-time string
+//    try {
+//        val instant = java.time.Instant.parse(dateString) // Parses "2024-11-14T16:02:38.000Z"
+//        val zonedDateTime = instant.atZone(java.time.ZoneId.of("UTC"))
+//        val outputFormatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+//
+//        return outputFormatter.format(zonedDateTime) // Convert to desired format
+//    } catch (e: java.time.format.DateTimeParseException) {
+//        return "Invalid date format: ${e.message}"
+//    } catch (e: Exception) {
+//        return "Error: ${e.message}"
+//    }
+//
 
-        return outputFormatter.format(zonedDateTime) // Convert to desired format
+fun readableStringToLocal(dateString: String): String {
+    return try {
+        val sanitizedDateString = dateString.replace("\\.\\d{3}Z$".toRegex(), "Z") // Removes .000Z
+        val instant = java.time.Instant.parse(sanitizedDateString)
+        val outputFormatter =
+            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(java.time.ZoneId.of("UTC")) // Keep it in UTC
+
+        outputFormatter.format(instant)
     } catch (e: java.time.format.DateTimeParseException) {
-        return "Invalid date format: ${e.message}"
+        "Invalid date format: ${e.message}"
     } catch (e: Exception) {
-        return "Error: ${e.message}"
+        "Error: ${e.message}"
     }
 }

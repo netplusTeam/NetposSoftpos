@@ -42,35 +42,33 @@ class AllTransactionsAdapter(
         holder: ItemViewHolder,
         position: Int,
     ) {
+        if (position < 0 || position >= items.size) return // ✅ Prevents invalid access
         val item = items[position]
-        if (item.payer_account_name.isNullOrEmpty()) {
-            holder.customerName.text = "Payer"
-        } else {
-            holder.customerName.text = item.payer_account_name
-        }
+        holder.customerName.text = item.payer_account_name.toString()?.takeIf { it.isNotEmpty() } ?: "Payer"
+
         if (item.transactionType == "pos") {
             holder.rrn.text = item.rrn
-            if ((item.cardLabel != "" || item.cardLabel.isNotEmpty()) && item.maskedPan.isNotEmpty()) {
+            if ((item.cardLabel != "" || item.cardLabel.isNotEmpty()) && item.maskedPan?.isNotEmpty() == true) {
                 val cardDetails =
                     "${item.cardLabel} ending with ${item.maskedPan.takeLast(4)}"
                 holder.maskedPan.text = cardDetails
-            } else if (item.maskedPan.isNotEmpty()) {
+            } else if (item.maskedPan?.isNotEmpty() == true) {
                 val cardDetails =
                     "Card ending with ${item.maskedPan.takeLast(4)}"
                 holder.maskedPan.text = cardDetails
             }
         } else if ((item.transactionType == "pbt")) {
-            if (item.payer_account_name.isNullOrEmpty()) {
+            if (item.payer_account_name.toString().isNullOrEmpty()) {
                 holder.customerName.text = "Payer"
             } else {
-                holder.customerName.text = item.payer_account_name
+                holder.customerName.text = item.payer_account_name.toString()
             }
-            if (item.payer_account_number.isNullOrEmpty()) {
+            if (item.payer_account_number.toString().isNullOrEmpty()) {
                 holder.customerName.text = "Payer"
             } else {
-                holder.maskedPan.text = item.payer_account_number
+                holder.maskedPan.text = item.payer_account_number.toString()
             }
-            holder.rrn.text = item.transaction_reference
+            holder.rrn.text = item.transaction_reference.toString()
         }
         if (item.responseCode == "00") {
             holder.status.text =
@@ -83,17 +81,13 @@ class AllTransactionsAdapter(
             holder.status.setBackgroundResource(R.drawable.failed)
             holder.statusImg.setBackgroundResource(R.drawable.declined)
         }
-        holder.amount.text = item.amount.toLong().formatCurrencyAmount()
-        if (item.dateCreated.isNullOrEmpty()) {
-            //
-        } else {
-            holder.date.text = readableStringToLocal(item.dateCreated)
-        }
-        if (item.time.isNullOrEmpty()) {
-            //
-        } else {
-            holder.date.text = readableStringToLocal(item.time)
-        }
+        holder.amount.text = item.amount.formatCurrencyAmount()
+        val dateText =
+            item.dateCreated?.takeIf { it.isNotEmpty() }?.let { readableStringToLocal(it) }
+                ?: item.time.takeIf { it.isNotEmpty() }?.let { readableStringToLocal(it) }
+
+        dateText?.let { holder.date.text = it }
+
         holder.rootLayout.setOnClickListener { listener.invoke(item.toTransactionResponse()) }
     }
 
@@ -102,11 +96,5 @@ class AllTransactionsAdapter(
     fun clearData() {
         items.clear()
         notifyDataSetChanged()
-    }
-
-    fun addData(newItems: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>) {
-        val startPosition = items.size
-        items.addAll(newItems)
-        notifyItemRangeInserted(startPosition, newItems.size)
     }
 }
