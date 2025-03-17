@@ -104,14 +104,22 @@ class TransactionDetailsFragment : BaseFragment() {
             nfcCardReaderViewModel.setLastPosTransactionResponse(viewModel.lastTransactionResponse.value!!)
             viewModel.performAction()
         }
-        binding.details.text = viewModel.lastTransactionResponse.value!!.builder().toString()
-        Log.d("TRANSACT_IONS", "${viewModel.lastTransactionResponse.value}")
+
+        val transaction = viewModel.lastTransactionResponse.value
+        if (!transaction.toString().isNullOrBlank()) {
+            binding.details.text = transaction?.builder().toString()
+        } else {
+            // do nothing
+        }
         viewModel.done.observe(viewLifecycleOwner) {
             if (it) {
                 // Toast.makeText(requireContext(), "Done", Toast.LENGTH_SHORT).show()
                 viewModel.reset()
             }
         }
+
+        Log.d("TRANSACT_IONS", "${viewModel.lastTransactionResponse.value}")
+
         viewModel.showProgressDialog.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 if (it) progressDialog.show() else progressDialog.dismiss()
