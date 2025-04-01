@@ -71,8 +71,42 @@
             app:queryHint="Search with RRN or STAN"
             android:id="@+id/transaction_search"
             android:layout_width="match_parent"
+            android:visibility="gone"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/history_button" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:layout_marginTop="@dimen/margin_10"
+            app:layout_constraintTop_toBottomOf="@id/history_button"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/print_all"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/all" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/print_approved"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/approved" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/print_declined"
+                style="@style/Widget.MaterialComponents.Chip.Filter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/declined" />
+
+        </com.google.android.material.chip.ChipGroup>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_transactions_history"
@@ -83,9 +117,23 @@
             android:layout_marginBottom="@dimen/dimen_60dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/transaction_search"
+            app:layout_constraintTop_toBottomOf="@id/chip_group"
             app:layout_constraintVertical_bias="0.0"
             tools:layout_editor_absoluteX="16dp" />
+
+        <TextView
+            android:id="@+id/empty_lyt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_data"
+            android:textAlignment="center"
+            android:textSize="25sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/chip_group" />
 
         <LinearLayout
             android:id="@+id/search_layout"
