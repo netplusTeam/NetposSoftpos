@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.util.Log
@@ -132,7 +131,7 @@ class LoginFragment : BaseFragment() {
         //   Log.d("IMEI", uniqueNumber)
         binding.btnLogin.setOnClickListener {
             if (BuildConfig.FLAVOR.contains("providuspos")) {
-                viewModel.login(deviceId, partnerID)
+                viewModel.loginBankP(requireContext(), deviceId, partnerID)
 //            } else if (BuildConfig.FLAVOR.contains("zenith")) {
 //                viewModel.loginZenith(requireContext(), deviceId)
             } else {

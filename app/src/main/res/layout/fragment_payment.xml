@@ -1,72 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.fragments.PaymentFragment">
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+tools:context=".ui.fragments.PaymentFragment">
 
-    <data>
+<data>
 
-    </data>
+</data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select date"
+        android:layout_margin="@dimen/margin_10"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/show_date"
+        app:layout_constraintEnd_toStartOf="@+id/show_date"
+        app:layout_constraintTop_toTopOf="@+id/show_date" />
+    <ImageView
+        android:id="@+id/show_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_10"
+        android:visibility="gone"
+        android:src="@drawable/baseline_calendar_month_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/transactionTypeSpinner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_10"
+        android:entries="@array/transaction_types"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/show_date" />
 
-        <TextView
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="@+id/transactionTypeSpinner"
+        app:layout_constraintStart_toStartOf="@+id/transactionTypeSpinner"
+        app:layout_constraintTop_toBottomOf="@id/transactionTypeSpinner"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/print_all"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Select date"
-            android:layout_margin="@dimen/margin_10"
-            app:layout_constraintBottom_toBottomOf="@+id/show_date"
-            app:layout_constraintEnd_toStartOf="@+id/show_date"
-            app:layout_constraintTop_toTopOf="@+id/show_date" />
-        <ImageView
-            android:id="@+id/show_date"
+            android:checked="true"
+            android:text="@string/all" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/print_approved"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_10"
-            android:src="@drawable/baseline_calendar_month_24"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:text="@string/approved" />
 
-        <Spinner
-            android:id="@+id/transactionTypeSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/margin_10"
-            android:entries="@array/transaction_types"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/show_date" />
-
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginStart="@dimen/margin_10"
-            android:layout_marginEnd="@dimen/margin_10"
-            android:layout_marginBottom="@dimen/dimen_56dp"
-            android:layout_marginTop="@dimen/margin_10"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/transactionTypeSpinner" />
-
-        <TextView
-            android:id="@+id/empty_lyt"
+        <com.google.android.material.chip.Chip
+            android:id="@+id/print_declined"
+            style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/no_data"
-            android:textAlignment="center"
-            android:visibility="gone"
-            android:textSize="25sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/transactionTypeSpinner" />
+            android:text="@string/declined" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/margin_10"
+        android:layout_marginEnd="@dimen/margin_10"
+        android:layout_marginBottom="@dimen/dimen_56dp"
+        android:layout_marginTop="@dimen/margin_10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chip_group" />
+
+    <TextView
+        android:id="@+id/empty_lyt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/no_data"
+        android:textAlignment="center"
+        android:visibility="gone"
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/transactionTypeSpinner" />
 
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

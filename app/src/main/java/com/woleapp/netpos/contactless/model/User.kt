@@ -51,3 +51,5 @@ data class User(
 )
 
 data class TokenResp(val success: Boolean, val token: String)
+
+data class BankPTokenResp(val success: Boolean, val token: String, val invitation: String)

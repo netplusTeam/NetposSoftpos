@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.auth0.android.jwt.JWT
+import com.dsofttech.dprefs.utils.DPrefs
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
@@ -104,6 +105,20 @@ class AuthViewModel : ViewModel() {
             return
         }
         authProvidus(username, password, deviceSerialId, partnerID)
+    }
+
+    fun loginBankP(
+        context: Context,
+        deviceSerialId: String,
+        partnerID: String,
+    ) {
+        val username = usernameLiveData.value
+        val password = passwordLiveData.value
+        if (username.isNullOrEmpty() || password.isNullOrEmpty()) {
+            _message.value = Event("All fields are required")
+            return
+        }
+        authBankP(username, password, deviceSerialId, partnerID)
     }
 
     private fun auth(
@@ -367,6 +382,153 @@ class AuthViewModel : ViewModel() {
                         _gotoAdminPage.value = Event(true)
                         return@let
                     }
+                    (it as? HttpException).let { httpException ->
+                        val errorMessage =
+                            httpException?.response()?.errorBody()?.string()
+                                ?: "{\"success\":false,\"message\":\"Unexpected error\"}"
+                        _message.value =
+                            Event(
+                                try {
+                                    gson.fromJson(errorMessage, AuthError::class.java).message
+                                        ?: "Login Failed"
+                                } catch (e: Exception) {
+                                    "login failed"
+                                },
+                            )
+                    }
+                }
+            }.disposeWith(disposables)
+    }
+
+    private fun authBankP(
+        username: String,
+        password: String,
+        deviceId: String,
+        partnerID: String,
+    ) {
+        authInProgress.value = true
+        val encryptedDataBase64 =
+            AESGCMEncryption.encryptFields(
+                username,
+                password,
+                deviceId,
+                BANKP_SECRET_KEY,
+            )
+        val data =
+            JsonObject().apply {
+                addProperty("data", encryptedDataBase64.first)
+                addProperty("invitation", encryptedDataBase64.second)
+            }
+
+        stormApiService!!.bankPUserToken(partnerID, data).flatMap {
+            if (!it.success) {
+                throw Exception("Login Failed, Check Credentials")
+            }
+
+            // Decrypt the encrypted data
+            val decryptedData = AESGCMEncryption.decrypt(it.token, it.invitation, BANKP_SECRET_KEY)
+            DPrefs.putString(PREF_LOGIN_USER_TOKEN, it.token)
+            DPrefs.putString(PREF_LOGIN_API_KEY, it.invitation)
+            val userToken = decryptedData
+            val stormId: String = JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
+            DPrefs.putString(PREF_USER_TOKEN, userToken)
+//            val userTokenDecoded = JWT(userToken)
+            val userTokenDecoded = JWT(decryptedData)
+            val user =
+                User().apply {
+                    this.netplusPayMid =
+                        if (userTokenDecoded.claims.containsKey("netplusPayMid")) {
+                            userTokenDecoded.getClaim("netplusPayMid").asString()
+                        } else {
+                            null
+                        }
+                    this.business_address =
+                        if (userTokenDecoded.claims.containsKey("business_address")) {
+                            userTokenDecoded.getClaim(
+                                "business_address",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.terminal_id =
+                        if (userTokenDecoded.claims.containsKey("terminalId")) {
+                            userTokenDecoded.getClaim(
+                                "terminalId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.business_name =
+                        if (userTokenDecoded.claims.containsKey("businessName")) {
+                            userTokenDecoded.getClaim(
+                                "businessName",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.netplus_id =
+                        if (userTokenDecoded.claims.containsKey("stormId")) {
+                            userTokenDecoded.getClaim(
+                                "stormId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.mid =
+                        if (userTokenDecoded.claims.containsKey("mid")) {
+                            userTokenDecoded.getClaim("mid").asString()
+                        } else {
+                            " "
+                        }
+                    this.partnerId =
+                        if (userTokenDecoded.claims.containsKey("partnerId")) {
+                            userTokenDecoded.getClaim(
+                                "partnerId",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                    this.email =
+                        if (userTokenDecoded.claims.containsKey("username")) {
+                            userTokenDecoded.getClaim(
+                                "username",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+//                    this.username =
+//                        if (userTokenDecoded.claims.containsKey("username")) {
+//                            userTokenDecoded.getClaim(
+//                                "username",
+//                            ).asString()
+//                        } else {
+//                            " "
+//                        }
+                    this.userType =
+                        if (userTokenDecoded.claims.containsKey("user_type")) {
+                            userTokenDecoded.getClaim(
+                                "user_type",
+                            ).asString()
+                        } else {
+                            " "
+                        }
+                }
+//            Log.d("USER", user.toString())
+            Single.just(user)
+        }.subscribeOn(Schedulers.io()).doFinally { authInProgress.postValue(false) }
+            .observeOn(AndroidSchedulers.mainThread()).subscribe { res, error ->
+                res?.let {
+                    DPrefs.putString(PREF_USER, gson.toJson(it))
+                    DPrefs.putBoolean(PREF_AUTHENTICATED, true)
+                    _authDone.value = Event(true)
+//                    Log.d("RESPONSE", "HELLOOOLLL")
+                }
+                error?.let {
+                    if (it.message.equals("admin", true)) {
+                        _gotoAdminPage.value = Event(true)
+                        return@let
+                    }
+//                    Log.d("RESPONSERRR", "HELLOOOLLLERRRR")
                     (it as? HttpException).let { httpException ->
                         val errorMessage =
                             httpException?.response()?.errorBody()?.string()
