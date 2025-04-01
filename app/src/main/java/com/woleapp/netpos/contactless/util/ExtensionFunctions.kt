@@ -260,3 +260,10 @@ fun readableStringToLocal(dateString: String): String {
         "Error: ${e.message}"
     }
 }
+
+fun Long.formatDateForImmediateTransactionResponse(): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
+    sdf.timeZone = TimeZone.getTimeZone("Africa/Lagos") // Change to your desired time zone
+    return sdf.format(Date(this))
+}
+// fun Long.formatDate(): String? = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()).format(Date(this))

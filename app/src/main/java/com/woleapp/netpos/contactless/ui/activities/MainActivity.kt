@@ -8,6 +8,7 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.ProgressDialog
 import android.content.*
+import android.graphics.pdf.PdfDocument
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -28,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -42,6 +44,7 @@ import com.dspread.xpos.QPOSService
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.payneteasy.tlv.BerTag
@@ -85,13 +88,11 @@ import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.viewmodels.*
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -1954,6 +1955,14 @@ class MainActivity :
             Log.d("PDF_DOWNLOAD", "PDF successfully saved at: ${pdfFile.absolutePath}")
         } catch (e: Exception) {
             Log.e("PDF_DOWNLOAD_ERROR", "Failed to save PDF: ${e.message}")
+        }
+    }
+
+    private fun showProgressBar(isShowProgressBar: Boolean) {
+        if (isShowProgressBar) {
+            binding.progressBarActivity.visibility = View.VISIBLE
+        } else {
+            binding.progressBarActivity.visibility = View.GONE
         }
     }
 
