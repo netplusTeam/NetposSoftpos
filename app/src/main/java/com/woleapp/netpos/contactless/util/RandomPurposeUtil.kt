@@ -36,6 +36,9 @@ import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import java.text.*
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -637,5 +640,16 @@ object RandomPurposeUtil {
             else -> "Unknown"
         }
         return newResult
+    }
+
+    fun convertCalToDate(timeInMilli: Long): String {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+        val date =
+            Instant.ofEpochMilli(timeInMilli)
+                .atZone(ZoneId.of("Africa/Lagos")) // Convert to WAT (UTC+1)
+                .toLocalDate()
+
+        return date.format(formatter)
     }
 }

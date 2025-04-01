@@ -72,14 +72,11 @@ import com.woleapp.netpos.contactless.ui.dialog.dialogListener.PasswordDialog3
 import com.woleapp.netpos.contactless.ui.fragments.*
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
-import com.woleapp.netpos.contactless.util.AppConstants.STRING_FIREBASE_INTENT_ACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_BUNDLE_KEY
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_REQUEST_KEY
-import com.woleapp.netpos.contactless.util.AppConstants.TAG_NOTIFICATION_RECEIVED_FROM_BACKEND
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.convertCalToDate
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
@@ -1832,35 +1829,35 @@ class MainActivity :
 
     private fun getIntentDataSentInFromFirebaseService() {
         intent?.action?.let { intentAction ->
-            intent.getBooleanExtra(TAG_NOTIFICATION_RECEIVED_FROM_BACKEND, false)
-                .let { intentExtra ->
-                    if (intentAction == STRING_FIREBASE_INTENT_ACTION) {
-                        if (intentExtra) {
-                            if (receiptAlertDialog.isShowing) {
-                                receiptAlertDialog.dismiss()
-                            }
-                            val currentDateTime = getCurrentDateTime()
-                            getEndOfDayTransactions(
-                                dateStr2Long(
-                                    currentDateTime,
-                                    "yyyy-MM-dd hh:mm a",
-                                ),
-                                dateStr2Long(
-                                    currentDateTime,
-                                    "yyyy-MM-dd hh:mm a",
-                                ),
-                            ) {
-                                transactionViewModel.setEndOfDayList(it)
-                                deviceNotSupportedAlertDialog.dismiss()
-                                addFragmentWithoutRemove(
-                                    TransactionHistoryFragment.newInstance(
-                                        HISTORY_ACTION_EOD,
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
+//            intent.getBooleanExtra(TAG_NOTIFICATION_RECEIVED_FROM_BACKEND, false)
+//                .let { intentExtra ->
+//                    if (intentAction == STRING_FIREBASE_INTENT_ACTION) {
+//                        if (intentExtra) {
+//                            if (receiptAlertDialog.isShowing) {
+//                                receiptAlertDialog.dismiss()
+//                            }
+//                            val currentDateTime = getCurrentDateTime()
+//                            getEndOfDayTransactions(
+//                                dateStr2Long(
+//                                    currentDateTime,
+//                                    "yyyy-MM-dd hh:mm a",
+//                                ),
+//                                dateStr2Long(
+//                                    currentDateTime,
+//                                    "yyyy-MM-dd hh:mm a",
+//                                ),
+//                            ) {
+//                                transactionViewModel.setEndOfDayList(it)
+//                                deviceNotSupportedAlertDialog.dismiss()
+//                                addFragmentWithoutRemove(
+//                                    TransactionHistoryFragment.newInstance(
+//                                        HISTORY_ACTION_EOD,
+//                                    ),
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
         }
     }
 
