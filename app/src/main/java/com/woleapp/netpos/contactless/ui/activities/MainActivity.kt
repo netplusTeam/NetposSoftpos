@@ -1857,11 +1857,11 @@ class MainActivity :
                     posView.appVersion.text = appVersion
                     posView.maskedPan.text = maskedPan
                     posView.responseCode.text = responseCode
-                    if (stan.isBlank()) {
-                        posView.stan.visibility = View.GONE
-                    } else {
-                        posView.stan.text = stan
-                    }
+//                    if (stan.isBlank()) {
+//                        posView.stan.visibility = View.GONE
+//                    } else {
+//                        posView.stan.text = stan
+//                    }
 
                     posView.transAmount.invalidate()
                     posView.merchantName.invalidate()
@@ -1872,7 +1872,7 @@ class MainActivity :
                     posView.dateTime.invalidate()
                     posView.maskedPan.invalidate()
                     posView.appVersion.invalidate()
-                    posView.stan.invalidate()
+//                    posView.stan.invalidate()
                     posView.cardType.invalidate()
                     posView.responseCode.invalidate()
 
@@ -1885,7 +1885,7 @@ class MainActivity :
                     posView.dateTime.requestLayout()
                     posView.maskedPan.requestLayout()
                     posView.appVersion.requestLayout()
-                    posView.stan.requestLayout()
+//                    posView.stan.requestLayout()
                     posView.cardType.requestLayout()
                     posView.responseCode.requestLayout()
 
@@ -1905,6 +1905,36 @@ class MainActivity :
                 }
                 // getPermissionAndCreatePdf(pdfView)
             }
+        }
+    }
+
+    private suspend fun generateAndSavePdf(
+        isDownload: Boolean = false,
+        posView: LayoutPosReceiptPdfBinding,
+        onFile: (File) -> Unit,
+    ) {
+        try {
+            val pdfFile = createPdfFromView(posView.root)
+
+            if (isDownload) {
+                println(">>>>>>>>>>>>>>>>>>>>here,")
+                withContext(Dispatchers.Main) {
+                    val rootView = (posView.root.context as? Activity)?.findViewById<View>(android.R.id.content) ?: posView.root
+
+                    Handler(Looper.getMainLooper()).post {
+                        Snackbar.make(rootView, "PDF saved to Downloads!", Snackbar.LENGTH_LONG)
+                            .setAction("Open") {
+                                openPdfFile(posView.root.context, pdfFile)
+                            }
+                            .show()
+                    }
+                }
+            }
+
+            onFile(pdfFile)
+            Log.d("PDF_DOWNLOAD", "PDF successfully saved at: ${pdfFile.absolutePath}")
+        } catch (e: Exception) {
+            Log.e("PDF_DOWNLOAD_ERROR", "Failed to save PDF: ${e.message}")
         }
     }
 
