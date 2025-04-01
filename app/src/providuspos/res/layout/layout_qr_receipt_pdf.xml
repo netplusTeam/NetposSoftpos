@@ -33,7 +33,7 @@
                     android:layout_height="@dimen/dimen_40dp"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
-                    android:src="@drawable/bankpro_logo"
+                    android:src="@drawable/ic_netpos_logo"
                     app:layout_constraintBottom_toTopOf="@+id/constraintLayout2"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
