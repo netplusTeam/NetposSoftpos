@@ -17,7 +17,8 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 
 class TransactionsViewModel : ViewModel() {
-    private lateinit var endOfDayList: List<TransactionResponse>
+//    private lateinit var endOfDayList: List<TransactionResponse>
+    private lateinit var endOfDayList: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>
 
     var cardData: CardData? = null
     private val compositeDisposable = CompositeDisposable()
@@ -28,6 +29,7 @@ class TransactionsViewModel : ViewModel() {
     private val _done = MutableLiveData(false)
     private val _beginGetCardDetails = MutableLiveData<Event<Boolean>>()
     private var accountType: IsoAccountType = IsoAccountType.DEFAULT_UNSPECIFIED
+
 //    private lateinit var cardHolderName: String
     private val _message = MutableLiveData<Event<String>>()
     private var cardScheme: String? = null
@@ -83,12 +85,15 @@ class TransactionsViewModel : ViewModel() {
 
     fun getTransactions() =
         when (_selectedAction.value) {
-            HISTORY_ACTION_PREAUTH -> appDatabase!!.transactionResponseDao()
-                .getTransactionByTransactionType(TransactionType.PRE_AUTHORIZATION)
-            HISTORY_ACTION_REFUND, HISTORY_ACTION_REVERSAL -> appDatabase!!.transactionResponseDao()
-                .getRefundableTransactions()
-            else -> appDatabase!!.transactionResponseDao()
-                .getTransactions(NetPosTerminalConfig.getTerminalId())
+            HISTORY_ACTION_PREAUTH ->
+                appDatabase!!.transactionResponseDao()
+                    .getTransactionByTransactionType(TransactionType.PRE_AUTHORIZATION)
+            HISTORY_ACTION_REFUND, HISTORY_ACTION_REVERSAL ->
+                appDatabase!!.transactionResponseDao()
+                    .getRefundableTransactions()
+            else ->
+                appDatabase!!.transactionResponseDao()
+                    .getTransactions(NetPosTerminalConfig.getTerminalId())
         }.map {
             transactionList = it
             it
@@ -120,27 +125,32 @@ class TransactionsViewModel : ViewModel() {
         _done.value = false
     }
 
-    private fun refundTransaction(transactionResponse: TransactionResponse, context: Context) {
+    private fun refundTransaction(
+        transactionResponse: TransactionResponse,
+        context: Context,
+    ) {
         val originalDataElements = transactionResponse.toOriginalDataElements()
 
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
 
-        val requestData = TransactionRequestData(
-            transactionType = transactionType,
-            amount = originalDataElements.originalAmount,
-            originalDataElements = originalDataElements,
-            accountType = accountType
-        )
+        val requestData =
+            TransactionRequestData(
+                transactionType = transactionType,
+                amount = originalDataElements.originalAmount,
+                originalDataElements = originalDataElements,
+                accountType = accountType,
+            )
         inProgress.value = true
         TransactionProcessor(hostConfig).processTransaction(
             context,
             requestData,
-            cardData!!
+            cardData!!,
         ).flatMap {
             if (it.responseCode == "A3") {
                 _shouldRefreshNibssKeys.postValue(Event(true))
@@ -171,20 +181,22 @@ class TransactionsViewModel : ViewModel() {
     }
 
     private fun printReceipt() {
-        val transactionResponse = lastTransactionResponse.value!!
-            .apply {
-                this.cardExpiry = ""
-            }
+        val transactionResponse =
+            lastTransactionResponse.value!!
+                .apply {
+                    this.cardExpiry = ""
+                }
         _showPrintDialog.postValue(
-            Event(transactionResponse.buildSMSText().toString())
+            Event(transactionResponse.buildSMSText().toString()),
         )
     }
 
     fun showReceiptDialog() {
-        _showPrintDialog.value = Event(
-            lastTransactionResponse.value!!.buildSMSText()
-                .toString()
-        )
+        _showPrintDialog.value =
+            Event(
+                lastTransactionResponse.value!!.buildSMSText()
+                    .toString(),
+            )
     }
 
 //    fun setCustomerName(cardHolderName: String) {
@@ -202,33 +214,35 @@ class TransactionsViewModel : ViewModel() {
     fun doSaleCompletion(context: Context) {
         val transactionResponse = lastTransactionResponse.value!!
         val originalDataElements = transactionResponse.toOriginalDataElements()
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
         // 0428084454
         // 0428084454
 
-        val requestData = TransactionRequestData(
-            transactionType = TransactionType.PRE_AUTHORIZATION_COMPLETION,
-            amount = originalDataElements.originalAmount,
-            originalDataElements = originalDataElements
-        )
+        val requestData =
+            TransactionRequestData(
+                transactionType = TransactionType.PRE_AUTHORIZATION_COMPLETION,
+                amount = originalDataElements.originalAmount,
+                originalDataElements = originalDataElements,
+            )
 
         _showProgressDialog.value = Event(true)
         TransactionProcessor(hostConfig).processTransaction(
             context,
             requestData,
-            cardData!!
+            cardData!!,
         ).flatMap {
             if (it.responseCode == "A3") {
                 _shouldRefreshNibssKeys.postValue(Event(true))
             }
             _showProgressDialog.postValue(Event(false))
             _message.postValue(Event("Transaction: ${it.responseMessage}"))
-         //   it.cardHolder = cardHolderName
+            //   it.cardHolder = cardHolderName
             it.cardLabel = cardScheme!!
             it.id = transactionResponse.id
             lastTransactionResponse.postValue(it)
@@ -255,18 +269,20 @@ class TransactionsViewModel : ViewModel() {
         val transactionResponse = lastTransactionResponse.value!!
         val originalDataElements = transactionResponse.toOriginalDataElements()
 
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
 
-        val requestData = TransactionRequestData(
-            transactionType = TransactionType.REFUND,
-            amount = originalDataElements.originalAmount,
-            originalDataElements = originalDataElements
-        )
+        val requestData =
+            TransactionRequestData(
+                transactionType = TransactionType.REFUND,
+                amount = originalDataElements.originalAmount,
+                originalDataElements = originalDataElements,
+            )
         _showProgressDialog.value = Event(true)
         TransactionProcessor(hostConfig).processTransaction(context, requestData, cardData!!)
             .flatMap {
@@ -275,7 +291,7 @@ class TransactionsViewModel : ViewModel() {
                 }
                 _showProgressDialog.postValue(Event(false))
                 _message.postValue(Event("Transaction: ${it.responseMessage}"))
-              //  it.cardHolder = cardHolderName
+                //  it.cardHolder = cardHolderName
                 it.cardLabel = cardScheme!!
                 it.id = transactionResponse.id
                 lastTransactionResponse.postValue(it)
@@ -298,11 +314,13 @@ class TransactionsViewModel : ViewModel() {
             }.disposeWith(compositeDisposable)
     }
 
-    fun setEndOfDayList(eodList: List<TransactionResponse>) {
+//    fun setEndOfDayList(eodList: List<TransactionResponse>) {
+//        this.endOfDayList = eodList
+//    }
+
+    fun setEndOfDayList(eodList: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>) {
         this.endOfDayList = eodList
     }
 
     fun getEodList() = endOfDayList
-
-
 }

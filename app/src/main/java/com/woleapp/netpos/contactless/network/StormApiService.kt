@@ -3,10 +3,7 @@
 package com.woleapp.netpos.contactless.network
 
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.model.NipNotification
-import com.woleapp.netpos.contactless.model.SessionCode
-import com.woleapp.netpos.contactless.model.TokenResp
-import com.woleapp.netpos.contactless.model.User
+import com.woleapp.netpos.contactless.model.*
 import io.reactivex.Single
 import retrofit2.Response
 import retrofit2.http.*
