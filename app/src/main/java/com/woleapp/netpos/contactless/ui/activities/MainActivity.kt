@@ -32,6 +32,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.alcineo.softpos.payment.api.interfaces.NFCListener
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
@@ -77,12 +78,16 @@ import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_RE
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.convertCalToDate
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.formatCurrencyAmountUsingCurrentModule
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.viewmodels.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
@@ -1560,11 +1565,19 @@ class MainActivity :
     }
 
     private fun handlePdfReceiptPrinting() {
+//        Log.d("RECEIPT", "THIS ONE")
         viewModel.showPrintDialog.observe(this) { event ->
             event.getContentIfNotHandled()?.let { result ->
-                when (Prefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
+                when (DPrefs.getString(PREF_PRINTER_SETTINGS, "nothing_is_there")) {
                     PREF_VALUE_PRINT_DOWNLOAD -> {
                         receiptPdf = createPdf(binding, this)
+//                        createPdf(binding, this, this) { pdfFile ->
+//                            if (pdfFile != null) {
+//                                Toast.makeText(this, "PDF saved at: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
+//                            } else {
+//                                Toast.makeText(this, "Failed to create PDF", Toast.LENGTH_LONG).show()
+//                            }
+//                        }
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
@@ -1583,22 +1596,31 @@ class MainActivity :
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                showSnackBar(
-                                    binding.root,
-                                    getString(R.string.fileDownloaded),
-                                )
+                                downloadPdfImpl(isDownload = true)
+//                                showSnackBar(
+//                                    binding.root,
+//                                    getString(R.string.fileDownloaded),
+//                                )
                             }
                             receiptDialogBinding.shareButton.setOnClickListener {
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                sharePdf(receiptPdf, this@MainActivity)
+                                downloadPdfImpl(isDownload = false) {
+                                    sharePdf(it, this@MainActivity)
+                                }
+                                // sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
                     }
                     PREF_VALUE_PRINT_SMS -> {
-                        receiptPdf = createPdf(binding, this)
+                        // receiptPdf = createPdf(binding, this)
+//                        createPdf(binding, this, this) { pdfFile ->
+//                            if (pdfFile != null) {
+//                                Toast.makeText(this, "PDF saved at: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
+//                            } else {
+//                                Toast.makeText(this, "Failed to create PDF", Toast.LENGTH_LONG).show()
+//                            }
+//                        }
                         receiptAlertDialog.apply {
                             receiptDialogBinding.transactionContent.text = result
                             show()
@@ -1624,22 +1646,31 @@ class MainActivity :
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                showSnackBar(
-                                    binding.root,
-                                    getString(R.string.fileDownloaded),
-                                )
+                                downloadPdfImpl(isDownload = true)
+//                                showSnackBar(
+//                                    binding.root,
+//                                    getString(R.string.fileDownloaded),
+//                                )
                             }
                             receiptDialogBinding.shareButton.setOnClickListener {
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                sharePdf(receiptPdf, this@MainActivity)
+                                downloadPdfImpl(isDownload = false) {
+                                    sharePdf(it, this@MainActivity)
+                                }
+                                // sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
                     }
                     PREF_VALUE_PRINT_SHARE -> {
                         receiptPdf = createPdf(binding, this)
+//                        createPdf(binding, this, this) { pdfFile ->
+//                            if (pdfFile != null) {
+//                                Toast.makeText(this, "PDF saved at: ${pdfFile.absolutePath}", Toast.LENGTH_LONG).show()
+//                            } else {
+//                                Toast.makeText(this, "Failed to create PDF", Toast.LENGTH_LONG).show()
+//                            }
+//                        }
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text = getString(R.string.share)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
@@ -1654,44 +1685,46 @@ class MainActivity :
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                showSnackBar(
-                                    binding.root,
-                                    getString(R.string.fileDownloaded),
-                                )
+                                downloadPdfImpl(isDownload = true)
+//                                showSnackBar(
+//                                    binding.root,
+//                                    getString(R.string.fileDownloaded),
+//                                )
                             }
                             receiptDialogBinding.shareButton.setOnClickListener {
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                sharePdf(receiptPdf, this@MainActivity)
+                                downloadPdfImpl(isDownload = false) {
+                                    sharePdf(it, this@MainActivity)
+                                }
+                                // sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
                     }
+
                     else -> {
-                        receiptPdf = createPdfWithRRN(pdfView, this, result)
                         receiptAlertDialog.apply {
                             receiptDialogBinding.sendButton.text =
                                 getString(R.string.download)
                             receiptDialogBinding.telephoneWrapper.visibility = View.INVISIBLE
                             receiptDialogBinding.transactionContent.text = result.replace("Card Owner: CUSTOMER", "")
-                            Log.d("DIALOG_DATA", result)
-                            Log.d("DIALOG_DATA", "$receiptPdf")
+//                            Log.d("DIALOG_DATA", result)
+//                            Log.d("DIALOG_DATA", "$receiptPdf")
                             show()
                             receiptDialogBinding.sendButton.setOnClickListener { view ->
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                showSnackBar(
-                                    binding.root,
-                                    getString(R.string.fileDownloaded),
-                                )
+                                downloadPdfImpl(isDownload = true)
+                                showProgressBar(true)
                             }
                             receiptDialogBinding.shareButton.setOnClickListener {
                                 cancel()
                                 dismiss()
-                                downloadPdfImpl()
-                                sharePdf(receiptPdf, this@MainActivity)
+                                downloadPdfImpl(isDownload = false) {
+                                    sharePdf(it, this@MainActivity)
+                                }
+                                showProgressBar(true)
+                                // sharePdf(receiptPdf, this@MainActivity)
                             }
                         }
                         receiptDialogBinding.apply {
@@ -1700,6 +1733,176 @@ class MainActivity :
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun downloadPdfImpl(
+        isDownload: Boolean = false,
+        onFile: (File) -> Unit = {},
+    ) {
+        viewModel.lastPosTransactionResponse.value?.let {
+//            Log.d("SIT_HEREE", "$it")
+            if (it.TVR.contains(IS_QR_TRANSACTION)) {
+                val qrTransaction =
+                    it.copy(TVR = it.TVR.replace(IS_QR_TRANSACTION, ""))
+                        .mapTransactionResponseToQrTransaction()
+
+                val posView: LayoutQrReceiptPdfBinding = qrPdfView
+                // val response = it
+                lifecycleScope.launch(Dispatchers.Main) {
+                    val amount = "Amount:   ${divideLongBy100(qrTransaction.amount ?: 0).formatCurrencyAmountUsingCurrentModule()}"
+                    val status = "TRANSACTION    ${if (qrTransaction.responseCode == "00" || qrTransaction.responseCode == "16") "APPROVED" else "DECLINED"}"
+                    val terminalId = "TerminalId:   ${qrTransaction.terminalId}"
+                    val userBusinessName = "Merchant:   ${Singletons.getCurrentlyLoggedInUser()?.business_name
+                        ?: "${BuildConfig.FLAVOR} POS MERCHANT"}"
+                    // val rrn = "RRN:  ${qrTransaction.RRN}"
+                    val message = "Message: ${getMessage()[it.responseCode] ?: "Unknown response"} "
+                    val cardType = it.cardLabel
+                    val maskedPan = "Masked Pan: ${it.maskedPan}"
+                    val responseCode = "Response Code: ${it.responseCode}"
+                    val appVersion = "App Version: ${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
+                    val cardOwner = "Card Owner:  ${qrTransaction.customerName}"
+                    val orderId = "Order Id: ${qrTransaction.rrnOrderId}"
+                    val date =
+                        if (it.transmissionDateTime.isNotBlank()) {
+                            it.transactionTimeInMillis.formatDateForImmediateTransactionResponse()
+                        } else {
+                            it.transactionTimeInMillis.formatDate()
+                        }
+
+                    posView.cardOwner.text = cardOwner
+                    posView.orderId.text = orderId
+                    posView.transAmount.text = amount
+                    posView.status.text = status
+                    posView.terminalIdPlaceHolder.text = terminalId
+                    posView.merchantName.text = userBusinessName
+                    posView.message.text = message
+                    posView.dateTime.text = "DATE/TIME: $date"
+                    posView.appVersion.text = appVersion
+                    posView.maskedPan.text = maskedPan
+                    posView.responseCode.text = responseCode
+
+                    posView.transAmount.invalidate()
+                    posView.merchantName.invalidate()
+                    posView.status.invalidate()
+                    posView.cardOwner.invalidate()
+                    posView.terminalIdPlaceHolder.invalidate()
+                    posView.orderId.invalidate()
+                    posView.message.invalidate()
+                    posView.dateTime.invalidate()
+                    posView.maskedPan.invalidate()
+                    posView.appVersion.invalidate()
+                    posView.responseCode.invalidate()
+
+                    posView.terminalIdPlaceHolder.requestLayout()
+                    posView.merchantName.requestLayout()
+                    posView.status.requestLayout()
+                    posView.transAmount.requestLayout()
+                    posView.status.requestLayout()
+                    posView.message.requestLayout()
+                    posView.dateTime.requestLayout()
+                    posView.maskedPan.requestLayout()
+                    posView.cardOwner.requestLayout()
+                    posView.appVersion.requestLayout()
+                    posView.orderId.requestLayout()
+                    posView.responseCode.requestLayout()
+
+                    posView.executePendingBindings()
+
+                    // Ensure UI updates before PDF generation
+                    delay(500) // Small delay to allow UI updates
+                    posView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                    posView.root.layout(0, 0, posView.root.measuredWidth, posView.root.measuredHeight)
+
+                    showProgressBar(false)
+
+                    generateQRAndSavePdf(isDownload = isDownload, posView) {
+                            receiptFile ->
+                        onFile(receiptFile)
+                    }
+                }
+            } else {
+                val posView: LayoutPosReceiptPdfBinding = pdfView
+                val response = it
+                lifecycleScope.launch(Dispatchers.Main) {
+                    val amount = "Amount:   ${divideLongBy100(response.amount ?: 0).formatCurrencyAmountUsingCurrentModule()}"
+                    val status = "TRANSACTION    ${if (response.responseCode == "00" || response.responseCode == "16") "APPROVED" else "DECLINED"}"
+                    val terminalId = "TerminalId:   ${response.terminalId}"
+                    val userBusinessName = "Merchant:   ${Singletons.getCurrentlyLoggedInUser()?.business_name
+                        ?: "${BuildConfig.FLAVOR} POS MERCHANT"}"
+                    val rrn = "RRN:  ${response.RRN}"
+                    val message = "Message: ${getMessage()[it.responseCode] ?: "Unknown response"} "
+                    val cardType = it.cardLabel
+                    val maskedPan = "Masked Pan: ${it.maskedPan}"
+                    val responseCode = "Response Code: ${it.responseCode}"
+                    val appVersion = "App Version: ${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
+                    val date =
+                        if (it.transmissionDateTime.isNotBlank()) {
+                            it.transactionTimeInMillis.formatDateForImmediateTransactionResponse()
+                        } else {
+                            it.transactionTimeInMillis.formatDate()
+                        }
+
+                    val stan = response.STAN ?: ""
+                    posView.transAmount.text = amount
+                    posView.status.text = status
+                    posView.terminalIdPlaceHolder.text = terminalId
+                    posView.merchantName.text = userBusinessName
+                    posView.rrn.text = rrn
+                    posView.message.text = message
+                    posView.dateTime.text = "DATE/TIME: $date"
+                    posView.cardType.text = cardType
+                    posView.appVersion.text = appVersion
+                    posView.maskedPan.text = maskedPan
+                    posView.responseCode.text = responseCode
+                    if (stan.isBlank()) {
+                        posView.stan.visibility = View.GONE
+                    } else {
+                        posView.stan.text = stan
+                    }
+
+                    posView.transAmount.invalidate()
+                    posView.merchantName.invalidate()
+                    posView.status.invalidate()
+                    posView.terminalIdPlaceHolder.invalidate()
+                    posView.rrn.invalidate()
+                    posView.message.invalidate()
+                    posView.dateTime.invalidate()
+                    posView.maskedPan.invalidate()
+                    posView.appVersion.invalidate()
+                    posView.stan.invalidate()
+                    posView.cardType.invalidate()
+                    posView.responseCode.invalidate()
+
+                    posView.terminalIdPlaceHolder.requestLayout()
+                    posView.merchantName.requestLayout()
+                    posView.status.requestLayout()
+                    posView.transAmount.requestLayout()
+                    posView.status.requestLayout()
+                    posView.message.requestLayout()
+                    posView.dateTime.requestLayout()
+                    posView.maskedPan.requestLayout()
+                    posView.appVersion.requestLayout()
+                    posView.stan.requestLayout()
+                    posView.cardType.requestLayout()
+                    posView.responseCode.requestLayout()
+
+                    posView.executePendingBindings()
+
+                    // Ensure UI updates before PDF generation
+                    delay(500) // Small delay to allow UI updates
+                    posView.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+                    posView.root.layout(0, 0, posView.root.measuredWidth, posView.root.measuredHeight)
+
+                    showProgressBar(false)
+
+                    generateAndSavePdf(isDownload = isDownload, posView) {
+                            receiptFile ->
+                        onFile(receiptFile)
+                    }
+                }
+                // getPermissionAndCreatePdf(pdfView)
             }
         }
     }
@@ -1723,6 +1926,78 @@ class MainActivity :
                 )
                 getPermissionAndCreatePdf(pdfView)
             }
+        }
+    }
+
+    private suspend fun generateQRAndSavePdf(
+        isDownload: Boolean = false,
+        posView: LayoutQrReceiptPdfBinding,
+        onFile: (File) -> Unit,
+    ) {
+        try {
+            val pdfFile = createPdfFromView(posView.root)
+            if (isDownload) {
+                println(">>>>>>>>>>>>>>>>>>>>here,")
+                withContext(Dispatchers.Main) {
+                    val rootView = (posView.root.context as? Activity)?.findViewById<View>(android.R.id.content) ?: posView.root
+
+                    Handler(Looper.getMainLooper()).post {
+                        Snackbar.make(rootView, "PDF saved to Downloads!", Snackbar.LENGTH_LONG)
+                            .setAction("Open") {
+                                openPdfFile(posView.root.context, pdfFile)
+                            }
+                            .show()
+                    }
+                }
+            }
+            onFile(pdfFile)
+            Log.d("PDF_DOWNLOAD", "PDF successfully saved at: ${pdfFile.absolutePath}")
+        } catch (e: Exception) {
+            Log.e("PDF_DOWNLOAD_ERROR", "Failed to save PDF: ${e.message}")
+        }
+    }
+
+    private fun createPdfFromView(view: View): File {
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(view.width, view.height, 1).create()
+        val page = pdfDocument.startPage(pageInfo)
+
+        view.draw(page.canvas)
+        pdfDocument.finishPage(page)
+
+        val filePath =
+            when (BuildConfig.FLAVOR) {
+                "providuspos" ->
+                    File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "PROVIDUS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf",
+                    )
+                else ->
+                    File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "NetPOS_Receipt_" + getCurrentDateTimeAsFormattedString() + ".pdf",
+                    )
+            }
+        pdfDocument.writeTo(FileOutputStream(filePath))
+        pdfDocument.close()
+
+        return filePath
+    }
+
+    private fun openPdfFile(
+        context: Context,
+        file: File,
+    ) {
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
+        val intent =
+            Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, "No PDF viewer found!", Toast.LENGTH_SHORT).show()
         }
     }
 
