@@ -79,13 +79,14 @@ import com.woleapp.netpos.contactless.util.AppConstants.TAG_NOTIFICATION_RECEIVE
 import com.woleapp.netpos.contactless.util.AppConstants.WRITE_PERMISSION_REQUEST_CODE
 import com.woleapp.netpos.contactless.util.Mappers.mapTransactionResponseToQrTransaction
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.dateStr2Long
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil.divideLongBy100
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getCurrentDateTime
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponseActivity
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showSnackBar
 import com.woleapp.netpos.contactless.util.Singletons.gson
 import com.woleapp.netpos.contactless.viewmodels.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
 import timber.log.Timber
 import java.io.File
@@ -751,6 +752,14 @@ class MainActivity :
                 }
             }
         }
+
+        salesViewModel.paymentTransactionResponse.observe(this) { response ->
+//            Log.d("THE_RESULT", response.toString())
+
+            response?.data?.data?.transactions?.let { transactions ->
+                showEndOfDayBottomSheetDialog(transactions)
+            }
+        }
     }
 
 //    override fun onResume() {
@@ -1321,19 +1330,17 @@ class MainActivity :
                     { _, endYear, endMonth, endDay ->
                         val endCalendar =
                             Calendar.getInstance().apply { set(endYear, endMonth, endDay) }
-                        val startDate = startCalendar.timeInMillis
-                        val endDate = endCalendar.timeInMillis
+                        val startDate = convertCalToDate(startCalendar.timeInMillis)
+                        val endDate = convertCalToDate(endCalendar.timeInMillis)
                         val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
 //                        Log.d("THE_RESULT", "$startDate====$endDate")
 
                         if (startDate != null) {
                             if (endDate != null) {
-                                getEndOfDayTransactions(
+                                getPaymentTransactions(
                                     startDate,
                                     endDate,
-                                ) {
-                                    showEndOfDayBottomSheetDialog(it)
-                                }
+                                )
                             }
                         }
                     },
@@ -1353,6 +1360,33 @@ class MainActivity :
             setTitle("Select Start Date") // Setting a title for start date selection
             datePicker.maxDate = System.currentTimeMillis() // Prevents selecting future dates
         }.show()
+    }
+
+    private fun getPaymentTransactions(
+        startDate: String,
+        endDate: String,
+    ) {
+        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
+        val loginToken = DPrefs.getString(PREF_LOGIN_USER_TOKEN)
+        val apiKey = DPrefs.getString(PREF_LOGIN_API_KEY)
+        GlobalScope.launch {
+            try {
+                val response =
+                    salesViewModel.getPaymentTransactions(
+                        "Bearer $loginToken",
+                        apiKey,
+                        user.terminal_id.toString(),
+                        "all",
+                        startDate,
+                        endDate,
+                        "",
+                        1,
+                        300,
+                    )
+            } catch (e: Exception) {
+                Log.e("DEBUG", "API call failed: ${e.message}", e)
+            }
+        }
     }
 
     private fun getEndOfDayTransactions(
@@ -1375,7 +1409,7 @@ class MainActivity :
         }
     }
 
-    private fun showEndOfDayBottomSheetDialog(transactions: List<TransactionResponse>) {
+    private fun showEndOfDayBottomSheetDialog(transactions: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>) {
         val approvedList = transactions.filter { it.responseCode == "00" }
         val declinedList = transactions.filter { it.responseCode != "00" }
 
@@ -1383,34 +1417,11 @@ class MainActivity :
         val approvedAmt = approvedList.sumOf { it.amount }
         val declinedAmt = declinedList.sumOf { it.amount }
 
-        // Calculate total amounts
-        val totalApprovedAmt = "${(divideLongBy100(approvedAmt)).formatCurrencyAmount("\u20A6")}\n"
-        val totalDeclinedAmt = "${(divideLongBy100(declinedAmt)).formatCurrencyAmount("\u20A6")}\n"
+        val totalApprovedAmt = "${approvedAmt.formatCurrencyAmount()}\n"
+        val totalDeclinedAmt = "${declinedAmt.formatCurrencyAmount()}\n"
 
         val endOfDay = LayoutPrintEndOfDayBinding.inflate(LayoutInflater.from(this), null, false)
-        endOfDay.apply {
-            approvedCount.text = approvedList.size.toString()
-            declinedCount.text = declinedList.size.toString()
-            totalApprovedAmount.text = totalApprovedAmt.toString()
-            totalDeclinedAmount.text = totalDeclinedAmt.toString()
-            totalTransactions.text =
-                getString(R.string.total_transaction_count, transactions.size.toString())
-            print.setOnClickListener {
-                when (chipGroup.checkedChipId) {
-                    R.id.print_approved -> approvedList
-                    R.id.print_declined -> declinedList
-                    else -> transactions
-                }.apply {
-                    if (isEmpty()) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            getString(R.string.no_transactions),
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                }
-            }
-        }
+
         val bottomSheet =
             BottomSheetDialog(this, R.style.SheetDialog).apply {
                 dismissWithAnimation = true
@@ -1418,14 +1429,78 @@ class MainActivity :
                 setContentView(endOfDay.root)
                 show()
             }
-        endOfDay.view.setOnClickListener {
-            transactionViewModel.setEndOfDayList(transactions)
-            bottomSheet.dismiss()
-            showFragment(
-                TransactionHistoryFragment.newInstance(HISTORY_ACTION_EOD),
-                "Transaction History",
-            )
+
+        // Set default values
+        endOfDay.apply {
+            approvedCount.text = approvedList.size.toString()
+            declinedCount.text = declinedList.size.toString()
+            totalApprovedAmount.text = totalApprovedAmt
+            totalDeclinedAmount.text = totalDeclinedAmt
+            totalTransactions.text =
+                getString(R.string.total_transaction_count, transactions.size.toString())
+
+            // Function to update the displayed transactions
+            fun updateDisplayedTransactions(
+                selectedTransactions: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction>,
+            ) {
+                if (selectedTransactions.isEmpty()) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.no_transactions),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    return // Do nothing if no transactions
+                }
+                transactionViewModel.setEndOfDayList(selectedTransactions)
+            }
+
+            // Listen for chip selection changes
+            chipGroup.setOnCheckedChangeListener { _, checkedId ->
+                when (checkedId) {
+                    R.id.print_approved -> updateDisplayedTransactions(approvedList)
+                    R.id.print_declined -> updateDisplayedTransactions(declinedList)
+                    R.id.print_all -> updateDisplayedTransactions(transactions)
+                }
+            }
+
+            // Handle the print button click
+            print.setOnClickListener {
+                val selectedTransactions =
+                    when (chipGroup.checkedChipId) {
+                        R.id.print_approved -> approvedList
+                        R.id.print_declined -> declinedList
+                        else -> transactions
+                    }
+                updateDisplayedTransactions(selectedTransactions)
+            }
+
+            // Handle the view button click (Navigation)
+            view.setOnClickListener {
+                val selectedTransactions =
+                    when (chipGroup.checkedChipId) {
+                        R.id.print_approved -> approvedList
+                        R.id.print_declined -> declinedList
+                        else -> transactions
+                    }
+
+                if (selectedTransactions.isEmpty()) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.no_transactions),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                } else {
+                    transactionViewModel.setEndOfDayList(selectedTransactions)
+                    bottomSheet.dismiss()
+                    showFragment(
+                        TransactionHistoryFragment.newInstance(HISTORY_ACTION_EOD),
+                        "Transaction History",
+                    )
+                }
+            }
         }
+
+        // Close button dismisses the bottom sheet
         endOfDay.closeButton.setOnClickListener {
             bottomSheet.dismiss()
         }
