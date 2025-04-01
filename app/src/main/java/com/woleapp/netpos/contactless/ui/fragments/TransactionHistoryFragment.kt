@@ -1,11 +1,13 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
@@ -36,19 +38,26 @@ import javax.inject.Named
 class TransactionHistoryFragment : BaseFragment() {
     private lateinit var globalAction: String
 
+    //    private var fullTransactionList: List<TransactionResponse> = listOf() // Store the full list
+    private var fullTransactionList: List<com.woleapp.netpos.contactless.model.payment.transactions.Transaction> = listOf() // Store the full list
+
     companion object {
         fun newInstance(action: String = HISTORY_ACTION_DEFAULT) =
             TransactionHistoryFragment().apply {
-                arguments = Bundle().apply {
-                    globalAction = action
-                    putString(HISTORY_ACTION, action)
-                }
+                arguments =
+                    Bundle().apply {
+                        globalAction = action
+                        putString(HISTORY_ACTION, action)
+                    }
             }
     }
 
     private lateinit var binding: FragmentTransactionHistoryBinding
     private val viewModel by activityViewModels<TransactionsViewModel>()
+
     private lateinit var adapter: TransactionsAdapter
+
+    //    private lateinit var adapter: AllTransactionsAdapter
     private lateinit var feedbackDialog: AlertDialog
     private lateinit var feedbackBinding: LayoutComplaintsBinding
     private val notificationModel by activityViewModels<NotificationViewModel>()
@@ -76,21 +85,34 @@ class TransactionHistoryFragment : BaseFragment() {
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         val action = requireArguments().getString(HISTORY_ACTION, HISTORY_ACTION_DEFAULT)
         if (action != HISTORY_ACTION_DEFAULT) {
             binding.historyHeader.text = getString(R.string.history_header_template, action)
         }
         viewModel.setAction(action)
-        val adapterListener = object : TransactionClickListener {
-            override fun invoke(p1: TransactionResponse) {
-                viewModel.setSelectedTransaction(p1)
-                viewModel.setAction(HISTORY_ACTION_REPRINT)
-                globalAction = HISTORY_ACTION_REPRINT
+        // Load the full transaction list
+        fullTransactionList = viewModel.getEodList()
+        adapter =
+            TransactionsAdapter {
+                viewModel.setSelectedTransaction(it)
                 addFragmentWithoutRemove(TransactionDetailsFragment())
             }
-        }
+        adapter.submitList(fullTransactionList)
+
+        val adapterListener =
+            object : TransactionClickListener {
+                override fun invoke(p1: TransactionResponse) {
+                    viewModel.setSelectedTransaction(p1)
+                    viewModel.setAction(HISTORY_ACTION_REPRINT)
+                    globalAction = HISTORY_ACTION_REPRINT
+                    addFragmentWithoutRemove(TransactionDetailsFragment())
+                }
+            }
         if (action == HISTORY_ACTION_PREAUTH) {
             val header = "Select PREAUTH Transaction"
             binding.historyHeader.text = header
@@ -105,17 +127,16 @@ class TransactionHistoryFragment : BaseFragment() {
             viewModel.setAction(HISTORY_ACTION_REPRINT)
             adapter = TransactionsAdapter(adapterListener)
         }
-        adapter = TransactionsAdapter {
-            viewModel.setSelectedTransaction(it)
-            addFragmentWithoutRemove(TransactionDetailsFragment())
-        }
-        val tabListener = View.OnClickListener {
-            val selected = when (it) {
-                binding.historyButton -> 0
-                else -> 1
+
+        val tabListener =
+            View.OnClickListener {
+                val selected =
+                    when (it) {
+                        binding.historyButton -> 0
+                        else -> 1
+                    }
+                setSelectedTab(selected)
             }
-            setSelectedTab(selected)
-        }
         binding.historyButton.setOnClickListener(tabListener)
         binding.searchButton.setOnClickListener(tabListener)
         binding.rvTransactionsHistory.adapter = adapter
@@ -126,62 +147,82 @@ class TransactionHistoryFragment : BaseFragment() {
             ),
         )
         if (action != HISTORY_ACTION_EOD) {
-            viewModel.getTransactions().observe(viewLifecycleOwner) {
-                adapter.submitList(it)
-                adapter.notifyDataSetChanged()
-            }
+//            viewModel.getTransactions().observe(viewLifecycleOwner) {
+//                adapter.submitList(it)
+//                adapter.notifyDataSetChanged()
+//            }
         } else {
             val eodList = viewModel.getEodList()
             adapter.submitList(eodList)
             adapter.notifyDataSetChanged()
         }
         setSelectedTab()
-        binding.transactionSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                if (query.isNullOrEmpty()) {
-                    adapter.submitList(viewModel.transactionList)
-                    return true
-                }
-                adapter.submitList(
-                    viewModel.transactionList?.filter { transactionResponse ->
-                        (transactionResponse.RRN.contains(query.toString())).or(
-                            transactionResponse.STAN.contains(
-                                query.toString(),
-                            ),
-                        )
-                    },
-                )
-                return true
-            }
+//        binding.transactionSearch.setOnQueryTextListener(
+//            object : SearchView.OnQueryTextListener {
+//                override fun onQueryTextSubmit(query: String?): Boolean {
+//                    if (query.isNullOrEmpty()) {
+//                        adapter.submitList(viewModel.transactionList)
+//                        return true
+//                    }
+//                    adapter.submitList(
+//                        viewModel.transactionList?.filter { transactionResponse ->
+//                            (transactionResponse.RRN.contains(query.toString())).or(
+//                                transactionResponse.STAN.contains(
+//                                    query.toString(),
+//                                ),
+//                            )
+//                        },
+//                    )
+//                    return true
+//                }
+//
+//                override fun onQueryTextChange(newText: String?): Boolean {
+//                    if (newText.isNullOrEmpty()) {
+//                        adapter.submitList(viewModel.transactionList)
+//                        return true
+//                    }
+//                    adapter.submitList(
+//                        viewModel.transactionList?.filter { transactionResponse ->
+//                            (transactionResponse.RRN.contains(newText ?: "")).or(
+//                                transactionResponse.STAN.contains(
+//                                    newText ?: "",
+//                                ),
+//                            )
+//                        },
+//                    )
+//                    return true
+//                }
+//            },
+//        )
 
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (newText.isNullOrEmpty()) {
-                    adapter.submitList(viewModel.transactionList)
-                    return true
-                }
-                adapter.submitList(
-                    viewModel.transactionList?.filter { transactionResponse ->
-                        (transactionResponse.RRN.contains(newText ?: "")).or(
-                            transactionResponse.STAN.contains(
-                                newText ?: "",
-                            ),
-                        )
-                    },
-                )
-                return true
+        binding.chipGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.print_approved -> filterTransactions("00") // Approved
+                R.id.print_declined -> filterTransactions("declined") // Declined (fixing logic)
+                else -> {
+                    binding.emptyLyt.visibility = View.GONE
+                    binding.complaintsBtn.visibility = View.VISIBLE
+                    adapter.submitList(emptyList()) // Clear the list first
+                    adapter.notifyDataSetChanged() // Force UI update
+                    Handler(Looper.getMainLooper()).postDelayed({ // Add a small delay before setting the filtered list
+                        adapter.submitList(fullTransactionList)
+                    }, 100)
+                } // Show all transactions
             }
-        })
-
-        feedbackBinding = LayoutComplaintsBinding.inflate(
-            LayoutInflater.from(requireContext()), null, false
-        ).apply {
-            lifecycleOwner = this@TransactionHistoryFragment
-            executePendingBindings()
         }
+
+        feedbackBinding =
+            LayoutComplaintsBinding.inflate(
+                LayoutInflater.from(requireContext()),
+                null,
+                false,
+            ).apply {
+                lifecycleOwner = this@TransactionHistoryFragment
+                executePendingBindings()
+            }
         feedbackDialog =
             AlertDialog.Builder(requireContext()).setView(feedbackBinding.root).setCancelable(true)
                 .create()
-
 
         binding.complaintsBtn.setOnClickListener {
             binding.complaintsBtn.visibility = View.GONE
@@ -194,6 +235,35 @@ class TransactionHistoryFragment : BaseFragment() {
         }
         loader = alertDialog(requireContext(), true)
         deviceId = getDeviceId(requireContext())
+    }
+
+    private fun filterTransactions(responseCode: String) {
+        val filteredList =
+            when (responseCode) {
+                "00" ->
+                    fullTransactionList.filter {
+                        it.responseCode?.trim() == "00"
+                    } // Approved transactions
+                else ->
+                    fullTransactionList.filter {
+                        it.responseCode?.trim() != "00" || it.responseCode?.trim() == null
+                    } // Declined transactions
+            }
+
+        adapter.submitList(emptyList()) // Clear the list first
+        adapter.notifyDataSetChanged() // Force UI update
+        Handler(Looper.getMainLooper()).postDelayed({ // Add a small delay before setting the filtered list
+            adapter.submitList(filteredList)
+        }, 100)
+
+        if (filteredList.isEmpty()) {
+            binding.emptyLyt.visibility = View.VISIBLE
+            binding.complaintsBtn.visibility = View.GONE
+            Toast.makeText(requireContext(), getString(R.string.no_transactions), Toast.LENGTH_SHORT).show()
+        } else {
+            binding.emptyLyt.visibility = View.GONE
+            binding.complaintsBtn.visibility = View.VISIBLE
+        }
     }
 
     private fun submitMerchantFeedback() {
@@ -263,15 +333,18 @@ class TransactionHistoryFragment : BaseFragment() {
         val subject = feedbackBinding.subjectEdittext.text?.trim().toString()
         val feedback = feedbackBinding.feedbackEdittext.text?.trim().toString()
 
-        val newFeedBack = FeedbackRequest(
-            username = email, subject = subject, feedback = feedback
-        )
+        val newFeedBack =
+            FeedbackRequest(
+                username = email,
+                subject = subject,
+                feedback = feedback,
+            )
         observeServerResponse(
             notificationModel.feedbackFromMerchants(newFeedBack, initPartnerId(), deviceId),
             loader,
             compositeDisposable,
             ioScheduler,
-            mainThreadScheduler
+            mainThreadScheduler,
         ) {
             feedbackDialog.dismiss()
             showToast("Feedback saved successfully!")
