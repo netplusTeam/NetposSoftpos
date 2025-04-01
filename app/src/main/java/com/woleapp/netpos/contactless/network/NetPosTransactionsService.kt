@@ -30,4 +30,17 @@ interface NetPosTransactionsService {
         @Query("endDate") endDate: String?,
         @Query("page") page: Int,
     ): Single<Response<AllTransactionsResponseDto>>
+
+    @GET("/merchant-transactions/{terminalId}")
+    fun getPaymentTransaction(
+        @Header("Authorization") token: String,
+        @Header("api-key") apiKey: String,
+        @Path("terminalId") username: String,
+        @Query("transactionType") transactionType: String,
+        @Query("startDate") startDate: String?,
+        @Query("endDate") endDate: String?,
+        @Query("transactionStatus") transactionStatus: String?,
+        @Query("page") page: Int,
+        @Query("pageSize") pageSize: Int,
+    ): Single<Response<AllTransactionsResponseDto>>
 }

@@ -1,44 +1,75 @@
 package com.woleapp.netpos.contactless.util
 
 object UtilityParam {
-
     init {
         System.loadLibrary("api-keys")
     }
 
     private external fun getAuthUserName(): String
+
     private external fun getAuthPassword(): String
+
     private external fun getGetQrBaseUrl(): String
+
     private external fun getSendVerveOtpBaseUrl(): String
+
     private external fun getMerchantId(): String
+
     private external fun getWebViewBaseUrl(): String
+
     private external fun getContactlessExistingBaseUrl(): String
+
     private external fun getContactlessPaymentWithQrBaseUrl(): String
+
     private external fun getNotificationBaseUrl(): String
+
     private external fun getMpgsTag(): String
+
     private external fun getBaseUrlNetPosMqtt(): String
+
     private external fun getBaseUrlStormUtilities(): String
+
     private external fun getConfigurationDataIp(): String
+
     private external fun getConfigurationDataPort(): String
+
     private external fun getConfigurationDataVendorIp(): String
+
     private external fun getConfigurationDataVendorPort(): String
+
     private external fun getAppName(): String
+
     private external fun getAppPassword(): String
+
     private external fun getBaseUrlBills(): String
+
     private external fun getMasterPassQr(): String
+
     private external fun getSmsBaseUrl(): String
+
     private external fun getZenithBaseUrl(): String
+
     private external fun getStringNotificationBaseUrlNoApi(): String
+
     private external fun getNetposTransactionApiBaseUrl(): String
+
     private external fun getRrnServiceBaseUrl(): String
+
     private external fun getCardPinKey(): String
+
     private external fun getBearerTokenForMPGSTransaction(): String
 
     private external fun getFwBaseUrl(): String
+
     private external fun getPayByTransferBaseUrl(): String
+
     private external fun getProvidusMerchantsAccountBaseUrl(): String
+
     private external fun getFCMBMerchantsAccountBaseUrl(): String
+
     private external fun getPayByTransferBearerToken(): String
+
+    private external fun getBankPSecretKey(): String
 
     val STRING_NOTIFICATION_BASE_URL_NO_API = getStringNotificationBaseUrlNoApi()
     val ZENITH_BASE_URL = getZenithBaseUrl()
@@ -72,4 +103,5 @@ object UtilityParam {
     val PROVIDUS_MERCHANTS_ACCOUNT_BASE_URL = getProvidusMerchantsAccountBaseUrl()
     val FCMB_MERCHANTS_ACCOUNT_BASE_URL = getFCMBMerchantsAccountBaseUrl()
     val PAY_BY_TRANSFER_BEARER_TOKEN = getPayByTransferBearerToken()
+    val BANKP_SECRET_KEY = getBankPSecretKey()
 }

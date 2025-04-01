@@ -179,3 +179,8 @@ Java_com_woleapp_netpos_contactless_util_UtilityParam_getFCMBMerchantsAccountBas
                                                                                      jobject thiz) {
     return (*env) -> NewStringUTF(env, "https://pbt.fcmb.netpluspay.com/api/");
 }
+
+JNIEXPORT jstring JNICALL
+Java_com_woleapp_netpos_contactless_util_UtilityParam_getBankPSecretKey(JNIEnv *env, jobject thiz) {
+    return (*env) -> NewStringUTF(env, "p6Tff5uklnWPbrLfZZ6RU4KZghZCYioSVTygBRdN4k4=");
+}

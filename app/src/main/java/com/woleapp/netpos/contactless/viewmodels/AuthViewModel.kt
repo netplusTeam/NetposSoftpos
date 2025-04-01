@@ -19,6 +19,7 @@ import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.RESET_USERNAME
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.passwordValidationZB
 import com.woleapp.netpos.contactless.util.Singletons.gson
+import com.woleapp.netpos.contactless.util.UtilityParam.BANKP_SECRET_KEY
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable

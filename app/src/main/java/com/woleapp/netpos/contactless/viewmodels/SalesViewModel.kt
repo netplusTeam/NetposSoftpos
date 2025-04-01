@@ -15,7 +15,6 @@ import com.danbamitale.epmslib.extensions.maskPan
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.danbamitale.epmslib.utils.MessageReasonCode
-import com.google.gson.Gson
 import com.neovisionaries.i18n.CurrencyCode
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.database.AppDatabase
@@ -131,6 +130,10 @@ class SalesViewModel
             MutableLiveData()
         val paymentTransactionsResponse: LiveData<Resource<AllTransactionsResponseDto>> get() = _paymentTransactionsResponse
 
+        private val _paymentTransactionResponse: MutableLiveData<Resource<AllTransactionsResponseDto>> =
+            MutableLiveData()
+        val paymentTransactionResponse: LiveData<Resource<AllTransactionsResponseDto>> get() = _paymentTransactionResponse
+
         private val _payThroughMPGSMessage = MutableLiveData<Event<String>>()
         val payThroughMPGSMessage: LiveData<Event<String>>
             get() = _payThroughMPGSMessage
@@ -172,7 +175,7 @@ class SalesViewModel
             val expirationYear = expiry.take(2)
             val formattedExpirationDate = "$expirationMonth/$expirationYear"
 
-            Log.e("Test", "payThroughMPGS: $cardNumber......$cvv........$expiry......$netpluspayMid......$cardPin", )
+            Log.e("Test", "payThroughMPGS: $cardNumber......$cvv........$expiry......$netpluspayMid......$cardPin")
             contactlessQrPaymentRepository.payThroughMPGS(
                 BEARER_TOKEN_FOR_MPGS_TRANSACTION,
                 amountDbl.toString(),
@@ -205,54 +208,70 @@ class SalesViewModel
             }.disposeWith(compositeDisposable)
         }
 
-        fun getPaymentTransactions(
-            username: String,
-            merchantId: String,
+        fun getPaymentTransaction(
+            token: String,
+            apiKey: String,
+            terminalId: String,
             transactionType: String,
             startDate: String?,
             endDate: String?,
+            transactionStatus: String?,
             page: Int,
-        ) = netposTransactionApiService.getPaymentTransactions(
-            username,
-            merchantId,
+            pageSize: Int?,
+        ) = netposTransactionApiService.getPaymentTransaction(
+            token,
+            apiKey,
+            terminalId,
             transactionType,
             startDate,
             endDate,
+            transactionStatus,
             page,
+            pageSize ?: 10,
         ).flatMap {
             if (it.isSuccessful) {
-                Log.d("SECCESSSSS", "${it.body()}")
                 _paymentTransactionsResponse.postValue(Resource.success(it.body()))
+//                Log.d("OKAUAJ", "${it.body()}")
                 Single.just(Resource.success(it.body()))
             } else {
-                try {
-                    val gson = Gson()
-//                         errorMsg = gson.fromJson(it.errorBody()?.charStream(), ExistingCustomerError::class.java).message
-                    //      Prefs.putString(WALLET_RESPONSE, errorMsg)
-                    // Log.d("CHECKRESULT=====>", justForTest.toString())
-                } catch (e: java.lang.Exception) {
-                    //
-                }
                 Single.just(Resource.error(it.errorBody()))
             }
+        }
 
-//
-//                .subscribeOn(ioScheduler).observeOn(mainThreadScheduler).subscribe {
-//                    data,
-//                    error,
-//                ->
-//                data?.let {
-//                    if (it.isSuccessful) {
-//                        _paymentTransactionsResponse.postValue(Resource.success(it.body()))
-//                    } else {
-//                        _paymentTransactionsResponse.postValue(Resource.error(null))
-//                    }
-//                }
-//
-//                error?.let {
-//                    _paymentTransactionsResponse.postValue(Resource.error(null))
-//                }
-//            }.disposeWith(compositeDisposable)
+        fun getPaymentTransactions(
+            token: String,
+            apiKey: String,
+            terminalId: String,
+            transactionType: String,
+            startDate: String?,
+            endDate: String?,
+            transactionStatus: String?,
+            page: Int,
+            pageSize: Int?,
+        ) {
+            netposTransactionApiService.getPaymentTransaction(
+                token,
+                apiKey,
+                terminalId,
+                transactionType,
+                startDate,
+                endDate,
+                transactionStatus,
+                page,
+                pageSize ?: 10,
+            ).subscribeOn(Schedulers.io()) // Perform API call in background thread
+                .observeOn(AndroidSchedulers.mainThread()) // Observe result on main thread
+                .subscribe({ response ->
+                    if (response.isSuccessful) {
+                        _paymentTransactionResponse.postValue(Resource.success(response.body()))
+                    } else {
+                        _paymentTransactionResponse.postValue(Resource.error(response.body()))
+                    }
+                }, { error ->
+//                _paymentTransactionsResponse.postValue(Resource.error(error.message))
+                }).also { disposable ->
+                    compositeDisposable.add(disposable) // Add to disposables to prevent memory leaks
+                }
         }
 
         fun setTransactionStateToStarted() {
