@@ -1,6 +1,7 @@
 package com.woleapp.netpos.contactless.viewmodels
 
 import android.content.Context
+import android.util.Log
 import android.util.Patterns
 import android.widget.Toast
 import androidx.lifecycle.LiveData
@@ -514,13 +515,13 @@ class AuthViewModel : ViewModel() {
                             " "
                         }
                 }
-//            Log.d("USER", user.toString())
+            Log.d("USER", user.toString())
             Single.just(user)
         }.subscribeOn(Schedulers.io()).doFinally { authInProgress.postValue(false) }
             .observeOn(AndroidSchedulers.mainThread()).subscribe { res, error ->
                 res?.let {
-                    DPrefs.putString(PREF_USER, gson.toJson(it))
-                    DPrefs.putBoolean(PREF_AUTHENTICATED, true)
+                    Prefs.putString(PREF_USER, gson.toJson(it))
+                    Prefs.putBoolean(PREF_AUTHENTICATED, true)
                     _authDone.value = Event(true)
 //                    Log.d("RESPONSE", "HELLOOOLLL")
                 }

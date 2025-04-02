@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.dsofttech.dprefs.utils.DPrefs
+import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.TransactionClickListener
 import com.woleapp.netpos.contactless.adapter.transactions.AllTransactionsAdapter
@@ -92,12 +93,12 @@ class PaymentFragment : BaseFragment() {
         loader = alertDialog(requireContext())
         tid =
             Singletons.gson.fromJson(
-                DPrefs.getString(PREF_USER),
+                Prefs.getString(PREF_USER),
                 User::class.java,
             ).terminal_id.toString()
         merchantId =
             Singletons.gson.fromJson(
-                DPrefs.getString(PREF_USER),
+                Prefs.getString(PREF_USER),
                 User::class.java,
             ).netplusPayMid.toString()
         loginToken = DPrefs.getString(PREF_LOGIN_USER_TOKEN)

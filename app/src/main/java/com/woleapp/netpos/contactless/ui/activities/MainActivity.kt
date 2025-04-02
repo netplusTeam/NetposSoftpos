@@ -1369,7 +1369,7 @@ class MainActivity :
         startDate: String,
         endDate: String,
     ) {
-        val user = gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
+        val user = gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
         val loginToken = DPrefs.getString(PREF_LOGIN_USER_TOKEN)
         val apiKey = DPrefs.getString(PREF_LOGIN_API_KEY)
         GlobalScope.launch {
