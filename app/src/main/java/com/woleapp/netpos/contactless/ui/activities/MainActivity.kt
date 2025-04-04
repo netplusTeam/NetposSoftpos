@@ -1743,7 +1743,7 @@ class MainActivity :
         onFile: (File) -> Unit = {},
     ) {
         viewModel.lastPosTransactionResponse.value?.let {
-//            Log.d("SIT_HEREE", "$it")
+            Log.d("SIT_HEREE", "$it")
             if (it.TVR.contains(IS_QR_TRANSACTION)) {
                 val qrTransaction =
                     it.copy(TVR = it.TVR.replace(IS_QR_TRANSACTION, ""))
@@ -1829,14 +1829,15 @@ class MainActivity :
                 lifecycleScope.launch(Dispatchers.Main) {
                     val amount = "Amount:   ${divideLongBy100(response.amount ?: 0).formatCurrencyAmountUsingCurrentModule()}"
                     val status = "TRANSACTION    ${if (response.responseCode == "00" || response.responseCode == "16") "APPROVED" else "DECLINED"}"
-                    val terminalId = "TerminalId:   ${response.terminalId}"
-                    val userBusinessName = "Merchant:   ${Singletons.getCurrentlyLoggedInUser()?.business_name
-                        ?: "${BuildConfig.FLAVOR} POS MERCHANT"}"
-                    val rrn = "RRN:  ${response.RRN}"
-                    val message = "Message: ${getMessage()[it.responseCode] ?: "Unknown response"} "
+                    val terminalId = response.terminalId
+                    val userBusinessName =
+                        Singletons.getCurrentlyLoggedInUser()?.business_name
+                            ?: "${BuildConfig.FLAVOR} POS MERCHANT"
+                    val rrn = response.RRN
+                    val message = "${getMessage()[it.responseCode] ?: "Unknown response"} "
                     val cardType = it.cardLabel
-                    val maskedPan = "Masked Pan: ${it.maskedPan}"
-                    val responseCode = "Response Code: ${it.responseCode}"
+                    val maskedPan = it.maskedPan
+                    val responseCode = "${it.responseCode}"
                     val appVersion = "App Version: ${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
                     val date =
                         if (it.transmissionDateTime.isNotBlank()) {
@@ -1852,7 +1853,7 @@ class MainActivity :
                     posView.merchantName.text = userBusinessName
                     posView.rrn.text = rrn
                     posView.message.text = message
-                    posView.dateTime.text = "DATE/TIME: $date"
+                    posView.dateTime.text = "$date"
                     posView.cardType.text = cardType
                     posView.appVersion.text = appVersion
                     posView.maskedPan.text = maskedPan
