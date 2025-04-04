@@ -82,6 +82,7 @@ class TransactionDetailsFragment : BaseFragment() {
             } else {
                 binding.actionButton.text = it
             }
+
             if (it == HISTORY_ACTION_PREAUTH) {
                 binding.actionButton.visibility = View.GONE
                 if (viewModel.lastTransactionResponse.value!!.responseCode == "00") {
@@ -93,6 +94,7 @@ class TransactionDetailsFragment : BaseFragment() {
                 }
             }
         }
+
         binding.preAuthRefund.setOnClickListener {
             gotoAction { viewModel.preAuthRefund(requireContext()) }
         }
@@ -100,6 +102,7 @@ class TransactionDetailsFragment : BaseFragment() {
         binding.preAuthComplete.setOnClickListener {
             gotoAction { viewModel.doSaleCompletion(requireContext()) }
         }
+
         binding.actionButton.setOnClickListener {
             Log.d("SEE_RESULT", "${viewModel.lastTransactionResponse.value}")
             nfcCardReaderViewModel.setLastPosTransactionResponse(viewModel.lastTransactionResponse.value!!)

@@ -258,4 +258,21 @@ object Mappers {
             merchantId = this@toTransactionResponse.merchantId
         }
     }
+
+    fun readableStringToLong(dateString: String): Long {
+        return try {
+            val sanitizedDateString = dateString.removeSuffix(".000Z") + "Z" // Ensures correct formatting
+            java.time.Instant.parse(sanitizedDateString).toEpochMilli()
+        } catch (e: java.time.format.DateTimeParseException) {
+//        Log.e("DateParsing", "Invalid date format: ${e.message}")
+            0L // Return 0 if parsing fails
+        } catch (e: Exception) {
+//        Log.e("DateParsing", "Error: ${e.message}")
+            0L
+        }
+    }
+
+    fun convertToKobo(value: Double): Long {
+        return (value * 100).toLong() // Convert Naira to Kobo
+    }
 }

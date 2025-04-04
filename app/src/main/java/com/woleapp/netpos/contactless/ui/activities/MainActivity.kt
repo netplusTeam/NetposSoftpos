@@ -1767,7 +1767,7 @@ class MainActivity :
                     val orderId = "Order Id: ${qrTransaction.rrnOrderId}"
                     val date =
                         if (it.transmissionDateTime.isNotBlank()) {
-                            it.transactionTimeInMillis.formatDateForImmediateTransactionResponse()
+                            it.transmissionDateTime
                         } else {
                             it.transactionTimeInMillis.formatDate()
                         }
