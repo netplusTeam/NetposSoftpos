@@ -2,7 +2,6 @@ package com.woleapp.netpos.contactless.util
 
 import android.text.Html
 import android.text.Spanned
-import android.util.Log
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -206,25 +205,31 @@ object Mappers {
     fun Transaction.toTransactionResponse(): TransactionResponse {
         var currentDateTime = ""
         currentDateTime =
-            if (this@toTransactionResponse.time.isNullOrEmpty()) {
-                this@toTransactionResponse.dateCreated
+            if (this@toTransactionResponse.time.toString().isNullOrEmpty()) {
+                (
+                    {
+                        this@toTransactionResponse.dateCreated
+                    }
+                ).toString()
             } else {
-                this@toTransactionResponse.time
+                this@toTransactionResponse.time.toString()
             }
         return TransactionResponse().apply {
             transactionType = TransactionType.PURCHASE
-            maskedPan = ""
+            maskedPan = this@toTransactionResponse.maskedPan
+            val amountInKobo = convertToKobo(this@toTransactionResponse.amount)
             amount =
-                if (this@toTransactionResponse.amount.toInt() == 0) {
+                if (this@toTransactionResponse.amount == 0.0) {
                     0L
                 } else {
-                    this@toTransactionResponse.amount.times(100).toDouble().toLong()
+                    amountInKobo
                 }
+
 //            transmissionDateTime = currentDateTime
             STAN = ""
             RRN =
                 if (this@toTransactionResponse.rrn.isNullOrEmpty()) {
-                    this@toTransactionResponse.transaction_reference
+                    this@toTransactionResponse.transaction_reference.toString()
                 } else {
                     this@toTransactionResponse.rrn
                 }
@@ -241,12 +246,16 @@ object Mappers {
 //                } else {
 //                    "CUSTOMER"
 //                }
-            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+//            transactionTimeInMillis = readableStringToLong(this@toTransactionResponse.dateCreated)
+//            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+            if (this@toTransactionResponse.dateCreated.isNullOrEmpty()) {
+                transactionTimeInMillis = readableStringToLong(this@toTransactionResponse.time)
+            } else {
+                transactionTimeInMillis = readableStringToLong(this@toTransactionResponse.dateCreated)
+            }
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@toTransactionResponse.terminalId
             merchantId = this@toTransactionResponse.merchantId
-
-            Log.d("SEE_RESULT_1", "${this@toTransactionResponse}")
         }
     }
 }
