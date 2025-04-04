@@ -2,6 +2,7 @@ package com.woleapp.netpos.contactless.util
 
 import android.text.Html
 import android.text.Spanned
+import android.util.Log
 import com.danbamitale.epmslib.entities.TransactionResponse
 import com.danbamitale.epmslib.entities.TransactionType
 import com.danbamitale.epmslib.utils.IsoAccountType
@@ -240,10 +241,12 @@ object Mappers {
 //                } else {
 //                    "CUSTOMER"
 //                }
-//            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
+            transactionTimeInMillis = dateStr2Long(currentDateTime, "yyyy-MM-dd hh:mm a")
             accountType = IsoAccountType.DEFAULT_UNSPECIFIED
             terminalId = this@toTransactionResponse.terminalId
             merchantId = this@toTransactionResponse.merchantId
+
+            Log.d("SEE_RESULT_1", "${this@toTransactionResponse}")
         }
     }
 }
