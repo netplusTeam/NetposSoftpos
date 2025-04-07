@@ -1769,7 +1769,7 @@ class MainActivity :
                         if (it.transmissionDateTime.isNotBlank()) {
                             it.transmissionDateTime
                         } else {
-                            it.transactionTimeInMillis.formatDate()
+                            it.transactionTimeInMillis.formatTransactionDate()
                         }
 
                     posView.cardOwner.text = cardOwner
@@ -1826,6 +1826,7 @@ class MainActivity :
             } else {
                 val posView: LayoutPosReceiptPdfBinding = pdfView
                 val response = it
+                Log.d("FINAL_1", "$response")
                 lifecycleScope.launch(Dispatchers.Main) {
                     val amount = "Amount:   ${divideLongBy100(response.amount ?: 0).formatCurrencyAmountUsingCurrentModule()}"
                     val status = "TRANSACTION    ${if (response.responseCode == "00" || response.responseCode == "16") "APPROVED" else "DECLINED"}"
@@ -1841,11 +1842,15 @@ class MainActivity :
                     val appVersion = "App Version: ${BuildConfig.FLAVOR} POS ${BuildConfig.VERSION_NAME}"
                     val date =
                         if (it.transmissionDateTime.isNotBlank()) {
-                            it.transactionTimeInMillis.formatDateForImmediateTransactionResponse()
+                            it.transmissionDateTime
                         } else {
-                            it.transactionTimeInMillis.formatDate()
+                            it.transactionTimeInMillis.formatTransactionDate()
                         }
-
+//                        if (it.transmissionDateTime.isNullOrEmpty()) {
+//                            Mappers.utcDateStringToEpochMillis(it.transmissionDateTime)
+//                        } else {
+//                            Mappers.utcDateStringToEpochMillis(it.transactionTimeInMillis.toString())
+//                        }
                     val stan = response.STAN ?: ""
                     posView.transAmount.text = amount
                     posView.status.text = status
