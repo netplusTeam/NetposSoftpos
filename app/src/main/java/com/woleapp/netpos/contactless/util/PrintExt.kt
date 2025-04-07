@@ -49,7 +49,7 @@ fun TransactionResponse.buildSMSText(s: String? = null): StringBuilder =
         if (otherAmount > 0) {
             append("Cashback Amount: ${divideLongBy100(otherAmount).formatCurrencyAmount("\u20A6")}\n")
         }
-        append("Date/Time: ${transactionTimeInMillis.formatDate()}\n")
+        append("Date/Time: ${transactionTimeInMillis.formatTransactionDate()}\n")
         s?.let {
             append("Remark: $it\n")
         }
@@ -133,3 +133,28 @@ fun TransactionResponse.builder() =
             }",
         )
     }
+
+// fun TransactionResponse.builder() =
+//
+//    StringBuilder().apply {
+//        append("Merchant Name: ").append(Singletons.getCurrentlyLoggedInUser()!!.business_name)
+//        append("\nTERMINAL ID: ").append(terminalId).append("\n")
+//        append(transactionType).append("\n")
+//        append("DATE/TIME: ").append(transactionTimeInMillis.formatDate()).append("\n")
+//        append("AMOUNT: ").append(divideLongBy100(amount).formatCurrencyAmount("\u20A6")).append("\n")
+//        if (maskedPan.isNotEmpty()) {
+//            append(cardLabel).append(" Ending with ").append(maskedPan.substring(maskedPan.length - 4))
+//                .append("\n")
+//        } else {
+//            append(cardLabel).append("\n")
+//        }
+//        append("RESPONSE CODE: ").append(responseCode).append("\n").append(
+//            " : ${
+//                try {
+//                    responseMessage
+//                } catch (ex: Exception) {
+//                    "Error"
+//                }
+//            }",
+//        )
+//    }

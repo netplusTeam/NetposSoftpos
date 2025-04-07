@@ -468,6 +468,7 @@
                         android:layout_marginTop="@dimen/margin_10"
                         android:fontFamily="@font/poppins_bold"
                         android:text="@string/card_type_place_holder_txt"
+                        android:visibility="gone"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="@+id/date_time_txt"
@@ -482,6 +483,7 @@
                         android:text="@string/card_type_place_holder"
                         android:textColor="@color/colorAccent"
                         android:textSize="16sp"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="@+id/date_time"
                         app:layout_constraintStart_toStartOf="@+id/date_time"
                         app:layout_constraintTop_toBottomOf="@+id/divider8" />

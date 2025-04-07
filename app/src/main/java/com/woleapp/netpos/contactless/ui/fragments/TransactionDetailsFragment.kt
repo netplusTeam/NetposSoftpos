@@ -4,7 +4,6 @@ package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -104,7 +103,6 @@ class TransactionDetailsFragment : BaseFragment() {
         }
 
         binding.actionButton.setOnClickListener {
-            Log.d("SEE_RESULT", "${viewModel.lastTransactionResponse.value}")
             nfcCardReaderViewModel.setLastPosTransactionResponse(viewModel.lastTransactionResponse.value!!)
             viewModel.performAction()
         }

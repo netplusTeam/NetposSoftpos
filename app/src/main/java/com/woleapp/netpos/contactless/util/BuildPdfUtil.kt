@@ -487,7 +487,7 @@ private fun initViewsForPosReceipt(
             dateTime.text =
                 pdfView.appVersion.context.getString(
                     R.string.date_time_place_holder,
-                    it.transactionTimeInMillis.formatDate(),
+                    it.transactionTimeInMillis.formatTransactionDate(),
                 )
             transAmount.text =
                 pdfView.appVersion.context.getString(
