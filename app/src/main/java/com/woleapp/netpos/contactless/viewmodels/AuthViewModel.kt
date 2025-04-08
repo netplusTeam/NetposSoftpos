@@ -433,7 +433,7 @@ class AuthViewModel : ViewModel() {
             DPrefs.putString(PREF_LOGIN_API_KEY, it.invitation)
             val userToken = decryptedData
             val stormId: String = JWTHelper.getStormId(userToken) ?: throw Exception("Login Failed")
-            DPrefs.putString(PREF_USER_TOKEN, userToken)
+            Prefs.putString(PREF_USER_TOKEN, userToken)
 //            val userTokenDecoded = JWT(userToken)
             val userTokenDecoded = JWT(decryptedData)
             val user =
