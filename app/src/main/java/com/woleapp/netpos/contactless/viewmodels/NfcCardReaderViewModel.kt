@@ -31,6 +31,7 @@ import com.woleapp.netpos.contactless.taponphone.visa.*
 import com.woleapp.netpos.contactless.taponphone.visa.PPSEv21.PPSEManager
 import com.woleapp.netpos.contactless.util.Event
 import com.woleapp.netpos.contactless.util.ICCCardHelper
+import com.woleapp.netpos.contactless.util.filterICC
 import com.woleapp.netpos.contactless.util.sendSMS
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.disposables.CompositeDisposable
@@ -447,7 +448,7 @@ class NfcCardReaderViewModel
             }
         }
 
-        fun showPin(pan: String)  {
+        fun showPin(pan: String) {
             _showPinPadDialog.postValue(Event(pan))
         }
 
@@ -473,6 +474,28 @@ class NfcCardReaderViewModel
             hideBluetoothDialog()
         }
 
+//        fun doCr100TransactionDip(data: BtCardInfo) {
+//            val (pan, track2, icc, cardType) = data
+//
+//            iccCardHelper = ICCCardHelper()
+//            iccCardHelper.apply {
+//                cardScheme = cardType!!.cardScheme
+//                customerName = "CUSTOMER"
+//            }
+//            _showAccountTypeDialog.postValue(Event(true))
+//            val cardData =
+//                CardData(
+//                    track2 ?: "",
+//                    "",
+//                    pan ?: "",
+//                    "051",
+//                )
+//            iccCardHelper.cardData = cardData
+//
+//            hideBluetoothDialog()
+//            // listener.resetCardInfoFlow()
+//        }
+
         fun doCr100TransactionDip(data: BtCardInfo) {
             val (pan, track2, icc, cardType) = data
 
@@ -485,7 +508,7 @@ class NfcCardReaderViewModel
             val cardData =
                 CardData(
                     track2 ?: "",
-                    "",
+                    filterICC(icc = icc),
                     pan ?: "",
                     "051",
                 )
