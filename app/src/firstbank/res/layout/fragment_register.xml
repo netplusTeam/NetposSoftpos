@@ -197,7 +197,7 @@
                 app:endIconDrawable="@drawable/ic_arrow_down_24"
                 app:endIconTint="@color/black"
                 app:hintEnabled="true"
-                app:layout_constraintTop_toBottomOf="@+id/email_field"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_lga_by_state"
                 app:layout_constraintEnd_toEndOf="@+id/phoneee"
                 app:layout_constraintStart_toStartOf="@+id/phoneee"
                 app:layout_constraintBottom_toTopOf="@+id/phoneee">
@@ -217,14 +217,75 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_lga_by_state"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Select LGA"
+                android:textColorHint="@android:color/black"
+                android:visibility="visible"
+                app:endIconDrawable="@drawable/ic_arrow_down_24"
+                app:endIconTint="@color/black"
+                app:errorEnabled="true"
+                app:errorTextColor="@color/colorError"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_branch"
+                app:layout_constraintStart_toStartOf="@+id/fragment_branch"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_branch">
+
+                <AutoCompleteTextView
+                    android:id="@+id/lga_by_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:gravity="center_vertical"
+                    android:inputType="none"
+                    android:text="@={viewmodel.registrationFBNModel.merchantAddressLgaCode}"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_merchant_category_code"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="Select Category Code"
+                android:textColorHint="@android:color/black"
+                android:visibility="visible"
+                app:endIconDrawable="@drawable/ic_arrow_down_24"
+                app:endIconTint="@color/black"
+                app:errorEnabled="true"
+                app:errorTextColor="@color/colorError"
+                app:hintEnabled="true"
+                app:layout_constraintEnd_toEndOf="@+id/fragment_lga_by_state"
+                app:layout_constraintStart_toStartOf="@+id/fragment_lga_by_state"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_lga_by_state">
+
+                <AutoCompleteTextView
+                    android:id="@+id/merchant_category_code"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:gravity="center_vertical"
+                    android:inputType="none"
+                    android:text="@={viewmodel.registrationFBNModel.merchantCategoryCode}"
+                    android:textColor="@android:color/background_dark"
+                    android:textCursorDrawable="@color/black"
+                    android:visibility="visible"
+                    app:backgroundTint="@color/white" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/email_field"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_email_address"
                 android:textColorHint="@android:color/black"
-                app:layout_constraintEnd_toEndOf="@id/textInputBusinessName"
-                app:layout_constraintStart_toStartOf="@id/textInputBusinessName"
-                app:layout_constraintTop_toBottomOf="@id/fragment_branch">
+                app:layout_constraintEnd_toEndOf="@+id/fragment_merchant_category_code"
+                app:layout_constraintStart_toStartOf="@+id/fragment_merchant_category_code"
+                app:layout_constraintTop_toBottomOf="@id/fragment_merchant_category_code">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email"
@@ -248,7 +309,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/bvn"
                 app:errorEnabled="true"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:errorTextColor="@color/colorError"
                 android:textColorHint="@android:color/black"
                 app:layout_constraintEnd_toEndOf="@id/email_field"
@@ -262,6 +323,7 @@
                     android:background="@drawable/edittext_bg"
                     android:drawablePadding="8dp"
                     android:inputType="number"
+                    android:text="@={viewmodel.registrationFBNModel.BVN}"
                     android:singleLine="true"
                     android:textColor="@android:color/black"
                     android:textColorHint="@android:color/black"
@@ -269,26 +331,27 @@
                     tools:text="" />
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/reference_field"
+                android:id="@+id/fragment_tin"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="@string/reference"
+                android:hint="@string/tin"
                 app:errorEnabled="true"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:errorTextColor="@color/colorError"
                 android:textColorHint="@android:color/black"
-                app:layout_constraintEnd_toEndOf="@id/email_field"
-                app:layout_constraintStart_toStartOf="@id/email_field"
+                app:layout_constraintEnd_toEndOf="@id/bvn_field"
+                app:layout_constraintStart_toStartOf="@id/bvn_field"
                 app:layout_constraintTop_toBottomOf="@+id/bvn_field">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/reference"
+                    android:id="@+id/tin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/edittext_bg"
                     android:drawablePadding="8dp"
                     android:singleLine="true"
                     android:inputType="number"
+                    android:text="@={viewmodel.registrationFBNModel.TIN}"
                     android:textColor="@android:color/black"
                     android:textColorHint="@android:color/black"
                     android:textSize="15sp"
@@ -306,7 +369,7 @@
                 android:textColorHint="@android:color/black"
                 app:layout_constraintEnd_toEndOf="@id/email_field"
                 app:layout_constraintStart_toStartOf="@id/email_field"
-                app:layout_constraintTop_toBottomOf="@+id/reference_field">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_tin">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
@@ -358,7 +421,7 @@
                 android:text="@string/i_agree_to_the_terms_and_conditions"
                 app:layout_constraintEnd_toEndOf="@+id/email_field"
                 app:layout_constraintStart_toStartOf="@+id/email_field"
-                app:layout_constraintTop_toBottomOf="@+id/bvn_field" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_tin" />
 
 
             <Button

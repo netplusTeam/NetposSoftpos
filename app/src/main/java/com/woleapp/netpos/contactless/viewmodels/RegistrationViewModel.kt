@@ -175,10 +175,11 @@ class RegistrationViewModel
             disposable.clear()
         }
 
-        fun setSelectedState(data: String) {
+        fun setSelectedState(data: FBNState) {
             registrationFBNModel.value =
                 registrationFBNModel.value?.apply {
-                    state = data
+                    state = data.state
+                    stateCode = data.state_code
                 }
         }
 
@@ -186,6 +187,21 @@ class RegistrationViewModel
             registrationFBNModel.value =
                 registrationFBNModel.value?.apply {
                     branch_name = data
+                }
+        }
+
+        fun setSelectedLgaByState(data: String) {
+            registrationFBNModel.value =
+                registrationFBNModel.value?.apply {
+                    merchantAddressLgaCode = data
+                }
+        }
+
+        fun setSelectedMerchantCategoryCode(data: String) {
+            registrationFBNModel.value =
+                registrationFBNModel.value?.apply {
+                    merchantCategoryCode = data
+                    businessOccupationCode = data
                 }
         }
 

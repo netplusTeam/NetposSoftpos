@@ -1,13 +1,12 @@
 package com.woleapp.netpos.contactless.model
 
-data class FBNState(
-    val createdAt: String,
+data class LgaByState(
     val id: Int,
+    val lga_code: String,
+    val lga_name: String,
     val state_code: String,
-    val state: String,
-    val updatedAt: String,
 ) {
     override fun toString(): String {
-        return state
+        return lga_name
     }
 }

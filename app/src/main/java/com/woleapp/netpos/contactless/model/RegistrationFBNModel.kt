@@ -7,14 +7,21 @@ data class RegistrationFBNModel(
     var phoneNumber: String,
     var email: String,
     var state: String?,
+    var stateCode: String?,
+    var merchantAddressLgaCode: String?,
+    var merchantCategoryCode: String?,
+    var businessOccupationCode: String?,
+    var BVN: String?,
+    var TIN: String?,
     var branch_name: String?,
-    var isRegistered: Boolean = true
+    var appName: String = "FirstPOS",
+    var appVersion: String = "v3",
+    var terminalType: String = "SoftPOS",
+    var terminalModelDescription: String = "SoftPOS",
+    var isRegistered: Boolean = true,
 ) {
-    constructor() : this("", "", "", "", "", "", "")
-
+    constructor() : this("", "", "", "", "", "", "", "", "", "", "", "", "")
 
     fun allFieldsFilledFBN() =
-        businessName.isNotEmpty() && contactInformation.isNotEmpty() && businessAddress.isNotEmpty() && phoneNumber.isNotEmpty() && email.isNotEmpty() && state?.isNotEmpty() == true && branch_name?.isNotEmpty() == true
-
+        businessName.isNotEmpty() && contactInformation.isNotEmpty() && businessAddress.isNotEmpty() && merchantAddressLgaCode?.isNotEmpty() == true && merchantCategoryCode?.isNotEmpty() == true && phoneNumber.isNotEmpty() && email.isNotEmpty() && state?.isNotEmpty() == true && BVN?.isNotEmpty() == true && TIN?.isNotEmpty() == true && branch_name?.isNotEmpty() == true
 }
-

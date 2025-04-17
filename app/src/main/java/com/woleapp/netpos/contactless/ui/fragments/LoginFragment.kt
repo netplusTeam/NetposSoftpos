@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -123,10 +124,15 @@ class LoginFragment : BaseFragment() {
         val credentials = JsonObject()
         credentials.addProperty("appname", UtilityParam.APP_NAME)
         credentials.addProperty("password", UtilityParam.APP_PASSWORD)
+
         viewModel.apply {
             stormApiService = StormApiClient.getInstance()
             appCredentials = credentials
         }
+
+        val contactlessBaseUrl = UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
+        Log.d("BASE_URL", "$contactlessBaseUrl")
+
         deviceId = getDeviceId(requireContext())
         partnerID = initPartnerId()
         binding.btnLogin.setOnClickListener {

@@ -20,12 +20,11 @@ import com.google.android.material.textfield.TextInputEditText
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.BranchAdapter
+import com.woleapp.netpos.contactless.adapter.LgaByStateAdapter
+import com.woleapp.netpos.contactless.adapter.MerchantCategoryCodeAdapter
 import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentExisitingCustomersRegistrationBinding
-import com.woleapp.netpos.contactless.model.ExistingAccountRegisterRequest
-import com.woleapp.netpos.contactless.model.FBNBranch
-import com.woleapp.netpos.contactless.model.FBNState
-import com.woleapp.netpos.contactless.model.RegistrationForExistingFBNUsersRequest
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
@@ -49,15 +48,19 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
     private lateinit var passwordView: TextInputEditText
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
+    private lateinit var firstBankLgaByStates: AutoCompleteTextView
+    private lateinit var firstBankMerchantCategoryCode: AutoCompleteTextView
     private lateinit var confirmPasswordView: TextInputEditText
     private lateinit var bvnView: TextInputEditText
-    private lateinit var referenceView: TextInputEditText
+    private lateinit var tinView: TextInputEditText
     private lateinit var phoneNumber: TextInputEditText
     private lateinit var submitBtn: Button
     private lateinit var partnerID: String
     private lateinit var actNumber: String
     private lateinit var deviceSerialID: String
-    private lateinit var listOfStates: String
+    private lateinit var listOfStates: FBNState
+    private lateinit var listOfLgaByStates: String
+    private lateinit var listOfMerchantCategoryCode: String
     private lateinit var listOfBranches: String
     private var termsAndConditionsCheckBox: Boolean = false
 
@@ -148,7 +151,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                     p3: Long,
                 ) {
                     val statesList = adapterView?.getItemAtPosition(p2) as FBNState
-                    listOfStates = statesList.state
+                    listOfStates = statesList
                     viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
                 }
             }
@@ -173,6 +176,56 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 ) {
                     val branchList = adapterView?.getItemAtPosition(p2) as FBNBranch
                     listOfBranches = branchList.branch_name
+                }
+            }
+
+        viewModel.getLgaByStatesResponse.observe(viewLifecycleOwner) {
+            val lgaByStateAdapter =
+                LgaByStateAdapter(
+                    viewModel.listOfLgaByStates,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
+            firstBankLgaByStates.setAdapter(lgaByStateAdapter)
+        }
+
+        firstBankLgaByStates.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val lgaList =
+                        adapterView?.getItemAtPosition(p2) as LgaByState
+                    listOfLgaByStates = lgaList.lga_name
+                }
+            }
+
+        viewModel.getMerchantCategoryCode(deviceSerialID)
+
+        viewModel.getMerchantCategoryCodeResponse.observe(viewLifecycleOwner) {
+            val merchantCategoryCodeAdapter =
+                MerchantCategoryCodeAdapter(
+                    viewModel.listOfMerchantCategoryCode,
+                    requireContext(),
+                    android.R.layout.simple_expandable_list_item_1,
+                )
+            firstBankMerchantCategoryCode.setAdapter(merchantCategoryCodeAdapter)
+        }
+
+        firstBankMerchantCategoryCode.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val lgaList =
+                        adapterView?.getItemAtPosition(p2) as MerchantCategoryCode
+                    listOfMerchantCategoryCode = lgaList.category_name
                 }
             }
 
@@ -210,6 +263,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             contactName = contactInfo
             addressView = address
             emailView = email
+            bvnView = bvn
+            tinView = tin
             passwordView = password
             firstBankStates = state
             firstBankBranches = branch
@@ -307,6 +362,9 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             }
             emailView.text.toString().isEmpty() -> {
                 showToast(getString(R.string.all_please_enter_email_address))
+            }
+            bvnView.text.toString().isEmpty() -> {
+                showToast(getString(R.string.all_please_enter_bvn))
             }
             passwordView.text.toString().isEmpty() -> {
                 showToast(getString(R.string.hint_enter_password))
@@ -547,9 +605,15 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                     contactInformation = contactName.text.toString().trim(),
                     username = emailView.text.toString().trim(),
                     password = passwordView.text.toString().trim(),
-                    state = listOfStates,
+                    state = listOfStates.state,
                     branch_name = listOfBranches,
                     phoneNumber = phoneNumber.text.toString().trim(),
+                    stateCode = listOfStates.state_code,
+                    merchantAddressLgaCode = listOfLgaByStates,
+                    merchantCategoryCode = listOfMerchantCategoryCode,
+                    businessOccupationCode = listOfMerchantCategoryCode,
+                    BVN = bvnView.text.toString().trim(),
+                    TIN = tinView.text.toString().trim(),
                 )
             if (!passwordValidation(passwordView.text.toString().trim())) {
                 showToast(
