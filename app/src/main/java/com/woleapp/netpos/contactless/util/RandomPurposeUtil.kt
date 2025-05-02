@@ -30,16 +30,6 @@ import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.ui.dialog.LoadingDialog
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_LOADING_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_EASY_PAY
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_EASY_PAY_FCMB
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_FCMB_EASY_PAY
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_FIRST_B
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_PROVIDUS
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_PROVIDUS_POS
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_PROVIDUS_SOFT_POS
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_STANBIC
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_WEMA_B
-import com.woleapp.netpos.contactless.util.UtilityParam.STRING_PARTNER_ID_ZENITH
 import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -52,21 +42,22 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 object RandomPurposeUtil {
-    private val bankList = mapOf(
-        "firstbank" to "firstbank",
-        "easypay" to "fcmb",
-        "fcmbeasypay" to "fcmb",
-        "easypayfcmb" to "fcmb",
-        "providuspos" to "providus",
-        "stanbic" to "stanbic",
-        "providus" to "providus",
-        "providussoftpos" to "providus",
-        "wemabank" to "wemabank",
-        "zenith" to "zenith",
-        "unitybank" to "unitybank",
-        "polaris" to "polaris",
-        "netpos" to "netpos",
-    )
+    private val bankList =
+        mapOf(
+            "firstbank" to "firstbank",
+            "easypay" to "fcmb",
+            "fcmbeasypay" to "fcmb",
+            "easypayfcmb" to "fcmb",
+            "providuspos" to "providus",
+            "stanbic" to "stanbic",
+            "providus" to "providus",
+            "providussoftpos" to "providus",
+            "wemabank" to "wemabank",
+            "zenith" to "zenith",
+            "unitybank" to "unitybank",
+            "polaris" to "polaris",
+            "netpos" to "netpos",
+        )
 
     fun stringToBase64(text: String): String {
         val data: ByteArray = text.toByteArray()
@@ -78,7 +69,10 @@ object RandomPurposeUtil {
         return String(decodedString)
     }
 
-    fun LifecycleOwner.showSnackBar(rootView: View, message: String) {
+    fun LifecycleOwner.showSnackBar(
+        rootView: View,
+        message: String,
+    ) {
         Snackbar.make(rootView, message, Snackbar.LENGTH_LONG).show()
     }
 
@@ -91,12 +85,16 @@ object RandomPurposeUtil {
             .format(Date())
 
     @SuppressLint("SimpleDateFormat")
-    fun dateStr2Long(dateStr: String, inputDateFormat: String): Long {
+    fun dateStr2Long(
+        dateStr: String,
+        inputDateFormat: String,
+    ): Long {
         val formattedDateString = dateStr.removeSuffix(dateStr.takeLast(3))
         return try {
             val c = Calendar.getInstance()
-            c.time = SimpleDateFormat(inputDateFormat)
-                .parse(dateStr)!!
+            c.time =
+                SimpleDateFormat(inputDateFormat)
+                    .parse(dateStr)!!
             c.timeInMillis
         } catch (e: ParseException) {
             e.printStackTrace()
@@ -123,11 +121,12 @@ object RandomPurposeUtil {
     ): SpannableString {
         val spannedText = SpannableString(text)
         val styleSpan = StyleSpan(Typeface.BOLD)
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                clickAction()
+        val clickableSpan =
+            object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    clickAction()
+                }
             }
-        }
         if (startIndex < 0) throw IndexOutOfBoundsException("$startIndex must be at least 0")
         if (text.isEmpty()) throw IndexOutOfBoundsException("$text can't be empty")
         if (endIndex > text.length) throw IndexOutOfBoundsException("$endIndex can't be greater than the length of $text")
@@ -238,6 +237,19 @@ object RandomPurposeUtil {
         return dialogBuilder.create()
     }
 
+    fun alertDialog(
+        context: Context,
+        setCancelable: Boolean,
+    ): AlertDialog {
+        val dialogView: View =
+            LayoutInflater.from(context).inflate(R.layout.layout_loading_dialog, null)
+        val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
+        dialogBuilder.setCancelable(setCancelable)
+        dialogBuilder.setView(dialogView)
+
+        return dialogBuilder.create()
+    }
+
     fun <T> Fragment.observeServerResponse(
         serverResponse: Single<Resource<T>>,
         loadingDialog: AlertDialog,
@@ -262,6 +274,7 @@ object RandomPurposeUtil {
                                     it.data is ConfirmOTPResponse ||
                                     it.data is ExistingAccountRegisterResponse ||
                                     it.data is BankWExistingRegistrationResponse ||
+                                    it.data is FeedbackResponse ||
                                     it.data is String
                                 ) {
                                     successAction()
@@ -386,7 +399,10 @@ object RandomPurposeUtil {
         serverResponse.observeOnce(this.viewLifecycleOwner, null)
     }
 
-    fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T>?) {
+    fun <T> LiveData<T>.observeOnce(
+        lifecycleOwner: LifecycleOwner,
+        observer: Observer<T>?,
+    ) {
         observe(
             lifecycleOwner,
             object : Observer<T> {
@@ -398,7 +414,10 @@ object RandomPurposeUtil {
         )
     }
 
-    fun closeSoftKeyboard(context: Context, activity: Activity) {
+    fun closeSoftKeyboard(
+        context: Context,
+        activity: Activity,
+    ) {
         activity.currentFocus?.let { view ->
             val imm =
                 context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -417,11 +436,10 @@ object RandomPurposeUtil {
         )
     }
 
-    fun alertDialog(
-        context: Context,
-    ): AlertDialog {
-        val dialogView: View = LayoutInflater.from(context)
-            .inflate(R.layout.layout_loading_dialog, null)
+    fun alertDialog(context: Context): AlertDialog {
+        val dialogView: View =
+            LayoutInflater.from(context)
+                .inflate(R.layout.layout_loading_dialog, null)
         val dialogBuilder: AlertDialog.Builder = AlertDialog.Builder(context)
         dialogBuilder.setCancelable(false)
         dialogBuilder.setView(dialogView)
@@ -435,19 +453,20 @@ object RandomPurposeUtil {
     }
 
     fun getDeviceId(context: Context): String {
-        val deviceId: String = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        } else {
-            val mTelephony = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            if (mTelephony.deviceId != null) {
-                mTelephony.deviceId
+        val deviceId: String =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
             } else {
-                Settings.Secure.getString(
-                    context.contentResolver,
-                    Settings.Secure.ANDROID_ID,
-                )
+                val mTelephony = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+                if (mTelephony.deviceId != null) {
+                    mTelephony.deviceId
+                } else {
+                    Settings.Secure.getString(
+                        context.contentResolver,
+                        Settings.Secure.ANDROID_ID,
+                    )
+                }
             }
-        }
         return deviceId
     }
 
@@ -455,19 +474,20 @@ object RandomPurposeUtil {
 
     fun initPartnerId(): String {
         var partnerID = ""
-        val bankList = mapOf(
-            "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
-            "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
-            "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "stanbic" to "377F47E9-55F9-45E0-B77A-1BAA4BC88026",
-            "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
-            "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
-            "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
-            "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
-        )
+        val bankList =
+            mapOf(
+                "firstbank" to "7FD43DF1-633F-4250-8C6F-B49DBB9650EA",
+                "easypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "fcmbeasypay" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "easypayfcmb" to "1B0E68FD-7676-4F2C-883D-3931C3564190",
+                "providuspos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "stanbic" to "377F47E9-55F9-45E0-B77A-1BAA4BC88026",
+                "providus" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "providussoftpos" to "8B26F328-040F-4F27-A5BC-4414AB9D1EFA",
+                "wemabank" to "1E3D050B-6995-495F-982A-0511114959C8",
+                "zenith" to "C936667C-0B02-4A34-80D0-0FC5B525256E",
+                "tingo" to "1EED19E0-9625-49AA-A0CF-2EFCD8F30036",
+            )
 
         for (element in bankList) {
             if (element.key == BuildConfig.FLAVOR) {
@@ -559,8 +579,9 @@ object RandomPurposeUtil {
     fun dateStr2Long(dateStr: String): Long {
         return try {
             val c = Calendar.getInstance()
-            c.time = SimpleDateFormat("yyyy-MM-dd hh:mm")
-                .parse(dateStr)!!
+            c.time =
+                SimpleDateFormat("yyyy-MM-dd hh:mm")
+                    .parse(dateStr)!!
             c.timeInMillis
         } catch (e: ParseException) {
             e.printStackTrace()

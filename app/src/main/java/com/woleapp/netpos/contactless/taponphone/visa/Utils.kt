@@ -33,12 +33,15 @@ val REQUIRED_TAGS = arrayOf(
     "9F03",
     "5F34",
     "8E",
-    "57"
+    "57",
+    "5A",
+    "5F24",
+    "5F20"
 )
 
 enum class NfcPaymentType(val cardScheme: String, @DrawableRes val icon: Int) {
-    VISA("Visa Card", R.drawable.visacards), MASTERCARD(
+    VISA("Visa Card", R.drawable.ic_visacard), MASTERCARD(
         "Mastercard",
         R.drawable.ic_mastercard_logo_new
-    )
+    ), VERVE("Verve Card", R.drawable.verve_card)
 }

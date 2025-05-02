@@ -3,6 +3,7 @@ package com.woleapp.netpos.contactless.app
 import android.app.Activity
 import android.app.Application
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
@@ -11,8 +12,10 @@ import com.visa.app.ttpkernel.ContactlessConfiguration
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.*
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
+import com.woleapp.netpos.contactless.taponphone.verve.VerveSoftPosInitialization
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import java.util.Observable
 
 @HiltAndroidApp
 class NetPosApp : Application() {
@@ -22,9 +25,13 @@ class NetPosApp : Application() {
     private lateinit var configuration: ConfigurationInterface
     lateinit var builder: StringBuilder
     lateinit var nfcProvider: NfcProvider
+    private lateinit var verveSoftPosInitializationObservable: Observable
 
     companion object {
         lateinit var INSTANCE: NetPosApp
+
+        @JvmStatic
+        var cr100Pos: QPOSService? = null
 
         fun assignInstance(instance: NetPosApp) {
             INSTANCE = instance
@@ -40,6 +47,10 @@ class NetPosApp : Application() {
             Timber.plant(Timber.DebugTree())
         }
         DPrefs.initializeDPrefs(this)
+        initVisaLib()
+
+        //initialize verve sdk
+        verveSoftPosInitializationObservable = VerveSoftPosInitialization.getInstance(this)
     }
 
     private fun initVisaLib() {

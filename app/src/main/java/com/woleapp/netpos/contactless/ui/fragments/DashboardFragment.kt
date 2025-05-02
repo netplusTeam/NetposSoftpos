@@ -1,11 +1,16 @@
-@file:Suppress("DEPRECATION")
+@file:Suppress("DEPRECATION", "ktlint:standard:no-wildcard-imports")
 
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
 import android.content.DialogInterface
+import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.text.InputFilter
 import android.view.LayoutInflater
 import android.view.View
@@ -14,21 +19,35 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
-import com.danbamitale.epmslib.entities.* // ktlint-disable no-wildcard-imports
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
+import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
+import com.woleapp.netpos.contactless.app.NetPosApp
+import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
+import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
+import com.woleapp.netpos.contactless.cr100.MyQposClass
+import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
+import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
+import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
+import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
-import com.woleapp.netpos.contactless.util.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
 import io.reactivex.Observable
@@ -44,7 +63,6 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class DashboardFragment : BaseFragment() {
-
     private lateinit var progressDialog: ProgressDialog
     private lateinit var binding: FragmentDashboardBinding
     private lateinit var amountEditText: EditText
@@ -58,6 +76,19 @@ class DashboardFragment : BaseFragment() {
     private lateinit var dialogPrintTypeBinding: DialogPrintTypeBinding
     private lateinit var printTypeDialog: AlertDialog
     private lateinit var printerErrorDialog: AlertDialog
+    private lateinit var loader: android.app.AlertDialog
+
+    private lateinit var cardCvv: String
+    private lateinit var user: User
+
+    private lateinit var listener: MyQposClass
+    private var nfcAdapter: NfcAdapter? = null
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var lvIndicatorBTPOS: RecyclerView? = null
+    private var blueToothAddress = ""
+    private var blueTitle: String? = null
+    private var startTime = 0L
+    private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,22 +104,25 @@ class DashboardFragment : BaseFragment() {
         isVend = arguments?.getBoolean("IS_VEND", false) ?: false
         viewModel.isVend(isVend)
 
-        dialogPrintTypeBinding = DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
-            executePendingBindings()
-        }
-        printerErrorDialog = AlertDialog.Builder(requireContext())
-            .apply {
-                setTitle(getString(R.string.printer_error))
-                setIcon(R.drawable.ic_warning)
-                setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
-                    d.cancel()
-                    viewModel.showReceiptDialog()
-                }
-                setNegativeButton(getString(R.string.dismiss)) { d, _ ->
-                    d.cancel()
-                    viewModel.finish()
-                }
-            }.create()
+        dialogPrintTypeBinding =
+            DialogPrintTypeBinding.inflate(layoutInflater, null, false).apply {
+                executePendingBindings()
+            }
+        loader = alertDialog(requireContext())
+        printerErrorDialog =
+            AlertDialog.Builder(requireContext())
+                .apply {
+                    setTitle(getString(R.string.printer_error))
+                    setIcon(R.drawable.ic_warning)
+                    setPositiveButton(getString(R.string.send_receipt_2)) { d, _ ->
+                        d.cancel()
+                        viewModel.showReceiptDialog()
+                    }
+                    setNegativeButton(getString(R.string.dismiss)) { d, _ ->
+                        d.cancel()
+                        viewModel.finish()
+                    }
+                }.create()
         binding.apply {
             viewmodel = viewModel
             lifecycleOwner = viewLifecycleOwner
@@ -100,6 +134,7 @@ class DashboardFragment : BaseFragment() {
                 showSnackBar(s)
             }
         }
+
         viewModel.getCardData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { shouldGetCardData ->
                 if (shouldGetCardData) {
@@ -119,6 +154,7 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         }
+
         viewModel.showReceiptType.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
                 printTypeDialog.show()
@@ -169,8 +205,16 @@ class DashboardFragment : BaseFragment() {
             }
         }
         binding.process.setOnClickListener {
-            viewModel.validateField()
+            if (nfcAdapter != null) {
+                viewModel.validateFieldForNFC()
+            } else {
+                if (viewModel.validateFieldForBluetooth()) {
+                    initIntent()
+                }
+            }
         }
+
+        checkForNFC()
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
@@ -193,22 +237,24 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        adapter = ServiceAdapter {
-            when (it.id) {
-                0 -> showFragment(TransactionsFragment())
-                2 -> showFragment(NipNotificationFragment.newInstance())
-                3 -> showFragment(BillsFragment())
-                5 -> {
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.container_main, SettingsFragment())
-                        .addToBackStack(null)
-                        .commit()
-                }
-                else -> {
-                    sendPayload()
+        adapter =
+            ServiceAdapter {
+                when (it.id) {
+                    0 -> showFragment(TransactionsFragment())
+                    2 -> showFragment(NipNotificationFragment.newInstance())
+                    3 -> showFragment(BillsFragment())
+                    5 -> {
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.container_main, SettingsFragment())
+                            .addToBackStack(null)
+                            .commit()
+                    }
+
+                    else -> {
+                        sendPayload()
+                    }
                 }
             }
-        }
 
         progressDialog = ProgressDialog(requireContext())
         return binding.root
@@ -229,10 +275,16 @@ class DashboardFragment : BaseFragment() {
         MqttHelper.sendPayload(MqttTopics.AUTHENTICATION, event)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         setServices()
         vend()
+        lvIndicatorBTPOS = view.findViewById(R.id.lv_indicator_BTPOS)
+        bluetoothAdapter = BluetoothAdapter(requireActivity(), null)
+
         observer = { event ->
             event.getContentIfNotHandled()?.let {
                 it.error?.let { error ->
@@ -248,29 +300,31 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun setServices() {
-        val listOfServices = ArrayList<Service>()
-            .apply {
-                add(Service(0, "Transaction", R.drawable.ic_trans))
-                add(Service(1, "Balance Inquiry", R.drawable.ic_write))
-                add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
-                add(Service(5, "Settings", R.drawable.ic_baseline_settings))
-            }
+        val listOfServices =
+            ArrayList<Service>()
+                .apply {
+                    add(Service(0, "Transaction", R.drawable.ic_trans))
+                    add(Service(1, "Balance Inquiry", R.drawable.ic_write))
+                    add(Service(4, "View End Of Day Transactions", R.drawable.ic_print))
+                    add(Service(5, "Settings", R.drawable.ic_baseline_settings))
+                }
         adapter.submitList(listOfServices)
     }
 
     private fun vend() {
         if (isVend) {
             var count = 0
-            val progressBar = ProgressDialog(context).apply {
-                this.setCancelable(false)
-                this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
-                    dialog.cancel()
-                    compositeDisposable.clear()
-                    requireActivity().onBackPressed()
+            val progressBar =
+                ProgressDialog(context).apply {
+                    this.setCancelable(false)
+                    this.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel") { dialog, _ ->
+                        dialog.cancel()
+                        compositeDisposable.clear()
+                        requireActivity().onBackPressed()
+                    }
+                    this.setMessage("Waiting for amount.")
+                    show()
                 }
-                this.setMessage("Waiting for amount.")
-                show()
-            }
             val socket = Socket()
             var printWriter: PrintWriter? = null
             var reader: BufferedReader? = null
@@ -289,10 +343,11 @@ class DashboardFragment : BaseFragment() {
             }.flatMap {
                 Observable.interval(0, 5, TimeUnit.SECONDS)
             }.flatMap {
-                val out = JsonObject().apply {
-                    addProperty("serial_number", Build.ID)
-                    addProperty("status", "")
-                }.toString()
+                val out =
+                    JsonObject().apply {
+                        addProperty("serial_number", Build.ID)
+                        addProperty("status", "")
+                    }.toString()
                 printWriter?.println(out)
                 try {
                     val s = reader?.readLine()
@@ -365,15 +420,16 @@ class DashboardFragment : BaseFragment() {
             return
         }
 
-        val hostConfig = HostConfig(
-            NetPosTerminalConfig.getTerminalId(),
-            NetPosTerminalConfig.connectionData,
-            NetPosTerminalConfig.getKeyHolder()!!,
-            NetPosTerminalConfig.getConfigData()!!,
-        )
+        val hostConfig =
+            HostConfig(
+                NetPosTerminalConfig.getTerminalId(),
+                NetPosTerminalConfig.connectionData,
+                NetPosTerminalConfig.getKeyHolder()!!,
+                NetPosTerminalConfig.getConfigData()!!,
+            )
         val requestData =
             TransactionRequestData(TransactionType.BALANCE, 0L, accountType = accountType)
-        progressDialog!!.setMessage("Checking Balance...")
+        progressDialog.setMessage("Checking Balance...")
         progressDialog.show()
         val processor = TransactionProcessor(hostConfig)
         processor.processTransaction(requireContext(), requestData, cardData)
@@ -404,15 +460,17 @@ class DashboardFragment : BaseFragment() {
 
                     val me = it.buildSMSText("Account Balance Check")
 
-                    val messageString = if (it.isApproved) {
-                        "Account Balance:\n " + it.accountBalances.joinToString("\n") { accountBalance ->
-                            "${accountBalance.accountType}, ${
-                                accountBalance.amount.div(100).formatCurrencyAmount()
-                            }"
+                    val messageString =
+                        if (it.isApproved) {
+                            "Account Balance:\n " +
+                                it.accountBalances.joinToString("\n") { accountBalance ->
+                                    "${accountBalance.accountType}, ${
+                                        accountBalance.amount.div(100).formatCurrencyAmount()
+                                    }"
+                                }
+                        } else {
+                            "${it.responseMessage}(${it.responseCode})"
                         }
-                    } else {
-                        "${it.responseMessage}(${it.responseCode})"
-                    }
 
                     showMessage(
                         if (it.isApproved) "Approved" else "Declined",
@@ -423,7 +481,10 @@ class DashboardFragment : BaseFragment() {
             }
     }
 
-    private fun showMessage(s: String, vararg messageString: String) {
+    private fun showMessage(
+        s: String,
+        vararg messageString: String,
+    ) {
         AlertDialog.Builder(requireContext())
             .apply {
                 setTitle(s)
@@ -434,5 +495,184 @@ class DashboardFragment : BaseFragment() {
                 }
                 create().show()
             }
+    }
+
+    private fun showAccountTypeDialogForContact(onAccountTypeSelected: (IsoAccountType) -> Unit) {
+        val accountTypes = arrayOf("Savings", "Current", "Default")
+        AlertDialog.Builder(requireActivity())
+            .setTitle("Choose Account Type")
+            .setSingleChoiceItems(accountTypes, -1) { dialog, which ->
+                dialog.dismiss()
+                when (which) {
+                    0 -> onAccountTypeSelected(IsoAccountType.SAVINGS)
+                    1 -> onAccountTypeSelected(IsoAccountType.CURRENT)
+                    2 -> onAccountTypeSelected(IsoAccountType.DEFAULT_UNSPECIFIED)
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun openCr100(mode: QPOSService.CommunicationMode) {
+        listener = MyQposClass(bluetoothAdapter, requireActivity())
+        cr100Pos = QPOSService.getInstance(mode)
+
+        if (cr100Pos == null) {
+            showToast("Unknown communication mode")
+            return
+        }
+
+        cr100Pos!!.setConext(requireActivity())
+        val handler = Looper.myLooper()?.let { Handler(it) }
+        cr100Pos!!.initListener(handler, listener)
+
+        val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+
+        cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
+            if (cardInfo.isValid()) {
+                nfcCardReaderViewModel.doCr100Transaction(cardInfo)
+                listener.resetCardInfoFlow()
+            }
+        }
+    }
+
+    private fun deviceType(type: Int) {
+        if (BluetoothDialog.manualExitDialog != null) {
+            BluetoothDialog.manualExitDialog.dismiss()
+        }
+
+        requireActivity().showBluetoothDialog(bluetoothAdapter)
+        if (type == BLUETOOTH) {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+            }
+            posType = POS_TYPE.BLUETOOTH
+            cr100Pos?.scanQPos2Mode(requireActivity(), 10)
+        } else {
+            if (cr100Pos == null) {
+                openCr100(QPOSService.CommunicationMode.BLUETOOTH_BLE)
+            }
+            posType = POS_TYPE.BLUETOOTH_BLE
+            cr100Pos?.startScanQposBLE(10)
+        }
+        refreshAdapter()
+        bluetoothAdapter.notifyDataSetChanged()
+    }
+
+    private fun initIntent() {
+        scanBlue()
+        openCr100(QPOSService.CommunicationMode.BLUETOOTH)
+
+        if (cr100Pos!!.bluetoothState) {
+            BluetoothDialog.manualExitDialog(
+                requireActivity(),
+                "Do you want to continue with the previous connection?",
+                object : BluetoothDialog.OnMyClickListener {
+                    override fun onCancel() {
+                        cr100Pos?.disconnectBT()
+                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                        deviceType(BLUETOOTH)
+                        refreshAdapter()
+                        bluetoothAdapter.notifyDataSetChanged()
+                        BluetoothDialog.manualExitDialog.dismiss()
+                    }
+
+                    override fun onConfirm() {
+                        if (BluetoothToolsBean.getBlueToothName() != null) {
+                            showToast(BluetoothToolsBean.getBlueToothName())
+                        }
+
+                        val keyIndex: Int = getBluetoothKeyIndex()
+                        cr100Pos?.doTrade(keyIndex, 60)
+                        BluetoothDialog.manualExitDialog.dismiss()
+                    }
+                },
+            )
+        } else {
+            lvIndicatorBTPOS?.adapter = bluetoothAdapter
+            deviceType(BLUETOOTH)
+            refreshAdapter()
+            bluetoothAdapter.notifyDataSetChanged()
+        }
+    }
+
+    private fun scanBlue() {
+        lvIndicatorBTPOS?.layoutManager =
+            LinearLayoutManager(
+                requireActivity(),
+                LinearLayoutManager.VERTICAL,
+                false,
+            )
+
+        bluetoothAdapter.setOnBluetoothItemClickListener { position, itemData ->
+            onBTPosSelected(itemData)
+            BluetoothDialog.loading(requireActivity(), getString(R.string.str_connecting))
+            BluetoothToolsBean.setConectedState("CONNECTED")
+        }
+    }
+
+    private fun onBTPosSelected(itemData: Map<String?, *>) {
+        cr100Pos?.stopScanQPos2Mode()
+        startTime = System.currentTimeMillis()
+        blueToothAddress = itemData["ADDRESS"]!! as String
+        blueTitle = itemData["TITLE"] as String?
+        blueTitle =
+            blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
+                ?.get(0)
+        cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
+        blueTitle?.let { listener.setBlueTitle(it) }
+    }
+
+    private fun refreshAdapter() {
+        bluetoothAdapter.clearData()
+        val data = java.util.ArrayList<Map<String, *>>()
+        bluetoothAdapter.setListData(data)
+    }
+
+    private fun BtCardInfo.isValid(): Boolean {
+        return realPan.isNotEmpty() &&
+            track2.isNotEmpty() &&
+            decryptedIcc.isNotEmpty() &&
+            cardType != null
+    }
+
+    private fun checkForNFC() {
+        val showNfcRequest =
+            Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).nfc_interest
+        nfcAdapter =
+            (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
+        if (nfcAdapter != null) {
+            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+            if (nfcAdapter?.isEnabled == false) {
+                androidx.appcompat.app.AlertDialog.Builder(requireContext()).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        startActivityForResult(
+                            Intent(Settings.ACTION_NFC_SETTINGS),
+                            0,
+                        )
+                    }.show()
+            }
+        } else if (showNfcRequest == "0") {
+            binding.requestADevice.visibility = View.VISIBLE
+        }
+
+        binding.requestADevice.setOnClickListener {
+            showFragment(
+                RequestNfcFragment(),
+                containerViewId = R.id.container_main,
+                fragmentName = "RequestNfcFragment",
+            )
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (cr100Pos != null) {
+            listener.cleanup()
+            cr100Pos!!.cancelTrade()
+            cr100Pos!!.disconnectBT()
+        }
     }
 }

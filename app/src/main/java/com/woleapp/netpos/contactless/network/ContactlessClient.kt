@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ContactlessClient {
     private val contactlessBaseUrl = UtilityParam.STRING_CONTACTLESS_EXISTING_BASE_URL
     var contactlessClientInstance: ContactlessRegistrationService? = null
+
     fun getContactlessService(): ContactlessRegistrationService =
         contactlessClientInstance ?: synchronized(this) {
             Retrofit.Builder()

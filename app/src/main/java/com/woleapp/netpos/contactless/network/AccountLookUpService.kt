@@ -7,8 +7,7 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface AccountLookUpService {
-
-//    @POST("account-lookup")
+    //    @POST("account-lookup")
 //    fun findAccount(
 //        @Body accountNumber: AccountNumberLookUpRequest,
 //        @Query("partnerId") partnerId: String,
@@ -50,6 +49,17 @@ interface AccountLookUpService {
 
     @GET("get-states")
     fun getStates(): Single<GetStatesResponse>
+
+    @GET("get-lga-by-state/{stateCode}")
+    fun getLgaByState(
+        @Path("stateCode") stateCode: String,
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<LgaByStateResponses>
+
+    @GET("get-mcc-list")
+    fun getMccList(
+        @Query("deviceSerialId") deviceSerialId: String,
+    ): Single<MerchantCategoryCodeResponse>
 
     @GET("get-bank-branches/{stateId}")
     fun getBranches(
@@ -93,7 +103,13 @@ interface AccountLookUpService {
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<EncryptedApiResponseModel>
 
-    @POST("user/register-existing-user")
+//    @POST("user/register-existing-user")
+//    fun encryptedRegisterExistingAccount(
+//        @Body data: EncryptedApiRequestModel,
+//        @Query("partnerId") partnerId: String,
+//        @Query("deviceSerialId") deviceSerialId: String,
+//    ): Single<EncryptedApiResponseModel>
+    @POST("user/register-existing-user-test")
     fun encryptedRegisterExistingAccount(
         @Body data: EncryptedApiRequestModel,
         @Query("partnerId") partnerId: String,

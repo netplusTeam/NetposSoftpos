@@ -1,18 +1,17 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.DatePickerDialog
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AutoCompleteTextView
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.BranchAdapter
@@ -20,10 +19,10 @@ import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRegisterBinding
 import com.woleapp.netpos.contactless.model.FBNBranch
 import com.woleapp.netpos.contactless.model.FBNState
-import com.woleapp.netpos.contactless.util.RandomPurposeUtil
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.showAlertDialog
+import com.woleapp.netpos.contactless.util.showToast
 import com.woleapp.netpos.contactless.viewmodels.ContactlessRegViewModel
 import com.woleapp.netpos.contactless.viewmodels.RegistrationViewModel
 import java.util.*
@@ -36,43 +35,51 @@ class RegisterFragment : BaseFragment() {
     private lateinit var failureDialog: AlertDialog
     private lateinit var register: Button
     private lateinit var deviceSerialId: String
-    private lateinit var listOfStates: String
+    private lateinit var listOfStates: FBNState
+    private lateinit var listOfLgaByStates: String
+    private lateinit var listOfMerchantCategoryCode: String
     private lateinit var listOfBranches: String
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
-    private lateinit var partnerID : String
+
+//    private lateinit var firstBankLgaByStates: AutoCompleteTextView
+//    private lateinit var firstBankMerchantCategoryCode: AutoCompleteTextView
+    private lateinit var partnerID: String
     private lateinit var date: Calendar
+    private var termsAndConditionsCheckBox: Boolean = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
     ): View {
-        binding = FragmentRegisterBinding.inflate(layoutInflater).apply {
-            executePendingBindings()
-            lifecycleOwner = viewLifecycleOwner
-            viewmodel = this@RegisterFragment.viewModel
-        }
+        binding =
+            FragmentRegisterBinding.inflate(layoutInflater).apply {
+                executePendingBindings()
+                lifecycleOwner = viewLifecycleOwner
+                viewmodel = this@RegisterFragment.viewModel
+            }
 
         if (BuildConfig.FLAVOR.contains("zenith")) {
             viewModel.message.observe(viewLifecycleOwner) { event ->
                 event.getContentIfNotHandled()?.let {
-                    failureDialog = AlertDialog.Builder(requireContext())
-                        .setTitle("Registration Status")
-                        .setCancelable(false)
-                        .setPositiveButton("OK") { _, _ ->
-                            failureDialog.dismiss()
-                        }
-                        .setMessage(it)
-                        .create()
+                    failureDialog =
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Registration Status")
+                            .setCancelable(false)
+                            .setPositiveButton("OK") { _, _ ->
+                                failureDialog.dismiss()
+                            }
+                            .setMessage(it)
+                            .create()
                 }
                 failureDialog.show()
             }
-        }else{
+        } else {
             viewModel.message.observe(viewLifecycleOwner) { event ->
                 event.getContentIfNotHandled()?.let {
                     showAlertDialog(requireContext(), it, "OK") {}
-                 //   Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    //   Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -85,39 +92,44 @@ class RegisterFragment : BaseFragment() {
             }
         }
         if (BuildConfig.FLAVOR.contains("zenith")) {
-            dialog = AlertDialog.Builder(requireContext())
-                .setTitle("Registration Status")
-                .setCancelable(false)
-                .setPositiveButton("Continue") { _, _ ->
-                    showFragment(
-                        LoginFragment(),
-                        containerViewId = R.id.auth_container,
-                        fragmentName = "Login Fragment",
-                    )
-                }
-                .setMessage("Successful")
-                .create()
-        }else{
-            dialog = AlertDialog.Builder(requireContext())
-                .setTitle("Registration Status")
-                .setCancelable(false)
-                .setPositiveButton("Continue") { _, _ ->
-                    // d.cancel()
-                    // requireActivity().onBackPressed()
-                    showFragment(
-                        LoginFragment(),
-                        containerViewId = R.id.auth_container,
-                        fragmentName = "Login Fragment",
-                    )
-                }
-                .setMessage("Business Info Received, our team will contact you in 2 Business Days")
-                .create()
+            dialog =
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Registration Status")
+                    .setCancelable(false)
+                    .setPositiveButton("Continue") { _, _ ->
+                        showFragment(
+                            LoginFragment(),
+                            containerViewId = R.id.auth_container,
+                            fragmentName = "Login Fragment",
+                        )
+                    }
+                    .setMessage("Successful")
+                    .create()
+        } else {
+            dialog =
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Registration Status")
+                    .setCancelable(false)
+                    .setPositiveButton("Continue") { _, _ ->
+                        // d.cancel()
+                        // requireActivity().onBackPressed()
+                        showFragment(
+                            LoginFragment(),
+                            containerViewId = R.id.auth_container,
+                            fragmentName = "Login Fragment",
+                        )
+                    }
+                    .setMessage("Business Info Received, our team will contact you in 2 Business Days")
+                    .create()
         }
 
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         partnerID = initPartnerId()
         if (BuildConfig.FLAVOR.contains("zenith")) {
@@ -125,15 +137,15 @@ class RegisterFragment : BaseFragment() {
             binding.fragmentState.hint = "Select D.O.B"
             binding.loginLabel.text = "Account Opening/SIGN UP"
             binding.state.isFocusableInTouchMode = false
-            binding.bvnField.visibility = View.VISIBLE
-            binding.referenceField.visibility = View.VISIBLE
-            binding.passwordField.visibility = View.VISIBLE
-            binding.confirmPasswordField.visibility = View.VISIBLE
+//            binding.bvnField.visibility = View.VISIBLE
+//            binding.referenceField.visibility = View.VISIBLE
+//            binding.passwordField.visibility = View.VISIBLE
+//            binding.confirmPasswordField.visibility = View.VISIBLE
             binding.textInputBusinessName.hint = "First Name"
             binding.businessName.isFocusableInTouchMode = true
             binding.contactInfo.isFocusableInTouchMode = true
-            binding.phone.isFocusableInTouchMode = true
-            binding.email.isFocusableInTouchMode = true
+//            binding.phone.isFocusableInTouchMode = true
+//            binding.email.isFocusableInTouchMode = true
             binding.textContactInfo.hint = "Last Name"
             binding.state.setOnClickListener {
                 showDateTimePicker()
@@ -147,50 +159,134 @@ class RegisterFragment : BaseFragment() {
             contactlessViewModel.getStates()
 
             contactlessViewModel.getStatesResponse.observe(viewLifecycleOwner) {
-                val stateAdapter = StatesAdapter(
-                    contactlessViewModel.listOfStates, requireContext(),
-                    android.R.layout.simple_expandable_list_item_1
-                )
+                val stateAdapter =
+                    StatesAdapter(
+                        contactlessViewModel.listOfStates,
+                        requireContext(),
+                        android.R.layout.simple_expandable_list_item_1,
+                    )
                 firstBankStates.setAdapter(stateAdapter)
             }
 
-            firstBankStates.onItemClickListener = object : AdapterView.OnItemClickListener {
-                override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                    val statesList =
-                        adapterView?.getItemAtPosition(p2) as FBNState
-                    listOfStates = statesList.state
-                    viewModel.setSelectedState(listOfStates)
-                    contactlessViewModel.getBranches(statesList.id, partnerID, deviceSerialId)
+            firstBankStates.onItemClickListener =
+                object : AdapterView.OnItemClickListener {
+                    override fun onItemClick(
+                        adapterView: AdapterView<*>?,
+                        p1: View?,
+                        p2: Int,
+                        p3: Long,
+                    ) {
+                        val statesList =
+                            adapterView?.getItemAtPosition(p2) as FBNState
+                        listOfStates = statesList
+                        viewModel.setSelectedState(listOfStates)
+                        contactlessViewModel.getBranches(statesList.id, partnerID, deviceSerialId)
+                        contactlessViewModel.getLgaByState(statesList.state_code, deviceSerialId)
+                    }
                 }
-            }
 
             contactlessViewModel.getBranchResponse.observe(viewLifecycleOwner) {
-                val branchAdapter = BranchAdapter(
-                    contactlessViewModel.listOfBranches, requireContext(),
-                    android.R.layout.simple_expandable_list_item_1
-                )
+                val branchAdapter =
+                    BranchAdapter(
+                        contactlessViewModel.listOfBranches,
+                        requireContext(),
+                        android.R.layout.simple_expandable_list_item_1,
+                    )
                 firstBankBranches.setAdapter(branchAdapter)
             }
 
-            firstBankBranches.onItemClickListener = object : AdapterView.OnItemClickListener {
-                override fun onItemClick(adapterView: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                    val branchList =
-                        adapterView?.getItemAtPosition(p2) as FBNBranch
-                    listOfBranches = branchList.branch_name
-                    viewModel.setSelectedBranch(listOfBranches)
+            firstBankBranches.onItemClickListener =
+                object : AdapterView.OnItemClickListener {
+                    override fun onItemClick(
+                        adapterView: AdapterView<*>?,
+                        p1: View?,
+                        p2: Int,
+                        p3: Long,
+                    ) {
+                        val branchList =
+                            adapterView?.getItemAtPosition(p2) as FBNBranch
+                        listOfBranches = branchList.branch_name
+                        viewModel.setSelectedBranch(listOfBranches)
+                    }
                 }
-            }
+
+//            contactlessViewModel.getLgaByStatesResponse.observe(viewLifecycleOwner) {
+//                val lgaByStateAdapter =
+//                    LgaByStateAdapter(
+//                        contactlessViewModel.listOfLgaByStates,
+//                        requireContext(),
+//                        android.R.layout.simple_expandable_list_item_1,
+//                    )
+//                firstBankLgaByStates.setAdapter(lgaByStateAdapter)
+//            }
+//
+//            firstBankLgaByStates.onItemClickListener =
+//                object : AdapterView.OnItemClickListener {
+//                    override fun onItemClick(
+//                        adapterView: AdapterView<*>?,
+//                        p1: View?,
+//                        p2: Int,
+//                        p3: Long,
+//                    ) {
+//                        val lgaList =
+//                            adapterView?.getItemAtPosition(p2) as LgaByState
+//                        listOfLgaByStates = lgaList.lga_name
+//                        viewModel.setSelectedLgaByState(listOfLgaByStates)
+//                    }
+//                }
+
+//            contactlessViewModel.getMerchantCategoryCode(deviceSerialId)
+//
+//            contactlessViewModel.getMerchantCategoryCodeResponse.observe(viewLifecycleOwner) {
+//                val merchantCategoryCodeAdapter =
+//                    MerchantCategoryCodeAdapter(
+//                        contactlessViewModel.listOfMerchantCategoryCode,
+//                        requireContext(),
+//                        android.R.layout.simple_expandable_list_item_1,
+//                    )
+//                firstBankMerchantCategoryCode.setAdapter(merchantCategoryCodeAdapter)
+//            }
+//
+//            firstBankMerchantCategoryCode.onItemClickListener =
+//                object : AdapterView.OnItemClickListener {
+//                    override fun onItemClick(
+//                        adapterView: AdapterView<*>?,
+//                        p1: View?,
+//                        p2: Int,
+//                        p3: Long,
+//                    ) {
+//                        val lgaList =
+//                            adapterView?.getItemAtPosition(p2) as MerchantCategoryCode
+//                        listOfMerchantCategoryCode = lgaList.category_name
+//                        viewModel.setSelectedMerchantCategoryCode(listOfMerchantCategoryCode)
+//                    }
+//                }
         }
 
         register = binding.btnLogin
         register.setOnClickListener {
-            viewModel.register(requireContext(),partnerID, deviceSerialId)
+            if (termsAndConditionsCheckBox) {
+                viewModel.register(requireContext(), partnerID, deviceSerialId)
+            } else {
+                showToast("Please accept the terms and conditions to proceed")
+            }
+        }
+
+        // set checkbox message
+        binding.myCheckBox.text = "I have read, accepted and consented to the above Data Privacy Policy and Terms and Conditions of FirstPOS."
+
+        // Set a listener on the CheckBox
+        binding.myCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            termsAndConditionsCheckBox = isChecked
+            binding.myCheckBox.buttonTintList = ColorStateList.valueOf(Color.YELLOW)
         }
     }
 
-    private fun initViews(){
-        with(binding){
+    private fun initViews() {
+        with(binding) {
             firstBankStates = state
+//            firstBankLgaByStates = lgaByState
+//            firstBankMerchantCategoryCode = merchantCategoryCode
             firstBankBranches = branch
         }
     }
@@ -199,11 +295,15 @@ class RegisterFragment : BaseFragment() {
         val currentDate = Calendar.getInstance()
         date = Calendar.getInstance()
         DatePickerDialog(
-            requireContext(), { view, year, monthOfYear, dayOfMonth ->
+            requireContext(),
+            { view, year, monthOfYear, dayOfMonth ->
                 date.set(year, monthOfYear, dayOfMonth)
                 val month = monthOfYear + 1
                 binding.state.setText("$year-$month-$dayOfMonth")
-            }, currentDate[Calendar.YEAR], currentDate[Calendar.MONTH], currentDate[Calendar.DATE]
+            },
+            currentDate[Calendar.YEAR],
+            currentDate[Calendar.MONTH],
+            currentDate[Calendar.DATE],
         ).show()
     }
 }

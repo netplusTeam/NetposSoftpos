@@ -28,7 +28,6 @@ import javax.inject.Named
 
 @AndroidEntryPoint
 class NewOrExistingFragment : BaseFragment() {
-
     private lateinit var binding: FragmentNewOrExistingBinding
     private val viewModel by activityViewModels<ContactlessRegViewModel>()
     private lateinit var loader: AlertDialog
@@ -61,12 +60,15 @@ class NewOrExistingFragment : BaseFragment() {
                 override fun handleOnBackPressed() {
                     requireActivity().supportFragmentManager.popBackStack()
                 }
-            }
+            },
         )
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?,
+    ) {
         super.onViewCreated(view, savedInstanceState)
         newPartnerId = initPartnerId()
         deviceSerialID = getDeviceId(requireContext())
@@ -74,10 +76,15 @@ class NewOrExistingFragment : BaseFragment() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message.contains("OTP")) {
                     showAlertDialog(requireContext(), message, "OK") {
+//                        showFragment(
+//                            RegistrationOTPFragment(),
+//                            containerViewId = R.id.auth_container,
+//                            fragmentName = "RegisterOTP Fragment",
+//                        )
                         showFragment(
-                            RegistrationOTPFragment(),
+                            ExistingCustomersRegistrationFragment(),
                             containerViewId = R.id.auth_container,
-                            fragmentName = "RegisterOTP Fragment",
+                            fragmentName = "ExistingCustomersRegistration Fragment",
                         )
                     }
                 } else {
@@ -92,7 +99,7 @@ class NewOrExistingFragment : BaseFragment() {
             showFragment(
                 RegisterFragment(),
                 containerViewId = R.id.auth_container,
-                fragmentName = "Register Fragment"
+                fragmentName = "Register Fragment",
             )
         }
 
@@ -132,8 +139,9 @@ class NewOrExistingFragment : BaseFragment() {
                     Toast.LENGTH_SHORT,
                 ).show()
             } else {
-                if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith") || BuildConfig.FLAVOR.contains(
-                        "wemabank"
+                if (BuildConfig.FLAVOR.contains("firstbank") || BuildConfig.FLAVOR.contains("zenith") ||
+                    BuildConfig.FLAVOR.contains(
+                        "wemabank",
                     )
                 ) {
                     viewModel.findAccountForFirstBankUser(account, newPartnerId, deviceSerialID)
@@ -156,7 +164,6 @@ class NewOrExistingFragment : BaseFragment() {
         }
     }
 
-
     private fun otherBanks() {
         loader.show()
         observeServerResponse(
@@ -173,6 +180,4 @@ class NewOrExistingFragment : BaseFragment() {
             )
         }
     }
-
 }
-

@@ -1,7 +1,9 @@
+@file:Suppress("ktlint:standard:no-wildcard-imports")
+
 package com.woleapp.netpos.contactless.network
 
 import com.google.gson.JsonObject
-import com.woleapp.netpos.contactless.model.* // ktlint-disable no-wildcard-imports
+import com.woleapp.netpos.contactless.model.*
 import io.reactivex.Single
 import retrofit2.Response
 
@@ -43,6 +45,13 @@ interface ContactlessRegRepository {
     ): Single<GetFBNBranchResponse>
 
     fun getStates(): Single<GetStatesResponse>
+
+    fun getLgaByState(
+        stateCode: String,
+        deviceSerialId: String,
+    ): Single<LgaByStateResponses>
+
+    fun getMccList(deviceSerialId: String): Single<MerchantCategoryCodeResponse>
 
     fun resetPassword(
         payload: JsonObject,
@@ -91,7 +100,5 @@ interface ContactlessRegRepository {
         deviceSerialId: String,
     ): Single<RegistrationModel?>
 
-    fun getCred(
-        data: String,
-    ): Single<Boolean>
+    fun getCred(data: String): Single<Boolean>
 }

@@ -20,9 +20,11 @@ import androidx.constraintlayout.widget.Group;
 import com.danbamitale.epmslib.entities.KeyHolder;
 import com.danbamitale.epmslib.entities.KeyHolderKt;
 import com.danbamitale.epmslib.utils.TripleDES;
+import com.dsofttech.dprefs.utils.DPrefs;
 import com.woleapp.netpos.contactless.R;
 import com.woleapp.netpos.contactless.util.ExtensionFunctionsKt;
 import com.woleapp.netpos.contactless.util.Singletons;
+import com.woleapp.netpos.contactless.util.UtilityParam;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -140,7 +142,13 @@ public class PasswordDialog {
                 Toast.makeText(context, context.getString(R.string.pin_too_short), Toast.LENGTH_SHORT).show();
                 return;
             }
-            pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+
+            if(Singletons.INSTANCE.getKeyHolder() != null) {
+                pinListener.onConfirm(encodePinBlock(etPin.getText().toString(), pan));
+            } else {
+                Toast.makeText(context, "Terminal not configured", Toast.LENGTH_SHORT).show();
+            }
+
             dialog.cancel();
         });
 
@@ -162,7 +170,14 @@ public class PasswordDialog {
     private static String encodePinBlock(String pin, String pan) {
         Timber.e(pan);
         String pinP = "0" + pin.length() + pin + "FFFFFFFFFF";
-        String cardNum = "0000" + pan.substring(3, 15);
+        String cardNum;
+        if(pan.length() > 16) {
+            //for cards with 19 pan digits n make it fit into the standard 16-digit field expected by the format 0 PIN block structure.
+            cardNum = "0000" + pan.substring(6, 18);
+        }else{
+            cardNum = "0000" + pan.substring(3, 15);
+        }
+
         // System.out.println(Util.BytesToString(HexDump.hexStringToByteArray("0425A8EF8B7A6E66")));
         String pinblock = ExtensionFunctionsKt.xorHex(pinP, cardNum);
         //System.out.println(ExtensionFunctionsKt.xorHex(pin, cardNum));
