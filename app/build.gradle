@@ -37,7 +37,7 @@ android {
         vectorDrawables.useSupportLibrary = true
         applicationId "com.woleapp.netpos.contactless"
         compileSdkVersion 33
-        minSdkVersion 24
+        minSdkVersion 28
         targetSdkVersion 33
         versionCode 47
         versionName "1.0.47"
