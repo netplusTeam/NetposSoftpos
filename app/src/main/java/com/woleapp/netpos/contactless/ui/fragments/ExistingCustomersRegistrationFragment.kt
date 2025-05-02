@@ -156,6 +156,22 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
                 }
             }
 
+        firstBankStates.onItemClickListener =
+            object : AdapterView.OnItemClickListener {
+                override fun onItemClick(
+                    adapterView: AdapterView<*>?,
+                    p1: View?,
+                    p2: Int,
+                    p3: Long,
+                ) {
+                    val statesList =
+                        adapterView?.getItemAtPosition(p2) as FBNState
+                    listOfStates = statesList
+                    viewModel.getBranches(statesList.id, partnerID, deviceSerialID)
+                    viewModel.getLgaByState(statesList.state_code, deviceSerialID)
+                }
+            }
+
         viewModel.getBranchResponse.observe(viewLifecycleOwner) {
             val branchAdapter =
                 BranchAdapter(
@@ -265,6 +281,8 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             emailView = email
             bvnView = bvn
             tinView = tin
+            firstBankLgaByStates = lgaByState
+            firstBankMerchantCategoryCode = merchantCategoryCode
             passwordView = password
             firstBankStates = state
             firstBankBranches = branch

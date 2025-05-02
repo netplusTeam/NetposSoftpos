@@ -16,14 +16,10 @@ import androidx.fragment.app.activityViewModels
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.BranchAdapter
-import com.woleapp.netpos.contactless.adapter.LgaByStateAdapter
-import com.woleapp.netpos.contactless.adapter.MerchantCategoryCodeAdapter
 import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentRegisterBinding
 import com.woleapp.netpos.contactless.model.FBNBranch
 import com.woleapp.netpos.contactless.model.FBNState
-import com.woleapp.netpos.contactless.model.LgaByState
-import com.woleapp.netpos.contactless.model.MerchantCategoryCode
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
 import com.woleapp.netpos.contactless.util.showToast
@@ -45,8 +41,9 @@ class RegisterFragment : BaseFragment() {
     private lateinit var listOfBranches: String
     private lateinit var firstBankStates: AutoCompleteTextView
     private lateinit var firstBankBranches: AutoCompleteTextView
-    private lateinit var firstBankLgaByStates: AutoCompleteTextView
-    private lateinit var firstBankMerchantCategoryCode: AutoCompleteTextView
+
+//    private lateinit var firstBankLgaByStates: AutoCompleteTextView
+//    private lateinit var firstBankMerchantCategoryCode: AutoCompleteTextView
     private lateinit var partnerID: String
     private lateinit var date: Calendar
     private var termsAndConditionsCheckBox: Boolean = false
@@ -212,57 +209,57 @@ class RegisterFragment : BaseFragment() {
                     }
                 }
 
-            contactlessViewModel.getLgaByStatesResponse.observe(viewLifecycleOwner) {
-                val lgaByStateAdapter =
-                    LgaByStateAdapter(
-                        contactlessViewModel.listOfLgaByStates,
-                        requireContext(),
-                        android.R.layout.simple_expandable_list_item_1,
-                    )
-                firstBankLgaByStates.setAdapter(lgaByStateAdapter)
-            }
+//            contactlessViewModel.getLgaByStatesResponse.observe(viewLifecycleOwner) {
+//                val lgaByStateAdapter =
+//                    LgaByStateAdapter(
+//                        contactlessViewModel.listOfLgaByStates,
+//                        requireContext(),
+//                        android.R.layout.simple_expandable_list_item_1,
+//                    )
+//                firstBankLgaByStates.setAdapter(lgaByStateAdapter)
+//            }
+//
+//            firstBankLgaByStates.onItemClickListener =
+//                object : AdapterView.OnItemClickListener {
+//                    override fun onItemClick(
+//                        adapterView: AdapterView<*>?,
+//                        p1: View?,
+//                        p2: Int,
+//                        p3: Long,
+//                    ) {
+//                        val lgaList =
+//                            adapterView?.getItemAtPosition(p2) as LgaByState
+//                        listOfLgaByStates = lgaList.lga_name
+//                        viewModel.setSelectedLgaByState(listOfLgaByStates)
+//                    }
+//                }
 
-            firstBankLgaByStates.onItemClickListener =
-                object : AdapterView.OnItemClickListener {
-                    override fun onItemClick(
-                        adapterView: AdapterView<*>?,
-                        p1: View?,
-                        p2: Int,
-                        p3: Long,
-                    ) {
-                        val lgaList =
-                            adapterView?.getItemAtPosition(p2) as LgaByState
-                        listOfLgaByStates = lgaList.lga_name
-                        viewModel.setSelectedLgaByState(listOfLgaByStates)
-                    }
-                }
-
-            contactlessViewModel.getMerchantCategoryCode(deviceSerialId)
-
-            contactlessViewModel.getMerchantCategoryCodeResponse.observe(viewLifecycleOwner) {
-                val merchantCategoryCodeAdapter =
-                    MerchantCategoryCodeAdapter(
-                        contactlessViewModel.listOfMerchantCategoryCode,
-                        requireContext(),
-                        android.R.layout.simple_expandable_list_item_1,
-                    )
-                firstBankMerchantCategoryCode.setAdapter(merchantCategoryCodeAdapter)
-            }
-
-            firstBankMerchantCategoryCode.onItemClickListener =
-                object : AdapterView.OnItemClickListener {
-                    override fun onItemClick(
-                        adapterView: AdapterView<*>?,
-                        p1: View?,
-                        p2: Int,
-                        p3: Long,
-                    ) {
-                        val lgaList =
-                            adapterView?.getItemAtPosition(p2) as MerchantCategoryCode
-                        listOfMerchantCategoryCode = lgaList.category_name
-                        viewModel.setSelectedMerchantCategoryCode(listOfMerchantCategoryCode)
-                    }
-                }
+//            contactlessViewModel.getMerchantCategoryCode(deviceSerialId)
+//
+//            contactlessViewModel.getMerchantCategoryCodeResponse.observe(viewLifecycleOwner) {
+//                val merchantCategoryCodeAdapter =
+//                    MerchantCategoryCodeAdapter(
+//                        contactlessViewModel.listOfMerchantCategoryCode,
+//                        requireContext(),
+//                        android.R.layout.simple_expandable_list_item_1,
+//                    )
+//                firstBankMerchantCategoryCode.setAdapter(merchantCategoryCodeAdapter)
+//            }
+//
+//            firstBankMerchantCategoryCode.onItemClickListener =
+//                object : AdapterView.OnItemClickListener {
+//                    override fun onItemClick(
+//                        adapterView: AdapterView<*>?,
+//                        p1: View?,
+//                        p2: Int,
+//                        p3: Long,
+//                    ) {
+//                        val lgaList =
+//                            adapterView?.getItemAtPosition(p2) as MerchantCategoryCode
+//                        listOfMerchantCategoryCode = lgaList.category_name
+//                        viewModel.setSelectedMerchantCategoryCode(listOfMerchantCategoryCode)
+//                    }
+//                }
         }
 
         register = binding.btnLogin
@@ -287,8 +284,8 @@ class RegisterFragment : BaseFragment() {
     private fun initViews() {
         with(binding) {
             firstBankStates = state
-            firstBankLgaByStates = lgaByState
-            firstBankMerchantCategoryCode = merchantCategoryCode
+//            firstBankLgaByStates = lgaByState
+//            firstBankMerchantCategoryCode = merchantCategoryCode
             firstBankBranches = branch
         }
     }

@@ -142,6 +142,7 @@ class ContactlessRegViewModel
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { data, error ->
                         data?.let {
+                            Log.d("RESP====", "$it")
                             _firstBankAccountNumberResponse.postValue(Resource.success(it))
                             saveAccountNumber(accountNumber)
                             saveExistingPhoneNumber(it.data.phone)
@@ -596,14 +597,14 @@ class ContactlessRegViewModel
         }
 
         fun registerExistingAccountForFBN(
-            accountNumber: RegistrationForExistingFBNUsersRequest,
+            fbnData: RegistrationForExistingFBNUsersRequest,
             partnerId: String,
             deviceSerialId: String,
         ) {
             _existingRegRequestResponse.postValue(Resource.loading(null))
             disposable.add(
                 contactlessRegRepo.encryptedRegisterExistingAccount(
-                    gson.toJson(accountNumber),
+                    gson.toJson(fbnData),
                     partnerId,
                     deviceSerialId,
                 )

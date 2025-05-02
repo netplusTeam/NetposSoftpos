@@ -97,7 +97,13 @@ interface AccountLookUpService {
         @Query("deviceSerialId") deviceSerialId: String,
     ): Single<EncryptedApiResponseModel>
 
-    @POST("user/register-existing-user")
+//    @POST("user/register-existing-user")
+//    fun encryptedRegisterExistingAccount(
+//        @Body data: EncryptedApiRequestModel,
+//        @Query("partnerId") partnerId: String,
+//        @Query("deviceSerialId") deviceSerialId: String,
+//    ): Single<EncryptedApiResponseModel>
+    @POST("user/register-existing-user-test")
     fun encryptedRegisterExistingAccount(
         @Body data: EncryptedApiRequestModel,
         @Query("partnerId") partnerId: String,

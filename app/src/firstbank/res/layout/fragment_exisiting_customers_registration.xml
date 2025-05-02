@@ -188,8 +188,6 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/edittext_bg"
                         android:drawablePadding="8dp"
-                        android:focusableInTouchMode="false"
-                        android:inputType="none"
                         android:singleLine="true"
                         android:textColor="@android:color/black"
                         android:textColorHint="@android:color/black"
