@@ -588,9 +588,11 @@ class MainActivity :
                 .setNegativeButton(getString(R.string.close)) { dialog, _ ->
                     dialog.dismiss()
                     // finish()
-                }.setPositiveButton(getString(R.string.nfc)) { dialog, _ ->
+                }
+                .setPositiveButton(getString(R.string.nfc)) { dialog, _ ->
                     showFragment(RequestNfcFragment(), "RequestNfcFragment")
-                }.create()
+                }
+                .create()
         terminalId = Singletons.getCurrentlyLoggedInUser()?.terminal_id.toString()
         userName = Singletons.getCurrentlyLoggedInUser()?.netplus_id.toString()
         firebaseInstance = FirebaseMessaging.getInstance()

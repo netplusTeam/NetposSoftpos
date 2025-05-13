@@ -76,16 +76,16 @@ class NewOrExistingFragment : BaseFragment() {
             it.getContentIfNotHandled()?.let { message ->
                 if (message.contains("OTP")) {
                     showAlertDialog(requireContext(), message, "OK") {
-//                        showFragment(
-//                            RegistrationOTPFragment(),
-//                            containerViewId = R.id.auth_container,
-//                            fragmentName = "RegisterOTP Fragment",
-//                        )
                         showFragment(
-                            ExistingCustomersRegistrationFragment(),
+                            RegistrationOTPFragment(),
                             containerViewId = R.id.auth_container,
-                            fragmentName = "ExistingCustomersRegistration Fragment",
+                            fragmentName = "RegisterOTP Fragment",
                         )
+//                        showFragment(
+//                            ExistingCustomersRegistrationFragment(),
+//                            containerViewId = R.id.auth_container,
+//                            fragmentName = "ExistingCustomersRegistration Fragment",
+//                        )
                     }
                 } else {
                     showAlertDialog(requireContext(), message, "OK") {}

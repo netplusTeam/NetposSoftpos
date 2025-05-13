@@ -13,6 +13,7 @@ import android.widget.Button
 import androidx.core.widget.doOnTextChanged
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
+import com.dsofttech.dprefs.utils.DPrefs
 import com.github.barteksc.pdfviewer.PDFView
 import com.google.android.material.textfield.TextInputEditText
 import com.woleapp.netpos.contactless.BuildConfig
@@ -23,6 +24,7 @@ import com.woleapp.netpos.contactless.adapter.MerchantCategoryCodeAdapter
 import com.woleapp.netpos.contactless.adapter.StatesAdapter
 import com.woleapp.netpos.contactless.databinding.FragmentExisitingCustomersRegistrationBinding
 import com.woleapp.netpos.contactless.model.*
+import com.woleapp.netpos.contactless.util.AppConstants
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.getDeviceId
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.initPartnerId
@@ -116,39 +118,39 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
             binding.email.isFocusableInTouchMode = true
         }
         initViews()
-//        val newActNumber = DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
-//        actNumber = newActNumber.substring(1, newActNumber.length - 1)
-//
-//        val newBusinessName = DPrefs.getString(AppConstants.BUSINESS_NAME, "")
-//        val businessName = newBusinessName.substring(1, newBusinessName.length - 1)
-//
-//        val newBusinessAddress = DPrefs.getString(AppConstants.BUSINESS_ADDRESS, "")
-//        val businessAddress = newBusinessAddress.substring(1, newBusinessAddress.length - 1)
-//
-//        val newEmail = DPrefs.getString(AppConstants.EMAIL_ADDRESS, "")
-//        val email = newEmail.substring(1, newEmail.length - 1)
-//
-//        val newPhone = DPrefs.getString(AppConstants.PHONE_NUMBER, "")
-//        val phone = newPhone.substring(1, newPhone.length - 1)
-//
-//        val newTitle = DPrefs.getString(AppConstants.TITLE, "")
-//        val title = newTitle.substring(1, newTitle.length - 1)
-//        val newContactInfo = DPrefs.getString(AppConstants.FULL_NAME, "")
-//        val contactInfo =
-//            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
-//
-//        binding.businessName.setText(businessName.replace("\\u0026", "&"))
-//        binding.contactInfo.setText(contactInfo)
-//        binding.address.setText(businessAddress.replace("\\u0026", "&"))
-//        binding.phone.setText(phone)
-//        binding.email.setText(email.replace("\\u0026", "&"))
-//        binding.title.setText(title)
+        val newActNumber = DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
+        actNumber = newActNumber.substring(1, newActNumber.length - 1)
+
+        val newBusinessName = DPrefs.getString(AppConstants.BUSINESS_NAME, "")
+        val businessName = newBusinessName.substring(1, newBusinessName.length - 1)
+
+        val newBusinessAddress = DPrefs.getString(AppConstants.BUSINESS_ADDRESS, "")
+        val businessAddress = newBusinessAddress.substring(1, newBusinessAddress.length - 1)
+
+        val newEmail = DPrefs.getString(AppConstants.EMAIL_ADDRESS, "")
+        val email = newEmail.substring(1, newEmail.length - 1)
+
+        val newPhone = DPrefs.getString(AppConstants.PHONE_NUMBER, "")
+        val phone = newPhone.substring(1, newPhone.length - 1)
+
+        val newTitle = DPrefs.getString(AppConstants.TITLE, "")
+        val title = newTitle.substring(1, newTitle.length - 1)
+        val newContactInfo = DPrefs.getString(AppConstants.FULL_NAME, "")
+        val contactInfo =
+            newContactInfo.substring(1, newContactInfo.length - 1).replace("\\u0026", "&")
+
+        binding.businessName.setText(businessName.replace("\\u0026", "&"))
+        binding.contactInfo.setText(contactInfo)
+        binding.address.setText(businessAddress.replace("\\u0026", "&"))
+        binding.phone.setText(phone)
+        binding.email.setText(email.replace("\\u0026", "&"))
+        binding.title.setText(title)
 
         loader = alertDialog(requireContext())
 
-//        if (email.isNullOrEmpty()) {
-//            binding.email.isFocusableInTouchMode = true
-//        }
+        if (email.isNullOrEmpty()) {
+            binding.email.isFocusableInTouchMode = true
+        }
         viewModel.getStatesResponse.observe(viewLifecycleOwner) {
             val stateAdapter =
                 StatesAdapter(
@@ -282,6 +284,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
 
         // set checkbox message
         binding.myCheckBox.text = "By checking this box, you agree to the terms and conditions"
+        binding.myCheckBox.setTextColor(resources.getColor(R.color.black))
 
         // Set a listener on the CheckBox
         binding.myCheckBox.setOnCheckedChangeListener { _, isChecked ->
@@ -642,7 +645,7 @@ class ExistingCustomersRegistrationFragment : BaseFragment() {
         if (BuildConfig.FLAVOR.contains("firstbank")) {
             val existingAccountRegReq =
                 RegistrationForExistingFBNUsersRequest(
-                    accountNumber = "3063092771",
+                    accountNumber = actNumber,
                     businessAddress = addressView.text.toString().trim(),
                     businessName = businessNameView.text.toString().trim(),
                     contactInformation = contactName.text.toString().trim(),
