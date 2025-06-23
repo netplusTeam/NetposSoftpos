@@ -148,7 +148,7 @@
     <string name="date_time_place_holder">DATE/TIME: %1$s</string>
     <string name="declined">Declined</string>
     <string name="declined_transactions">Declined Transactions</string>
-<!--    <string name="default_web_client_id">983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com</string>-->
+    <string name="default_web_client_id">983048306918-3nd8524b8jqums09f9rau495c47sthjl.apps.googleusercontent.com</string>
     <string name="define_easypreferences" />
     <string name="delete">Delete</string>
     <string name="device_doesnt_have_nfc">Device does not have NFC support. Please connect to the NetPOS Lite bluetooth device to continue</string>
@@ -190,9 +190,9 @@
     <string name="from">FROM</string>
     <string name="fullname">Fullname</string>
     <string name="gcm_defaultSenderId">983048306918</string>
-<!--    <string name="google_api_key">AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o</string>-->
+    <string name="google_api_key">AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o</string>
     <string name="google_app_id">1:983048306918:android:ef39fe502a47f726bfbb27</string>
-<!--    <string name="google_crash_reporting_api_key">AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o</string>-->
+    <string name="google_crash_reporting_api_key">AIzaSyBIhdh0G7VzrVjZadvQlnOy6JuJfn5Et6o</string>
     <string name="google_storage_bucket">netposcontactless.appspot.com</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="hide_bottom_view_on_scroll_behavior">com.google.android.material.behavior.HideBottomViewOnScrollBehavior</string>

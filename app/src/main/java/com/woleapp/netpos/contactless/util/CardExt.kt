@@ -152,7 +152,7 @@ fun newShowSelectCardDialog(
     // Initialize the observer
     observer =
         Observer<String> { aid ->
-            Log.d("CARDTYPE", nfcPaymentType.toString())
+            Log.d("CARDTYPE", aid)
             when (aid) {
                 "a0000000041010" -> {
                     selectCardDialog.dismiss()

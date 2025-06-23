@@ -238,7 +238,7 @@ class DashboardFragment : BaseFragment() {
             }
         }
         binding.process.setOnClickListener {
-            cardReadingOption = Prefs.getString(NFC_KIT_OPTION, "null")
+            cardReadingOption = Prefs.getString(NFC_OPTION, "null")
             if (nfcAdapter != null) {
 //                if (nfcAdapter?.isEnabled == true) {
 //                    viewModel.validateFieldForNFC()
@@ -880,7 +880,7 @@ class DashboardFragment : BaseFragment() {
             .setMessage("Which NFC do you want to use?")
             .setCancelable(false)
             .setPositiveButton("Phone") { dialog, _ ->
-                Prefs.putString(NFC_KIT_OPTION, "true")
+                Prefs.putString(NFC_OPTION, "true")
                 if (nfcAdapter?.isEnabled == false) {
                     enableNFC()
                 } else {
@@ -889,7 +889,7 @@ class DashboardFragment : BaseFragment() {
                 dialog.dismiss()
             }
             .setNegativeButton("NFC Kit") { dialog, _ ->
-                Prefs.putString(NFC_KIT_OPTION, "false")
+                Prefs.putString(NFC_OPTION, "false")
                 initCr100Intent()
                 dialog.dismiss()
             }
@@ -914,6 +914,7 @@ class DashboardFragment : BaseFragment() {
                             Intent(Settings.ACTION_NFC_SETTINGS),
                             0,
                         )
+                        viewModel.validateFieldForNFC()
                     }.show()
             }
             .show()
