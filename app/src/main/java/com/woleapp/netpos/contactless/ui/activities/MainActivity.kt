@@ -1851,6 +1851,7 @@ class MainActivity :
 //                        } else {
 //                            Mappers.utcDateStringToEpochMillis(it.transactionTimeInMillis.toString())
 //                        }
+                    Log.d("DATE_TIME", "$date")
                     val stan = response.STAN ?: ""
                     posView.transAmount.text = amount
                     posView.status.text = status
