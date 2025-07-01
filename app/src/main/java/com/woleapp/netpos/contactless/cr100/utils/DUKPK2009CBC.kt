@@ -1,8 +1,7 @@
 package com.woleapp.netpos.contactless.cr100.utils
 
 import android.content.Context
-import com.woleapp.netpos.contactless.BuildConfig
-import java.math.BigInteger
+import com.woleapp.netpos.contactless.util.decryptOpenSslFile
 import java.security.Key
 import java.util.Locale
 import javax.crypto.Cipher
@@ -36,31 +35,29 @@ object DUKPK2009CBC {
         key: Enum_key?,
         mode: Enum_mode,
         clearIpek: String?,
+        context: Context?,
     ): String {
         var ipek: ByteArray? = null
         val byte_ksn = parseHexStr2Byte(ksnV)
         ipek =
             if (clearIpek == null || clearIpek.length == 0) {
-                val byte_bdk = parseHexStr2Byte(BuildConfig.CR100_BDK_VALUE)
-                GenerateIPEK(byte_ksn, byte_bdk)
+                val cr100BdkValue = decryptOpenSslFile(context!!, "netpos_light_bdk_key.txt.enc")
+                val byteBdk = parseHexStr2Byte(cr100BdkValue.toString(Charsets.UTF_8))
+                generateIPEK(byte_ksn, byteBdk)
             } else {
                 parseHexStr2Byte(clearIpek)
             }
         val ipekStr =
             parseByte2HexStr(ipek)
-        println("ipekStr=$ipekStr")
-        val dataKey = GetDataKey(byte_ksn, ipek)
+        val dataKey = getDataKey(byte_ksn, ipek)
         val dataKeyStr = parseByte2HexStr(dataKey)
-        println("dataKeyStr=$dataKeyStr")
-        val dataKeyVariant = GetDataKeyVariant(byte_ksn, ipek)
+        val dataKeyVariant = getDataKeyVariant(byte_ksn, ipek)
         val dataKeyStrVariant = parseByte2HexStr(dataKeyVariant)
-        println("dataKeyStrVariant=$dataKeyStrVariant")
-        val pinKey = GetPinKeyVariant(byte_ksn, ipek)
+
+        val pinKey = getPinKeyVariant(byte_ksn, ipek)
         val pinKeyStr = parseByte2HexStr(pinKey)
-        println("pinKeyStr=$pinKeyStr")
-        val macKey = GetMacKeyVariant(byte_ksn, ipek)
+        val macKey = getMacKeyVariant(byte_ksn, ipek)
         val macKeyStr = parseByte2HexStr(macKey)
-        println("macKeyStr=$macKeyStr")
         var keySel: String? = null
         when (key) {
             Enum_key.MAC -> keySel = macKeyStr
@@ -72,49 +69,22 @@ object DUKPK2009CBC {
         var buf: ByteArray? = null
         if (mode == Enum_mode.CBC) {
             buf =
-                TriDesDecryptionCBC(
+                triDesDecryptionCBC(
                     parseHexStr2Byte(keySel),
                     parseHexStr2Byte(datastrV),
                 )
         } else if (mode == Enum_mode.ECB) {
             buf =
-                TriDesDecryptionECB(
+                triDesDecryptionECB(
                     parseHexStr2Byte(keySel),
                     parseHexStr2Byte(datastrV),
                 )
         }
+
         return parseByte2HexStr(buf)
     }
 
-    fun generatePinBlock(
-        pinKsn: String?,
-        clearPin: String,
-        pan: String,
-        clearIpek: String?,
-    ): String {
-        val length = 14 - clearPin.length
-        var newClearPin = "0" + clearPin.length + clearPin
-        for (i in 0 until length) {
-            newClearPin = newClearPin + "F"
-        }
-        var newPan = pan.substring(pan.length - 13, pan.length - 1)
-        newPan = "0000$newPan"
-        println("newPan: $newPan")
-        val xorResult = xor(newClearPin, newPan)
-        println("data: $xorResult")
-        val byte_ksn = parseHexStr2Byte(pinKsn)
-        val byte_ipek = parseHexStr2Byte(clearIpek)
-        val byte_pin = parseHexStr2Byte(xorResult)
-        val pinKey = GetPinKeyVariant(byte_ksn, byte_ipek)
-        val pinKeyStr = parseByte2HexStr(pinKey)
-        println("pinKeyStr=$pinKeyStr")
-        val buf = TriDesEncryption(pinKey, byte_pin)
-        val deResultStr = parseByte2HexStr(buf)
-        println("data: $deResultStr")
-        return deResultStr
-    }
-
-    fun GenerateIPEK(
+    private fun generateIPEK(
         ksn: ByteArray?,
         bdk: ByteArray?,
     ): ByteArray {
@@ -125,10 +95,11 @@ object DUKPK2009CBC {
         result = ByteArray(16)
         temp = ByteArray(8)
         keyTemp = ByteArray(16)
+
         System.arraycopy(bdk, 0, keyTemp, 0, 16)
         System.arraycopy(ksn, 0, temp, 0, 8)
         temp[7] = (temp[7].toInt() and 0xE0).toByte()
-        temp2 = TriDesEncryption(keyTemp, temp)
+        temp2 = triDesEncryption(keyTemp, temp)
         System.arraycopy(temp2, 0, result, 0, 8)
         keyTemp[0] = (keyTemp[0].toInt() xor 0xC0).toByte()
         keyTemp[1] = (keyTemp[1].toInt() xor 0xC0).toByte()
@@ -138,12 +109,12 @@ object DUKPK2009CBC {
         keyTemp[9] = (keyTemp[9].toInt() xor 0xC0).toByte()
         keyTemp[10] = (keyTemp[10].toInt() xor 0xC0).toByte()
         keyTemp[11] = (keyTemp[11].toInt() xor 0xC0).toByte()
-        temp2 = TriDesEncryption(keyTemp, temp)
+        temp2 = triDesEncryption(keyTemp, temp)
         System.arraycopy(temp2, 0, result, 8, 8)
         return result
     }
 
-    fun GetDUKPTKey(
+    private fun getDUKPTKey(
         ksn: ByteArray?,
         ipek: ByteArray?,
     ): ByteArray {
@@ -164,7 +135,7 @@ object DUKPK2009CBC {
         while (shift > 0) {
             if (cnt[0].toInt() and shift > 0) {
                 temp[5] = (temp[5].toInt() or shift).toByte()
-                NRKGP(key, temp)
+                nRKGP(key, temp)
             }
             shift = shift shr 1
         }
@@ -172,7 +143,7 @@ object DUKPK2009CBC {
         while (shift > 0) {
             if (cnt[1].toInt() and shift > 0) {
                 temp[6] = (temp[6].toInt() or shift).toByte()
-                NRKGP(key, temp)
+                nRKGP(key, temp)
             }
             shift = shift shr 1
         }
@@ -180,7 +151,7 @@ object DUKPK2009CBC {
         while (shift > 0) {
             if (cnt[2].toInt() and shift > 0) {
                 temp[7] = (temp[7].toInt() or shift).toByte()
-                NRKGP(key, temp)
+                nRKGP(key, temp)
             }
             shift = shift shr 1
         }
@@ -192,7 +163,7 @@ object DUKPK2009CBC {
     private function used by GetDUKPTKey
     </summary>
      **/
-    private fun NRKGP(
+    private fun nRKGP(
         key: ByteArray,
         ksn: ByteArray,
     ) {
@@ -205,13 +176,15 @@ object DUKPK2009CBC {
         key_l = ByteArray(8)
         key_r = ByteArray(8)
         key_temp = ByteArray(8)
+
         System.arraycopy(key, 0, key_temp, 0, 8)
         i = 0
         while (i < 8) {
             temp[i] = (ksn[i].toInt() xor key[8 + i].toInt()).toByte()
             i++
         }
-        key_r = TriDesEncryption(key_temp, temp)!!
+
+        key_r = triDesEncryption(key_temp, temp)!!
         i = 0
         while (i < 8) {
             key_r[i] = (key_r[i].toInt() xor key[8 + i].toInt()).toByte()
@@ -230,78 +203,62 @@ object DUKPK2009CBC {
             temp[i] = (ksn[i].toInt() xor key[8 + i].toInt()).toByte()
             i++
         }
-        key_l = TriDesEncryption(key_temp, temp)!!
+
+        key_l = triDesEncryption(key_temp, temp)!!
         i = 0
         while (i < 8) {
             key[i] = (key_l[i].toInt() xor key[8 + i].toInt()).toByte()
             i++
         }
+
         System.arraycopy(key_r, 0, key, 8, 8)
     }
 
-    /*<summary>
-    Get current Data Key variant
-    Data Key variant is XOR DUKPT Key with 0000 0000 00FF 0000 0000 0000 00FF 0000
-    </summary>
-    <param name="ksn">Key serial number(KSN). A 10 bytes data. Which use to determine which BDK will be used and calculate IPEK. With different KSN, the DUKPT system will ensure different IPEK will be generated.
-    Normally, the first 4 digit of KSN is used to determine which BDK is used. The last 21 bit is a counter which indicate the current key.</param>
-    <param name="ipek">IPEK (16 byte).</param>
-    <returns>Data Key variant (16 byte)</returns>
-     **/
-    fun GetDataKeyVariant(
+    fun getDataKeyVariant(
         ksn: ByteArray?,
         ipek: ByteArray?,
     ): ByteArray {
         val key: ByteArray
-        key = GetDUKPTKey(ksn, ipek)
+        key = getDUKPTKey(ksn, ipek)
         key[5] = (key[5].toInt() xor 0xFF).toByte()
         key[13] = (key[13].toInt() xor 0xFF).toByte()
         return key
     }
 
-    /*<summary>
-    Get current PIN Key variant
-    PIN Key variant is XOR DUKPT Key with 0000 0000 0000 00FF 0000 0000 0000 00FF
-    </summary>
-    <param name="ksn">Key serial number(KSN). A 10 bytes data. Which use to determine which BDK will be used and calculate IPEK. With different KSN, the DUKPT system will ensure different IPEK will be generated.
-    Normally, the first 4 digit of KSN is used to determine which BDK is used. The last 21 bit is a counter which indicate the current key.</param>
-    <param name="ipek">IPEK (16 byte).</param>
-    <returns>PIN Key variant (16 byte)</returns>
-     **/
-    fun GetPinKeyVariant(
+    fun getPinKeyVariant(
         ksn: ByteArray?,
         ipek: ByteArray?,
     ): ByteArray {
         val key: ByteArray
-        key = GetDUKPTKey(ksn, ipek)
+        key = getDUKPTKey(ksn, ipek)
         key[7] = (key[7].toInt() xor 0xFF).toByte()
         key[15] = (key[15].toInt() xor 0xFF).toByte()
         return key
     }
 
-    fun GetMacKeyVariant(
+    fun getMacKeyVariant(
         ksn: ByteArray?,
         ipek: ByteArray?,
     ): ByteArray {
         val key: ByteArray
-        key = GetDUKPTKey(ksn, ipek)
+        key = getDUKPTKey(ksn, ipek)
         key[6] = (key[6].toInt() xor 0xFF).toByte()
         key[14] = (key[14].toInt() xor 0xFF).toByte()
         return key
     }
 
-    fun GetDataKey(
+    fun getDataKey(
         ksn: ByteArray?,
         ipek: ByteArray?,
     ): ByteArray? {
-        val temp1 = GetDataKeyVariant(ksn, ipek)
-        return TriDesEncryption(temp1, temp1)
+        val temp1 = getDataKeyVariant(ksn, ipek)
+        return triDesEncryption(temp1, temp1)
     }
 
     /*
      * 3DES encryption
      **/
-    fun TriDesEncryption(
+    fun triDesEncryption(
         byteKey: ByteArray,
         dec: ByteArray?,
     ): ByteArray? {
@@ -322,7 +279,9 @@ object DUKPK2009CBC {
             val ecipher =
                 Cipher.getInstance("DESede/ECB/NoPadding")
             ecipher.init(Cipher.ENCRYPT_MODE, key)
+
             // Encrypt
+
             // String en_txt = parseByte2HexStr(en_b);
             // String en_txt =byte2hex(en_b);
             return ecipher.doFinal(dec)
@@ -335,7 +294,7 @@ object DUKPK2009CBC {
     /*
      * 3DES decryption CBC
      **/
-    fun TriDesDecryptionCBC(
+    fun triDesDecryptionCBC(
         byteKey: ByteArray?,
         dec: ByteArray?,
     ): ByteArray? {
@@ -371,7 +330,7 @@ object DUKPK2009CBC {
     /*
      * 3DES decryption ECB
      **/
-    fun TriDesDecryptionECB(
+    fun triDesDecryptionECB(
         byteKey: ByteArray?,
         dec: ByteArray?,
     ): ByteArray? {
@@ -400,6 +359,7 @@ object DUKPK2009CBC {
             val dcipher =
                 Cipher.getInstance("DESede/ECB/NoPadding")
             dcipher.init(Cipher.DECRYPT_MODE, key)
+
             return dcipher.doFinal(dec)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -441,64 +401,10 @@ object DUKPK2009CBC {
         return sb.toString()
     }
 
-    /*
-     * data fill
-     **/
-    fun dataFill(dataStr: String): String {
-        var dataStr = dataStr
-        var len = dataStr.length
-        if (len % 16 != 0) {
-            dataStr += "80"
-            len = dataStr.length
-        }
-        while (len % 16 != 0) {
-            dataStr += "0"
-            len++
-            println(dataStr)
-        }
-        return dataStr
-    }
-
-    fun xor(
-        key1: String?,
-        key2: String?,
-    ): String {
-        var result = ""
-        val arr1 = parseHexStr2Byte(key1)
-        val arr2 = parseHexStr2Byte(key2)
-        val arr3 = ByteArray(arr1!!.size)
-        for (i in arr1.indices) {
-            arr3[i] = (arr1[i].toInt() xor arr2!![i].toInt()).toByte()
-        }
-        result = parseByte2HexStr(arr3)
-        return result
-    }
-
-    fun decodeTrack1(compressedTrack1: String): String {
-        var resultTrack1 = ""
-        for (i in 0 until compressedTrack1.length / 6) {
-            // 1. convert every 6chars(3bytes) to binary string
-            val sub = compressedTrack1.substring(i * 6, (i + 1) * 6)
-            val threeByteInt = sub.toInt(16)
-            val bigInter = BigInteger.valueOf(threeByteInt.toLong())
-            val strBinary = bigInter.toString(2)
-            // BigInteger.toString(radix) will miss leading 0s, so need padding 0 at the begging with length of 3byte(24 bits)
-            val withLeadingZeros = String.format("%24s", strBinary).replace(' ', '0')
-            // 2. group binary result on every 6 binary chars into 4 groups (bytes)
-            val fourBytes = byteArrayOf(0x00, 0x00, 0x00, 0x00)
-            for (j in 0 until withLeadingZeros.length / 6) {
-                val byteStr = withLeadingZeros.substring(j * 6, (j + 1) * 6)
-                fourBytes[j] = byteStr.toByte(2)
-                fourBytes[j] = (fourBytes[j] + 0x20).toByte()
-            }
-            resultTrack1 += String(fourBytes)
-        }
-        return resultTrack1
-    }
-
     fun extractTrack2AndPanValues(input: String): Pair<String, String> {
         var indexOfD = -1
         var indexOfF = -1
+
         // Scan through the string once to find both 'D' and 'F'
         for (i in input.indices) {
             if (input[i] == 'D' && indexOfD == -1) {
@@ -507,15 +413,19 @@ object DUKPK2009CBC {
             if (input[i] == 'F' && indexOfF == -1) {
                 indexOfF = i
             }
+
             if (indexOfD != -1 && indexOfF != -1) {
                 break
             }
         }
+
         if (indexOfD == -1 || indexOfF == -1) {
             throw IllegalArgumentException("String must contain both 'D' and 'F'")
         }
+
         val valueBeforeD = input.substring(0, indexOfD)
         val valueBeforeF = input.substring(0, indexOfF)
+
         return Pair(valueBeforeD, valueBeforeF)
     }
 
