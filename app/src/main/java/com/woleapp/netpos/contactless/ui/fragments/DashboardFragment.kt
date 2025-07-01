@@ -219,7 +219,7 @@ class DashboardFragment : BaseFragment() {
 //        }
 
         binding.process.setOnClickListener {
-            if (etPinEt.text.toString().isEmpty()) {
+            if (binding.priceTextbox.text.toString().isEmpty()) {
                 Toast.makeText(
                     context,
                     getString(R.string.valid_amount),
@@ -227,7 +227,6 @@ class DashboardFragment : BaseFragment() {
                 ).show()
                 return@setOnClickListener
             } else {
-                binding.priceTextbox.text = etPinEt.text
                 if (nfcAdapter != null) {
                     if (nfcAdapter?.isEnabled == true) {
                         viewModel.validateFieldForNFC()
