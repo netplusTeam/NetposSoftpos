@@ -9,6 +9,7 @@ import com.woleapp.netpos.contactless.R;
 import java.util.ArrayList;
 import java.util.Map;
 
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -63,9 +64,11 @@ public class BluetoothAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_EMPTY) {
+            Log.d("BLUETOOTH", "NOT_HERE");
             View v = View.inflate(mContext, R.layout.layout_empty_state_netpos_lite, null);
             return new EmptyViewHolder(v);
         } else {
+            Log.d("BLUETOOTH", "HERE");
             View v = View.inflate(mContext, R.layout.bt_qpos_item, null);
             return new MyViewHolder(v);
         }

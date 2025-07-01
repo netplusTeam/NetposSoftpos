@@ -798,12 +798,12 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (cr100Pos != null) {
-            listener.cleanup()
-            cr100Pos!!.cancelTrade()
-            cr100Pos!!.disconnectBT()
-        }
-    }
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        if (cr100Pos != null) {
+//            listener.cleanup()
+//            cr100Pos!!.cancelTrade()
+//            cr100Pos!!.disconnectBT()
+//        }
+//    }
 }
