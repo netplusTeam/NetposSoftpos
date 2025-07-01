@@ -696,7 +696,7 @@ class DashboardFragment : BaseFragment() {
         DPrefs.putString(BLUETOOTH_ADDRESS, blueToothAddress)
         blueTitle?.let {
             listener.setBlueTitle(it)
-            DPrefs.putString(BLUETOOTH_TITLE, blueTitle)
+            DPrefs.putString(BLUETOOTH_TITLE, blueTitle!!)
         }
     }
 
