@@ -234,7 +234,9 @@ class DashboardFragment : BaseFragment() {
 //        }
 
         binding.process.setOnClickListener {
+            Log.d("BLUETOOTH", "OKOK1")
             if (binding.priceTextbox.text.toString().isEmpty()) {
+                Log.d("BLUETOOTH", "OKOK2")
                 Toast.makeText(
                     context,
                     getString(R.string.valid_amount),
@@ -242,17 +244,23 @@ class DashboardFragment : BaseFragment() {
                 ).show()
                 return@setOnClickListener
             } else {
+                Log.d("BLUETOOTH", "OKOK3")
 //                binding.priceTextbox.text =
                 if (nfcAdapter != null) {
                     if (nfcAdapter?.isEnabled == true) {
+                        Log.d("BLUETOOTH", "OKOK4")
                         viewModel.validateFieldForNFC()
                     } else {
+                        Log.d("BLUETOOTH", "OKOK5")
                         if (viewModel.validateFieldForBluetooth()) {
+                            Log.d("BLUETOOTH", "OKOK6")
                             initIntent()
                         }
                     }
                 } else {
+                    Log.d("BLUETOOTH", "OKOK7")
                     if (viewModel.validateFieldForBluetooth()) {
+                        Log.d("BLUETOOTH", "OKOK8")
                         initIntent()
                     }
                 }
