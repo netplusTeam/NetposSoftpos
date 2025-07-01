@@ -242,6 +242,7 @@ class DashboardFragment : BaseFragment() {
                 ).show()
                 return@setOnClickListener
             } else {
+//                binding.priceTextbox.text =
                 if (nfcAdapter != null) {
                     if (nfcAdapter?.isEnabled == true) {
                         viewModel.validateFieldForNFC()
