@@ -156,24 +156,36 @@ class MainActivity :
         if (nfcAdapter != null) {
             // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
             if (nfcAdapter?.isEnabled == false) {
-                AlertDialog.Builder(this).setTitle("NFC Message")
-                    .setMessage("NFC is not enabled, goto device settings to enable")
-                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
-                        dialog.dismiss()
-                        startActivityForResult(
-                            Intent(android.provider.Settings.ACTION_NFC_SETTINGS),
-                            0,
-                        )
-                    }.show()
+                nfcNotEnabledDialog()
+            } else {
+                DPrefs.putBoolean(PREF_NFC_ENABLED, true)
             }
         } else {
-            AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
-                .setCancelable(false).setMessage(getString(R.string.device_doesnt_have_nfc))
-                .setPositiveButton(getString(R.string.close)) { dialog, _ ->
-                    dialog.dismiss()
-                    // finish()
-                }.create().show()
+            deviceNotSupportedAlertDialog.show()
         }
+
+//        nfcAdapter = (applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
+//        if (nfcAdapter != null) {
+//            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+//            if (nfcAdapter?.isEnabled == false) {
+//                AlertDialog.Builder(this).setTitle("NFC Message")
+//                    .setMessage("NFC is not enabled, goto device settings to enable")
+//                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+//                        dialog.dismiss()
+//                        startActivityForResult(
+//                            Intent(android.provider.Settings.ACTION_NFC_SETTINGS),
+//                            0,
+//                        )
+//                    }.show()
+//            }
+//        } else {
+//            AlertDialog.Builder(this).setTitle(getString(R.string.nfc_message_title))
+//                .setCancelable(false).setMessage(getString(R.string.device_doesnt_have_nfc))
+//                .setPositiveButton(getString(R.string.close)) { dialog, _ ->
+//                    dialog.dismiss()
+//                    // finish()
+//                }.create().show()
+//        }
     }
 
     private fun startNfcPayment(nfcDataWrapper: NfcDataWrapper) {
@@ -203,6 +215,32 @@ class MainActivity :
                 )
             }
         }
+    }
+
+    private fun nfcNotEnabledDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("NFC Check")
+            .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
+            .setCancelable(false)
+            .setPositiveButton("Yes") { dialog, _ ->
+                DPrefs.putBoolean(PREF_NFC_ENABLED, false)
+                dialog.dismiss()
+            }
+            .setNegativeButton("No") { _, _ ->
+                // Save preference to never show this dialog again
+                AlertDialog.Builder(this).setTitle("NFC Message")
+                    .setMessage("NFC is not enabled, goto device settings to enable")
+                    .setCancelable(false).setPositiveButton("Settings") { dialog, _ ->
+                        dialog.dismiss()
+                        showWirelessSettings()
+                    }.show()
+            }
+            .show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (nfcAdapter != null) nfcAdapter?.disableReaderMode(this)
     }
 
     private fun stopNfcPayment() {
