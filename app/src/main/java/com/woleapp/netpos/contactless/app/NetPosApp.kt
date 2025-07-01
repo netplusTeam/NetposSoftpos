@@ -2,15 +2,20 @@ package com.woleapp.netpos.contactless.app
 
 import android.app.Activity
 import android.app.Application
+import android.content.ContextWrapper
 import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
 import com.mastercard.terminalsdk.ConfigurationInterface
 import com.mastercard.terminalsdk.TerminalSdk
 import com.mastercard.terminalsdk.TransactionInterface
 import com.oluwatayo.taponphone.implementations.TransactionProcessLoggerImpl
+import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessConfiguration
-import com.woleapp.netpos.contactless.BuildConfig
-import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.*
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.CardCommProviderStub
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.DisplayImplementation
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.OutcomeObserver
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.ResourceProviderImplementation
+import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.UnpredictableNumberImplementation
 import com.woleapp.netpos.contactless.taponphone.mastercard.implementations.nfc.NfcProvider
 import com.woleapp.netpos.contactless.taponphone.verve.VerveSoftPosInitialization
 import dagger.hilt.android.HiltAndroidApp
@@ -19,7 +24,6 @@ import java.util.Observable
 
 @HiltAndroidApp
 class NetPosApp : Application() {
-
     lateinit var transactionsApi: TransactionInterface
     lateinit var outcomeObserver: OutcomeObserver
     private lateinit var configuration: ConfigurationInterface
@@ -38,18 +42,23 @@ class NetPosApp : Application() {
         }
     }
 
+    //
     val terminalSdk: TerminalSdk = TerminalSdk.getInstance()
 
     override fun onCreate() {
         super.onCreate()
         assignInstance(this)
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+        Timber.plant(Timber.DebugTree())
         DPrefs.initializeDPrefs(this)
+        Prefs.Builder()
+            .setContext(this)
+            .setMode(ContextWrapper.MODE_PRIVATE)
+            .setPrefsName(packageName)
+            .setUseDefaultSharedPreference(true)
+            .build()
         initVisaLib()
-
-        //initialize verve sdk
+//
+//        //initialize verve sdk
         verveSoftPosInitializationObservable = VerveSoftPosInitialization.getInstance(this)
     }
 
@@ -69,19 +78,19 @@ class NetPosApp : Application() {
             byteArrayOf(0xE6.toByte(), 0x00.toByte(), 0x40.toByte(), 0x00.toByte()) // TTQ E6004000
         myData["9F33"] =
             byteArrayOf(0xE0.toByte(), 0xF8.toByte(), 0xC8.toByte()) // Terminal Capabilities
-        myData["9F40"] = byteArrayOf(
-            0x60.toByte(),
-            0x00.toByte(),
-            0x00.toByte(),
-            0x50.toByte(),
-            0x01.toByte(),
-        ) // Additional Terminal Capabilities
+        myData["9F40"] =
+            byteArrayOf(
+                0x60.toByte(),
+                0x00.toByte(),
+                0x00.toByte(),
+                0x50.toByte(),
+                0x01.toByte(),
+            ) // Additional Terminal Capabilities
         val mercahnt = "NetPOS Contactless"
         val merchantByte = mercahnt.toByteArray()
         myData["9F4E"] = merchantByte // Merchant Name and location
         myData["9F1B"] = byteArrayOf(0x00, 0x00, 0x00, 0x00) // terminal floor limit
-        myData["DF01"] =
-            byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01) // Reader CVM Required Limit
+        myData["DF01"] = byteArrayOf(0x00, 0x00, 0x00, 0x00, 0x00, 0x01) // Reader CVM Required Limit
         contactlessConfiguration.terminalData = myData
     }
 

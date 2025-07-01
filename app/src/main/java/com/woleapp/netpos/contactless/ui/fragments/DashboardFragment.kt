@@ -27,6 +27,7 @@ import com.danbamitale.epmslib.entities.*
 import com.danbamitale.epmslib.extensions.formatCurrencyAmount
 import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
+import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
@@ -291,7 +292,7 @@ class DashboardFragment : BaseFragment() {
         }
 
         // user object to get netposmid and netplusmid
-        user = Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java)
+        user = Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java)
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
             Log.e("Error", "onCreateView: >>>>>>>>>>>>>>>>>>>>>>>>")
@@ -359,7 +360,7 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         val showNfcRequest =
-            Singletons.gson.fromJson(Prefs.getString(PREF_USER, ""), User::class.java).nfc_interest
+            Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).nfc_interest
         nfcAdapter =
             (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
         if (nfcAdapter != null) {
@@ -599,8 +600,8 @@ class DashboardFragment : BaseFragment() {
 
                 response?.let {
                     if (it.responseCode == "A3") {
-                        Prefs.remove(PREF_CONFIG_DATA)
-                        Prefs.remove(PREF_KEYHOLDER)
+                        DPrefs.removePref(PREF_CONFIG_DATA)
+                        DPrefs.removePref(PREF_KEYHOLDER)
                         NetPosTerminalConfig.init(
                             requireContext().applicationContext,
                             configureSilently = true,
