@@ -40,7 +40,6 @@ import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
-import com.woleapp.netpos.contactless.cr100.model.CardChannel
 import com.woleapp.netpos.contactless.cr100.widget.*
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
@@ -569,6 +568,7 @@ class DashboardFragment : BaseFragment() {
     private fun openCr100(mode: QPOSService.CommunicationMode) {
         listener = MyQposClass(bluetoothAdapter, requireActivity())
         cr100Pos = QPOSService.getInstance(mode)
+        Log.d("BLUETOOTH", "OKOK11")
 
         if (cr100Pos == null) {
             showToast("Unknown communication mode")
@@ -592,25 +592,25 @@ class DashboardFragment : BaseFragment() {
         }
 
         // Contact
-        requestPinLiveData.observe(viewLifecycleOwner) { result ->
-
-            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
-                nfcCardReaderViewModel.showPin(pan = result.pan)
-                if (result.btCardInfo != null) {
-                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-                }
-                hideBluetoothDialog()
-                // listener.resetCardInfoFlow()
-            } else {
-                if (result.cardType == CardChannel.Contact) {
-                    if (result.btCardInfo != null) {
-                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
-                        hideBluetoothDialog()
-                        // listener.resetCardInfoFlow()
-                    }
-                }
-            }
-        }
+//        requestPinLiveData.observe(viewLifecycleOwner) { result ->
+//
+//            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+//                nfcCardReaderViewModel.showPin(pan = result.pan)
+//                if (result.btCardInfo != null) {
+//                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+//                }
+//                hideBluetoothDialog()
+//                // listener.resetCardInfoFlow()
+//            } else {
+//                if (result.cardType == CardChannel.Contact) {
+//                    if (result.btCardInfo != null) {
+//                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+//                        hideBluetoothDialog()
+//                        // listener.resetCardInfoFlow()
+//                    }
+//                }
+//            }
+//        }
 
 //        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
 //        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
@@ -653,6 +653,7 @@ class DashboardFragment : BaseFragment() {
     private fun initIntent() {
         binding.batteryTxt.visibility = View.VISIBLE
         binding.batteryImg.visibility = View.VISIBLE
+        Log.d("BLUETOOTH", "OKOK9")
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
@@ -678,11 +679,11 @@ class DashboardFragment : BaseFragment() {
                 cr100Pos?.doTrade(keyIndex, 60)
             }
         } else {
-            DPrefs.getString(BLUETOOTH_TITLE, "")?.let {
+            DPrefs.getString(BLUETOOTH_TITLE, null.toString())?.let {
                 listener.setBlueTitle(it)
             }
 
-            DPrefs.getString(BLUETOOTH_ADDRESS, "")?.let {
+            DPrefs.getString(BLUETOOTH_ADDRESS, null.toString())?.let {
                 cr100Pos?.connectBluetoothDevice(true, 60, it)
             } ?: run {
                 lvIndicatorBTPOS?.adapter = bluetoothAdapter
@@ -700,6 +701,7 @@ class DashboardFragment : BaseFragment() {
                 LinearLayoutManager.VERTICAL,
                 false,
             )
+        Log.d("BLUETOOTH", "OKOK10")
 
         bluetoothAdapter.setOnBluetoothItemClickListener { position, itemData ->
             onBTPosSelected(itemData)
