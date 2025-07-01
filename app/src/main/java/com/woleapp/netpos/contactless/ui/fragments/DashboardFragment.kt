@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.text.InputFilter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,16 +38,16 @@ import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
-import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
-import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
+import com.woleapp.netpos.contactless.cr100.widget.*
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.*
 import com.woleapp.netpos.contactless.mqtt.MqttHelper
 import com.woleapp.netpos.contactless.nibss.NetPosTerminalConfig
 import com.woleapp.netpos.contactless.util.*
+import com.woleapp.netpos.contactless.util.AppConstants.BATTERY_PERCENTAGE
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
+import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.viewmodels.NfcCardReaderViewModel
 import com.woleapp.netpos.contactless.viewmodels.SalesViewModel
@@ -204,12 +205,38 @@ class DashboardFragment : BaseFragment() {
                 }
             }
         }
+//        binding.process.setOnClickListener {
+//            if (nfcAdapter != null) {
+//                viewModel.validateFieldForNFC()
+//            } else {
+//                if (viewModel.validateFieldForBluetooth()) {
+//                    initIntent()
+//                }
+//            }
+//        }
+
         binding.process.setOnClickListener {
-            if (nfcAdapter != null) {
-                viewModel.validateFieldForNFC()
+            if (etPinEt.text.toString().isEmpty()) {
+                Toast.makeText(
+                    context,
+                    getString(R.string.valid_amount),
+                    Toast.LENGTH_SHORT,
+                ).show()
+                return@setOnClickListener
             } else {
-                if (viewModel.validateFieldForBluetooth()) {
-                    initIntent()
+                binding.priceTextbox.text = etPinEt.text
+                if (nfcAdapter != null) {
+                    if (nfcAdapter?.isEnabled == true) {
+                        viewModel.validateFieldForNFC()
+                    } else {
+                        if (viewModel.validateFieldForBluetooth()) {
+                            initIntent()
+                        }
+                    }
+                } else {
+                    if (viewModel.validateFieldForBluetooth()) {
+                        initIntent()
+                    }
                 }
             }
         }
@@ -527,12 +554,48 @@ class DashboardFragment : BaseFragment() {
         cr100Pos!!.initListener(handler, listener)
 
         val cardInfoLiveData = listener.cardInfoFlow.asLiveData()
+        val requestPinLiveData = listener.requestPinFlow.asLiveData()
 
+        Log.d("JUST_CHECKING", "${requestPinLiveData.value?.btCardInfo}")
+        // contactless
         cardInfoLiveData.observe(viewLifecycleOwner) { cardInfo ->
             if (cardInfo.isValid()) {
                 nfcCardReaderViewModel.doCr100Transaction(cardInfo)
                 listener.resetCardInfoFlow()
             }
+        }
+
+        // Contact
+        requestPinLiveData.observe(viewLifecycleOwner) { result ->
+
+            if (result.isPinSet == true && result.cardType == CardChannel.Contact) {
+                nfcCardReaderViewModel.showPin(pan = result.pan)
+                if (result.btCardInfo != null) {
+                    nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                }
+                hideBluetoothDialog()
+                // listener.resetCardInfoFlow()
+            } else {
+                if (result.cardType == CardChannel.Contact) {
+                    if (result.btCardInfo != null) {
+                        nfcCardReaderViewModel.doCr100TransactionDip(result.btCardInfo)
+                        hideBluetoothDialog()
+                        // listener.resetCardInfoFlow()
+                    }
+                }
+            }
+        }
+
+//        val batteryPercentage = listener.cr100BatteryPercentageFlow.asLiveData()
+//        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+//            if (batteryLevel.isNotEmpty())
+//                {
+//                    Log.d("BATTERY_LEVEL1", "$batteryPercentage")
+//                }
+//        }
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryPercent ->
+            Log.d("BATTERY_LEVEL", "$batteryPercent")
         }
     }
 
@@ -542,6 +605,7 @@ class DashboardFragment : BaseFragment() {
         }
 
         requireActivity().showBluetoothDialog(bluetoothAdapter)
+
         if (type == BLUETOOTH) {
             if (cr100Pos == null) {
                 openCr100(QPOSService.CommunicationMode.BLUETOOTH)
@@ -555,44 +619,51 @@ class DashboardFragment : BaseFragment() {
             posType = POS_TYPE.BLUETOOTH_BLE
             cr100Pos?.startScanQposBLE(10)
         }
+
         refreshAdapter()
         bluetoothAdapter.notifyDataSetChanged()
     }
 
     private fun initIntent() {
+        binding.batteryTxt.visibility = View.VISIBLE
+        binding.batteryImg.visibility = View.VISIBLE
         scanBlue()
         openCr100(QPOSService.CommunicationMode.BLUETOOTH)
 
         if (cr100Pos!!.bluetoothState) {
-            BluetoothDialog.manualExitDialog(
-                requireActivity(),
-                "Do you want to continue with the previous connection?",
-                object : BluetoothDialog.OnMyClickListener {
-                    override fun onCancel() {
-                        cr100Pos?.disconnectBT()
-                        lvIndicatorBTPOS?.adapter = bluetoothAdapter
-                        deviceType(BLUETOOTH)
-                        refreshAdapter()
-                        bluetoothAdapter.notifyDataSetChanged()
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
+            if (BluetoothToolsBean.getBlueToothName() != null) {
+                showToast(BluetoothToolsBean.getBlueToothName())
+                DPrefs.putString(BATTERY_PERCENTAGE, "posinfo")
+            }
 
-                    override fun onConfirm() {
-                        if (BluetoothToolsBean.getBlueToothName() != null) {
-                            showToast(BluetoothToolsBean.getBlueToothName())
-                        }
+            val info = DPrefs.getString(BATTERY_PERCENTAGE)
 
-                        val keyIndex: Int = getBluetoothKeyIndex()
-                        cr100Pos?.doTrade(keyIndex, 60)
-                        BluetoothDialog.manualExitDialog.dismiss()
-                    }
-                },
-            )
+            if ("posinfo" == info) {
+                // First, get POS info
+                cr100Pos!!.getQposInfo()
+                handleResult()
+                // Delay `doTrade()` until `getQposInfo()` finishes
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val keyIndex: Int = getBluetoothKeyIndex()
+                    cr100Pos?.doTrade(keyIndex, 60)
+                }, 2000) // Adjust delay time if needed
+            } else {
+                val keyIndex: Int = getBluetoothKeyIndex()
+                cr100Pos?.doTrade(keyIndex, 60)
+            }
         } else {
-            lvIndicatorBTPOS?.adapter = bluetoothAdapter
-            deviceType(BLUETOOTH)
-            refreshAdapter()
-            bluetoothAdapter.notifyDataSetChanged()
+            DPrefs.getString(BLUETOOTH_TITLE, "")?.let {
+                listener.setBlueTitle(it)
+            }
+
+            DPrefs.getString(BLUETOOTH_ADDRESS, "")?.let {
+                cr100Pos?.connectBluetoothDevice(true, 60, it)
+            } ?: run {
+                lvIndicatorBTPOS?.adapter = bluetoothAdapter
+                deviceType(BLUETOOTH)
+                refreshAdapter()
+                bluetoothAdapter.notifyDataSetChanged()
+            }
         }
     }
 
@@ -620,7 +691,39 @@ class DashboardFragment : BaseFragment() {
             blueTitle?.split("\\(".toRegex())?.dropLastWhile { it.isEmpty() }?.toTypedArray()
                 ?.get(0)
         cr100Pos?.connectBluetoothDevice(true, 60, blueToothAddress)
-        blueTitle?.let { listener.setBlueTitle(it) }
+        DPrefs.putString(BLUETOOTH_ADDRESS, blueToothAddress)
+        blueTitle?.let {
+            listener.setBlueTitle(it)
+            DPrefs.putString(BLUETOOTH_TITLE, blueTitle)
+        }
+    }
+
+    private fun handleResult() {
+        val batteryPercentage = listener.cardBatteryFlow.asLiveData()
+        batteryPercentage.observe(viewLifecycleOwner) { batteryLevel ->
+            if (batteryLevel.isNotEmpty()) {
+                binding.batteryTxt.text = batteryLevel
+                updateBatteryImage(requireContext(), batteryLevel, binding.batteryImg)
+            }
+        }
+    }
+
+    private fun updateBatteryImage(
+        context: Context,
+        batteryLevelString: String,
+        imageView: ImageView,
+    ) {
+        // Extract numeric value and convert to Int, handling potential errors
+
+        val drawableRes =
+            when (batteryLevelString.filter { it.isDigit() }.toIntOrNull() ?: 0) {
+                in 0..20 -> R.drawable.battery // Battery is low
+                in 21..50 -> R.drawable.battery_25 // Battery is medium
+                in 51..80 -> R.drawable.battery_75 // Battery is high
+                in 81..100 -> R.drawable.battery_full // Battery is full
+                else -> R.drawable.battery // Fallback drawable
+            }
+        imageView.setImageResource(drawableRes)
     }
 
     private fun refreshAdapter() {

@@ -4,6 +4,7 @@ import java.util.*
 
 object AppConstants {
     fun getGUID() = UUID.randomUUID().toString().replace("-", "")
+
     const val APP_UPDATE_REQUEST_CODE = 911
     const val APP_UPDATE_TAG = "APP_UPDATE_TAG"
     const val PERMISSION_REQUEST_CODE = 200
@@ -55,4 +56,7 @@ object AppConstants {
     const val FBN_ACCOUNT_NUMBER_LOOKUP = "fbn_account_number_lookup"
     const val FBN_EXISTING_CUSTOMER_ACCOUNT_REGISTER = "fbn_existing_customer_account_register"
     const val FBN_OTP = "fbn_otp"
+    const val BLUETOOTH_ADDRESS = "BLUETOOTH_ADDRESS"
+    const val BLUETOOTH_TITLE = "BLUETOOTH_TITLE"
+    const val BATTERY_PERCENTAGE = "battery_percentage"
 }

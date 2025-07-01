@@ -267,6 +267,7 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="enter_your_providus_account_number">"Enter your account number"</string>
     <string name="download_share">Download and Share</string>
     <string name="enter_valid_number">Please enter a valid phone number</string>
+    <string name="valid_amount">Please enter a valid amount</string>
     <string name="no_transactions">No transactions to print</string>
     <string name="please_wait">Please wait</string>
     <string name="nfc_message_title">NFC Message</string>
