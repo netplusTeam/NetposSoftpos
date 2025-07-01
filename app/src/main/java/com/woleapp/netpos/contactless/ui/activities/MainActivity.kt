@@ -44,6 +44,7 @@ import com.google.android.material.navigation.NavigationBarView
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
+import com.pixplicity.easyprefs.library.Prefs
 import com.visa.app.ttpkernel.ContactlessKernel
 import com.woleapp.netpos.contactless.BuildConfig
 import com.woleapp.netpos.contactless.R
@@ -161,7 +162,7 @@ class MainActivity :
             if (nfcAdapter?.isEnabled == false) {
                 nfcNotEnabledDialog()
             } else {
-                DPrefs.putBoolean(PREF_NFC_ENABLED, true)
+                Prefs.putBoolean(PREF_NFC_ENABLED, true)
             }
         } else {
             deviceNotSupportedAlertDialog.show()
@@ -226,7 +227,7 @@ class MainActivity :
             .setMessage("Your NFC is not yet enabled. Would you like to continue with the external device to process transactions?")
             .setCancelable(false)
             .setPositiveButton("Yes") { dialog, _ ->
-                DPrefs.putBoolean(PREF_NFC_ENABLED, false)
+                Prefs.putBoolean(PREF_NFC_ENABLED, false)
                 dialog.dismiss()
             }
             .setNegativeButton("No") { _, _ ->
@@ -328,7 +329,7 @@ class MainActivity :
         // Initialize Crashlytics
         crashlytics = FirebaseCrashlytics.getInstance()
         crashlytics.setCrashlyticsCollectionEnabled(true) // Ensure collection is enabled
-        nfcEnabled = DPrefs.getBoolean(PREF_NFC_ENABLED, false)
+        nfcEnabled = Prefs.getBoolean(PREF_NFC_ENABLED, false)
 
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)

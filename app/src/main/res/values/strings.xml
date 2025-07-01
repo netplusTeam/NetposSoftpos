@@ -281,4 +281,5 @@ Nullam purus nulla, elementum nec tempor eget, rutrum et risus. Nullam ut suscip
     <string name="no_bluetooth_device_found_message">No Bluetooth devices found. Please switch on bluetooth on your device and power on the NetPOS Lite device. Pair and connect to continue.</string>    <string name="customer_name">Customer Name</string>
     <string name="account_number">Account Name</string>
     <string name="tin">Tax Identification Number</string>
+    <string name="nfc">Request Device</string>
 </resources>

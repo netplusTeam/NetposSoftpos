@@ -49,6 +49,7 @@ data class User(
     var mid: String? = null,
     var partnerId: String? = null,
     var netplusPayMid: String? = null,
+    var userType: String? = null,
 )
 
 data class TokenResp(val success: Boolean, val token: String)

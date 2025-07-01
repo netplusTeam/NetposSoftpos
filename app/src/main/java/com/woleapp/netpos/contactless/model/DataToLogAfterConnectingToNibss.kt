@@ -9,17 +9,17 @@ import com.danbamitale.epmslib.utils.IsoAccountType
 data class DataToLogAfterConnectingToNibss(
     val status: String,
     val transactionResponse: TransactionResponseX,
-    val rrn: String
+    val rrn: String,
 )
 
 data class LogToBackendResponse(
     val `data`: List<Int>,
     val message: String,
-    val status: String
+    val status: String,
 )
 
 data class ResponseBodyAfterLoginToBackend(
-    val message: String
+    val message: String,
 )
 
 data class TransactionResponseX(
@@ -50,7 +50,8 @@ data class TransactionResponseX(
     val terminalId: String,
     val transactionTimeInMillis: Long,
     val transactionType: String,
-    val transmissionDateTime: String
+    val transmissionDateTime: String,
+    val agentName: String? = null,
 )
 
 @Entity(tableName = "transactionTrackingTable")
@@ -58,7 +59,7 @@ data class TransactionResponseXForTracking(
     @PrimaryKey(autoGenerate = false)
     val temporalRRN: String,
     val transRespX: TransactionResponseX,
-    val status: String
+    val status: String,
 )
 
 fun mapToTransactionResponse(transRespX: TransactionResponseX): TransactionResponse =
@@ -98,20 +99,20 @@ fun mapToTransactionResponse(transRespX: TransactionResponseX): TransactionRespo
 data class TransactionToLogAfterSuccessfulTransaction(
     val rrn: String,
     val status: String,
-    val transactionResponse: TransactionResponse
+    val transactionResponse: TransactionResponse,
 )
 
 data class TransactionToLogBeforeConnectInToNibss(
     val status: String,
-    val trasnactionResponse: TransactionResponse
+    val trasnactionResponse: TransactionResponse,
 )
 
 data class TransactionToLogBeforeConnectingToNibbs(
     val status: String,
-    val transactionResponse: TransactionResponseX
+    val transactionResponse: TransactionResponseX,
 )
 
 data class TransactionToLogToBackEnd(
     val status: String,
-    val trasnactionResponse: TransactionResponse
+    val trasnactionResponse: TransactionResponse,
 )

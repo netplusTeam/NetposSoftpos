@@ -277,6 +277,10 @@ dependencies {
     // DPrefs
     implementation "com.github.D-Soft-Tech:DPrefs:1.0.4"
 
+
+    //easyprefs
+    implementation 'com.pixplicity.easyprefs:EasyPrefs:1.10.0'
+
     //JWT
     implementation 'com.auth0:java-jwt:3.10.0'
     implementation 'com.auth0.android:jwtdecode:2.0.0'

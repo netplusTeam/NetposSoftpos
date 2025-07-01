@@ -264,7 +264,6 @@ class MyQposClass(private val bluetoothAdapter: BluetoothAdapter, private val co
                         "TITLE" to "${device.name} (${device.address})",
                         "ADDRESS" to device.address,
                     )
-                Log.w("MyQposClass", "Device found")
                 bluetoothAdapter.setData(itm)
             }
         } ?: run {
