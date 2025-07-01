@@ -3,6 +3,7 @@
 package com.woleapp.netpos.contactless.ui.fragments
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -17,6 +18,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
@@ -38,6 +40,7 @@ import com.woleapp.netpos.contactless.app.NetPosApp.Companion.cr100Pos
 import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
+import com.woleapp.netpos.contactless.cr100.model.CardChannel
 import com.woleapp.netpos.contactless.cr100.widget.*
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
