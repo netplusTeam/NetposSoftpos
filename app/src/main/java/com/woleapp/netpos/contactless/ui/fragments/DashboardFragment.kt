@@ -218,6 +218,21 @@ class DashboardFragment : BaseFragment() {
 //            }
 //        }
 
+//        val showNfcRequest =
+//            Singletons.gson.fromJson(DPrefs.getString(PREF_USER, ""), User::class.java).nfc_interest
+//        nfcAdapter =
+//            (requireActivity().applicationContext as NetPosApp).nfcProvider.mNFCManager?.mNfcAdapter
+//        if (nfcAdapter != null) {
+//            // Toast.makeText(this, "Device has NFC support", Toast.LENGTH_SHORT).show()
+//            if (nfcAdapter?.isEnabled == false) {
+//                if (nfcEnabled) {
+//                    nfcNotEnabledDialog()
+//                }
+//            }
+//        } else if (showNfcRequest == "0") {
+//            binding.requestADevice.visibility = View.VISIBLE
+//        }
+
         binding.process.setOnClickListener {
             if (binding.priceTextbox.text.toString().isEmpty()) {
                 Toast.makeText(
@@ -243,7 +258,7 @@ class DashboardFragment : BaseFragment() {
             }
         }
 
-        checkForNFC()
+//        checkForNFC()
 
         nfcCardReaderViewModel.iccCardHelperLiveData.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {

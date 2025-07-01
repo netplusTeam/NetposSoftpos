@@ -59,4 +59,5 @@ object AppConstants {
     const val BLUETOOTH_ADDRESS = "BLUETOOTH_ADDRESS"
     const val BLUETOOTH_TITLE = "BLUETOOTH_TITLE"
     const val BATTERY_PERCENTAGE = "battery_percentage"
+    const val PREF_NFC_ENABLED = "nfc_enabled"
 }

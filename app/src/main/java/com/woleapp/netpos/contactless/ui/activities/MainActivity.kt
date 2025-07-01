@@ -16,6 +16,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -67,6 +68,7 @@ import com.woleapp.netpos.contactless.ui.dialog.QrPasswordPinBlockDialog
 import com.woleapp.netpos.contactless.ui.fragments.*
 import com.woleapp.netpos.contactless.util.*
 import com.woleapp.netpos.contactless.util.AppConstants.IS_QR_TRANSACTION
+import com.woleapp.netpos.contactless.util.AppConstants.PREF_NFC_ENABLED
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_FIREBASE_INTENT_ACTION
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_BUNDLE_KEY
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_QR_READ_RESULT_REQUEST_KEY
@@ -137,6 +139,7 @@ class MainActivity :
     private var verveNfcListener: NFCListener? = null
     private val salesViewModel by viewModels<SalesViewModel>()
     private lateinit var crashlytics: FirebaseCrashlytics
+    private var nfcEnabled: Boolean = false
 
     override fun onStart() {
         super.onStart()
@@ -325,6 +328,7 @@ class MainActivity :
         // Initialize Crashlytics
         crashlytics = FirebaseCrashlytics.getInstance()
         crashlytics.setCrashlyticsCollectionEnabled(true) // Ensure collection is enabled
+        nfcEnabled = DPrefs.getBoolean(PREF_NFC_ENABLED, false)
 
         pdfView = LayoutPosReceiptPdfBinding.inflate(layoutInflater)
         qrPdfView = LayoutQrReceiptPdfBinding.inflate(layoutInflater)
@@ -650,6 +654,12 @@ class MainActivity :
                 }
             }
         }
+    }
+
+    private fun showWirelessSettings() {
+        Toast.makeText(this, "You need to enable NFC", Toast.LENGTH_SHORT).show()
+        val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
+        startActivity(intent)
     }
 
     override fun onResume() {
