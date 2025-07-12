@@ -3,14 +3,15 @@ package com.woleapp.netpos.contactless.ui.fragments
 import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.util.Log
+import android.text.*
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import com.chaos.view.PinView
@@ -39,7 +40,7 @@ class RegistrationOTPFragment : BaseFragment() {
     private lateinit var newOtpId: String
     private lateinit var partnerID: String
     private lateinit var deviceSerialID: String
-    private var timeSeconds = 120L
+    private var timeSeconds = 10L
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -98,18 +99,15 @@ class RegistrationOTPFragment : BaseFragment() {
 //        }
         val newPoneNumber = DPrefs.getString(AppConstants.SAVE_PHONE_NUMBER, "")
         val phoneNumber = newPoneNumber.substring(0, newPoneNumber.length)
-        Log.d("NUMBERCHECK", phoneNumber)
+//        Log.d("NUMBERCHECK", phoneNumber)
         val newActNumber = DPrefs.getString(AppConstants.SAVED_ACCOUNT_NUM_SIGNED_UP, "")
         newAccountNumber = newActNumber.substring(1, newActNumber.length - 1)
-        Log.d("ACCOUNTNUMBER", newAccountNumber)
+//        Log.d("ACCOUNTNUMBER", newAccountNumber)
         val otpId = DPrefs.getString(AppConstants.SAVED_OTP_ID, "")
         newOtpId = otpId.substring(1, otpId.length - 1)
-        Log.d("otpId", otpId)
+//        Log.d("otpId", otpId)
         loader = alertDialog(requireContext())
-        resendCode.setOnClickListener {
-            resendOtp()
-            binding.otpResent.visibility = View.GONE
-        }
+
         otpView.requestFocus()
         val inputMethodManager =
             requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -205,7 +203,7 @@ class RegistrationOTPFragment : BaseFragment() {
             binding.otpResent.visibility = View.VISIBLE
             viewModel.clearLiveData()
             newOtpId = viewModel.firstBankAccountNumberResponse.value?.data?.data?.otpId!!
-            Log.d("JUSTCHECKING", newOtpId)
+//            Log.d("JUSTCHECKING", newOtpId)
         }
     }
 
@@ -231,11 +229,35 @@ class RegistrationOTPFragment : BaseFragment() {
                         resendCode.text = "Resend OTP in $timeSeconds seconds"
                     }
                     if (timeSeconds <= 0) {
-                        timeSeconds = 120L
+                        timeSeconds = 10L
                         timer.cancel()
                         activity?.runOnUiThread {
                             resendCode.isEnabled = true
-                            resendCode.text = getString(R.string.resend_code)
+                            binding.otpResent.visibility = View.GONE
+
+                            val fullText = "Didn't Receive OTP? Resend it"
+                            val spannableString = SpannableString(fullText)
+
+                            val clickableSpan =
+                                object : ClickableSpan() {
+                                    override fun onClick(widget: View) {
+                                        resendOtp()
+                                        binding.otpResent.visibility = View.GONE
+                                    }
+
+                                    override fun updateDrawState(ds: TextPaint) {
+                                        super.updateDrawState(ds)
+                                        ds.color = ContextCompat.getColor(requireContext(), R.color.colorPrimary)
+                                        ds.isUnderlineText = true
+                                    }
+                                }
+
+                            val startIndex = fullText.indexOf("Resend it")
+                            val endIndex = startIndex + "Resend it".length
+                            spannableString.setSpan(clickableSpan, startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+                            resendCode.text = spannableString
+                            resendCode.movementMethod = LinkMovementMethod.getInstance()
                         }
                     }
                 }

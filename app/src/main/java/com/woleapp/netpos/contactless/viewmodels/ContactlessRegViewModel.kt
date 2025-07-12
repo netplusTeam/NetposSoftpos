@@ -1,5 +1,6 @@
 package com.woleapp.netpos.contactless.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +17,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.exceptions.CompositeException
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONObject
 import retrofit2.HttpException
 import javax.inject.Inject
 
@@ -212,23 +215,28 @@ class ContactlessRegViewModel
                                 _otpMessage.value = Event(it.message.toString())
                             }
                         }
-                        error?.let {
-                            _confirmOTPResponse.postValue(Resource.error(null))
-                            (it as? HttpException).let { httpException ->
-                                val errorMessage =
-                                    httpException?.response()?.errorBody()?.string()
-                                        ?: "{\"message\":\"Unexpected error\"}"
-                                val errorMsg =
-                                    DPrefs.getString(AppConstants.FBN_OTP, "Invalid OTP provided")
-                                _otpMessage.value =
-                                    Event(
-                                        try {
-                                            errorMsg ?: "Error"
-                                        } catch (e: Exception) {
-                                            "Error"
-                                        },
-                                    )
-                            }
+//                        error?.let {
+//                            _confirmOTPResponse.postValue(Resource.error(null))
+//                            (it as? HttpException).let { httpException ->
+//                                val errorMessage =
+//                                    httpException?.response()?.errorBody()?.string()
+//                                        ?: "{\"message\":\"Unexpected error\"}"
+//                                val errorMsg =
+//                                    DPrefs.getString(AppConstants.FBN_OTP, "Invalid OTP provided")
+//
+//                                _otpMessage.value =
+//                                    Event(
+//                                        try {
+//                                            errorMsg ?: "Error"
+//                                        } catch (e: Exception) {
+//                                            "Error"
+//                                        },
+//                                    )
+//                            }
+//                        }
+
+                        error?.let { throwable ->
+                            handleOtpError(throwable)
                         }
                     },
             )
@@ -705,6 +713,50 @@ class ContactlessRegViewModel
 
         private fun saveAccountNumberToResetPasswordForProvidus(accountNumber: String) {
             DPrefs.putString(AppConstants.ACCOUNT_NUMBER_FOR_PROVIDUS, gson.toJson(accountNumber))
+        }
+
+        private fun handleOtpError(throwable: Throwable) {
+            if (throwable is CompositeException) {
+                throwable.exceptions.forEachIndexed { index, ex ->
+                    Log.e("COMPOSITE_EXCEPTION", "Exception[$index]: ${ex::class.java.name} - ${ex.message}")
+                }
+            }
+
+            val httpException =
+                (throwable as? CompositeException)?.exceptions?.find { it is HttpException } as? HttpException
+                    ?: throwable as? HttpException
+
+            httpException?.let { httpEx ->
+                val responseCode = httpEx.code()
+
+                val errorBodyResponse = httpEx.response()?.errorBody()
+                val errorBodyStr = errorBodyResponse?.string() // Read it ONCE
+
+                Log.d("RAW_ERROR_BODY", errorBodyStr ?: "null") // Should print the JSON string
+
+                val message =
+                    try {
+                        if (!errorBodyStr.isNullOrBlank()) {
+                            val json = JSONObject(errorBodyStr)
+                            json.optString("message", "Something went wrong")
+                        } else {
+                            "Something went wrong"
+                        }
+                    } catch (e: Exception) {
+                        Log.e("ERROR_PARSING", "Failed to parse error body", e)
+                        "Something went wrong"
+                    }
+
+                val displayMessage =
+                    when (responseCode) {
+                        429 -> "Too many attempts. Please wait before trying again."
+                        400 -> message
+                        else -> message
+                    }
+
+                _otpMessage.value = Event(displayMessage)
+                _confirmOTPResponse.postValue(Resource.error(null))
+            }
         }
 
         override fun onCleared() {

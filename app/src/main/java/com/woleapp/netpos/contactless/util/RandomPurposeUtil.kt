@@ -343,10 +343,15 @@ object RandomPurposeUtil {
                 Status.LOADING -> {
                     loadingDialog.show()
                 }
+//                Status.ERROR -> {
+//                    loadingDialog.cancel()
+//                    loadingDialog.dismiss()
+//                }
                 Status.ERROR -> {
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
                 }
+
                 Status.TIMEOUT -> {
                     loadingDialog.cancel()
                     loadingDialog.dismiss()
@@ -595,15 +600,16 @@ object RandomPurposeUtil {
         positiveButtonTitle: String,
         onPositiveButtonClick: () -> Unit,
     ) {
-        val alertDialog = AlertDialog.Builder(context)
-            .setMessage(message)
-            .setPositiveButton(positiveButtonTitle) { _, _ ->
-                onPositiveButtonClick()
-                // Dismiss the dialog when "Yes" is clicked
-                alertDialog(context).dismiss()
-            }
-            .setCancelable(false)
-            .create()
+        val alertDialog =
+            AlertDialog.Builder(context)
+                .setMessage(message)
+                .setPositiveButton(positiveButtonTitle) { _, _ ->
+                    onPositiveButtonClick()
+                    // Dismiss the dialog when "Yes" is clicked
+                    alertDialog(context).dismiss()
+                }
+                .setCancelable(false)
+                .create()
 
         alertDialog.show()
     }

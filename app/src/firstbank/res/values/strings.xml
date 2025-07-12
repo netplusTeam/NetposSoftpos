@@ -159,7 +159,7 @@
     <string name="invalid_qr">Invalid Qr detected</string>
     <string name="verify">OTP Verification</string>
     <string name="otp_here">Enter the OTP sent to you Here…</string>
-    <string name="resend_code">Didn\'t Receive Code? Resend it</string>
+    <string name="resend_code">Didn\'t Receive OTP? Resend it</string>
     <string name="otp_resent">A fresh OTP has been sent to you...</string>
 
 </resources>
