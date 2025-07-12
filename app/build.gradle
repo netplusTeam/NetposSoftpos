@@ -365,4 +365,12 @@ dependencies {
 
     implementation 'com.payneteasy:ber-tlv:1.0-11'
     implementation 'com.github.devnied.emvnfccard:library:3.0.1'
+
+    //Google Play Services Location (for GPS)
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    // Google Maps SDK
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+
+
 }

@@ -7,6 +7,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,6 +31,7 @@ import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
 import com.pixplicity.easyprefs.library.Prefs
@@ -259,26 +262,35 @@ class DashboardFragment : BaseFragment() {
             }
         }
         btnConfirmBtn.setOnClickListener {
-            if (etPinEt.text.toString().isEmpty()) {
-                Toast.makeText(
-                    context,
-                    getString(R.string.enter_a_valid_amount),
-                    Toast.LENGTH_SHORT,
-                ).show()
-                return@setOnClickListener
+            if (!PrefsHelper.hasShownFirstLocationPrompt(requireContext())) {
+                FirstLocationPromptBottomSheet(
+                    onYes = { requestAndCaptureLocation() },
+                    onNo = { openMapPicker() },
+                ).show(parentFragmentManager, "FirstLocationPrompt")
+
+                PrefsHelper.setShownFirstLocationPrompt(requireContext())
             } else {
-                binding.priceTextbox.text = etPinEt.text
-                if (nfcAdapter != null) {
-                    if (nfcAdapter?.isEnabled == true) {
-                        viewModel.validateFieldForNFC()
+                if (etPinEt.text.toString().isEmpty()) {
+                    Toast.makeText(
+                        context,
+                        getString(R.string.enter_a_valid_amount),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                    return@setOnClickListener
+                } else {
+                    binding.priceTextbox.text = etPinEt.text
+                    if (nfcAdapter != null) {
+                        if (nfcAdapter?.isEnabled == true) {
+                            viewModel.validateFieldForNFC()
+                        } else {
+                            if (viewModel.validateFieldForBluetooth()) {
+                                initIntent()
+                            }
+                        }
                     } else {
                         if (viewModel.validateFieldForBluetooth()) {
                             initIntent()
                         }
-                    }
-                } else {
-                    if (viewModel.validateFieldForBluetooth()) {
-                        initIntent()
                     }
                 }
             }
@@ -1008,5 +1020,49 @@ class DashboardFragment : BaseFragment() {
 
     private fun hideProgressDialog() {
         progressDialog?.dismiss()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                requestAndCaptureLocation()
+            } else {
+                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun requestAndCaptureLocation() {
+        val client = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+            return
+        }
+
+        client.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                Toast.makeText(requireContext(), "Lat: ${location.latitude}, Lng: ${location.longitude}", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener {
+            Toast.makeText(requireContext(), "Failed to get location: ${it.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openMapPicker() {
+        showFragment(
+            MapLocationPickerFragment(),
+            containerViewId = R.id.container_main,
+            fragmentName = "Map Location Fragment",
+        )
     }
 }
