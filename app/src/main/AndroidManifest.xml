@@ -130,8 +130,8 @@
         </provider>
 
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_api_key"/>
+            android:name="com.mapbox.token"
+            android:value="pk.eyJ1IjoibmV0cG9zIiwiYSI6ImNtZDV1czd5MDAzNmkycXMyanlzZ3lseXoifQ.Em5H4zBUh1D9OUCq9ZXa2g" />
 
     </application>
 

@@ -2,6 +2,7 @@
 
 package com.woleapp.netpos.contactless.ui.fragments
 
+import android.Manifest
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
@@ -31,9 +32,16 @@ import com.danbamitale.epmslib.processors.TransactionProcessor
 import com.danbamitale.epmslib.utils.IsoAccountType
 import com.dsofttech.dprefs.utils.DPrefs
 import com.dspread.xpos.QPOSService
-import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.JsonObject
+import com.mapbox.android.core.location.LocationEngine
+import com.mapbox.android.core.location.LocationEngineCallback
+import com.mapbox.android.core.location.LocationEngineProvider
+import com.mapbox.android.core.location.LocationEngineRequest.Builder
+import com.mapbox.android.core.location.LocationEngineResult
+import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.geojson.Point
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.pixplicity.easyprefs.library.Prefs
 import com.woleapp.netpos.contactless.R
 import com.woleapp.netpos.contactless.adapter.ServiceAdapter
@@ -43,11 +51,7 @@ import com.woleapp.netpos.contactless.cr100.BluetoothToolsBean
 import com.woleapp.netpos.contactless.cr100.MyQposClass
 import com.woleapp.netpos.contactless.cr100.model.BtCardInfo
 import com.woleapp.netpos.contactless.cr100.model.CardChannel
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothAdapter
-import com.woleapp.netpos.contactless.cr100.widget.BluetoothDialog
-import com.woleapp.netpos.contactless.cr100.widget.POS_TYPE
-import com.woleapp.netpos.contactless.cr100.widget.hideBluetoothDialog
-import com.woleapp.netpos.contactless.cr100.widget.showBluetoothDialog
+import com.woleapp.netpos.contactless.cr100.widget.*
 import com.woleapp.netpos.contactless.databinding.DialogPrintTypeBinding
 import com.woleapp.netpos.contactless.databinding.FragmentDashboardBinding
 import com.woleapp.netpos.contactless.model.*
@@ -60,7 +64,6 @@ import com.woleapp.netpos.contactless.util.AppConstants.BATTERY_PERCENTAGE
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_ADDRESS
 import com.woleapp.netpos.contactless.util.AppConstants.BLUETOOTH_TITLE
 import com.woleapp.netpos.contactless.util.AppConstants.STRING_CVV_DIALOG_TAG
-import com.woleapp.netpos.contactless.util.BLUETOOTH
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.alertDialog
 import com.woleapp.netpos.contactless.util.RandomPurposeUtil.observeServerResponse
 import com.woleapp.netpos.contactless.util.UtilityParam.PIN_KEY
@@ -119,6 +122,13 @@ class DashboardFragment : BaseFragment() {
     private var startTime = 0L
     private var posType: POS_TYPE = POS_TYPE.BLUETOOTH
     private var nfcEnabled = false
+    lateinit var permissionsManager: PermissionsManager
+
+    // Location & Map
+    private lateinit var locationEngine: LocationEngine
+    private lateinit var locationCallback: LocationEngineCallback<LocationEngineResult>
+    private lateinit var pointAnnotationManager: PointAnnotationManager
+    private var selectedLocation: Point? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -264,7 +274,7 @@ class DashboardFragment : BaseFragment() {
         btnConfirmBtn.setOnClickListener {
             if (!PrefsHelper.hasShownFirstLocationPrompt(requireContext())) {
                 FirstLocationPromptBottomSheet(
-                    onYes = { requestAndCaptureLocation() },
+                    onYes = { requestLocation() },
                     onNo = { openMapPicker() },
                 ).show(parentFragmentManager, "FirstLocationPrompt")
 
@@ -1024,38 +1034,64 @@ class DashboardFragment : BaseFragment() {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
-        permissions: Array<out String>,
+        permissions: Array<String>,
         grantResults: IntArray,
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 1001) {
+        if (requestCode == 101) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                requestAndCaptureLocation()
+                requestLocation()
             } else {
-                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun requestAndCaptureLocation() {
-        val client = LocationServices.getFusedLocationProviderClient(requireActivity())
+//    private fun requestAndCaptureLocation() {
+//        val client = LocationServices.getFusedLocationProviderClient(requireActivity())
+//
+//        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+//            != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+//            return
+//        }
+//
+//        client.lastLocation.addOnSuccessListener { location ->
+//            if (location != null) {
+//                Toast.makeText(requireContext(), "Lat: ${location.latitude}, Lng: ${location.longitude}", Toast.LENGTH_LONG).show()
+//            } else {
+//                Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show()
+//            }
+//        }.addOnFailureListener {
+//            Toast.makeText(requireContext(), "Failed to get location: ${it.localizedMessage}", Toast.LENGTH_SHORT).show()
+//        }
+//    }
 
-        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION)
+    private fun requestLocation() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
-            requestPermissions(arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), 1001)
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 101)
             return
         }
 
-        client.lastLocation.addOnSuccessListener { location ->
-            if (location != null) {
-                Toast.makeText(requireContext(), "Lat: ${location.latitude}, Lng: ${location.longitude}", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(requireContext(), "Location not available", Toast.LENGTH_SHORT).show()
-            }
-        }.addOnFailureListener {
-            Toast.makeText(requireContext(), "Failed to get location: ${it.localizedMessage}", Toast.LENGTH_SHORT).show()
-        }
+        val locationEngine = LocationEngineProvider.getBestLocationEngine(requireContext())
+        locationEngine.getLastLocation(
+            object : LocationEngineCallback<LocationEngineResult> {
+                override fun onSuccess(result: LocationEngineResult?) {
+                    val location = result?.lastLocation
+                    if (location != null) {
+                        Toast.makeText(requireContext(), "Lat: ${location.latitude}, Lng: ${location.longitude}", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Location unavailable", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(exception: Exception) {
+                    Toast.makeText(requireContext(), "Error: ${exception.localizedMessage}", Toast.LENGTH_SHORT).show()
+                }
+            },
+        )
     }
 
     private fun openMapPicker() {

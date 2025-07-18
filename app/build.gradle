@@ -186,9 +186,16 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
     }
     packagingOptions {
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/io.netty.versions.properties'
-        exclude 'META-INF/DEPENDENCIES'
+        packagingOptions {
+            exclude 'META-INF/INDEX.LIST'
+            exclude 'META-INF/io.netty.versions.properties'
+            exclude 'META-INF/DEPENDENCIES'
+
+            pickFirst 'lib/arm64-v8a/libc++_shared.so'
+            pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+            pickFirst 'lib/x86/libc++_shared.so'
+            pickFirst 'lib/x86_64/libc++_shared.so' // Optional, if error appears for this too
+        }
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -366,11 +373,24 @@ dependencies {
     implementation 'com.payneteasy:ber-tlv:1.0-11'
     implementation 'com.github.devnied.emvnfccard:library:3.0.1'
 
-    //Google Play Services Location (for GPS)
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
 
-    // Google Maps SDK
-    implementation 'com.google.android.gms:play-services-maps:18.2.0'
+//    //mapbox
+//    implementation 'com.mapbox.maps:android:11.13.3'
+//    implementation 'com.mapbox.plugin:maps-locationcomponent:11.13.3'
+//    implementation 'com.mapbox.mapboxsdk:mapbox-android-core:6.0.0'
 
+
+    // MapBox SDK
+    implementation 'com.mapbox.maps:android:10.16.0'
+
+    // MapBox Location Services
+//    implementation 'com.mapbox.mapboxsdk:mapbox-android-core:5.0.2'
+
+    // MapBox Annotations
+
+//    implementation "com.mapbox.maps:plugin-annotation:10.16.0"
+
+    // MapBox Gestures
+//    implementation 'com.mapbox.plugin:maps-gestures:10.16.0'
 
 }
